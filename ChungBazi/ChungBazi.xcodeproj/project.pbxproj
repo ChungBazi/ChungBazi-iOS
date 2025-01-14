@@ -1,0 +1,534 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1F09A1D22D3580E2000E8762 /* Then in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1D12D3580E2000E8762 /* Then */; };
+		1F09A1D52D358125000E8762 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1D42D358125000E8762 /* SnapKit */; };
+		1F09A1D82D35814E000E8762 /* KakaoSDK in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1D72D35814E000E8762 /* KakaoSDK */; };
+		1F09A1DA2D35814E000E8762 /* KakaoSDKAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1D92D35814E000E8762 /* KakaoSDKAuth */; };
+		1F09A1DC2D35814E000E8762 /* KakaoSDKCert in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1DB2D35814E000E8762 /* KakaoSDKCert */; };
+		1F09A1DE2D35814E000E8762 /* KakaoSDKCertCore in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1DD2D35814E000E8762 /* KakaoSDKCertCore */; };
+		1F09A1E02D35814E000E8762 /* KakaoSDKCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A1DF2D35814E000E8762 /* KakaoSDKCommon */; };
+		1F09A2532D35820C000E8762 /* CombineMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2522D35820C000E8762 /* CombineMoya */; };
+		1F09A2552D35820C000E8762 /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2542D35820C000E8762 /* Moya */; };
+		1F09A2572D35820C000E8762 /* ReactiveMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2562D35820C000E8762 /* ReactiveMoya */; };
+		1F09A2592D35820C000E8762 /* RxMoya in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2582D35820C000E8762 /* RxMoya */; };
+		1F09A25C2D35825A000E8762 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A25B2D35825A000E8762 /* Kingfisher */; };
+		1F09A25F2D358271000E8762 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A25E2D358271000E8762 /* FSCalendar */; };
+		1F09A2622D3582C5000E8762 /* SwiftyToaster in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2612D3582C5000E8762 /* SwiftyToaster */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1F09A0A42D357328000E8762 /* ChungBazi.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChungBazi.app; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		1F09A0B92D35732A000E8762 /* Exceptions for "ChungBazi" folder in "ChungBazi" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 1F09A0A32D357328000E8762 /* ChungBazi */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedRootGroup section */
+		1F09A0A62D357328000E8762 /* ChungBazi */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				1F09A0B92D35732A000E8762 /* Exceptions for "ChungBazi" folder in "ChungBazi" target */,
+			);
+			path = ChungBazi;
+			sourceTree = "<group>";
+		};
+/* End PBXFileSystemSynchronizedRootGroup section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1F09A0A12D357328000E8762 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1F09A25C2D35825A000E8762 /* Kingfisher in Frameworks */,
+				1F09A25F2D358271000E8762 /* FSCalendar in Frameworks */,
+				1F09A1D22D3580E2000E8762 /* Then in Frameworks */,
+				1F09A2622D3582C5000E8762 /* SwiftyToaster in Frameworks */,
+				1F09A1E02D35814E000E8762 /* KakaoSDKCommon in Frameworks */,
+				1F09A2552D35820C000E8762 /* Moya in Frameworks */,
+				1F09A2592D35820C000E8762 /* RxMoya in Frameworks */,
+				1F09A2572D35820C000E8762 /* ReactiveMoya in Frameworks */,
+				1F09A1D52D358125000E8762 /* SnapKit in Frameworks */,
+				1F09A1DE2D35814E000E8762 /* KakaoSDKCertCore in Frameworks */,
+				1F09A1D82D35814E000E8762 /* KakaoSDK in Frameworks */,
+				1F09A1DA2D35814E000E8762 /* KakaoSDKAuth in Frameworks */,
+				1F09A2532D35820C000E8762 /* CombineMoya in Frameworks */,
+				1F09A1DC2D35814E000E8762 /* KakaoSDKCert in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1F09A09B2D357328000E8762 = {
+			isa = PBXGroup;
+			children = (
+				1F09A0A62D357328000E8762 /* ChungBazi */,
+				1F09A0A52D357328000E8762 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1F09A0A52D357328000E8762 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1F09A0A42D357328000E8762 /* ChungBazi.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1F09A0A32D357328000E8762 /* ChungBazi */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1F09A0BA2D35732A000E8762 /* Build configuration list for PBXNativeTarget "ChungBazi" */;
+			buildPhases = (
+				1F09A0A02D357328000E8762 /* Sources */,
+				1F09A0A12D357328000E8762 /* Frameworks */,
+				1F09A0A22D357328000E8762 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				1F09A0A62D357328000E8762 /* ChungBazi */,
+			);
+			name = ChungBazi;
+			packageProductDependencies = (
+				1F09A1D12D3580E2000E8762 /* Then */,
+				1F09A1D42D358125000E8762 /* SnapKit */,
+				1F09A1D72D35814E000E8762 /* KakaoSDK */,
+				1F09A1D92D35814E000E8762 /* KakaoSDKAuth */,
+				1F09A1DB2D35814E000E8762 /* KakaoSDKCert */,
+				1F09A1DD2D35814E000E8762 /* KakaoSDKCertCore */,
+				1F09A1DF2D35814E000E8762 /* KakaoSDKCommon */,
+				1F09A2522D35820C000E8762 /* CombineMoya */,
+				1F09A2542D35820C000E8762 /* Moya */,
+				1F09A2562D35820C000E8762 /* ReactiveMoya */,
+				1F09A2582D35820C000E8762 /* RxMoya */,
+				1F09A25B2D35825A000E8762 /* Kingfisher */,
+				1F09A25E2D358271000E8762 /* FSCalendar */,
+				1F09A2612D3582C5000E8762 /* SwiftyToaster */,
+			);
+			productName = ChungBazi;
+			productReference = 1F09A0A42D357328000E8762 /* ChungBazi.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1F09A09C2D357328000E8762 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1620;
+				LastUpgradeCheck = 1620;
+				TargetAttributes = {
+					1F09A0A32D357328000E8762 = {
+						CreatedOnToolsVersion = 16.2;
+					};
+				};
+			};
+			buildConfigurationList = 1F09A09F2D357328000E8762 /* Build configuration list for PBXProject "ChungBazi" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 1F09A09B2D357328000E8762;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				1F09A1D02D3580E2000E8762 /* XCRemoteSwiftPackageReference "Then" */,
+				1F09A1D32D358125000E8762 /* XCRemoteSwiftPackageReference "SnapKit" */,
+				1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */,
+				1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */,
+				1F09A25A2D35825A000E8762 /* XCRemoteSwiftPackageReference "Kingfisher" */,
+				1F09A25D2D358271000E8762 /* XCRemoteSwiftPackageReference "FSCalendar" */,
+				1F09A2602D3582C5000E8762 /* XCRemoteSwiftPackageReference "SwiftyToaster" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 1F09A0A52D357328000E8762 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1F09A0A32D357328000E8762 /* ChungBazi */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1F09A0A22D357328000E8762 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1F09A0A02D357328000E8762 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1F09A0BB2D35732A000E8762 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChungBazi/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.project.ChungBazi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		1F09A0BC2D35732A000E8762 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ChungBazi/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.project.ChungBazi;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		1F09A0BD2D35732A000E8762 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		1F09A0BE2D35732A000E8762 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1F09A09F2D357328000E8762 /* Build configuration list for PBXProject "ChungBazi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F09A0BD2D35732A000E8762 /* Debug */,
+				1F09A0BE2D35732A000E8762 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1F09A0BA2D35732A000E8762 /* Build configuration list for PBXNativeTarget "ChungBazi" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1F09A0BB2D35732A000E8762 /* Debug */,
+				1F09A0BC2D35732A000E8762 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		1F09A1D02D3580E2000E8762 /* XCRemoteSwiftPackageReference "Then" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/devxoul/Then";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 3.0.0;
+			};
+		};
+		1F09A1D32D358125000E8762 /* XCRemoteSwiftPackageReference "SnapKit" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.7.1;
+			};
+		};
+		1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kakao/kakao-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.23.0;
+			};
+		};
+		1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
+		1F09A25A2D35825A000E8762 /* XCRemoteSwiftPackageReference "Kingfisher" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/onevcat/Kingfisher";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 8.1.3;
+			};
+		};
+		1F09A25D2D358271000E8762 /* XCRemoteSwiftPackageReference "FSCalendar" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/WenchaoD/FSCalendar";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.8.4;
+			};
+		};
+		1F09A2602D3582C5000E8762 /* XCRemoteSwiftPackageReference "SwiftyToaster" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/noeyiz/SwiftyToaster";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.0.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		1F09A1D12D3580E2000E8762 /* Then */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D02D3580E2000E8762 /* XCRemoteSwiftPackageReference "Then" */;
+			productName = Then;
+		};
+		1F09A1D42D358125000E8762 /* SnapKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D32D358125000E8762 /* XCRemoteSwiftPackageReference "SnapKit" */;
+			productName = SnapKit;
+		};
+		1F09A1D72D35814E000E8762 /* KakaoSDK */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDK;
+		};
+		1F09A1D92D35814E000E8762 /* KakaoSDKAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKAuth;
+		};
+		1F09A1DB2D35814E000E8762 /* KakaoSDKCert */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCert;
+		};
+		1F09A1DD2D35814E000E8762 /* KakaoSDKCertCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCertCore;
+		};
+		1F09A1DF2D35814E000E8762 /* KakaoSDKCommon */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A1D62D35814E000E8762 /* XCRemoteSwiftPackageReference "kakao-ios-sdk" */;
+			productName = KakaoSDKCommon;
+		};
+		1F09A2522D35820C000E8762 /* CombineMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = CombineMoya;
+		};
+		1F09A2542D35820C000E8762 /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
+		1F09A2562D35820C000E8762 /* ReactiveMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = ReactiveMoya;
+		};
+		1F09A2582D35820C000E8762 /* RxMoya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A2512D35820C000E8762 /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = RxMoya;
+		};
+		1F09A25B2D35825A000E8762 /* Kingfisher */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A25A2D35825A000E8762 /* XCRemoteSwiftPackageReference "Kingfisher" */;
+			productName = Kingfisher;
+		};
+		1F09A25E2D358271000E8762 /* FSCalendar */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A25D2D358271000E8762 /* XCRemoteSwiftPackageReference "FSCalendar" */;
+			productName = FSCalendar;
+		};
+		1F09A2612D3582C5000E8762 /* SwiftyToaster */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1F09A2602D3582C5000E8762 /* XCRemoteSwiftPackageReference "SwiftyToaster" */;
+			productName = SwiftyToaster;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 1F09A09C2D357328000E8762 /* Project object */;
+}
