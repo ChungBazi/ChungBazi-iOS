@@ -1,11 +1,11 @@
 //
-//  WelfarePolicyViewController.swift
+//  CategoryPolicyViewController.swift
 //  ChungBazi
 //
 
 import UIKit
 
-class WelfarePolicyViewController: UIViewController {
+class CategoryPolicyViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
