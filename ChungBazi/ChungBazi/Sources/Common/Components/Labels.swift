@@ -8,7 +8,7 @@
 import UIKit
 
 class BaseTitleLabel: UILabel {
-    init(text: String, font: UIFont, textColor: UIColor = .black) {
+    init(text: String, font: UIFont, textColor: UIColor = .gray800) {
         super.init(frame: .zero)
         self.text = text
         self.font = font
@@ -115,6 +115,8 @@ class B12_M: BaseTitleLabel {
 class BTN16_M: BaseTitleLabel {
     init(text: String, textColor: UIColor = .black) {
         super.init(text: text, font: .ptdMediumFont(ofSize: 16), textColor: textColor)
+        self.addCharacterSpacing(0.01)
+        self.setLineSpacing(ratio: 1.4)
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -124,6 +126,8 @@ class BTN16_M: BaseTitleLabel {
 class BTN14_SB: BaseTitleLabel {
     init(text: String, textColor: UIColor = .black) {
         super.init(text: text, font: .ptdSemiBoldFont(ofSize: 14), textColor: textColor)
+        self.addCharacterSpacing(0.01)
+        self.setLineSpacing(ratio: 1.4)
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
@@ -133,6 +137,8 @@ class BTN14_SB: BaseTitleLabel {
 class BTN14_M: BaseTitleLabel {
     init(text: String, textColor: UIColor = .black) {
         super.init(text: text, font: .ptdMediumFont(ofSize: 14), textColor: textColor)
+        self.addCharacterSpacing(0.01)
+        self.setLineSpacing(ratio: 1.4)
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

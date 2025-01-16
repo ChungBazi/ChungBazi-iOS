@@ -8,7 +8,7 @@
 import UIKit
 
 extension UILabel {
-    func setLineSpacing(ratio: Double) {
+    func setLineSpacing(ratio: Double = 1.4) {
         self.lineBreakMode = .byWordWrapping
         self.lineBreakStrategy = .hangulWordPriority
         
@@ -23,7 +23,7 @@ extension UILabel {
             ])
     }
     
-    func addCharacterSpacing(_ value: Double = -0.032) {    //FIXME: 자간 변경
+    func addCharacterSpacing(_ value: Double = 0.0) {
         let kernValue = self.font.pointSize * CGFloat(value)
         guard let text = text, !text.isEmpty else { return }
         let string = NSMutableAttributedString(string: text)
