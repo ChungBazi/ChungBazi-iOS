@@ -31,7 +31,7 @@ class CustomActiveButton: UIButton {
             backgroundColor: backgroundColor,
             isEnabled: isEnabled ?? true
         )
-        setDefaultHeight(40)
+        setDefaultHeight(48)
     }
     
     required init?(coder: NSCoder) {

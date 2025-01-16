@@ -19,6 +19,7 @@ class StartSurveyViewController: UIViewController {
         $0.layer.borderColor = UIColor.white.cgColor
         $0.layer.borderWidth = 1
         $0.backgroundColor = .clear
+        $0.addTarget(self, action: #selector(goToSetEducation), for: .touchUpInside)
     }
     
     override func viewDidLoad() {
@@ -26,6 +27,11 @@ class StartSurveyViewController: UIViewController {
         self.view = finishLoginView
         addComponents()
         setConstraints()
+    }
+    
+    @objc private func goToSetEducation() {
+        let vc = SetEducationViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func addComponents() {

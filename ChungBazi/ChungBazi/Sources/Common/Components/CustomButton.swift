@@ -30,7 +30,7 @@ class CustomButton: UIButton {
         self.layer.borderColor = borderColor.cgColor
         self.layer.cornerRadius = 10
         
-        setDefaultHeight(40)
+        setDefaultHeight(48)
     }
     
     required init?(coder: NSCoder) {
