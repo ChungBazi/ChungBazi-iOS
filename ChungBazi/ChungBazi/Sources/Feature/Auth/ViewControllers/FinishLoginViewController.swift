@@ -14,6 +14,7 @@ class FinishLoginViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = finishLoginView
+        goToNextView()
     }
     
     private func goToNextView() {
