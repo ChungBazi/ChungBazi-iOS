@@ -31,7 +31,7 @@ extension UILabel {
         attributedText = string
     }
     
-    static func createLabel(text: String, textColor: UIColor, fontSize: CGFloat? = nil, lineHeightMultiple: CGFloat) -> UILabel {
+    static func createLabel(text: String, textColor: UIColor = .gray800, fontSize: CGFloat? = nil, lineHeightMultiple: CGFloat = 1.17) -> UILabel {
         let label = B16_M(text: text, textColor: textColor)
         if let fontSize = fontSize {
             label.font = label.font.withSize(fontSize)
