@@ -9,7 +9,7 @@ import UIKit
 
 class BasicSurveyView: UIView {
 
-    private let title = UILabel().then {
+    public let title = UILabel().then {
         $0.font = UIFont.ptdRegularFont(ofSize: 24)
         $0.textColor = .black
         $0.numberOfLines = 2
@@ -20,11 +20,13 @@ class BasicSurveyView: UIView {
         $0.backgroundColor = .clear
     }
     
-    private lazy var backBtn = CustomButton(backgroundColor: .white, titleText: "이전으로", titleColor: .gray800, borderWidth: 1, borderColor: .gray400)
+    public lazy var backBtn = CustomButton(backgroundColor: .white, titleText: "이전으로", titleColor: .gray800, borderWidth: 1, borderColor: .gray400)
     
-    private lazy var nextBtn = CustomActiveButton(title: "다음으로",isEnabled: false).then {
+    public lazy var nextBtn = CustomActiveButton(title: "다음으로",isEnabled: false).then {
         $0.setEnabled(false)
     }
+    
+    private lazy var backBtnPlaceholder = UIView()
     
     private lazy var buttonStackView = UIStackView(arrangedSubviews: [backBtn, nextBtn]).then {
         $0.axis = .horizontal
@@ -44,6 +46,12 @@ class BasicSurveyView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    func toggleBackButton() {
+        backBtn.isHidden = true
+        backBtnPlaceholder.isHidden = false
+        buttonStackView.insertArrangedSubview(backBtnPlaceholder, at: 0)
     }
     
     private func addComponents() {
