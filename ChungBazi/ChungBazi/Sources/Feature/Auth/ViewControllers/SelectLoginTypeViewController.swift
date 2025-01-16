@@ -12,5 +12,14 @@ class SelectLoginTypeViewController: UIViewController {
         self.view = selectLoginView
     }
     
-    private lazy var selectLoginView = SelectLoginView()
+    private lazy var selectLoginView = SelectLoginView().then {
+        $0.kakaoBtn.addTarget(self, action: #selector(kakaoLogin), for: .touchUpInside)
+    }
+    
+    @objc private func kakaoLogin() {
+        let vc = FinishLoginViewController()
+        let navController = UINavigationController(rootViewController: vc)
+        navController.modalPresentationStyle = .fullScreen
+        self.present(navController, animated: true, completion: nil)
+    }
 }
