@@ -1,5 +1,5 @@
 //
-//  UIView+Extension.swift
+//  UIView+Extensions.swift
 //  ChungBazi
 //
 //  Created by 신호연 on 1/16/25.
@@ -13,5 +13,10 @@ extension UIView {
     func createRoundedView(radius: CGFloat) {
         self.layer.cornerRadius = radius
         self.layer.masksToBounds = true
+    }
+    
+    /// 여러 서브뷰 한 번에 추가
+    func addSubviews(_ views: UIView...) {
+        views.forEach { self.addSubview($0) }
     }
 }
