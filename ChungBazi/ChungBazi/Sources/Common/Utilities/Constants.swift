@@ -8,5 +8,6 @@
 import UIKit
 
 struct Constants {
-    
+    static let superViewHeight = UIScreen.main.bounds.height
+    static let superViewWidth = UIScreen.main.bounds.width
 }

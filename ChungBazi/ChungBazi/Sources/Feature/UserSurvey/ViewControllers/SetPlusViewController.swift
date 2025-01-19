@@ -9,19 +9,22 @@ class SetPlusViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.isHidden = true
+        self.view = baseSurveyView
+    }
 
-        // Do any additional setup after loading the view.
+    private lazy var baseSurveyView = BasicSurveyView(title: "추가사항을\n선택해주세요", logo: "thirdPageLogo").then {
+        $0.nextBtn.setEnabled(isEnabled: true)
+        $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    @objc private func goToback() {
+        navigationController?.popViewController(animated: true)
     }
-    */
-
+    
+    @objc private func goToSetPlus() {
+        let vc = SetIncomeLevelViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
