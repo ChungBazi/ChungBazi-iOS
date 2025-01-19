@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Then
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
@@ -29,12 +30,10 @@ extension UIViewController {
         navigationBarView.addSubview(titleLabel)
         
         if showBackButton {
-            let backButton: UIButton = {
-                let button = UIButton()
-                button.setImage(.backIcon, for: .normal)
-                button.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
-                return button
-            }()
+            let backButton = UIButton().then {
+                $0.setImage(.backIcon, for: .normal)
+                $0.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
+            }
             navigationBarView.addSubview(backButton)
             backButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
@@ -42,12 +41,10 @@ extension UIViewController {
             }
         }
         if showCartButton {
-            let cartButton: UIButton = {
-                let button = UIButton()
-                button.setImage(.cartIcon, for: .normal)
-                button.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
-                return button
-            }()
+            let cartButton = UIButton().then {
+                $0.setImage(.cartIcon, for: .normal)
+                $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
+            }
             navigationBarView.addSubview(cartButton)
             cartButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
@@ -55,12 +52,10 @@ extension UIViewController {
             }
         }
         if showAlarmButton {
-            let alarmButton: UIButton = {
-                let button = UIButton()
-                button.setImage(.alarmIcon, for: .normal)
-                button.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
-                return button
-            }()
+            let alarmButton = UIButton().then {
+                $0.setImage(.alarmIcon, for: .normal)
+                $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
+            }
             navigationBarView.addSubview(alarmButton)
             alarmButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
