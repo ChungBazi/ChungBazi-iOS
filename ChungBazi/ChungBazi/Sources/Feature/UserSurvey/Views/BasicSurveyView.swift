@@ -13,6 +13,7 @@ class BasicSurveyView: UIView {
         $0.font = UIFont.ptdRegularFont(ofSize: 24)
         $0.textColor = .black
         $0.numberOfLines = 2
+        $0.textAlignment = .center
     }
     
     private lazy var pageLogo = UIImageView().then {
@@ -23,7 +24,7 @@ class BasicSurveyView: UIView {
     public lazy var backBtn = CustomButton(backgroundColor: .white, titleText: "이전으로", titleColor: .gray800, borderWidth: 1, borderColor: .gray400)
     
     public lazy var nextBtn = CustomActiveButton(title: "다음으로",isEnabled: false).then {
-        $0.setEnabled(false)
+        $0.setEnabled(isEnabled: false)
     }
     
     private lazy var backBtnPlaceholder = UIView()

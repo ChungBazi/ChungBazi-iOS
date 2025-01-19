@@ -14,8 +14,9 @@ class SetEducationViewController: UIViewController {
         self.view = baseSurveyView
     }
     
-    private let baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
         $0.toggleBackButton()
+        $0.nextBtn.setEnabled(isEnabled: true)
         $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
     }
     

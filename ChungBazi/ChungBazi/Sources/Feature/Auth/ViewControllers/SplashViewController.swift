@@ -36,12 +36,12 @@ class SplashViewController: UIViewController {
     }
     
     private func updateLabelText() {
-        // 텍스트 업데이트
+        // 1초 후 텍스트 업데이트
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.splashLabel.text = "청바지"
             
-            // 2초 후 메인 화면으로 전환
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+            // 1초 후 메인 화면으로 전환
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 let vc = SelectLoginTypeViewController()
                 let navController = UINavigationController(rootViewController: vc)
                 navController.modalPresentationStyle = .fullScreen
