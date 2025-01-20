@@ -30,14 +30,14 @@ final class CalendarView: UIView {
         $0.font = .ptdMediumFont(ofSize: 12)
     }
     private let previousBtn = UIButton.createWithImage(
-        image: .arrowL,
+        image: .arrowLeft,
         tintColor: .gray500,
         target: self,
         action: #selector(prevPage),
         touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
     )
     private let nextBtn = UIButton.createWithImage(
-        image: .arrowR,
+        image: .arrowRight,
         tintColor: .gray500,
         target: self,
         action: #selector(nextPage),

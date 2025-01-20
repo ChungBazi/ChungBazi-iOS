@@ -1,5 +1,5 @@
 {
-  "originHash" : "cd7a6330d73d7124f766d03d498f1fa773b2fd383ec4682443ff20665fea744c",
+  "originHash" : "753c7a5e1fab6d8d3597f750893a54504e9aded4e220f99cb81c1f2ca8ede366",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -62,6 +62,15 @@
       "state" : {
         "revision" : "c7c7d2cf50a3211fe2843f76869c698e4e417930",
         "version" : "6.8.0"
+      }
+    },
+    {
+      "identity" : "safeareabrush",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/WallabyStuff/SafeAreaBrush",
+      "state" : {
+        "revision" : "4943d253687368afbea7ea09c19530a0361ed613",
+        "version" : "1.0.4"
       }
     },
     {

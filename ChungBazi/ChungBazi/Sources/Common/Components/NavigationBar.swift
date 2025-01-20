@@ -65,7 +65,8 @@ extension UIViewController {
         
         titleLabel.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
-            make.bottom.equalToSuperview().inset(13)
+            make.bottom.equalToSuperview().inset(14)
+            make.height.equalTo(28)
         }
         
         if let navigationController = self.navigationController {
