@@ -10,7 +10,7 @@ import UIKit
 extension UIView {
 
     /// 전체 코너에 둥근 모서리 적용
-    func createRoundedView(radius: CGFloat) {
+    func createRoundedView(radius: CGFloat = 10) {
         self.layer.cornerRadius = radius
         self.layer.masksToBounds = true
     }

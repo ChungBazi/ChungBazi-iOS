@@ -25,4 +25,6 @@ extension UIImage {
     static let community = UIImage(named: "tab_community_icon")
     static let home = UIImage(named: "tab_home_icon")
     static let profile = UIImage(named: "tab_profile_icon")
+    static let arrowR = UIImage(named: "arrowRight")
+    static let arrowL = UIImage(named: "arrowLeft")
 }

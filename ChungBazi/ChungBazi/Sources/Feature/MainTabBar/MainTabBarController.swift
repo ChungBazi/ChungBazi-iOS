@@ -22,7 +22,7 @@ class MainTabBarController: UITabBarController {
     }
     
     private func createCalendarViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "캘린더", image: .calendar, tag: 1)
+        return createNavigationController(for: CalenderViewController(), title: "캘린더", image: .calendar, tag: 1)
     }
     
     private func createCommunityViewController() -> UIViewController {
@@ -43,7 +43,6 @@ class MainTabBarController: UITabBarController {
         let customTabbar = CustomTabBar()
         setValue(customTabbar, forKey: "tabBar")
 
-        tabBar.backgroundColor = .white
         tabBar.tintColor = .blue700
         tabBar.unselectedItemTintColor = .gray800
 
@@ -89,7 +88,6 @@ class MainTabBarController: UITabBarController {
     }
     
     private class CustomTabBar: UITabBar {
-        var customHeight: CGFloat = 68
         private var backgroundView = UIView()
         
         override init(frame: CGRect) {
@@ -106,7 +104,7 @@ class MainTabBarController: UITabBarController {
             
             let safeAreaBottom = superview.safeAreaInsets.bottom
             var newFrame = frame
-            newFrame.size.height = customHeight + safeAreaBottom
+            newFrame.size.height = Constants.tabBarHeight + safeAreaBottom
             newFrame.origin.y = superview.bounds.height - newFrame.size.height
             frame = newFrame
             

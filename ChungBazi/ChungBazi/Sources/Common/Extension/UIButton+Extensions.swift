@@ -32,17 +32,25 @@ extension UIButton {
         image: UIImage?,
         contentMode: UIView.ContentMode = .scaleAspectFit,
         tintColor: UIColor? = nil,
-        cornerRadius: CGFloat = 0
+        cornerRadius: CGFloat = 0,
+        target: Any? = nil,
+        action: Selector? = nil,
+        touchAreaInsets: UIEdgeInsets = .zero
     ) -> UIButton {
-        return UIButton(type: .system).then {
+        let button = UIButton(type: .system).then {
             $0.setImage(image, for: .normal)
-            $0.imageView?.contentMode = .scaleAspectFill
+            $0.imageView?.contentMode = contentMode
             $0.clipsToBounds = true
             if let tintColor = tintColor {
                 $0.tintColor = tintColor
             }
             $0.layer.cornerRadius = cornerRadius
             $0.backgroundColor = .clear
+            $0.contentEdgeInsets = touchAreaInsets
         }
+        if let target = target, let action = action {
+            button.addTarget(target, action: action, for: .touchUpInside)
+        }
+        return button
     }
 }

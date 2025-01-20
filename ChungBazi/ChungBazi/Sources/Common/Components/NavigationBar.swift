@@ -10,7 +10,7 @@ import Then
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, backgroundColor: UIColor = .white) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, backgroundColor: UIColor = .clear) {
         
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -20,7 +20,7 @@ extension UIViewController {
         navigationBarView.snp.makeConstraints { make in
             make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
             make.leading.trailing.equalToSuperview()
-            make.height.equalTo(72)
+            make.height.equalTo(Constants.navigationHeight)
         }
         
         let titleLabel = T20_SB(text: titleText ?? "")
