@@ -16,8 +16,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
-        window?.rootViewController = CalendarDetailViewController()
-        let rootVC = SplashViewController()
+        
+        let rootVC = CalendarDetailViewController()
         let navigationController = UINavigationController(rootViewController: rootVC)
         
         window?.rootViewController = navigationController

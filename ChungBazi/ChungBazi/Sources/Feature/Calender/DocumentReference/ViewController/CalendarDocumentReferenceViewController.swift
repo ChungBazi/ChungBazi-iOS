@@ -13,7 +13,6 @@ final class CalendarDocumentReferenceViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view?.backgroundColor = .blue
         setupUI()
     }
     

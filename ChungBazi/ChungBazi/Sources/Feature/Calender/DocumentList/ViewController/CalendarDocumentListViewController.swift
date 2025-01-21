@@ -13,8 +13,12 @@ final class CalendarDocumentListViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view?.backgroundColor = .red
         setupUI()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        view.frame.size = view.superview?.bounds.size ?? .zero
     }
     
     private func setupUI() {

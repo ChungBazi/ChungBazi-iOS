@@ -37,7 +37,6 @@ final class CalendarDetailView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        configure()
     }
     
     required init?(coder: NSCoder) {
@@ -55,11 +54,11 @@ final class CalendarDetailView: UIView {
             $0.edges.width.equalToSuperview()
         }
         
-        setupPolicyInfo()
-        configure()
+        setupPolicyInfoView()
+        setupNavigationView()
     }
     
-    private func setupPolicyInfo() {
+    private func setupPolicyInfoView() {
         contentView.addSubview(policyInfoView)
         policyInfoView.addSubviews(characterImage, policyName, startText, startDate, endText, endDate)
         policyInfoView.snp.makeConstraints {
@@ -87,6 +86,7 @@ final class CalendarDetailView: UIView {
         endText.snp.makeConstraints {
             $0.top.equalTo(startText.snp.bottom).offset(2)
             $0.leading.equalTo(policyName)
+            $0.bottom.equalToSuperview()
         }
         endDate.snp.makeConstraints {
             $0.top.equalTo(endText)
@@ -94,11 +94,11 @@ final class CalendarDetailView: UIView {
         }
     }
     
-    private func configure() {
+    private func setupNavigationView() {
         contentView.addSubview(navigationView)
         navigationView.snp.makeConstraints {
             $0.top.equalTo(policyInfoView.snp.bottom).offset(34)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     
@@ -107,9 +107,9 @@ final class CalendarDetailView: UIView {
     
     // MARK: - Public Methods
     func update(policy: Policy) {
-        policyName.text = policy.policyName
-        startDate.text = policy.startDate
-        endDate.text = policy.endDate
+        policyName.text = policy.policyName.isEmpty ? "정책명 없음" : policy.policyName
+        startDate.text = policy.startDate.isEmpty ? "N/A" : policy.startDate
+        endDate.text = policy.endDate.isEmpty ? "N/A" : policy.endDate
     }
     
 }

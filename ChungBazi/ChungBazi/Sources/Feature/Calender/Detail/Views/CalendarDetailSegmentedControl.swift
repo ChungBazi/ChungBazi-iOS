@@ -15,21 +15,24 @@ final class CalendarDetailSegmentedControl: UISegmentedControl {
         let width = self.bounds.size.width / CGFloat(self.numberOfSegments)
         let height: CGFloat = 2
         let xPosition = CGFloat(self.selectedSegmentIndex * Int(width))
-        let yPosition = self.bounds.size.height - 1
+        let yPosition = self.titleTextHeight() + 13
         let frame = CGRect(x: xPosition, y: yPosition, width: width, height: height)
         let view = UIView(frame: frame)
+        view.backgroundColor = .gray100
         self.addSubview(view)
         return view
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        self.removeBackgroundAndDivider()
+        self.clearSegmentBackgroundAndDivider()
+        self.configureFont()
     }
     
     override init(items: [Any]?) {
         super.init(items: items)
-        self.removeBackgroundAndDivider()
+        self.clearSegmentBackgroundAndDivider()
+        self.configureFont()
     }
     
     required init?(coder: NSCoder) {
@@ -38,19 +41,47 @@ final class CalendarDetailSegmentedControl: UISegmentedControl {
     
     override func layoutSubviews() {
         super.layoutSubviews()
-        let underlineFinalXPosition = (self.bounds.width / CGFloat(self.numberOfSegments)) * CGFloat(self.selectedSegmentIndex)
-        UIView.animate(
-            withDuration: 0.1,
-            animations: {
-                self.underlineView.frame.origin.x = underlineFinalXPosition
-            }
-        )
+        
+        let segmentWidth = bounds.width / CGFloat(numberOfSegments)
+        let underlineXPosition = segmentWidth * CGFloat(selectedSegmentIndex)
+        let underlineYPosition = titleTextHeight() + 13
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.underlineView.frame = CGRect(
+                x: underlineXPosition,
+                y: underlineYPosition,
+                width: segmentWidth,
+                height: 2
+            )
+        })
     }
     
-    private func removeBackgroundAndDivider() {
-        let image = UIImage()
-        self.setBackgroundImage(image, for: .normal, barMetrics: .default)
-        self.setBackgroundImage(image, for: .selected, barMetrics: .default)
-        self.setDividerImage(image, forLeftSegmentState: .selected, rightSegmentState: .normal, barMetrics: .default)
+    private func clearSegmentBackgroundAndDivider() {
+        let clearImage = UIImage()
+        setBackgroundImage(clearImage, for: .normal, barMetrics: .default)
+        setBackgroundImage(clearImage, for: .selected, barMetrics: .default)
+        setDividerImage(clearImage, forLeftSegmentState: .selected, rightSegmentState: .normal, barMetrics: .default)
+    }
+    
+    private func configureFont() {
+        let font = UIFont.ptdMediumFont(ofSize: 16)
+        let attrebutes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.gray300
+        ]
+        let selectedAttributes: [NSAttributedString.Key: Any] = [
+            .font: font,
+            .foregroundColor: UIColor.black
+        ]
+        self.setTitleTextAttributes(attrebutes, for: .normal)
+        self.setTitleTextAttributes(selectedAttributes, for: .selected)
+    }
+    
+    /// 텍스트 높이를 계산하는 함수
+    private func titleTextHeight() -> CGFloat {
+        guard let font = self.titleTextAttributes(for: .normal)?[.font] as? UIFont else {
+            return 0
+        }
+        return font.lineHeight
     }
 }

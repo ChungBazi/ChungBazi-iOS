@@ -23,6 +23,7 @@ final class CalendarDetailViewController: UIViewController {
         CalendarDocumentListViewController(),
         CalendarDocumentReferenceViewController()
     ]
+    private let segmentedControl = CalendarDetailSegmentedControl(items: ["서류 리스트", "서류 참고 내용"])
     
     // MARK: - IBOutlet
     
@@ -31,7 +32,6 @@ final class CalendarDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        setupPageController()
         fetchData()
     }
     
@@ -39,33 +39,90 @@ final class CalendarDetailViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .gray50
         
+        setupCalendarDetailView()
+        setupNavigationBar()
+        setupSegmentedControl()
+        setupPageController()
+    }
+    
+    private func setupCalendarDetailView() {
         view.addSubview(calendarDetailView)
         calendarDetailView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
         }
-        
+    }
+    
+    private func setupNavigationBar() {
         fillSafeArea(position: .top, color: .white)
-        addCustomNavigationBar(titleText: "", showBackButton: false, showCartButton: true, showAlarmButton: true, backgroundColor: .white)
+        addCustomNavigationBar(
+            titleText: "",
+            showBackButton: false,
+            showCartButton: true,
+            showAlarmButton: true,
+            backgroundColor: .white
+        )
+    }
+    
+    private func setupSegmentedControl() {
+        segmentedControl.addTarget(self, action: #selector(segmentedChanged(_:)), for: .valueChanged)
+        segmentedControl.selectedSegmentIndex = 0
+        calendarDetailView.navigationView.addSubview(segmentedControl)
+        segmentedControl.snp.makeConstraints {
+            $0.top.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.height.equalTo(33)
+        }
     }
     
     private func setupPageController() {
         addChild(pageViewController)
         calendarDetailView.navigationView.addSubview(pageViewController.view)
         pageViewController.view.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(calendarDetailView.navigationView.snp.bottom).inset(20)
+            $0.top.equalTo(segmentedControl.snp.bottom).offset(8)
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.equalTo(1)
         }
         pageViewController.didMove(toParent: self)
-        guard let firstVC = dataViewControllers.first else { return }
-        pageViewController.setViewControllers([firstVC], direction: .forward, animated: false)
+        pageViewController.setViewControllers([dataViewControllers.first!], direction: .forward, animated: false)
+        
+        updatePageViewHeight()
+    }
+    
+    private func updatePageViewHeight() {
+        guard let currentViewController = pageViewController.viewControllers?.first else { return }
+        
+        let targetHeight = currentViewController.view.systemLayoutSizeFitting(UIView.layoutFittingCompressedSize).height
+
+        pageViewController.view.snp.remakeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(targetHeight)
+        }
+        view.layoutIfNeeded()
+    }
+    
+    // MARK: - Actions
+    @objc private func segmentedChanged(_ sender: UISegmentedControl) {
+        let index = sender.selectedSegmentIndex
+        guard index < dataViewControllers.count else { return }
+
+        let direction: UIPageViewController.NavigationDirection =
+            (pageViewController.viewControllers?.first.flatMap { dataViewControllers.firstIndex(of: $0) } ?? 0 < index)
+            ? .forward
+            : .reverse
+
+        pageViewController.setViewControllers([dataViewControllers[index]], direction: direction, animated: true) { [weak self] finished in
+            guard finished else { return }
+            self?.updatePageViewHeight()
+        }
     }
     
     // MARK: - Data
     private func fetchData() {
         let samplePolicy = createSamplePolicy()
-        updateUI(with: samplePolicy)
+        bindPolicyData(samplePolicy)
     }
 
     private func createSamplePolicy() -> Policy {
@@ -82,13 +139,10 @@ final class CalendarDetailViewController: UIViewController {
         )
     }
     
-    private func updateUI(with policy: Policy?) {
+    private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)
     }
-    
-    // MARK: - Actions
-    
 
 }
 
@@ -105,5 +159,9 @@ extension CalendarDetailViewController: UIPageViewControllerDataSource {
 }
 
 extension CalendarDetailViewController: UIPageViewControllerDelegate {
-    
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        if completed {
+            updatePageViewHeight()
+        }
+    }
 }
