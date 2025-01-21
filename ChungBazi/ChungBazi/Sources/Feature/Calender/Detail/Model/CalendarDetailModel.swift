@@ -19,4 +19,5 @@ struct Policy: Decodable {
 struct Document: Decodable {
     let documentId: Int
     let name: String
+    let isChecked: Bool
 }

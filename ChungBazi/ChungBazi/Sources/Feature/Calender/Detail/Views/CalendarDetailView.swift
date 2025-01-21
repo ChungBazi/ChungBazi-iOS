@@ -17,16 +17,27 @@ final class CalendarDetailView: UIView {
     
     private let policyInfoView = UIView()
     private let characterImage = UIImageView(image: .character06)
-    private let policyName = T20_M(text: "", textColor: .black)
+    private let policyName: UILabel = {
+        let label = UILabel.createLabel(
+            text: "",
+            textColor: .black,
+            fontSize: 20,
+            lineHeightMultiple: 1.4
+        )
+        return label
+    }()
     private let startText = B12_M(text: "시작일", textColor: .gray500)
     private let startDate = B12_M(text: "", textColor: .black)
     private let endText = B12_M(text: "마감일", textColor: .gray500)
     private let endDate = B12_M(text: "", textColor: .black)
     
+    lazy var navigationView = UIView()
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        configure()
     }
     
     required init?(coder: NSCoder) {
@@ -45,6 +56,7 @@ final class CalendarDetailView: UIView {
         }
         
         setupPolicyInfo()
+        configure()
     }
     
     private func setupPolicyInfo() {
@@ -57,11 +69,12 @@ final class CalendarDetailView: UIView {
         characterImage.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
             $0.size.equalTo(112)
+            $0.bottom.equalToSuperview()
         }
         policyName.snp.makeConstraints {
             $0.top.equalToSuperview().offset(17)
             $0.leading.equalTo(characterImage.snp.trailing).offset(7)
-            $0.height.equalTo(28)
+            $0.trailing.equalToSuperview()
         }
         startText.snp.makeConstraints {
             $0.top.equalTo(policyName.snp.bottom).offset(14)
@@ -81,15 +94,19 @@ final class CalendarDetailView: UIView {
         }
     }
     
+    private func configure() {
+        contentView.addSubview(navigationView)
+        navigationView.snp.makeConstraints {
+            $0.top.equalTo(policyInfoView.snp.bottom).offset(34)
+            $0.leading.trailing.equalToSuperview()
+        }
+    }
+    
     // MARK: - Actions
     
     
     // MARK: - Public Methods
     func update(policy: Policy) {
-        updatePolicyInfo(with: policy)
-    }
-
-    private func updatePolicyInfo(with policy: Policy) {
         policyName.text = policy.policyName
         startDate.text = policy.startDate
         endDate.text = policy.endDate
