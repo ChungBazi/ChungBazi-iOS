@@ -9,19 +9,23 @@ class SetEmploymentStatusViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        navigationController?.navigationBar.isHidden = true
+        self.view = baseSurveyView
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: "twicePageLogo").then {
+        $0.nextBtn.setEnabled(isEnabled: true)
+        $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
     }
-    */
+    
+    @objc private func goToback() {
+        navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func goToSetPlus() {
+        let vc = SetPlusViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 
 }

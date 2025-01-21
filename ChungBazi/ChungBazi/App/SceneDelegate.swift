@@ -17,6 +17,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         window?.rootViewController = CalendarDetailViewController()
+        let rootVC = SplashViewController()
+        let navigationController = UINavigationController(rootViewController: rootVC)
+        
+        window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
     }
 
