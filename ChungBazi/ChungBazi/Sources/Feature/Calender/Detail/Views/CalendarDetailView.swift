@@ -17,6 +17,7 @@ final class CalendarDetailView: UIView {
     
     private let policyInfoView = UIView()
     private let characterImage = UIImageView(image: .character06)
+    private let policyInfoTextView = UIView()
     private let policyName: UILabel = {
         let label = UILabel.createLabel(
             text: "",
@@ -60,37 +61,48 @@ final class CalendarDetailView: UIView {
     
     private func setupPolicyInfoView() {
         contentView.addSubview(policyInfoView)
-        policyInfoView.addSubviews(characterImage, policyName, startText, startDate, endText, endDate)
         policyInfoView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(30)
+            $0.top.equalToSuperview().offset(30)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
+        
+        policyInfoView.addSubviews(characterImage, policyInfoTextView)
         characterImage.snp.makeConstraints {
-            $0.top.leading.equalToSuperview()
+            $0.leading.equalToSuperview()
+            $0.centerY.equalToSuperview()
             $0.size.equalTo(112)
-            $0.bottom.equalToSuperview()
         }
-        policyName.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(17)
+        policyInfoTextView.snp.makeConstraints {
             $0.leading.equalTo(characterImage.snp.trailing).offset(7)
             $0.trailing.equalToSuperview()
+            $0.centerY.equalTo(characterImage)
+        }
+        
+        policyInfoTextView.addSubviews(policyName, startText, startDate, endText, endDate)
+        policyName.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
         }
         startText.snp.makeConstraints {
             $0.top.equalTo(policyName.snp.bottom).offset(14)
-            $0.leading.equalTo(policyName)
+            $0.leading.equalToSuperview()
         }
         startDate.snp.makeConstraints {
-            $0.top.equalTo(startText)
             $0.leading.equalTo(startText.snp.trailing).offset(29)
+            $0.centerY.equalTo(startText)
         }
         endText.snp.makeConstraints {
             $0.top.equalTo(startText.snp.bottom).offset(2)
-            $0.leading.equalTo(policyName)
+            $0.leading.equalToSuperview()
             $0.bottom.equalToSuperview()
         }
         endDate.snp.makeConstraints {
-            $0.top.equalTo(endText)
-            $0.leading.equalTo(startText.snp.trailing).offset(29)
+            $0.leading.equalTo(endText.snp.trailing).offset(29)
+            $0.centerY.equalTo(endText)
+        }
+        
+        policyInfoView.snp.makeConstraints {
+            $0.bottom.greaterThanOrEqualTo(characterImage.snp.bottom)
+            $0.bottom.greaterThanOrEqualTo(policyInfoTextView.snp.bottom)
         }
     }
     

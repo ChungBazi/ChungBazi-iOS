@@ -128,7 +128,7 @@ final class CalendarDetailViewController: UIViewController {
     private func createSamplePolicy() -> Policy {
         return Policy(
             policyId: 1,
-            policyName: "양진구청 마라톤 참가자 모집 모모모집",
+            policyName: "양진구청 마라톤 참가자 모집",
             startDate: "2024-12-12",
             endDate: "2024-12-23",
             documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
