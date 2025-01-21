@@ -1,5 +1,5 @@
 //
-//  CalendarDocumentListView.swift
+//  CalendarDetailDocumentListView.swift
 //  ChungBazi
 //
 //  Created by 신호연 on 1/21/25.
@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class CalendarDocumentListView: UIView {
+final class CalendarDetailDocumentListView: UIView {
     
     private let addButton = CustomButton(backgroundColor: .white, titleText: "서류 추가하기", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     

@@ -16,6 +16,9 @@ final class CalendarDetailView: UIView {
     private let contentView = UIView()
     
     private let policyInfoView = UIView()
+    var accessiblePolicyInfoView: UIView {
+        return policyInfoView
+    }
     private let characterImage = UIImageView(image: .character06)
     private let policyInfoTextView = UIView()
     private let policyName: UILabel = {
@@ -31,8 +34,6 @@ final class CalendarDetailView: UIView {
     private let startDate = B12_M(text: "", textColor: .black)
     private let endText = B12_M(text: "마감일", textColor: .gray500)
     private let endDate = B12_M(text: "", textColor: .black)
-    
-    lazy var navigationView = UIView()
     
     // MARK: - Initializers
     override init(frame: CGRect) {
@@ -56,7 +57,6 @@ final class CalendarDetailView: UIView {
         }
         
         setupPolicyInfoView()
-        setupNavigationView()
     }
     
     private func setupPolicyInfoView() {
@@ -103,14 +103,6 @@ final class CalendarDetailView: UIView {
         policyInfoView.snp.makeConstraints {
             $0.bottom.greaterThanOrEqualTo(characterImage.snp.bottom)
             $0.bottom.greaterThanOrEqualTo(policyInfoTextView.snp.bottom)
-        }
-    }
-    
-    private func setupNavigationView() {
-        contentView.addSubview(navigationView)
-        navigationView.snp.makeConstraints {
-            $0.top.equalTo(policyInfoView.snp.bottom).offset(34)
-            $0.leading.trailing.bottom.equalToSuperview()
         }
     }
     

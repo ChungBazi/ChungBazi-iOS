@@ -14,6 +14,17 @@ final class CalendarDetailViewController: UIViewController {
     // MARK: - Properties
     private let calendarDetailView = CalendarDetailView()
     
+    private let segmentedControl: UISegmentedControl = {
+        let control = UISegmentedControl(items: ["서류 리스트", "서류 참고 내용"])
+        control.translatesAutoresizingMaskIntoConstraints = false
+        return control
+    }()
+    private let firstView = CalendarDetailDocumentListView()
+    private let secondView = CalendarDetailDocumentReferenceView()
+    private let underLineView = UIView().then {
+        $0.backgroundColor = .blue700
+    }
+    
     // MARK: - IBOutlet
     
     
@@ -22,6 +33,11 @@ final class CalendarDetailViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         fetchData()
+        
+        self.segmentedControl.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
+        
+        self.segmentedControl.selectedSegmentIndex = 0
+        self.didChangeValue(segment: self.segmentedControl)
     }
     
     // MARK: - Setup
@@ -30,6 +46,9 @@ final class CalendarDetailViewController: UIViewController {
         
         setupCalendarDetailView()
         setupNavigationBar()
+        segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
+        segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
+        setupSegmentedControl()
     }
     
     private func setupCalendarDetailView() {
@@ -50,6 +69,74 @@ final class CalendarDetailViewController: UIViewController {
             showAlarmButton: true,
             backgroundColor: .white
         )
+    }
+    
+    private func setupSegmentedControl() {
+        calendarDetailView.addSubview(segmentedControl)
+        segmentedControl.snp.makeConstraints {
+            $0.top.equalTo(calendarDetailView.accessiblePolicyInfoView.snp.bottom).offset(21)
+            $0.leading.trailing.equalTo(calendarDetailView)
+            $0.height.equalTo(48)
+        }
+        
+        calendarDetailView.addSubviews(underLineView)
+        underLineView.snp.makeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom)
+            $0.height.equalTo(1)
+            $0.width.equalToSuperview().dividedBy(2)
+            $0.leading.equalToSuperview()
+        }
+        configureSegmentControlAppearance()
+    }
+    
+    private var shouldHideFirstView: Bool? {
+        didSet {
+            guard let shouldHideFirstView = self.shouldHideFirstView else { return }
+            self.firstView.isHidden = shouldHideFirstView
+            self.secondView.isHidden = !self.firstView.isHidden
+        }
+    }
+    
+    @objc private func didChangeValue(segment: UISegmentedControl) {
+        self.shouldHideFirstView = segment.selectedSegmentIndex != 0
+    }
+    
+    private func configureSegmentControlAppearance() {
+        segmentedControl.setTitleTextAttributes([
+            NSAttributedString.Key.foregroundColor: UIColor.gray300,
+            NSAttributedString.Key.font: UIFont.ptdMediumFont(ofSize: 16)
+        ], for: .normal)
+        segmentedControl.setTitleTextAttributes([
+            NSAttributedString.Key.foregroundColor: UIColor.black,
+            NSAttributedString.Key.font: UIFont.ptdSemiBoldFont(ofSize: 16)
+        ], for: .selected)
+        segmentedControl.selectedSegmentTintColor = .clear
+        segmentedControl.setBackgroundImage(UIImage(), for: .normal, barMetrics: .default)
+        segmentedControl.setDividerImage(UIImage(), forLeftSegmentState: .normal, rightSegmentState: .normal, barMetrics: .default)
+    }
+    
+    @objc func changeSegmentedControlLinePosition(_ segment: UISegmentedControl) {
+        let leadingDistance: CGFloat = CGFloat(segmentedControl.selectedSegmentIndex) * segmentedControl.frame.width / CGFloat(segmentedControl.numberOfSegments)
+        
+        UIView.animate(withDuration: 0.2, animations: {
+            self.underLineView.snp.updateConstraints {
+                $0.leading.equalToSuperview().offset(leadingDistance)
+            }
+            self.view.layoutIfNeeded()
+        })
+    }
+    
+    @objc private func didChangeValue(_ segment: UISegmentedControl) {
+        switch segment.selectedSegmentIndex {
+        case 0:
+            firstView.isHidden = false
+            secondView.isHidden = true
+        case 1:
+            firstView.isHidden = true
+            secondView.isHidden = false
+        default:
+            break
+        }
     }
     
     // MARK: - Data
