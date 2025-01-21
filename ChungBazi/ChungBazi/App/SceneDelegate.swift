@@ -17,8 +17,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         
-        let rootVC = CalendarDetailViewController()
+        let rootVC = MainTabBarController()
         let navigationController = UINavigationController(rootViewController: rootVC)
+        navigationController.isNavigationBarHidden = true
         
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()

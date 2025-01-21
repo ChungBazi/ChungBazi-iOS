@@ -57,6 +57,8 @@ final class CalendarView: UIView {
         $0.scope = .month
     }
     
+    private var events: [Date: [String]] = [:]
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -75,7 +77,7 @@ final class CalendarView: UIView {
         setupHeader()
         setupCalendar()
     }
-
+    
     private func setupHeader() {
         addSubview(customHeader)
         customHeader.addSubviews(previousBtn, nextBtn, customMonth, customYear)
@@ -103,7 +105,7 @@ final class CalendarView: UIView {
             $0.centerX.equalToSuperview()
         }
     }
-
+    
     private func setupCalendar() {
         addSubview(calendar)
         configureCalendarAppearance()
@@ -126,6 +128,9 @@ final class CalendarView: UIView {
         calendar.rowHeight = 70
         calendar.locale = Locale(identifier: "ko_KR")
         calendar.headerHeight = 0
+        calendar.placeholderType = .fillHeadTail
+        calendar.appearance.eventDefaultColor = .blue700
+        calendar.appearance.eventSelectionColor = .blue700
     }
     
     // MARK: - UI Update
@@ -152,15 +157,43 @@ final class CalendarView: UIView {
     }
     
     // MARK: - Public Methods
-    /// 데이터를 바인딩하거나 업데이트
-
+    func update(policy: Policy) {
+        let dateFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        guard let startDate = dateFormatter.date(from: policy.startDate),
+              let endDate = dateFormatter.date(from: policy.endDate) else { return }
+        
+        var currentDate = startDate
+        while currentDate <= endDate {
+            if currentDate == startDate {
+                events[currentDate, default: []].insert("startDate: \(policy.policyName)", at: 0)
+            } else if currentDate == endDate {
+                events[currentDate, default: []].append("endDate: \(policy.policyName)")
+            } else {
+                events[currentDate, default: []].append(policy.policyName)
+            }
+            
+            guard let nextDate = Calendar.current.date(byAdding: .day, value: 1, to: currentDate) else { break }
+            currentDate = nextDate
+        }
+        calendar.reloadData()
+    }
+    
 }
 
 // MARK: - FSCalendarDelegate
 extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
+    func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
+        return min(events[date]?.count ?? 0, 3)
+    }
+    
+    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
+        guard let eventNames = events[date] else { return nil }
+        return eventNames.prefix(3).map { _ in .blue700 }
+    }
+    
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         updateHeader(for: calendar.currentPage)
     }
-    
-    
 }
