@@ -18,6 +18,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         super.viewDidLoad()
         setupUI()
         fetchData()
+        configureCalendarViewDelegate()
     }
     
     // MARK: - Setup
@@ -127,6 +128,7 @@ extension CalenderViewController: CalendarViewDelegate {
         let vc = CalendarPolicyListViewController()
         vc.modalPresentationStyle = .pageSheet
         
+        let startOfSelectedDate = Calendar.current.startOfDay(for: date)
         vc.selectedDate = DateFormatter.yearMonthDay.string(from: date)
         vc.policies = getPolicies(for: date)
         

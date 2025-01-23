@@ -63,13 +63,12 @@ final class CalendarDetailViewController: UIViewController {
         contentView.addSubviews(segmentedControl, underLineView, firstView, secondView)
         firstView.snp.makeConstraints {
             $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
-            $0.bottom.equalToSuperview().inset(30)
             $0.leading.trailing.equalToSuperview()
         }
         secondView.snp.makeConstraints {
             $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
-            $0.bottom.equalToSuperview().inset(30)
             $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(30)
         }
         segmentedControl.snp.makeConstraints {
             $0.top.equalTo(calendarDetailView.accessiblePolicyInfoView.snp.bottom).offset(21)
@@ -161,7 +160,7 @@ final class CalendarDetailViewController: UIViewController {
             policyName: "양진구청 마라톤 참가자 모집",
             startDate: "2024-12-12",
             endDate: "2024-12-23",
-            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n",
+            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
             userDocuments: [
                 Document(documentId: 1, name: "주민등록본", isChecked: true),
                 Document(documentId: 2, name: "학생증", isChecked: false)
@@ -174,5 +173,4 @@ final class CalendarDetailViewController: UIViewController {
         calendarDetailView.update(policy: policy)
         secondView.update(policy: policy)
     }
-
 }

@@ -24,9 +24,11 @@ final class CalendarDetailDocumentReferenceView: UIView {
     
     private func setupUI() {
         addSubview(documentText)
+        documentText.lineBreakMode = .byCharWrapping
         documentText.snp.makeConstraints {
-            $0.top.bottom.equalToSuperview().inset(30)
+            $0.top.equalToSuperview().inset(30)
             $0.leading.trailing.equalToSuperview().inset(45)
+            $0.bottom.equalToSuperview()
         }
     }
     

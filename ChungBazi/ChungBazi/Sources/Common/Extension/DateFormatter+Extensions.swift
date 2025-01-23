@@ -19,4 +19,10 @@ extension DateFormatter {
         formatter.dateFormat = "yyyy-MM-dd"
         return formatter
     }()
+    
+    static let monthDay: DateFormatter = {
+        let formatter = DateFormatter.shared
+        formatter.dateFormat = "M월 d일"
+        return formatter
+    }()
 }

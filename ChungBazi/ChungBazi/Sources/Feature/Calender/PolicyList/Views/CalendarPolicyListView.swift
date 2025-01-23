@@ -12,10 +12,7 @@ import Then
 final class CalendarPolicyListView: UIView {
     
     private let titleLabel = T20_SB(text: "나의 정책")
-    private let tableView = UITableView().then {
-        $0.separatorInset = UIEdgeInsets(top: 0, left: Constants.gutter, bottom: 0, right: Constants.gutter)
-        $0.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0)
-    }
+    private let tableView = UITableView()
     private var policies: [Policy] = []
     
     override init(frame: CGRect) {
@@ -34,17 +31,25 @@ final class CalendarPolicyListView: UIView {
             $0.centerX.equalToSuperview()
         }
         tableView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(12)
+            $0.top.equalTo(titleLabel.snp.bottom).offset(26)
             $0.leading.trailing.bottom.equalToSuperview()
         }
         
         tableView.register(CalendarPolicyListCell.self, forCellReuseIdentifier: "PolicyCell")
         tableView.delegate = self
+        tableView.dataSource = self
     }
     
     func updateView(with date: String, policies: [Policy]) {
         self.policies = policies
-        titleLabel.text = "\(date) 나의 정책"
+        
+        guard let dateObject = DateFormatter.yearMonthDay.date(from: date) else {
+            print("잘못된 날짜 형식: \(date)")
+            return
+        }
+        
+        let monthDayDate = DateFormatter.monthDay.string(from: dateObject)
+        titleLabel.text = "\(monthDayDate) 나의 정책"
         tableView.reloadData()
     }
 }
@@ -52,6 +57,14 @@ final class CalendarPolicyListView: UIView {
 extension CalendarPolicyListView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 81
+    }
+    
+    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
+        cell.backgroundColor = .blue100
+    }
+    
+    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
+        12
     }
 }
 
@@ -68,4 +81,5 @@ extension CalendarPolicyListView: UITableViewDataSource {
         cell.configure(with: policy)
         return cell
     }
+
 }

@@ -25,8 +25,8 @@ final class CalendarDetailDocumentListView: UIView {
     private func setupUI() {
         addSubview(addButton)
         addButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(27)
-            $0.leading.equalToSuperview().offset(45)
+            $0.top.equalToSuperview().offset(20)
+            $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview().inset(20)
             $0.width.equalTo(118)
         }

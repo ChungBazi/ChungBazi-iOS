@@ -181,7 +181,10 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         cell.isSelected = true
         cell.updateCellAppearance()
         
+        let startOfSelectedDate = Calendar.current.startOfDay(for: date)
         if let eventsForDate = events[date], !eventsForDate.isEmpty {
+            delegate?.presentPolicyListViewController(for: date)
+        } else {
             delegate?.presentPolicyListViewController(for: date)
         }
     }
@@ -197,6 +200,7 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
             return FSCalendarCell()
         }
         cell.date = date
+        cell.isSelected = calendar.selectedDates.contains(date)
         cell.events = events
         return cell
     }
