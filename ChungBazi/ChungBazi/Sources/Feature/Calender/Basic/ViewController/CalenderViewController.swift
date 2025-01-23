@@ -7,19 +7,14 @@
 
 import UIKit
 
-final class CalenderViewController: UIViewController, CalendarViewDelegate, UISheetPresentationControllerDelegate {
- 
+final class CalenderViewController: UIViewController, UISheetPresentationControllerDelegate {
     // MARK: - Properties
     private let calendarView = CalendarView()
     private var selectedDate: String?
     
-    // MARK: - IBOutlet
-    
-    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
-        calendarView.delegate = self
         setupUI()
         fetchData()
     }
@@ -117,12 +112,17 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
             calendarView.update(policy: policy)
         }
     }
-    
-    // MARK: - Actions
-    
-    func presentPolicyListViewController() {
+}
+
+extension CalenderViewController: CalendarViewDelegate {
+    func presentPolicyListViewController(for date: Date) {
         let vc = CalendarPolicyListViewController()
         vc.modalPresentationStyle = .pageSheet
+        
+        vc.selectedDate = DateFormatter.yearMonthDay.string(from: date)
+        if let policiesForDate = getPolicies(for: date) {
+            vc.policies = policiesForDate
+        }
         
         if let sheet = vc.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
@@ -155,4 +155,19 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
         
         present(vc, animated: true, completion: nil)
     }
+    
+    private func getPolicies(for date: Date) -> [Policy]? {
+        let dateString = DateFormatter.yearMonthDay.string(from: date)
+        return createSamplePolicy().filter { policy in
+            policy.startDate <= dateString && policy.endDate >= dateString
+        }
+    }
+    
+    func configureCalendarViewDelegate() {
+        calendarView.delegate = self
+    }
+}
+
+extension CalendarDetailViewController: UISheetPresentationControllerDelegate {
+    
 }

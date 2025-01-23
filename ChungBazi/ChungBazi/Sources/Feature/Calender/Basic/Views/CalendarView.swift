@@ -11,7 +11,7 @@ import Then
 import FSCalendar
 
 protocol CalendarViewDelegate: AnyObject {
-    func presentPolicyListViewController()
+    func presentPolicyListViewController(for date: Date)
 }
 
 final class CalendarView: UIView {
@@ -185,6 +185,10 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         guard let cell = calendar.cell(for: date, at: monthPosition) as? CustomCalendarCell else { return }
         cell.isSelected = true
         cell.updateCellAppearance()
+        
+        if let eventsForDate = events[date], !eventsForDate.isEmpty {
+            delegate?.presentPolicyListViewController(for: date)
+        }
     }
     
     func calendar(_ calendar: FSCalendar, didDeselect date: Date, at monthPosition: FSCalendarMonthPosition) {
@@ -288,10 +292,14 @@ final class CustomCalendarCell: FSCalendarCell {
 
         let markerSize: CGFloat = 5
         let spacing: CGFloat = 3
-        let totalWidth = CGFloat(eventTypes.count) * markerSize + CGFloat(eventTypes.count - 1) * spacing
+        let maxVisibleMarkers = 3
+        let visibleEventCount = min(eventTypes.count, maxVisibleMarkers)
+        let totalWidth = CGFloat(visibleEventCount) * markerSize + CGFloat(visibleEventCount - 1) * spacing
         var offsetX: CGFloat = titleFrame.midX - totalWidth / 2
 
-        for eventType in eventTypes {
+        for (index, eventType) in eventTypes.enumerated() {
+            guard index < maxVisibleMarkers else { break }
+
             let markerLayer = CAShapeLayer()
             let markerRect = CGRect(x: offsetX, y: titleFrame.maxY + 5, width: markerSize, height: markerSize)
             markerLayer.frame = markerRect
@@ -309,6 +317,22 @@ final class CustomCalendarCell: FSCalendarCell {
             contentView.layer.addSublayer(markerLayer)
             eventLayers.append(markerLayer)
             offsetX += markerSize + spacing
+        }
+
+        if eventTypes.count > maxVisibleMarkers {
+            let remainingCount = eventTypes.count - maxVisibleMarkers
+            let label = UILabel()
+            label.text = "+\(remainingCount)"
+            label.font = .ptdMediumFont(ofSize: 12)
+            label.textColor = .gray300
+            label.textAlignment = .center
+            label.frame = CGRect(
+                x: titleFrame.midX - 15,
+                y: titleFrame.maxY + 10 + markerSize,
+                width: 30,
+                height: 20
+            )
+            contentView.addSubview(label)
         }
     }
 }
