@@ -18,6 +18,7 @@ final class CalendarView: UIView {
     
     // MARK: - Properties
     weak var delegate: CalendarViewDelegate?
+    private var events: [Date: [String]] = [:]
     
     private let customHeader = createCustomHeader()
     private let customMonth = UILabel().then {
@@ -45,7 +46,6 @@ final class CalendarView: UIView {
         $0.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         $0.scope = .month
     }
-    private var events: [Date: [String]] = [:]
     
     private static func createCustomHeader() -> UIView {
         return UIView().then {
@@ -162,14 +162,9 @@ final class CalendarView: UIView {
     }
     
     // MARK: - Public Methods
-    func update(policy: Policy) {
-        
-        guard let startDate = DateFormatter.yearMonthDay.date(from: policy.startDate),
-              let endDate = DateFormatter.yearMonthDay.date(from: policy.endDate) else { return }
-        
-        events[startDate, default: []].append("start")
-        events[endDate, default: []].append("end")
-        
+    func update(policy: SortedPolicy) {
+        events[policy.startDate, default: []].append("start")
+        events[policy.endDate, default: []].append("end")
         calendar.reloadData()
     }
 }

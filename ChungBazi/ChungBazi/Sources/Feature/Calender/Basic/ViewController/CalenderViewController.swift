@@ -11,6 +11,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     // MARK: - Properties
     private let calendarView = CalendarView()
     private var selectedDate: String?
+    private var policies: [SortedPolicy] = []
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -32,9 +33,16 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     // MARK: - Data
     private func fetchData() {
         let samplePolicies = createSamplePolicy()
-        bindPolicyData(samplePolicies)
+        policies = samplePolicies.map { policy in
+            SortedPolicy(
+                startDate: DateFormatter.yearMonthDay.date(from: policy.startDate) ?? Date(),
+                endDate: DateFormatter.yearMonthDay.date(from: policy.endDate) ?? Date(),
+                policyName: policy.policyName)
+        }
+        policies = sortMarkers(policies: policies)
+        bindPolicyData(policies)
     }
-
+    
     private func createSamplePolicy() -> [Policy] {
         return [
             Policy(
@@ -106,7 +114,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         ]
     }
     
-    private func bindPolicyData(_ policies: [Policy]) {
+    private func bindPolicyData(_ policies: [SortedPolicy]) {
         guard !policies.isEmpty else { return }
         for policy in policies {
             calendarView.update(policy: policy)
@@ -120,9 +128,7 @@ extension CalenderViewController: CalendarViewDelegate {
         vc.modalPresentationStyle = .pageSheet
         
         vc.selectedDate = DateFormatter.yearMonthDay.string(from: date)
-        if let policiesForDate = getPolicies(for: date) {
-            vc.policies = policiesForDate
-        }
+        vc.policies = getPolicies(for: date)
         
         if let sheet = vc.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
@@ -156,10 +162,18 @@ extension CalenderViewController: CalendarViewDelegate {
         present(vc, animated: true, completion: nil)
     }
     
-    private func getPolicies(for date: Date) -> [Policy]? {
-        let dateString = DateFormatter.yearMonthDay.string(from: date)
-        return createSamplePolicy().filter { policy in
-            policy.startDate <= dateString && policy.endDate >= dateString
+    private func getPolicies(for date: Date) -> [Policy] {
+        let filteredPolicies = policies.filter { policy in
+            policy.startDate <= date && policy.endDate >= date
+        }
+        
+        let originalPolicies = createSamplePolicy()
+        return filteredPolicies.compactMap { sortedPolicy in
+            originalPolicies.first { originalPolicy in
+                originalPolicy.policyName == sortedPolicy.policyName &&
+                originalPolicy.startDate == DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate) &&
+                originalPolicy.endDate == DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
+            }
         }
     }
     
