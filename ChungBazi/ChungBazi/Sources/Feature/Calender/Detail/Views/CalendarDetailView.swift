@@ -22,7 +22,7 @@ final class CalendarDetailView: UIView {
     var accessiblePolicyInfoView: UIView {
         return policyInfoView
     }
-    private let characterImage = UIImageView(image: .character06)
+    private let characterImage = UIImageView(image: .glassBaro)
     private let policyInfoTextView = UIView()
     private let policyName: UILabel = {
         let label = UILabel.createLabel(
