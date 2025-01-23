@@ -48,7 +48,6 @@ final class CalendarDetailViewController: UIViewController {
         setupNavigationBar()
         segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
         segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
-        setupSegmentedControl()
     }
     
     private func setupCalendarDetailView() {
@@ -58,6 +57,35 @@ final class CalendarDetailViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
         }
+        
+        let contentView = calendarDetailView.accessibleContentView
+        
+        contentView.addSubviews(segmentedControl, underLineView, firstView, secondView)
+        firstView.snp.makeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
+            $0.bottom.equalToSuperview().inset(30)
+            $0.leading.trailing.equalToSuperview()
+        }
+        secondView.snp.makeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
+            $0.bottom.equalToSuperview().inset(30)
+            $0.leading.trailing.equalToSuperview()
+        }
+        segmentedControl.snp.makeConstraints {
+            $0.top.equalTo(calendarDetailView.accessiblePolicyInfoView.snp.bottom).offset(21)
+            $0.leading.trailing.equalTo(calendarDetailView)
+            $0.height.equalTo(48)
+        }
+        underLineView.snp.makeConstraints {
+            $0.top.equalTo(segmentedControl.snp.bottom)
+            $0.height.equalTo(1)
+            $0.width.equalToSuperview().dividedBy(2)
+            $0.leading.equalToSuperview()
+        }
+        configureSegmentControlAppearance()
+        
+        firstView.isHidden = false
+        secondView.isHidden = true
     }
     
     private func setupNavigationBar() {
@@ -69,24 +97,6 @@ final class CalendarDetailViewController: UIViewController {
             showAlarmButton: true,
             backgroundColor: .white
         )
-    }
-    
-    private func setupSegmentedControl() {
-        calendarDetailView.addSubview(segmentedControl)
-        segmentedControl.snp.makeConstraints {
-            $0.top.equalTo(calendarDetailView.accessiblePolicyInfoView.snp.bottom).offset(21)
-            $0.leading.trailing.equalTo(calendarDetailView)
-            $0.height.equalTo(48)
-        }
-        
-        calendarDetailView.addSubviews(underLineView)
-        underLineView.snp.makeConstraints {
-            $0.top.equalTo(segmentedControl.snp.bottom)
-            $0.height.equalTo(1)
-            $0.width.equalToSuperview().dividedBy(2)
-            $0.leading.equalToSuperview()
-        }
-        configureSegmentControlAppearance()
     }
     
     private var shouldHideFirstView: Bool? {
@@ -151,7 +161,7 @@ final class CalendarDetailViewController: UIViewController {
             policyName: "양진구청 마라톤 참가자 모집",
             startDate: "2024-12-12",
             endDate: "2024-12-23",
-            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
+            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출\n",
             userDocuments: [
                 Document(documentId: 1, name: "주민등록본", isChecked: true),
                 Document(documentId: 2, name: "학생증", isChecked: false)
@@ -162,6 +172,7 @@ final class CalendarDetailViewController: UIViewController {
     private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)
+        secondView.update(policy: policy)
     }
 
 }

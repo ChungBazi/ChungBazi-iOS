@@ -14,6 +14,9 @@ final class CalendarDetailView: UIView {
     // MARK: - Properties
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    var accessibleContentView: UIView{
+        return contentView
+    }
     
     private let policyInfoView = UIView()
     var accessiblePolicyInfoView: UIView {

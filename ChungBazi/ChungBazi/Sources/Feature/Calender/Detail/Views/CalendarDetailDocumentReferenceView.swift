@@ -10,12 +10,27 @@ import SnapKit
 import Then
 
 final class CalendarDetailDocumentReferenceView: UIView {
+    
+    private let documentText = B16_M(text: "")
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
-        
+        setupUI()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    private func setupUI() {
+        addSubview(documentText)
+        documentText.snp.makeConstraints {
+            $0.top.bottom.equalToSuperview().inset(30)
+            $0.leading.trailing.equalToSuperview().inset(45)
+        }
+    }
+    
+    func update(policy: Policy) {
+        documentText.text = policy.documentText.isEmpty ? "서류 참고 내용 없음" : policy.documentText
     }
 }

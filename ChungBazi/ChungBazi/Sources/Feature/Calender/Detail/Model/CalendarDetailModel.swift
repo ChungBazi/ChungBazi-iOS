@@ -12,7 +12,7 @@ struct Policy: Decodable {
     let policyName: String
     let startDate: String
     let endDate: String
-    let documentText: String?
+    let documentText: String
     let userDocuments: [Document]?
 }
 
