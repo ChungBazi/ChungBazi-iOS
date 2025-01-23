@@ -15,16 +15,11 @@ protocol CalendarViewDelegate: AnyObject {
 }
 
 final class CalendarView: UIView {
-
+    
     // MARK: - Properties
     weak var delegate: CalendarViewDelegate?
-
-    private let customHeader = UIView().then {
-        $0.backgroundColor = .white
-        $0.clipsToBounds = true
-        $0.layer.cornerRadius = 10
-        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-    }
+    
+    private let customHeader = createCustomHeader()
     private let customMonth = UILabel().then {
         $0.textAlignment = .center
         $0.textColor = .black
@@ -35,20 +30,9 @@ final class CalendarView: UIView {
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 12)
     }
-    private let previousBtn = UIButton.createWithImage(
-        image: .arrowLeft,
-        tintColor: .gray500,
-        target: self,
-        action: #selector(prevPage),
-        touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-    )
-    private let nextBtn = UIButton.createWithImage(
-        image: .arrowRight,
-        tintColor: .gray500,
-        target: self,
-        action: #selector(nextPage),
-        touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-    )
+    private let previousBtn = createNavigationButton(image: .arrowLeft, action: #selector(prevPage))
+    private let nextBtn = createNavigationButton(image: .arrowRight, action: #selector(nextPage))
+    
     private var currentPage: Date?
     private let today = Date()
     private let dateFormatter = DateFormatter().then {
@@ -62,7 +46,25 @@ final class CalendarView: UIView {
         $0.scope = .month
     }
     private var events: [Date: [String]] = [:]
-
+    
+    private static func createCustomHeader() -> UIView {
+        return UIView().then {
+            $0.backgroundColor = .white
+            $0.clipsToBounds = true
+            $0.layer.cornerRadius = 10
+            $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        }
+    }
+    private static func createNavigationButton(image: UIImage, action: Selector) -> UIButton {
+        return UIButton.createWithImage(
+            image: image,
+            tintColor: .gray500,
+            target: self,
+            action: action,
+            touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+        )
+    }
+    
     // MARK: - Initializers
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -71,21 +73,21 @@ final class CalendarView: UIView {
         calendar.delegate = self
         updateHeader(for: calendar.currentPage)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     // MARK: - Setup
     private func setupUI() {
         setupHeader()
         setupCalendar()
     }
-
+    
     private func setupHeader() {
         addSubview(customHeader)
         customHeader.addSubviews(previousBtn, nextBtn, customMonth, customYear)
-
+        
         customHeader.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide.snp.top).offset(Constants.navigationHeight + 20)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
@@ -108,7 +110,7 @@ final class CalendarView: UIView {
             $0.centerX.equalToSuperview()
         }
     }
-
+    
     private func setupCalendar() {
         addSubview(calendar)
         configureCalendarAppearance()
@@ -119,7 +121,7 @@ final class CalendarView: UIView {
             $0.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).inset(26)
         }
     }
-
+    
     private func configureCalendarAppearance() {
         calendar.appearance.titleDefaultColor = .black
         calendar.appearance.titleSelectionColor = .white
@@ -133,43 +135,40 @@ final class CalendarView: UIView {
         calendar.locale = Locale(identifier: "ko_KR")
         calendar.headerHeight = 0
         calendar.placeholderType = .fillHeadTail
-        calendar.appearance.eventDefaultColor = .blue700
-        calendar.appearance.eventSelectionColor = .blue700
     }
-
+    
     // MARK: - UI Update
     private func updateHeader(for date: Date) {
+        let dateFormatter = DateFormatter.shared
         dateFormatter.dateFormat = "MMMM"
         customMonth.text = dateFormatter.string(from: date)
         
         dateFormatter.dateFormat = "yyyy"
         customYear.text = dateFormatter.string(from: date)
     }
-
+    
     // MARK: - Actions
     @objc private func prevPage() {
         moveCurrentPage(by: -1)
     }
-
+    
     @objc private func nextPage() {
         moveCurrentPage(by: 1)
     }
-
+    
     private func moveCurrentPage(by months: Int) {
         guard let newPage = Calendar.current.date(byAdding: .month, value: months, to: calendar.currentPage) else { return }
         calendar.setCurrentPage(newPage, animated: true)
     }
-
+    
     // MARK: - Public Methods
     func update(policy: Policy) {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
         
-        guard let startDate = dateFormatter.date(from: policy.startDate),
-              let endDate = dateFormatter.date(from: policy.endDate) else { return }
+        guard let startDate = DateFormatter.yearMonthDay.date(from: policy.startDate),
+              let endDate = DateFormatter.yearMonthDay.date(from: policy.endDate) else { return }
         
-        events[startDate] = ["start"]
-        events[endDate] = ["end"]
+        events[startDate, default: []].append("start")
+        events[endDate, default: []].append("end")
         
         calendar.reloadData()
     }
@@ -177,14 +176,6 @@ final class CalendarView: UIView {
 
 // MARK: - FSCalendarDelegate
 extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
-    func calendar(_ calendar: FSCalendar, numberOfEventsFor date: Date) -> Int {
-        return min(events[date]?.count ?? 0, 3)
-    }
-    
-    func calendar(_ calendar: FSCalendar, appearance: FSCalendarAppearance, eventDefaultColorsFor date: Date) -> [UIColor]? {
-        guard let eventNames = events[date] else { return nil }
-        return eventNames.prefix(3).map { _ in .blue700 }
-    }
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
         updateHeader(for: calendar.currentPage)
@@ -195,7 +186,7 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         cell.isSelected = true
         cell.updateCellAppearance()
     }
-
+    
     func calendar(_ calendar: FSCalendar, didDeselect date: Date, at monthPosition: FSCalendarMonthPosition) {
         guard let cell = calendar.cell(for: date, at: monthPosition) as? CustomCalendarCell else { return }
         cell.isSelected = false
@@ -207,6 +198,7 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
             return FSCalendarCell()
         }
         cell.date = date
+        cell.events = events
         return cell
     }
 }
@@ -218,31 +210,35 @@ final class CustomCalendarCell: FSCalendarCell {
             updateCellAppearance()
         }
     }
-
+    
+    var events: [Date: [String]] = [:]
+    
     private let customShapeLayer = CAShapeLayer()
+    private var eventLayers: [CAShapeLayer] = []
     private let today = Date()
-
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         contentView.layer.insertSublayer(customShapeLayer, below: titleLabel.layer)
-
+        
         titleLabel.textAlignment = .center
         titleLabel.font = .ptdMediumFont(ofSize: 14)
         titleLabel.textColor = .black
         titleLabel.addCharacterSpacing(0.01)
         titleLabel.setLineSpacing(ratio: 1.4)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     override func layoutSubviews() {
         super.layoutSubviews()
         layoutTitleLabel()
         layoutShapeLayer()
+        layoutEventMarkers()
     }
-
+    
     private func layoutTitleLabel() {
         titleLabel.frame = CGRect(
             x: 0,
@@ -251,14 +247,14 @@ final class CustomCalendarCell: FSCalendarCell {
             height: 20
         )
     }
-
+    
     private func layoutShapeLayer() {
         guard let titleFrame = titleLabel.frame as CGRect? else { return }
-
+        
         let shapeLayerSize: CGFloat = 27
         let shapeLayerX = titleFrame.midX - shapeLayerSize / 2
         let shapeLayerY = titleFrame.midY - shapeLayerSize / 2
-
+        
         customShapeLayer.frame = CGRect(
             x: shapeLayerX,
             y: shapeLayerY,
@@ -267,22 +263,52 @@ final class CustomCalendarCell: FSCalendarCell {
         )
         customShapeLayer.cornerRadius = 10
     }
-
+    
     func updateCellAppearance() {
         guard let date = date else { return }
-
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-
-        let cellDate = dateFormatter.string(from: date)
-        let todayDate = dateFormatter.string(from: today)
-
+        
+        let calendar = Calendar.current
+        
         if isSelected {
             customShapeLayer.backgroundColor = UIColor.blue700.cgColor
-        } else if cellDate == todayDate {
+        } else if calendar.isDate(date, inSameDayAs: today) {
             customShapeLayer.backgroundColor = UIColor.green300.cgColor
         } else {
             customShapeLayer.backgroundColor = UIColor.clear.cgColor
+        }
+    }
+    
+    private func layoutEventMarkers() {
+        let titleFrame = titleLabel.frame
+
+        eventLayers.forEach { $0.removeFromSuperlayer() }
+        eventLayers.removeAll()
+
+        guard let date = date, let eventTypes = events[date] else { return }
+
+        let markerSize: CGFloat = 5
+        let spacing: CGFloat = 3
+        let totalWidth = CGFloat(eventTypes.count) * markerSize + CGFloat(eventTypes.count - 1) * spacing
+        var offsetX: CGFloat = titleFrame.midX - totalWidth / 2
+
+        for eventType in eventTypes {
+            let markerLayer = CAShapeLayer()
+            let markerRect = CGRect(x: offsetX, y: titleFrame.maxY + 5, width: markerSize, height: markerSize)
+            markerLayer.frame = markerRect
+
+            if eventType == "start" {
+                markerLayer.path = UIBezierPath(ovalIn: CGRect(origin: .zero, size: markerRect.size)).cgPath
+                markerLayer.strokeColor = UIColor.blue700.cgColor
+                markerLayer.lineWidth = 1
+                markerLayer.fillColor = UIColor.clear.cgColor
+            } else if eventType == "end" {
+                markerLayer.path = UIBezierPath(ovalIn: CGRect(origin: .zero, size: markerRect.size)).cgPath
+                markerLayer.fillColor = UIColor.blue700.cgColor
+            }
+
+            contentView.layer.addSublayer(markerLayer)
+            eventLayers.append(markerLayer)
+            offsetX += markerSize + spacing
         }
     }
 }

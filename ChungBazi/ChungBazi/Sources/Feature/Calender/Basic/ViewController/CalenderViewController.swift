@@ -67,7 +67,7 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
             Policy(
                 policyId: 3,
                 policyName: "지역 사회봉사단 모집",
-                startDate: "2025-01-15",
+                startDate: "2025-01-12",
                 endDate: "2025-01-15",
                 documentText: "1단계: 지원서 제출 -> 2단계: 간단한 면접 진행",
                 userDocuments: [
@@ -78,7 +78,7 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
             Policy(
                 policyId: 4,
                 policyName: "공공 미술 프로젝트 지원",
-                startDate: "2025-01-23",
+                startDate: "2025-01-15",
                 endDate: "2025-01-23",
                 documentText: "1단계: 프로젝트 계획서 제출 -> 2단계: 현장 실사 후 최종 발표",
                 userDocuments: [
@@ -100,7 +100,7 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
             Policy(
                 policyId: 6,
                 policyName: "시민 체육대회 참가자 모집",
-                startDate: "2025-01-29",
+                startDate: "2025-01-12",
                 endDate: "2025-01-29",
                 documentText: "1단계: 참가 신청서 작성 -> 2단계: 참가비 납부",
                 userDocuments: [
@@ -119,6 +119,7 @@ final class CalenderViewController: UIViewController, CalendarViewDelegate, UISh
     }
     
     // MARK: - Actions
+    
     func presentPolicyListViewController() {
         let vc = CalendarPolicyListViewController()
         vc.modalPresentationStyle = .pageSheet
