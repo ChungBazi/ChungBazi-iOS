@@ -9,19 +9,17 @@ class SelectLoginTypeViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        self.view = selectLoginView
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    private lazy var selectLoginView = SelectLoginView().then {
+        $0.kakaoBtn.addTarget(self, action: #selector(kakaoLogin), for: .touchUpInside)
     }
-    */
-
+    
+    @objc private func kakaoLogin() {
+        let vc = FinishLoginViewController()
+        let navController = UINavigationController(rootViewController: vc)
+        navController.modalPresentationStyle = .fullScreen
+        self.present(navController, animated: true, completion: nil)
+    }
 }
