@@ -30,7 +30,7 @@ class MainTabBarController: UITabBarController {
     }
     
     private func createProfileViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "프로필", image: .tabProfileIcon, tag: 3)
+        return createNavigationController(for: ProfileViewController(), title: "프로필", image: .tabProfileIcon, tag: 3)
     }
     
     private func createNavigationController(for viewController: UIViewController, title: String, image: UIImage?, tag: Int) -> UINavigationController {
