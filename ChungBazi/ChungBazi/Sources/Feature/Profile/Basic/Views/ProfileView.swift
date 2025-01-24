@@ -9,7 +9,13 @@ import UIKit
 import SnapKit
 import Then
 
+protocol ProfileViewDelegate: AnyObject {
+    func didTapEditProfile()
+}
+
 final class ProfileView: UIView {
+    
+    weak var delegate: ProfileViewDelegate?
     
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .blue700
@@ -126,7 +132,7 @@ final class ProfileView: UIView {
     }
     
     @objc private func editProfileBtnTapped() {
-        //
+        delegate?.didTapEditProfile()
     }
 }
 
@@ -144,5 +150,12 @@ extension ProfileView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if menuItems[indexPath.row] == "정보 수정" {
+            delegate?.didTapEditProfile()
+        }
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }
