@@ -9,7 +9,7 @@ import UIKit
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, backgroundColor: UIColor = .white) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, backgroundColor: UIColor = .white) {
         
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -76,6 +76,53 @@ extension UIViewController {
         if let navigationController = self.navigationController {
             navigationController.interactivePopGestureRecognizer?.delegate = nil
             navigationController.interactivePopGestureRecognizer?.isEnabled = true
+        }
+        
+        if showHomeRecommendTabs {
+            addHomeRecommendTabs(to: navigationBarView, activeTab: activeTab)
+        }
+    }
+    // MARK: - Home-Recommend Tabs
+    private func addHomeRecommendTabs(to navigationBarView: UIView, activeTab: Int) {
+        let homeButton = UIButton(type: .system)
+        homeButton.setTitle("홈", for: .normal)
+        homeButton.titleLabel?.font = UIFont(name: AppFontName.pSemiBold, size: 28)
+        homeButton.setTitleColor(activeTab == 0 ? .black : AppColor.gray300, for: .normal)
+        homeButton.tag = 0
+        homeButton.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
+        
+        let recommendButton = UIButton(type: .system)
+        recommendButton.setTitle("추천", for: .normal)
+        recommendButton.titleLabel?.font = UIFont(name: AppFontName.pSemiBold, size: 28)
+        recommendButton.setTitleColor(activeTab == 1 ? .black : AppColor.gray300, for: .normal)
+        recommendButton.tag = 1
+        recommendButton.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
+        
+        let buttonStackView = UIStackView(arrangedSubviews: [homeButton, recommendButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.spacing = 20
+        buttonStackView.alignment = .center
+        navigationBarView.addSubview(buttonStackView)
+
+        buttonStackView.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(-10)
+            make.leading.equalToSuperview().offset(30)
+        }
+    }
+    
+    @objc private func tabButtonTapped(_ sender: UIButton) {
+        switch sender.tag {
+        case 0:
+            if !(self is HomeViewController) {
+                self.navigationController?.popToRootViewController(animated: false)
+            }
+        case 1:
+            if !(self is RecommendViewController) {
+                let recommendVC = RecommendViewController()
+                self.navigationController?.pushViewController(recommendVC, animated: false)
+            }
+        default:
+            break
         }
     }
     
