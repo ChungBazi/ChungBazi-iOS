@@ -9,7 +9,13 @@ import UIKit
 import SnapKit
 import Then
 
+protocol CalendarPolicyListViewDelegate: AnyObject {
+    func presentCalendarDetailViewController(for policy: Policy)
+}
+
 final class CalendarPolicyListView: UIView {
+    
+    weak var delegate: CalendarPolicyListViewDelegate?
     
     private let titleLabel = T20_SB(text: "나의 정책")
     private let tableView = UITableView()
@@ -18,6 +24,8 @@ final class CalendarPolicyListView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        tableView.delegate = self
+        tableView.dataSource = self
     }
     
     required init?(coder: NSCoder) {
@@ -30,14 +38,16 @@ final class CalendarPolicyListView: UIView {
             $0.top.equalToSuperview().inset(36)
             $0.centerX.equalToSuperview()
         }
+        
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        tableView.layer.cornerRadius = 10
         tableView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(26)
             $0.leading.trailing.bottom.equalToSuperview()
         }
         
         tableView.register(CalendarPolicyListCell.self, forCellReuseIdentifier: "PolicyCell")
-        tableView.delegate = self
-        tableView.dataSource = self
     }
     
     func updateView(with date: String, policies: [Policy]) {
@@ -54,7 +64,7 @@ final class CalendarPolicyListView: UIView {
     }
 }
 
-extension CalendarPolicyListView: UITableViewDelegate {
+extension CalendarPolicyListView: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 81
     }
@@ -66,9 +76,18 @@ extension CalendarPolicyListView: UITableViewDelegate {
     func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
         12
     }
-}
-
-extension CalendarPolicyListView: UITableViewDataSource {
+    
+    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
+        let spacer = UIView()
+        spacer.backgroundColor = .clear
+        return spacer
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedPolicy = policies[indexPath.row]
+        delegate?.presentCalendarDetailViewController(for: selectedPolicy)
+    }
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return policies.count
     }
@@ -81,5 +100,5 @@ extension CalendarPolicyListView: UITableViewDataSource {
         cell.configure(with: policy)
         return cell
     }
-
 }
+

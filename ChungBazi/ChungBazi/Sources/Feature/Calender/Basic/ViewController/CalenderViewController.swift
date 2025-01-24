@@ -9,6 +9,7 @@ import UIKit
 
 final class CalenderViewController: UIViewController, UISheetPresentationControllerDelegate {
     // MARK: - Properties
+    
     private let calendarView = CalendarView()
     private var selectedDate: String?
     private var policies: [SortedPolicy] = []
@@ -124,44 +125,72 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
 }
 
 extension CalenderViewController: CalendarViewDelegate {
+    func presentPolicyListViewController(for policy: Policy?) {
+        guard let policy = policy else { return }
+        let detailVC = CalendarDetailViewController(policy: policy)
+        
+        let navController = UINavigationController(rootViewController: detailVC)
+        navController.modalPresentationStyle = .fullScreen
+        
+        self.present(navController, animated: true, completion: nil)
+    }
+    
     func presentPolicyListViewController(for date: Date) {
-        let vc = CalendarPolicyListViewController()
-        vc.modalPresentationStyle = .pageSheet
-        
-        let startOfSelectedDate = Calendar.current.startOfDay(for: date)
-        vc.selectedDate = DateFormatter.yearMonthDay.string(from: date)
-        vc.policies = getPolicies(for: date)
-        
-        if let sheet = vc.sheetPresentationController {
+        let policyListVC = CalendarPolicyListViewController()
+        policyListVC.modalPresentationStyle = .pageSheet
+        policyListVC.selectedDate = DateFormatter.yearMonthDay.string(from: date)
+        policyListVC.policies = getPolicies(for: date)
+
+        let navigationController = UINavigationController(rootViewController: policyListVC)
+        navigationController.modalPresentationStyle = .pageSheet
+
+        if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.selectedDetentIdentifier = .medium
             sheet.largestUndimmedDetentIdentifier = .large
-            sheet.delegate = self
             sheet.prefersGrabberVisible = false
+            sheet.delegate = self
         }
-        
-        vc.view.layer.cornerRadius = 20
-        vc.view.layer.shadowColor = UIColor.black.cgColor
-        vc.view.layer.shadowOpacity = 0.16
-        vc.view.layer.shadowOffset = CGSize(width: 0, height: 3)
-        vc.view.layer.shadowRadius = 15
-        vc.view.layer.masksToBounds = false
-        vc.view.superview?.clipsToBounds = false
-        
+
+        navigationController.view.layer.masksToBounds = false
+        navigationController.view.clipsToBounds = false
+
+        policyListVC.view.layer.cornerRadius = 20
+        policyListVC.view.layer.shadowColor = UIColor.black.cgColor
+        policyListVC.view.layer.shadowOpacity = 0.16
+        policyListVC.view.layer.shadowOffset = CGSize(width: 0, height: 3)
+        policyListVC.view.layer.shadowRadius = 15
+        policyListVC.view.layer.masksToBounds = false
+
+        navigationController.isModalInPresentation = false
+
         let grabbarView = UIView()
         grabbarView.backgroundColor = .gray300
         grabbarView.layer.cornerRadius = 2.5
         grabbarView.translatesAutoresizingMaskIntoConstraints = false
-        
-        vc.view.addSubview(grabbarView)
+        policyListVC.view.addSubview(grabbarView)
         grabbarView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(9)
             $0.width.equalTo(86)
             $0.height.equalTo(5)
             $0.centerX.equalToSuperview()
         }
-        
-        present(vc, animated: true, completion: nil)
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissModal))
+        view.addGestureRecognizer(tapGesture)
+        tapGesture.name = "dismissGesture"
+
+        present(navigationController, animated: true, completion: nil)
+    }
+
+    @objc private func dismissModal() {
+        dismiss(animated: true, completion: nil)
+
+        if let gestures = view.gestureRecognizers {
+            for gesture in gestures where gesture.name == "dismissGesture" {
+                view.removeGestureRecognizer(gesture)
+            }
+        }
     }
     
     private func getPolicies(for date: Date) -> [Policy] {
@@ -181,6 +210,10 @@ extension CalenderViewController: CalendarViewDelegate {
     
     func configureCalendarViewDelegate() {
         calendarView.delegate = self
+    }
+    
+    private func createPolicy(from date: Date) -> Policy? {
+        return nil
     }
 }
 

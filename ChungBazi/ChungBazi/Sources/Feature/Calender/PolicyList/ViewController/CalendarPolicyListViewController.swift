@@ -17,6 +17,7 @@ final class CalendarPolicyListViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         setupData()
+        calendarPolicyListView.delegate = self
     }
     
     private func setupUI() {
@@ -29,5 +30,12 @@ final class CalendarPolicyListViewController: UIViewController {
  
     private func setupData() {
         calendarPolicyListView.updateView(with: selectedDate, policies: policies)
+    }
+}
+
+extension CalendarPolicyListViewController: CalendarPolicyListViewDelegate {
+    func presentCalendarDetailViewController(for policy: Policy) {
+        let detailVC = CalendarDetailViewController(policy: policy)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }

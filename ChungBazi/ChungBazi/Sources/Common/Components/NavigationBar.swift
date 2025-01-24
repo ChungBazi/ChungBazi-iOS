@@ -64,8 +64,7 @@ extension UIViewController {
         }
         
         titleLabel.snp.makeConstraints { make in
-            make.centerX.equalToSuperview()
-            make.bottom.equalToSuperview().inset(14)
+            make.center.equalToSuperview()
             make.height.equalTo(28)
         }
         

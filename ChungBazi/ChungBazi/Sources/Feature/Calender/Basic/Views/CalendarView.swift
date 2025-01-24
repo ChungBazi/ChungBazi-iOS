@@ -31,8 +31,8 @@ final class CalendarView: UIView {
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 12)
     }
-    private let previousBtn = createNavigationButton(image: .arrowLeft, action: #selector(prevPage))
-    private let nextBtn = createNavigationButton(image: .arrowRight, action: #selector(nextPage))
+    private let previousBtn = createNavigationButton(image: .arrowLeft, action: #selector(prevPage), target: self)
+    private let nextBtn = createNavigationButton(image: .arrowRight, action: #selector(nextPage), target: self)
     
     private var currentPage: Date?
     private let today = Date()
@@ -55,11 +55,11 @@ final class CalendarView: UIView {
             $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         }
     }
-    private static func createNavigationButton(image: UIImage, action: Selector) -> UIButton {
+    private static func createNavigationButton(image: UIImage, action: Selector, target: Any) -> UIButton {
         return UIButton.createWithImage(
             image: image,
             tintColor: .gray500,
-            target: self,
+            target: target,
             action: action,
             touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         )
@@ -123,8 +123,8 @@ final class CalendarView: UIView {
     }
     
     private func configureCalendarAppearance() {
-        calendar.appearance.titleDefaultColor = .black
-        calendar.appearance.titleSelectionColor = .white
+        calendar.appearance.titleDefaultColor = .gray800
+        calendar.appearance.titleSelectionColor = .gray800
         calendar.appearance.selectionColor = .clear
         calendar.appearance.todayColor = .clear
         calendar.appearance.titlePlaceholderColor = .gray300
@@ -184,8 +184,6 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         let startOfSelectedDate = Calendar.current.startOfDay(for: date)
         if let eventsForDate = events[date], !eventsForDate.isEmpty {
             delegate?.presentPolicyListViewController(for: date)
-        } else {
-            delegate?.presentPolicyListViewController(for: date)
         }
     }
     
@@ -203,6 +201,10 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         cell.isSelected = calendar.selectedDates.contains(date)
         cell.events = events
         return cell
+    }
+    
+    func calendar(_ calendar: FSCalendar, shouldSelect date: Date, at monthPosition: FSCalendarMonthPosition) -> Bool {
+        return events[date] != nil
     }
 }
 
@@ -269,15 +271,18 @@ final class CustomCalendarCell: FSCalendarCell {
     
     func updateCellAppearance() {
         guard let date = date else { return }
-        
+
         let calendar = Calendar.current
-        
-        if isSelected {
-            customShapeLayer.backgroundColor = UIColor.blue700.cgColor
-        } else if calendar.isDate(date, inSameDayAs: today) {
+
+        if calendar.isDate(date, inSameDayAs: today) {
             customShapeLayer.backgroundColor = UIColor.green300.cgColor
+            titleLabel.textColor = isSelected ? UIColor.white : UIColor.gray800
+        } else if isSelected {
+            customShapeLayer.backgroundColor = UIColor.blue700.cgColor
+            titleLabel.textColor = UIColor.white
         } else {
             customShapeLayer.backgroundColor = UIColor.clear.cgColor
+            titleLabel.textColor = UIColor.gray800
         }
     }
     

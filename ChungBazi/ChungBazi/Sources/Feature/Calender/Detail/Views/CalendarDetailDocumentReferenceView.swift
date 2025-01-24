@@ -34,5 +34,6 @@ final class CalendarDetailDocumentReferenceView: UIView {
     
     func update(policy: Policy) {
         documentText.text = policy.documentText.isEmpty ? "서류 참고 내용 없음" : policy.documentText
+        documentText.setLineSpacing(ratio: 1.17)
     }
 }

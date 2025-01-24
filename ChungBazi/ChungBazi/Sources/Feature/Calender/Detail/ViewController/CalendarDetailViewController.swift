@@ -13,6 +13,7 @@ final class CalendarDetailViewController: UIViewController {
     
     // MARK: - Properties
     private let calendarDetailView = CalendarDetailView()
+    private var policy: Policy?
     
     private let segmentedControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["서류 리스트", "서류 참고 내용"])
@@ -25,14 +26,23 @@ final class CalendarDetailViewController: UIViewController {
         $0.backgroundColor = .blue700
     }
     
-    // MARK: - IBOutlet
-    
-    
     // MARK: - Lifecycle
+    init(policy: Policy) {
+        self.policy = policy
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         fetchData()
+        if let policy = policy {
+            bindPolicyData(policy)
+        }
         
         self.segmentedControl.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
         

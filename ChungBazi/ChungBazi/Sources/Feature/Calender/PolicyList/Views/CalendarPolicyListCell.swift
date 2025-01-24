@@ -27,9 +27,9 @@ final class CalendarPolicyListCell: UITableViewCell {
     
     private func setupUI() {
         addSubviews(dotView, policyName, dateLabel)
-        dotView.tintColor = .blue700
         dotView.layer.cornerRadius = 7
         dotView.layer.masksToBounds = true
+        dotView.backgroundColor = .blue700
         dotView.snp.makeConstraints {
             $0.top.leading.equalToSuperview().offset(25)
             $0.size.equalTo(14)
