@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ProfileEditView: UIView {
+final class ProfileEditView: UIView, UITextFieldDelegate {
     
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .blue700
@@ -22,7 +22,12 @@ final class ProfileEditView: UIView {
     private let settingCharacterBtn = CustomButton(backgroundColor: .white, titleText: "캐릭터 설정하기", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
     private let nickNameTitle = B12_M(text: "닉네임", textColor: .gray500)
-    private let nickNameTextField = UITextField()
+    private let nickNameTextField = UITextField().then {
+        $0.text = "기존 닉네임"
+        $0.textColor = .gray800
+        $0.clearButtonMode = .always
+        $0.returnKeyType = .done
+    }
     private let nickNameUnderLine = UIView().then {
         $0.backgroundColor = .gray500
     }
@@ -38,6 +43,7 @@ final class ProfileEditView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        nickNameTextField.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -68,6 +74,7 @@ final class ProfileEditView: UIView {
         nickNameTextField.snp.makeConstraints {
             $0.top.equalTo(nickNameTitle.snp.bottom).offset(10)
             $0.leading.trailing.equalTo(nickNameTitle)
+            $0.height.equalTo(22)
         }
         nickNameUnderLine.snp.makeConstraints {
             $0.top.equalTo(nickNameTextField.snp.bottom).offset(5)
@@ -88,6 +95,7 @@ final class ProfileEditView: UIView {
             $0.height.equalTo(1)
         }
         completeBtn.snp.makeConstraints {
+            $0.top.equalTo(emailUnderLine.snp.bottom).offset(144)
             $0.bottom.equalToSuperview().inset(20)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }

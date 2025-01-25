@@ -9,11 +9,13 @@ import UIKit
 
 final class ProfileEditViewController: UIViewController {
     
+    private let scrollView = UIScrollView()
     private let profileEditView = ProfileEditView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        enableKeyboardHandling(for: scrollView)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -29,11 +31,24 @@ final class ProfileEditViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .gray50
         addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false)
-        view.addSubview(profileEditView)
-        profileEditView.snp.makeConstraints {
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(profileEditView)
+        
+        scrollView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
         }
+        profileEditView.snp.makeConstraints {
+            $0.edges.width.equalToSuperview()
+        }
+    }
+}
+
+extension ProfileEditViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
