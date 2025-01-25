@@ -11,6 +11,9 @@ import Then
 
 protocol ProfileViewDelegate: AnyObject {
     func didTapEditProfile()
+    func didTapLogout()
+    func didTapWithdraw()
+    func didTapMyRewardView()
 }
 
 final class ProfileView: UIView {
@@ -99,6 +102,8 @@ final class ProfileView: UIView {
         myRewardLabel.snp.makeConstraints {
             $0.bottom.centerX.equalToSuperview()
         }
+        myRewardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(myRewardViewTapped)))
+        myRewardView.isUserInteractionEnabled = true
         
         myCharacterView.addSubviews(myCharacterIcon, myCharacterLabel)
         myCharacterView.snp.makeConstraints {
@@ -119,20 +124,23 @@ final class ProfileView: UIView {
             $0.top.equalTo(myRewardView.snp.bottom).offset(26.5)
             $0.height.equalTo(8)
         }
-        
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.isScrollEnabled = false
         tableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(20)
+            $0.bottom.equalToSuperview()
         }
         tableView.register(ProfileTableCell.self, forCellReuseIdentifier: "ProfileTableCell")
     }
     
     @objc private func editProfileBtnTapped() {
         delegate?.didTapEditProfile()
+    }
+    
+    @objc private func myRewardViewTapped() {
+        delegate?.didTapMyRewardView()
     }
 }
 
@@ -153,8 +161,15 @@ extension ProfileView: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        if menuItems[indexPath.row] == "정보 수정" {
+        switch menuItems[indexPath.row] {
+        case "정보 수정":
             delegate?.didTapEditProfile()
+        case "로그아웃":
+            delegate?.didTapLogout()
+        case "탈퇴":
+            delegate?.didTapWithdraw()
+        default:
+            break
         }
         tableView.deselectRow(at: indexPath, animated: true)
     }
