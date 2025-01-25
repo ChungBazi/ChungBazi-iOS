@@ -115,6 +115,11 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         completeBtn.addTarget(self, action: #selector(completeBtnTapped), for: .touchUpInside)
     }
     
+    func configure(with data: ProfileModel) {
+        nickNameTextField.text = data.nickname
+        emailLabel.text = data.email
+    }
+    
     @objc private func settingPhotoBtnTapped() {
         // FIXME: 사진 설정하기 버튼
     }
@@ -124,6 +129,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     @objc private func completeBtnTapped() {
+        // FIXME: 예외 처리 구현
         guard let nickname = nickNameTextField.text, !nickname.isEmpty else {
             print("닉네임이 비어있습니다.")
             return

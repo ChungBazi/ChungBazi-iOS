@@ -8,14 +8,18 @@
 import UIKit
 
 class ProfileViewController: UIViewController {
-
+    
     private let profileView = ProfileView()
+    private var profileData: ProfileModel?
+    private var rewardData: RewardModel?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
         profileView.delegate = self
+        fetchData()
+        fetchRewardData()
     }
     
     
@@ -29,12 +33,34 @@ class ProfileViewController: UIViewController {
             $0.leading.trailing.equalToSuperview()
         }
     }
+    
+    private func fetchData() {
+        // FIXME: 추후 서버 연결 시 아래 코드 제거
+        profileData = ProfileModel(nickname: "홍길동", email: "hong@example.com")
+        if let profileData = profileData {
+            profileView.configure(with: profileData)
+        }
+    }
+    
+    private func fetchRewardData() {
+        rewardData = RewardModel(currentReward: 1, myPosts: 2, myComments: 3)
+    }
+    
+    private func navigateToEditProfile() {
+        guard let profileData = profileData else { return }
+        let editVC = ProfileEditViewController(profileData: profileData)
+        editVC.onProfileUpdated = { [weak self] updatedProfile in
+            guard let self = self else { return }
+            self.profileData = updatedProfile
+            self.profileView.configure(with: updatedProfile)
+        }
+        navigationController?.pushViewController(editVC, animated: true)
+    }
 }
 
 extension ProfileViewController: ProfileViewDelegate {
     func didTapEditProfile() {
-        let vc = ProfileEditViewController()
-        navigationController?.pushViewController(vc, animated: true)
+        navigateToEditProfile()
     }
     
     func didTapLogout() {
@@ -60,6 +86,7 @@ extension ProfileViewController: ProfileViewDelegate {
     }
     
     func didTapMyRewardView() {
-        showProfileMyRewardView()
+        guard let rewardData = rewardData else { return }
+        showProfileMyRewardView(rewardData: rewardData)
     }
 }

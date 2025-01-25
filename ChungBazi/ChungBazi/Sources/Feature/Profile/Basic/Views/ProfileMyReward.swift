@@ -1,5 +1,5 @@
 //
-//  ProfileMyRewardView.swift
+//  ProfileMyReward.swift
 //  ChungBazi
 //
 //  Created by 신호연 on 1/25/25.
@@ -10,11 +10,11 @@ import SnapKit
 import Then
 
 extension UIViewController {
-    func showProfileMyRewardView() {
-        let profileMyRewardVC = ProfileMyRewardViewController()
+    func showProfileMyRewardView(rewardData: RewardModel) {
+        guard presentedViewController == nil else { return }
+        let profileMyRewardVC = ProfileMyRewardViewController(rewardData: rewardData)
         profileMyRewardVC.modalPresentationStyle = .overFullScreen
         profileMyRewardVC.modalTransitionStyle = .crossDissolve
-        
         self.present(profileMyRewardVC, animated: true, completion: nil)
     }
 }
@@ -35,6 +35,17 @@ class ProfileMyRewardViewController: UIViewController {
         $0.axis = .vertical
         $0.alignment = .fill
         $0.spacing = 15
+    }
+
+    private let rewardData: RewardModel
+
+    init(rewardData: RewardModel) {
+        self.rewardData = rewardData
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
     
     override func viewDidLoad() {
@@ -95,10 +106,10 @@ class ProfileMyRewardViewController: UIViewController {
     }
     
     private func addRewardItems() {
-        let currentReward = createRewardSet(title: "현재 리워드:")
-        let myPosts = createRewardSet(title: "내가 쓴 글:")
-        let myComments = createRewardSet(title: "내가 쓴 댓글:")
-        
+        let currentReward = createRewardSet(title: "현재 리워드: \(rewardData.currentReward)단계")
+        let myPosts = createRewardSet(title: "내가 쓴 글: \(rewardData.myPosts)개")
+        let myComments = createRewardSet(title: "내가 쓴 댓글: \(rewardData.myComments)개")
+
         rewardStackView.addArrangedSubview(currentReward)
         rewardStackView.addArrangedSubview(myPosts)
         rewardStackView.addArrangedSubview(myComments)

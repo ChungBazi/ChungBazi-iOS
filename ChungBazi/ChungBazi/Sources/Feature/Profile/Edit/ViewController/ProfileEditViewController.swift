@@ -11,12 +11,24 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private let scrollView = UIScrollView()
     private let profileEditView = ProfileEditView()
+    var profileData: ProfileModel
+    var onProfileUpdated: ((ProfileModel) -> Void)?
+    
+    init(profileData: ProfileModel) {
+        self.profileData = profileData
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
+        profileEditView.configure(with: profileData)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -45,26 +57,11 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
             $0.edges.width.equalToSuperview()
         }
     }
-    
 
     func didCompleteEditing(nickname: String) {
-        sendNicknameToServer(nickname) { [weak self] success in
-            
-            // FIXME: 실제 실패 시 예외 처리 필요
-            guard success else {
-                print("닉네임 전송 실패")
-                return
-            }
-            DispatchQueue.main.async {
-                self?.navigationController?.popViewController(animated: true)
-                self?.tabBarController?.selectedIndex = 3
-            }
-        }
-    }
-
-    private func sendNicknameToServer(_ nickname: String, completion: @escaping (Bool) -> Void) {
-        // FIXME: 실제 서버 코드로 변경 필요
-        completion(true)
+        let updatedProfile = ProfileModel(nickname: nickname, email: profileData.email)
+        onProfileUpdated?(updatedProfile)
+        navigationController?.popViewController(animated: true)
     }
 }
 

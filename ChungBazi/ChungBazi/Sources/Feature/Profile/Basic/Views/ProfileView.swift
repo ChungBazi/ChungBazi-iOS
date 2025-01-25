@@ -27,13 +27,13 @@ final class ProfileView: UIView {
         $0.clipsToBounds = true
         $0.createRoundedView(radius: 57)
     }
-    private let nameLabel = T20_M(text: "Name")
+    private let nameLabel = T20_M(text: "")
     private let editProfileBtn = UIButton.createWithImage(
         image: .moveIcon,
         target: self,
         action: #selector(editProfileBtnTapped)
     )
-    private let emailLabel = B12_M(text: "Email", textColor: .gray500)
+    private let emailLabel = B12_M(text: "", textColor: .gray500)
     
     private let myRewardView = UIView()
     private let myRewardIcon = UIImageView().then {
@@ -129,10 +129,14 @@ final class ProfileView: UIView {
         tableView.isScrollEnabled = false
         tableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.leading.trailing.bottom.equalToSuperview()
         }
         tableView.register(ProfileTableCell.self, forCellReuseIdentifier: "ProfileTableCell")
+    }
+    
+    func configure(with data: ProfileModel) {
+        nameLabel.text = data.nickname
+        emailLabel.text = data.email
     }
     
     @objc private func editProfileBtnTapped() {
