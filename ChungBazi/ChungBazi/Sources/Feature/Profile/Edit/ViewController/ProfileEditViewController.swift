@@ -7,7 +7,7 @@
 
 import UIKit
 
-final class ProfileEditViewController: UIViewController {
+final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate {
     
     private let scrollView = UIScrollView()
     private let profileEditView = ProfileEditView()
@@ -16,6 +16,7 @@ final class ProfileEditViewController: UIViewController {
         super.viewDidLoad()
         setupUI()
         enableKeyboardHandling(for: scrollView)
+        profileEditView.delegate = self
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,6 +44,27 @@ final class ProfileEditViewController: UIViewController {
         profileEditView.snp.makeConstraints {
             $0.edges.width.equalToSuperview()
         }
+    }
+    
+
+    func didCompleteEditing(nickname: String) {
+        sendNicknameToServer(nickname) { [weak self] success in
+            
+            // FIXME: 실제 실패 시 예외 처리 필요
+            guard success else {
+                print("닉네임 전송 실패")
+                return
+            }
+            DispatchQueue.main.async {
+                self?.navigationController?.popViewController(animated: true)
+                self?.tabBarController?.selectedIndex = 3
+            }
+        }
+    }
+
+    private func sendNicknameToServer(_ nickname: String, completion: @escaping (Bool) -> Void) {
+        // FIXME: 실제 서버 코드로 변경 필요
+        completion(true)
     }
 }
 

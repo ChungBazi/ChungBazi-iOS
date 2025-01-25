@@ -9,7 +9,13 @@ import UIKit
 import SnapKit
 import Then
 
+protocol ProfileEditViewDelegate: AnyObject {
+    func didCompleteEditing(nickname: String)
+}
+
 final class ProfileEditView: UIView, UITextFieldDelegate {
+    
+    weak var delegate: ProfileEditViewDelegate?
     
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .blue700
@@ -23,7 +29,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     
     private let nickNameTitle = B12_M(text: "닉네임", textColor: .gray500)
     private let nickNameTextField = UITextField().then {
-        $0.text = "기존 닉네임"
+        $0.text = ""
         $0.textColor = .gray800
         $0.clearButtonMode = .always
         $0.returnKeyType = .done
@@ -33,7 +39,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     private let emailTitle = B12_M(text: "이메일", textColor: .gray500)
-    private let emailLabel = B16_M(text: "example@email.com", textColor: .gray300)
+    private let emailLabel = B16_M(text: "", textColor: .gray300)
     private let emailUnderLine = UIView().then {
         $0.backgroundColor = .gray500
     }
@@ -43,6 +49,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        setupActions()
         nickNameTextField.delegate = self
     }
     
@@ -88,6 +95,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         emailLabel.snp.makeConstraints {
             $0.top.equalTo(emailTitle.snp.bottom).offset(10)
             $0.leading.trailing.equalTo(nickNameTitle)
+            $0.height.equalTo(22)
         }
         emailUnderLine.snp.makeConstraints {
             $0.top.equalTo(emailLabel.snp.bottom).offset(5)
@@ -99,5 +107,27 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
             $0.bottom.equalToSuperview().inset(20)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
+    }
+    
+    private func setupActions() {
+        settingPhotoBtn.addTarget(self, action: #selector(settingPhotoBtnTapped), for: .touchUpInside)
+        settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)
+        completeBtn.addTarget(self, action: #selector(completeBtnTapped), for: .touchUpInside)
+    }
+    
+    @objc private func settingPhotoBtnTapped() {
+        // FIXME: 사진 설정하기 버튼
+    }
+    
+    @objc private func settingCharacterBtnTapped() {
+        // FIXME: 캐릭터 설정하기 버튼
+    }
+    
+    @objc private func completeBtnTapped() {
+        guard let nickname = nickNameTextField.text, !nickname.isEmpty else {
+            print("닉네임이 비어있습니다.")
+            return
+        }
+        delegate?.didCompleteEditing(nickname: nickname)
     }
 }
