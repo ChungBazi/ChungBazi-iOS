@@ -4,24 +4,24 @@
 //
 
 import UIKit
+import Then
 
 class SetEducationViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        // Do any additional setup after loading the view.
+        navigationController?.navigationBar.isHidden = true
+        self.view = baseSurveyView
     }
     
-
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
+        $0.toggleBackButton()
+        $0.nextBtn.setEnabled(isEnabled: true)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
     }
-    */
-
+    
+    @objc private func goToSetEmploymentStatus() {
+        let vc = SetEmploymentStatusViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
