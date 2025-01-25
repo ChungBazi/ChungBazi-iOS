@@ -10,7 +10,7 @@ import UIKit
 class BasicSurveyView: UIView {
 
     public let title = UILabel().then {
-        $0.font = UIFont.ptdRegularFont(ofSize: 24)
+        $0.font = UIFont.ptdMediumFont(ofSize: 24)
         $0.textColor = .black
         $0.numberOfLines = 2
         $0.textAlignment = .center
