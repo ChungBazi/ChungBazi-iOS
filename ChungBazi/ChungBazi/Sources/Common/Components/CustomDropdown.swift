@@ -34,6 +34,7 @@ class CustomDropdown: UIView {
     
     private var dropdownItems: [String] = []
     private var isDropdownOpen = false
+    private var selectedItem: String?
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initializer
@@ -126,6 +127,11 @@ class CustomDropdown: UIView {
         dropdownTableView.snp.updateConstraints { make in
             make.height.equalTo(isDropdownOpen ? tableHeight : 0)
         }
+    }
+    
+    func didSelectItem(at index: Int) {
+        selectedItem = dropdownItems[index]
+        delegate?.dropdown(self, didSelectItem: selectedItem ?? "")
     }
     
     // MARK: - Public Methods

@@ -19,7 +19,7 @@ struct Constants {
     
     static let plusCheckMenu = ["중소기업", "여성", "저소득층", "장애인", "농업인", "군인", "지역인재", "없음"]
     
-    static let interestCheckMenu = ["일자리", "주거", "진로", "문화/예술", "창업", "대외활동", "금융", "없음", "교육", "마음건강", "신체건강", "생활지원"]
+    static let interestCheckMenu = ["일자리", "주거", "진로", "문화/예술", "창업", "대외활동", "금융", "교육", "마음건강", "신체건강", "생활지원", "없음"]
     
     static let regionSiMenu = ["서울시"]
     

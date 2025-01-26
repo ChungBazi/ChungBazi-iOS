@@ -6,11 +6,10 @@
 import UIKit
 import Then
 
-class SetEducationViewController: UIViewController {
+class SetEducationViewController: UIViewController, CustomDropdownDelegate {
     
     private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
         $0.toggleBackButton()
-        $0.nextBtn.setEnabled(isEnabled: true)
         $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
     }
     
@@ -19,6 +18,7 @@ class SetEducationViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
+        dropdown.delegate = self
         addComoponents()
         setConstraints()
     }
@@ -38,6 +38,12 @@ class SetEducationViewController: UIViewController {
             $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(45)
             $0.height.equalTo(48 * Constants.eduDropDownItems.count + 48 + 8)
         }
+    }
+    
+    // MARK: - CustomDropdownDelegate
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        // 드롭다운에서 선택된 항목에 따라 버튼 활성화
+        baseSurveyView.nextBtn.setEnabled(isEnabled: true)
     }
     
     @objc private func goToSetEmploymentStatus() {

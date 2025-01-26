@@ -10,7 +10,6 @@ class SetPlusViewController: UIViewController {
     private var checkStatus: [Bool] // 체크 상태를 저장
     
     private lazy var baseSurveyView = BasicSurveyView(title: "추가사항을\n선택해주세요", logo: "thirdPageLogo").then {
-        $0.nextBtn.setEnabled(isEnabled: true)
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
     }
@@ -59,6 +58,11 @@ class SetPlusViewController: UIViewController {
         }
     }
     
+    private func updateNextButtonState() {
+        let isAnyChecked = checkStatus.contains(true) // 하나라도 true가 있는지 확인
+        baseSurveyView.nextBtn.setEnabled(isEnabled: isAnyChecked) // 버튼 활성화 상태 업데이트
+    }
+    
     @objc private func goToback() {
         navigationController?.popViewController(animated: true)
     }
@@ -89,5 +93,7 @@ extension SetPlusViewController: CheckCollectionViewCellDelegate {
         // 체크 상태 토글
         checkStatus[indexPath.row].toggle()
         checkCollectionView.reloadItems(at: [indexPath]) // UI 업데이트
+        
+        updateNextButtonState() // 버튼 활성화 상태 업데이트
     }
 }
