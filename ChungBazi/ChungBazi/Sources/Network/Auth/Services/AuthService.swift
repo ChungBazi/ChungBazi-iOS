@@ -28,8 +28,8 @@ final class AuthService: NetworkManager {
     // MARK: - DTO funcs
     
     /// 카카오 로그인 데이터 구조 생성
-    public func makeKakaoDTO(name: String, email: String, imageUrl: String) -> KakaoLoginRequestDto {
-        return KakaoLoginRequestDto(name: name, email: email, imageUrl: imageUrl)
+    public func makeKakaoDTO(name: String, email: String) -> KakaoLoginRequestDto {
+        return KakaoLoginRequestDto(name: name, email: email)
     }
 
     //MARK: - API funcs

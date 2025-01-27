@@ -9,7 +9,7 @@ import Foundation
 import Moya
 
 enum AuthEndpoints {
-    case postKakaoLogin(data : KakaoLoginRequestDTO)
+    case postKakaoLogin(data: KakaoLoginRequestDto)
     case postLogout
     case deleteUser
     case postReIssueToken

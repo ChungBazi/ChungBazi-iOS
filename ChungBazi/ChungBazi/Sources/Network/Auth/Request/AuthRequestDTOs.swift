@@ -8,11 +8,9 @@
 struct KakaoLoginRequestDto : Codable {
     let name: String
     let email: String
-    let imageUrl: String
     
-    init(name: String, email: String, imageUrl: String) {
+    init(name: String, email: String) {
         self.name = name
         self.email = email
-        self.imageUrl = imageUrl
     }
 }
