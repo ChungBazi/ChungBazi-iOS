@@ -22,7 +22,6 @@ class BaseTitleLabel: UILabel {
     }
     
     private func setupStyle() {
-        self.addCharacterSpacing(-0.32) //FIXME: 자간 변경
         if let text = self.text, text.contains("\n") || numberOfLines > 1 {
             self.setLineSpacing(ratio: 1.4)
         } else {

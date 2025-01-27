@@ -31,7 +31,7 @@ extension UIButton {
     static func createWithImage(
         image: UIImage?,
         contentMode: UIView.ContentMode = .scaleAspectFit,
-        tintColor: UIColor? = nil,
+        tintColor: UIColor? = .gray800,
         cornerRadius: CGFloat = 0,
         target: Any? = nil,
         action: Selector? = nil,
