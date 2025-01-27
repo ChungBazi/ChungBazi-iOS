@@ -13,7 +13,6 @@ class BasicSurveyView: UIView {
         $0.font = UIFont.ptdMediumFont(ofSize: 24)
         $0.textColor = .black
         $0.numberOfLines = 2
-        $0.textAlignment = .center
     }
     
     private lazy var pageLogo = UIImageView().then {
@@ -38,6 +37,8 @@ class BasicSurveyView: UIView {
         super.init(frame: .zero)
         self.backgroundColor = .gray50
         self.title.text = title
+        self.title.setLineSpacing()
+        self.title.textAlignment = .center
         self.pageLogo.image = UIImage(named: logo)
         addComponents()
         setConstraints()

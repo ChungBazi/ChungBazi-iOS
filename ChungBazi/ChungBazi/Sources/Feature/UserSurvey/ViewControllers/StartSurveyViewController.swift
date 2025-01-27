@@ -14,7 +14,7 @@ class StartSurveyViewController: UIViewController {
     private lazy var startBtn = UIButton().then {
         $0.setTitle("시작하기", for: .normal)
         $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.ptdRegularFont(ofSize: 16)
+        $0.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.layer.cornerRadius = 10
         $0.layer.borderColor = UIColor.white.cgColor
         $0.layer.borderWidth = 1

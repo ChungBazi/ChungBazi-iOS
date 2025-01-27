@@ -75,6 +75,24 @@ extension SetRegionViewController: UIPickerViewDataSource, UIPickerViewDelegate 
         }
     }
     
+    func pickerView(_ pickerView: UIPickerView, viewForRow row: Int, forComponent component: Int, reusing view: UIView?) -> UIView {
+        let label = UILabel()
+        
+        // 각 슬롯의 데이터 가져오기
+        if component == 0 {
+            label.text = firstSlotItems[row] // 첫 번째 슬롯 (시)의 데이터
+        } else {
+            label.text = secondSlotItems[row] // 두 번째 슬롯 (구)의 데이터
+        }
+        
+        // 폰트와 스타일 설정
+        label.font = UIFont.ptdMediumFont(ofSize: 20)
+        label.textAlignment = .center
+        label.textColor = UIColor.gray800
+        
+        return label
+    }
+    
     // 피커 뷰 행의 높이
     func pickerView(_ pickerView: UIPickerView, rowHeightForComponent component: Int) -> CGFloat {
         return 50
