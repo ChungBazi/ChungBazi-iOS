@@ -28,13 +28,13 @@ final class AuthService: NetworkManager {
     // MARK: - DTO funcs
     
     /// 카카오 로그인 데이터 구조 생성
-    public func makeKakaoDTO(name: String, email: String, imageUrl: String) -> KakaoLoginRequestDTO {
-        return KakaoLoginRequestDTO(name: name, email: email, imageUrl: imageUrl)
+    public func makeKakaoDTO(name: String, email: String, imageUrl: String) -> KakaoLoginRequestDto {
+        return KakaoLoginRequestDto(name: name, email: email, imageUrl: imageUrl)
     }
 
     //MARK: - API funcs
     /// 카카오 로그인 API
-    public func kakaoLogin(data: KakaoLoginRequestDTO, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
+    public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
         request(target: .postKakaoLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
     }
     

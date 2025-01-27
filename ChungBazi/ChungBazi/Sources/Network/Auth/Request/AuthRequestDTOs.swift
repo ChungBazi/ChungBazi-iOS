@@ -5,7 +5,7 @@
 //  Created by 이현주 on 1/27/25.
 //
 
-struct KakaoLoginRequestDTO : Codable {
+struct KakaoLoginRequestDto : Codable {
     let name: String
     let email: String
     let imageUrl: String
