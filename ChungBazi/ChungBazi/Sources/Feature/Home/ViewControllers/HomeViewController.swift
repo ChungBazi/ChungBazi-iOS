@@ -31,7 +31,7 @@ class HomeViewController: UIViewController {
         let label = UILabel()
         label.text = "정책도 쉽고 간편하게\n청바지"
         label.numberOfLines = 2
-        label.font = UIFont(name: "Pretendard-SemiBold", size: 20)
+        label.font = UIFont(name: AppFontName.pSemiBold, size: 20)
         label.textAlignment = .right
         label.textColor = .black
         let attributedText = NSMutableAttributedString(string: label.text ?? "")
