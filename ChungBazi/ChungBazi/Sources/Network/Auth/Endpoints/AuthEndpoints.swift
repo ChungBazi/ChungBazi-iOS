@@ -60,7 +60,7 @@ extension AuthEndpoints: TargetType {
         ]
         
         switch self {
-        case .postReIssueToken, .postLogout:
+        case .postReIssueToken, .postLogout, .deleteUser:
             if let cookies = HTTPCookieStorage.shared.cookies {
                 let cookieHeader = HTTPCookie.requestHeaderFields(with: cookies)
                 for (key, value) in cookieHeader {
