@@ -24,7 +24,7 @@ class CustomButton: UIButton {
         // 버튼의 속성 설정
         self.backgroundColor = backgroundColor
         self.setTitle(titleText, for: .normal)
-        self.titleLabel?.font = UIFont.ptdRegularFont(ofSize: 14)
+        self.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 16)
         self.setTitleColor(titleColor, for: .normal)
         self.layer.borderWidth = borderWidth
         self.layer.borderColor = borderColor.cgColor

@@ -5,18 +5,44 @@
 
 import UIKit
 
-class SetEmploymentStatusViewController: UIViewController {
+class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegate {
+    
+    private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: "twicePageLogo").then {
+        $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+    }
+    
+    private lazy var dropdown = CustomDropdown(title: "취업상태를 선택하세요", hasBorder: true, items: Constants.employmentDropDownItems)
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
-        self.view = baseSurveyView
+        dropdown.delegate = self
+        addComoponents()
+        setConstraints()
     }
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: "twicePageLogo").then {
-        $0.nextBtn.setEnabled(isEnabled: true)
-        $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
-        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+    private func addComoponents() {
+        view.addSubview(baseSurveyView)
+        baseSurveyView.addSubview(dropdown)
+    }
+    
+    private func setConstraints() {
+        baseSurveyView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
+        dropdown.snp.makeConstraints {
+            $0.top.equalTo(baseSurveyView.title.snp.bottom).offset(48)
+            $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(45)
+            $0.height.equalTo(48 * Constants.eduDropDownItems.count + 48 + 8)
+        }
+    }
+    
+    // MARK: - CustomDropdownDelegate
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        // 드롭다운에서 선택된 항목에 따라 버튼 활성화
+        baseSurveyView.nextBtn.setEnabled(isEnabled: true)
     }
     
     @objc private func goToback() {

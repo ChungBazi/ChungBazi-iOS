@@ -20,7 +20,7 @@ class CustomActiveButton: UIButton {
         self.setTitleColor(isEnabled ? .white : .gray50, for: .normal)
         self.backgroundColor = isEnabled ? .blue700 : .gray200
         
-        self.titleLabel?.font = UIFont.ptdRegularFont(ofSize: 14)
+        self.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 16)
         self.layer.cornerRadius = 10
         
         self.snp.makeConstraints { make in

@@ -10,10 +10,9 @@ import UIKit
 class BasicSurveyView: UIView {
 
     public let title = UILabel().then {
-        $0.font = UIFont.ptdRegularFont(ofSize: 24)
+        $0.font = UIFont.ptdMediumFont(ofSize: 24)
         $0.textColor = .black
         $0.numberOfLines = 2
-        $0.textAlignment = .center
     }
     
     private lazy var pageLogo = UIImageView().then {
@@ -23,9 +22,7 @@ class BasicSurveyView: UIView {
     
     public lazy var backBtn = CustomButton(backgroundColor: .white, titleText: "이전으로", titleColor: .gray800, borderWidth: 1, borderColor: .gray400)
     
-    public lazy var nextBtn = CustomActiveButton(title: "다음으로",isEnabled: false).then {
-        $0.setEnabled(isEnabled: false)
-    }
+    public lazy var nextBtn = CustomActiveButton(title: "다음으로", isEnabled: false)
     
     private lazy var backBtnPlaceholder = UIView()
     
@@ -40,6 +37,8 @@ class BasicSurveyView: UIView {
         super.init(frame: .zero)
         self.backgroundColor = .gray50
         self.title.text = title
+        self.title.setLineSpacing()
+        self.title.textAlignment = .center
         self.pageLogo.image = UIImage(named: logo)
         addComponents()
         setConstraints()
