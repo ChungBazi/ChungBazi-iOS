@@ -34,8 +34,8 @@ final class AuthService: NetworkManager {
 
     //MARK: - API funcs
     /// 카카오 로그인 API
-    public func kakaoLogin(data: KakaoLoginRequestDTO, completion: @escaping (Result<KakaoResponseDto, NetworkError>) -> Void) {
-        request(target: .postKakaoLogin(data: data), decodingType: KakaoResponseDto.self, completion: completion)
+    public func kakaoLogin(data: KakaoLoginRequestDTO, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postKakaoLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
     }
     
     /// 로그아웃 API
@@ -59,8 +59,8 @@ final class AuthService: NetworkManager {
     }
     
     /// 토큰 재발급 API
-    public func reissueToken(completion: @escaping (Result<KakaoResponseDto, NetworkError>) -> Void) {
-        request(target: .postReIssueToken, decodingType: KakaoResponseDto.self, completion: completion)
+    public func reissueToken(completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postReIssueToken, decodingType: KakaoLoginResponseDto.self, completion: completion)
     }
     
     /// 회원 탈퇴 API 해야함
