@@ -45,7 +45,7 @@ class SelectLoginView: UIView {
 
         // 타이틀 속성 설정
         let attributes: AttributeContainer = AttributeContainer([
-            .font: UIFont.ptdSemiBoldFont(ofSize: 15), .foregroundColor: UIColor.black])
+            .font: UIFont.ptdSemiBoldFont(ofSize: 15), .foregroundColor: UIColor.black.withAlphaComponent(0.85)])
         configuration.attributedTitle = AttributedString("카카오 로그인", attributes: attributes)
         configuration.titleAlignment = .center
         
