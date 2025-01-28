@@ -13,7 +13,7 @@ final class CalendarPolicyListCell: UITableViewCell {
     
     private let dotView = UIView()
     private let policyName = B16_M(text: "policyName", textColor: .black)
-    private let dateLabel = B12_M(text: "date", textColor: .blue700)
+    private let dateLabel = B14_M(text: "date", textColor: .blue700)
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)

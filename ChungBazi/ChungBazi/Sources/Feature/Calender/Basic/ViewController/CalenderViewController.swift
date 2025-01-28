@@ -24,12 +24,12 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .gray50
+        view.backgroundColor = .white
         view.addSubview(calendarView)
         calendarView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: true, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: true)
     }
     
     // MARK: - Data
@@ -125,7 +125,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
 }
 
 extension CalenderViewController: CalendarViewDelegate {
-    func presentPolicyListViewController(for policy: Policy?) {
+    func presentCalendarDetailViewController(for policy: Policy?) {
         guard let policy = policy else { return }
         let detailVC = CalendarDetailViewController(policy: policy)
         
@@ -163,18 +163,6 @@ extension CalenderViewController: CalendarViewDelegate {
         policyListVC.view.layer.masksToBounds = false
 
         navigationController.isModalInPresentation = false
-
-        let grabbarView = UIView()
-        grabbarView.backgroundColor = .gray300
-        grabbarView.layer.cornerRadius = 2.5
-        grabbarView.translatesAutoresizingMaskIntoConstraints = false
-        policyListVC.view.addSubview(grabbarView)
-        grabbarView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(9)
-            $0.width.equalTo(86)
-            $0.height.equalTo(5)
-            $0.centerX.equalToSuperview()
-        }
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissModal))
         view.addGestureRecognizer(tapGesture)

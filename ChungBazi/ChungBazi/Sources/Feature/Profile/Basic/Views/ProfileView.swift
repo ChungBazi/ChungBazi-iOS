@@ -20,6 +20,9 @@ final class ProfileView: UIView {
     
     weak var delegate: ProfileViewDelegate?
     
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .blue700
         $0.image = .basicBaro
@@ -33,7 +36,7 @@ final class ProfileView: UIView {
         target: self,
         action: #selector(editProfileBtnTapped)
     )
-    private let emailLabel = B12_M(text: "", textColor: .gray500)
+    private let emailLabel = B14_M(text: "", textColor: .gray500)
     
     private let myRewardView = UIView()
     private let myRewardIcon = UIImageView().then {
@@ -41,7 +44,7 @@ final class ProfileView: UIView {
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
     }
-    private let myRewardLabel = B12_M(text: "마이 리워드")
+    private let myRewardLabel = B14_M(text: "마이 리워드")
     
     
     private let myCharacterView = UIView()
@@ -50,13 +53,13 @@ final class ProfileView: UIView {
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
     }
-    private let myCharacterLabel = B12_M(text: "마이 캐릭터")
+    private let myCharacterLabel = B14_M(text: "마이 캐릭터")
     
     private let gray100View = UIView().then {
         $0.backgroundColor = .gray100
     }
     private let tableView = UITableView()
-    private let menuItems = ["정보 수정", "로그아웃", "탈퇴"]
+    private let menuItems = ["알림 설정", "공지사항", "1:1 문의하기", "앱정보", "로그아웃", "탈퇴"]
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,7 +73,17 @@ final class ProfileView: UIView {
     }
     
     private func setupUI() {
-        addSubviews(profileImageView, nameLabel, editProfileBtn, emailLabel, myRewardView, myCharacterView, gray100View, tableView)
+        addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        scrollView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        contentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview()
+        }
+        
+        contentView.addSubviews(profileImageView, nameLabel, editProfileBtn, emailLabel, myRewardView, myCharacterView, gray100View, tableView)
         profileImageView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(23)
             $0.centerX.equalToSuperview()
@@ -129,7 +142,8 @@ final class ProfileView: UIView {
         tableView.isScrollEnabled = false
         tableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(83)
         }
         tableView.register(ProfileTableCell.self, forCellReuseIdentifier: "ProfileTableCell")
     }
@@ -166,8 +180,6 @@ extension ProfileView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch menuItems[indexPath.row] {
-        case "정보 수정":
-            delegate?.didTapEditProfile()
         case "로그아웃":
             delegate?.didTapLogout()
         case "탈퇴":

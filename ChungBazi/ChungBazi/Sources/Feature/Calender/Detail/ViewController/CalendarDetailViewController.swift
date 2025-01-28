@@ -50,12 +50,17 @@ final class CalendarDetailViewController: UIViewController {
         self.didChangeValue(segment: self.segmentedControl)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
+        addCustomGrabber(to: view)
+    }
+    
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .gray50
+        view.backgroundColor = .white
         
         setupCalendarDetailView()
-        setupNavigationBar()
         segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
         segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
     }
@@ -64,8 +69,8 @@ final class CalendarDetailViewController: UIViewController {
         view.addSubview(calendarDetailView)
         calendarDetailView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         
         let contentView = calendarDetailView.accessibleContentView
@@ -95,17 +100,6 @@ final class CalendarDetailViewController: UIViewController {
         
         firstView.isHidden = false
         secondView.isHidden = true
-    }
-    
-    private func setupNavigationBar() {
-        fillSafeArea(position: .top, color: .white)
-        addCustomNavigationBar(
-            titleText: "",
-            showBackButton: false,
-            showCartButton: true,
-            showAlarmButton: true,
-            backgroundColor: .white
-        )
     }
     
     private var shouldHideFirstView: Bool? {

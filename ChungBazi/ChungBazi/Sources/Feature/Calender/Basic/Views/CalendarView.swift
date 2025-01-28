@@ -29,7 +29,7 @@ final class CalendarView: UIView {
     private let customYear = UILabel().then {
         $0.textAlignment = .center
         $0.textColor = .gray500
-        $0.font = .ptdMediumFont(ofSize: 12)
+        $0.font = .ptdMediumFont(ofSize: 14)
     }
     private let previousBtn = createNavigationButton(image: .arrowLeft, action: #selector(prevPage), target: self)
     private let nextBtn = createNavigationButton(image: .arrowRight, action: #selector(nextPage), target: self)
@@ -327,7 +327,7 @@ final class CustomCalendarCell: FSCalendarCell {
             let remainingCount = eventTypes.count - maxVisibleMarkers
             let label = UILabel()
             label.text = "+\(remainingCount)"
-            label.font = .ptdMediumFont(ofSize: 12)
+            label.font = .ptdMediumFont(ofSize: 14)
             label.textColor = .gray300
             label.textAlignment = .center
             label.frame = CGRect(

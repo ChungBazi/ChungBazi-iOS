@@ -27,7 +27,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     private let settingPhotoBtn = CustomButton(backgroundColor: .white, titleText: "사진 설정하기", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     private let settingCharacterBtn = CustomButton(backgroundColor: .white, titleText: "캐릭터 설정하기", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
-    private let nickNameTitle = B12_M(text: "닉네임", textColor: .gray500)
+    private let nickNameTitle = B14_M(text: "닉네임", textColor: .gray500)
     private let nickNameTextField = UITextField().then {
         $0.text = ""
         $0.textColor = .gray800
@@ -38,7 +38,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         $0.backgroundColor = .gray500
     }
     
-    private let emailTitle = B12_M(text: "이메일", textColor: .gray500)
+    private let emailTitle = B14_M(text: "이메일", textColor: .gray500)
     private let emailLabel = B16_M(text: "", textColor: .gray300)
     private let emailUnderLine = UIView().then {
         $0.backgroundColor = .gray500

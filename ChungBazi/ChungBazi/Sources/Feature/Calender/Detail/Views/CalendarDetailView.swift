@@ -33,10 +33,10 @@ final class CalendarDetailView: UIView {
         )
         return label
     }()
-    private let startText = B12_M(text: "시작일", textColor: .gray500)
-    private let startDate = B12_M(text: "", textColor: .black)
-    private let endText = B12_M(text: "마감일", textColor: .gray500)
-    private let endDate = B12_M(text: "", textColor: .black)
+    private let startText = B14_M(text: "시작일", textColor: .gray500)
+    private let startDate = B14_M(text: "", textColor: .black)
+    private let endText = B14_M(text: "마감일", textColor: .gray500)
+    private let endDate = B14_M(text: "", textColor: .black)
     
     // MARK: - Initializers
     override init(frame: CGRect) {
@@ -65,7 +65,7 @@ final class CalendarDetailView: UIView {
     private func setupPolicyInfoView() {
         contentView.addSubview(policyInfoView)
         policyInfoView.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(30)
+            $0.top.equalToSuperview().offset(52)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
         

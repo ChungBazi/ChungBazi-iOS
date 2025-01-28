@@ -102,9 +102,9 @@ class B16_M: BaseTitleLabel {
     }
 }
 
-class B12_M: BaseTitleLabel {
+class B14_M: BaseTitleLabel {
     init(text: String, textColor: UIColor = .black) {
-        super.init(text: text, font: .ptdMediumFont(ofSize: 12), textColor: textColor)
+        super.init(text: text, font: .ptdMediumFont(ofSize: 14), textColor: textColor)
     }
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

@@ -13,7 +13,7 @@ class AlarmListCollecionViewCell: UICollectionViewCell {
     static let identifier = "AlarmListCollecionViewCell"
     
     private lazy var image = UIImageView().then {
-        $0.image = UIImage.alarmCalendarIcon
+        $0.image = UIImage.alarmIcon
     }
     
     private lazy var title = UILabel().then {
