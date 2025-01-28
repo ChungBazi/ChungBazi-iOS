@@ -7,8 +7,9 @@
 
 import UIKit
 import SnapKit
+import Then
 
-class RecommendViewController: UIViewController {
+class RecommendViewController: UIViewController, CustomDropdownDelegate {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "OO님께 딱 맞는 주거 정책\n추천 리스트를 준비했어요!"
@@ -23,47 +24,37 @@ class RecommendViewController: UIViewController {
         return label
     }()
     
-    private let interestButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("관심", for: .normal)
-        button.titleLabel?.font = UIFont(name: AppFontName.pMedium, size: 14)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = AppColor.gray100
-        button.layer.cornerRadius = 10
-        button.snp.makeConstraints { make in
-            make.width.equalTo(91)
-            make.height.equalTo(36)
-        }
-        return button
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        return tableView
     }()
     
-    private let sortButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setTitle("최신순", for: .normal)
-        button.titleLabel?.font = UIFont(name: AppFontName.pMedium, size: 14)
-        button.setTitleColor(.black, for: .normal)
-        button.backgroundColor = AppColor.gray100
-        button.layer.cornerRadius = 10
-        button.snp.makeConstraints { make in
-            make.width.equalTo(91)
-            make.height.equalTo(36)
-        }
-        return button
-    }()
-    
-    private let tableView = UITableView()
+    private let interestDropdown: CustomDropdown = CustomDropdown(
+        title: "관심",
+        hasBorder: false,
+        items: Constants.interestItems
+    )
+
+    private let sortDropdown: CustomDropdown = CustomDropdown(
+        title: "최신순",
+        hasBorder: false,
+        items: ["최신순", "마감순"]
+    )
 
     private var policies: [PolicyItem] = [
-        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024-12-11 ~ 2025-01-31", badge: "D-3"),
-        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024-12-11 ~ 2025-01-31", badge: "D-11"),
-        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024-12-11 ~ 2025-01-31", badge: "D-2"),
-        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024-12-11 ~ 2025-01-31", badge: "마감")
+        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3"),
+        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11"),
+        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2"),
+        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감")
     ]
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColor.gray50
-        
+
         addCustomNavigationBar(
             titleText: "",
             showBackButton: false,
@@ -73,12 +64,13 @@ class RecommendViewController: UIViewController {
             activeTab: 1,
             backgroundColor: .gray50
         )
+        tableView.dataSource = self
+        tableView.delegate = self
         
         setupLayout()
-        configureTableView()
-        setupDropdownActions()
+        configureDropdowns()
     }
-    
+
     private func setupLayout() {
         view.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
@@ -86,83 +78,91 @@ class RecommendViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
-        let filterStackView = UIStackView(arrangedSubviews: [interestButton, sortButton])
-        filterStackView.axis = .horizontal
-        filterStackView.spacing = 8
-        filterStackView.alignment = .fill
-        filterStackView.distribution = .fillEqually
-
-        view.addSubview(filterStackView)
-        filterStackView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(40)
+        view.addSubview(interestDropdown)
+        view.addSubview(sortDropdown)
+                
+        interestDropdown.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(16)
+            $0.leading.equalTo(view.safeAreaLayoutGuide).offset(160)
+            $0.width.equalTo(91)
+            $0.height.equalTo(36 * Constants.interestItems.count + 36 + 8)
         }
 
+        sortDropdown.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(16)
+            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
+            $0.width.equalTo(91)
+            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+        }
+        
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(filterStackView.snp.bottom).offset(16)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(-60)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
 
-    private func configureTableView() {
-        tableView.register(PolicyTableViewCell.self, forCellReuseIdentifier: "PolicyTableViewCell")
-        tableView.dataSource = self
-        tableView.separatorStyle = .none
-    }
-
-    private func setupDropdownActions() {
-        interestButton.addTarget(self, action: #selector(handleInterestDropdown), for: .touchUpInside)
-        sortButton.addTarget(self, action: #selector(handleSortDropdown), for: .touchUpInside)
-    }
-
-    @objc private func handleInterestDropdown() {
-        let alertController = UIAlertController(title: "관심 카테고리", message: nil, preferredStyle: .actionSheet)
-        let categories = ["일자리", "주거", "교육", "복지,문화", "참여,권리"]
-        
-        categories.forEach { category in
-            alertController.addAction(UIAlertAction(title: category, style: .default, handler: { _ in
-                print("\(category) 선택됨")
-                self.filterPolicies(by: category)
-            }))
-        }
-        
-        alertController.addAction(UIAlertAction(title: "취소", style: .cancel))
-        present(alertController, animated: true)
-    }
-
-    @objc private func handleSortDropdown() {
-        let alertController = UIAlertController(title: "정렬 기준", message: nil, preferredStyle: .actionSheet)
-        let sortOptions = ["최신순", "마감순"]
-        
-        sortOptions.forEach { option in
-            alertController.addAction(UIAlertAction(title: option, style: .default, handler: { _ in
-                print("\(option) 선택됨")
-            }))
-        }
-        
-        alertController.addAction(UIAlertAction(title: "취소", style: .cancel))
-        present(alertController, animated: true)
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        view.bringSubviewToFront(interestDropdown)
+        view.bringSubviewToFront(sortDropdown)
     }
     
-    private func filterPolicies(by category: String) {
-        print("\(category) 카테고리에 따라 필터링")
+    private func configureDropdowns() {
+        interestDropdown.delegate = self
+        sortDropdown.delegate = self
+    }
+
+    // MARK: - CustomDropdownDelegate
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        if dropdown == interestDropdown {
+            print("관심 분야 선택: \(item)")
+            let categoryVC = CategoryPolicyViewController()
+            switch item {
+            case "일자리":
+                let jobPolicies = [
+                    PolicyItem(title: "<청년 맞춤형 일자리 매칭 지원 프로그램>", region: "강남구", period: "2024.12.11 - 2025.01.31", badge: "D-0"),
+                    PolicyItem(title: "<청년 일자리 디딤돌: 취업 준비 지원 패키지>", region: "서대문구", period: "2024.12.11 - 2025.01.31", badge: "D-1"),
+                    PolicyItem(title: "<청년 IT 직무 역량 강화와 일자리 연결 프로젝트>", region: "구로구", period: "2024.12.11 - 2025.01.31", badge: "D-2"),
+                    PolicyItem(title: "<문화·예술 분야 청년 일자리 창출 지원 사업>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-5"),
+                    PolicyItem(title: "<청년 스타트업 창업 지원 및 일자리 창출 프로젝트>", region: "금천구", period: "2024.12.11 - 2025.01.31", badge: "마감")
+                ]
+                categoryVC.configure(categoryTitle: "일자리", policies: jobPolicies)
+            case "주거":
+                categoryVC.configure(categoryTitle: "주거")
+            case "교육":
+                categoryVC.configure(categoryTitle: "교육")
+            case "복지,문화":
+                categoryVC.configure(categoryTitle: "복지,문화")
+            case "참여,권리":
+                categoryVC.configure(categoryTitle: "참여,권리")
+            default:
+                break
+            }
+            navigationController?.pushViewController(categoryVC, animated: true)
+        } else if dropdown == sortDropdown {
+            print("정렬 방식 선택: \(item)")
+        }
     }
 }
 
-// MARK: - UITableViewDataSource
-extension RecommendViewController: UITableViewDataSource {
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return policies.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PolicyTableViewCell", for: indexPath) as? PolicyTableViewCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: PolicyCardViewCell.identifier, for: indexPath) as? PolicyCardViewCell else {
             return UITableViewCell()
         }
         let policy = policies[indexPath.row]
-        cell.configure(with: policy)
+        cell.configure(with: policy, keyword: nil)
         return cell
+    }
+
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+        print("Selected policy: \(policies[indexPath.row].title)")
     }
 }

@@ -48,19 +48,20 @@ class BannerView: UIView {
         addSubview(iconImageView)
         
         iconImageView.snp.makeConstraints { make in
-            make.top.trailing.equalToSuperview().inset(4)
+            make.top.trailing.equalToSuperview().inset(-10)
+            make.trailing.equalToSuperview().inset(16)
             make.width.height.equalTo(90)
         }
         
         titleLabel.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().inset(16)
+            make.top.leading.equalToSuperview().inset(22)
             make.trailing.equalTo(iconImageView.snp.leading).offset(-8)
         }
         
         subtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(8)
             make.leading.trailing.equalTo(titleLabel)
-            make.bottom.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().inset(22)
         }
     }
 }

@@ -101,13 +101,18 @@ class HomeViewController: UIViewController {
         view.addSubview(policyIconImageView)
         view.addSubview(policyTextLabel)
         policyIconImageView.snp.makeConstraints { make in
-            make.top.equalTo(searchView.snp.bottom).offset(16)
-            make.leading.equalToSuperview().offset(20)
+            make.top.equalTo(searchView.snp.bottom).offset(14)
+            make.leading.equalToSuperview().offset(25)
             make.width.height.equalTo(159)
         }
+        policyIconImageView.layer.shadowColor = UIColor.black.cgColor
+        policyIconImageView.layer.shadowOpacity = 0.25
+        policyIconImageView.layer.shadowOffset = CGSize(width: 0, height: 4)
+        policyIconImageView.layer.shadowRadius = 4
+        policyIconImageView.layer.masksToBounds = false
         policyTextLabel.snp.makeConstraints { make in
             make.centerY.equalTo(policyIconImageView)
-            make.trailing.equalToSuperview().offset(-20)
+            make.trailing.equalToSuperview().offset(-30)
             make.width.equalTo(166)
             make.height.equalTo(56)
         }
@@ -155,7 +160,6 @@ class HomeViewController: UIViewController {
             button.iconImageView.image = UIImage(named: category.iconName)
             button.titleLabel.text = category.title
             button.tag = index
-            button.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(categoryButtonTapped(_:))))
           
             if index < 3 {
                 firstRowStackView.addArrangedSubview(button)
@@ -207,12 +211,5 @@ class HomeViewController: UIViewController {
     @objc private func didTapSearchView() {
         let searchResultVC = SearchResultViewController()
         navigationController?.pushViewController(searchResultVC, animated: true)
-    }
-    @objc private func categoryButtonTapped(_ sender: UITapGestureRecognizer) {
-        guard let button = sender.view as? CategoryButton, let index = categories.firstIndex(where: { $0.title == button.titleLabel.text }) else { return }
-        let selectedCategory = categories[index]
-        let categoryVC = CategoryPolicyViewController()
-        categoryVC.category = selectedCategory
-        navigationController?.pushViewController(categoryVC, animated: true)
     }
 }

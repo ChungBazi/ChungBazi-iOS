@@ -18,8 +18,8 @@ class CategoryButton: UIView {
     let titleLabel: UILabel = {
         let label = UILabel()
         label.textAlignment = .center
-        label.font = UIFont(name: AppFontName.pSemiBold, size: 14)
-        label.textColor = UIColor.black
+        label.font = UIFont(name: AppFontName.pMedium, size: 16)
+        label.textColor = AppColor.gray800
         return label
     }()
 
@@ -41,11 +41,11 @@ class CategoryButton: UIView {
         iconImageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.centerY.equalToSuperview().offset(-10)
-            make.width.height.equalTo(32) 
+            make.width.height.equalTo(20)
         }
 
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(iconImageView.snp.bottom).offset(4)
+            make.top.equalTo(iconImageView.snp.bottom).offset(5)
             make.centerX.equalToSuperview()
         }
     }

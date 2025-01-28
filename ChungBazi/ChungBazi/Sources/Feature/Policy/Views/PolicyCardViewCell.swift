@@ -1,5 +1,5 @@
 //
-//  PolicyTableViewCell.swift
+//  PolicyCardViewCell.swift
 //  ChungBazi
 //
 //  Created by 엄민서 on 1/24/25.
@@ -8,7 +8,9 @@
 import UIKit
 import SnapKit
 
-class PolicyTableViewCell: UITableViewCell {
+class PolicyCardViewCell: UITableViewCell {
+    static let identifier = "PolicyCardViewCell"
+
     private let badgeImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -18,7 +20,6 @@ class PolicyTableViewCell: UITableViewCell {
     private let badgeTextLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: AppFontName.pSemiBold, size: 14)
-        label.textColor = .white
         label.textAlignment = .center
         label.numberOfLines = 1
         return label
@@ -26,8 +27,9 @@ class PolicyTableViewCell: UITableViewCell {
 
     private let regionLabel: UILabel = {
         let label = UILabel()
-        label.font = UIFont(name: AppFontName.pMedium, size: 14)
-        label.textColor = AppColor.gray800
+        label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
+        label.textColor = .black
+        label.numberOfLines = 2
         return label
     }()
 
@@ -35,14 +37,14 @@ class PolicyTableViewCell: UITableViewCell {
         let label = UILabel()
         label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
         label.textColor = .black
-        label.numberOfLines = 1
+        label.numberOfLines = 2
         return label
     }()
 
     private let periodLabel: UILabel = {
         let label = UILabel()
         label.font = UIFont(name: AppFontName.pMedium, size: 14)
-        label.textColor = AppColor.gray600
+        label.textColor = AppColor.gray400
         return label
     }()
 
@@ -60,6 +62,7 @@ class PolicyTableViewCell: UITableViewCell {
 
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        backgroundColor = .clear
         setupLayout()
     }
 
@@ -81,7 +84,8 @@ class PolicyTableViewCell: UITableViewCell {
         badgeImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(17)
             make.centerY.equalToSuperview()
-            make.width.height.equalTo(50)
+            make.width.equalTo(52)
+            make.height.equalTo(60)
         }
 
         badgeTextLabel.snp.makeConstraints { make in
@@ -95,7 +99,7 @@ class PolicyTableViewCell: UITableViewCell {
 
         containerView.addSubview(labelStackView)
         labelStackView.snp.makeConstraints { make in
-            make.leading.equalTo(badgeImageView.snp.trailing).offset(10)
+            make.leading.equalTo(badgeImageView.snp.trailing).offset(15)
             make.trailing.equalToSuperview().offset(-17)
             make.top.equalToSuperview().offset(19)
             make.bottom.equalToSuperview().offset(-17)
@@ -124,11 +128,42 @@ class PolicyTableViewCell: UITableViewCell {
         }
     }
 
-    func configure(with item: PolicyItem) {
+    private func badgeTextColor(for badge: String) -> UIColor? {
+        switch badge {
+        case "마감":
+            return AppColor.gray500
+        case "D-0":
+            return .white
+        case let value where value.starts(with: "D-"):
+            if let day = Int(value.dropFirst(2)) {
+                if day >= 10 {
+                    return AppColor.gray800
+                } else if day >= 2 {
+                    return .white
+                } else if day == 1 {
+                    return .white
+                }
+            }
+            return AppColor.gray800
+        default:
+            return AppColor.gray800
+        }
+    }
+    
+    func configure(with item: PolicyItem, keyword: String?) {
         badgeImageView.image = badgeImage(for: item.badge)
         badgeTextLabel.text = item.badge
+        badgeTextLabel.textColor = badgeTextColor(for: item.badge)
         regionLabel.text = item.region
-        titleLabel.text = item.title
+        
+        let fullText = "\(item.region) \(item.title)"
+        if let keyword = keyword, let range = fullText.range(of: keyword) {
+            let attributedString = NSMutableAttributedString(string: fullText)
+            attributedString.addAttribute(.foregroundColor, value: AppColor.blue700, range: NSRange(range, in: fullText))
+            regionLabel.attributedText = attributedString
+        } else {
+            regionLabel.text = fullText
+        }
         periodLabel.text = item.period
     }
 }
