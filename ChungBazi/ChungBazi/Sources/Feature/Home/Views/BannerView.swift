@@ -13,27 +13,29 @@ class BannerView: UIView {
         let label = UILabel()
         label.numberOfLines = 0
         label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
-        label.textColor = UIColor.black
+        label.textColor = UIColor.white
+        label.text = "청년이라면 누구나\n누릴 수 있는 정부혜택"
         return label
     }()
     
     let subtitleLabel: UILabel = {
         let label = UILabel()
         label.numberOfLines = 0
-        label.font = UIFont(name: AppFontName.pMedium, size: 12)
-        label.textColor = UIColor.darkGray
+        label.font = UIFont(name: AppFontName.pMedium, size: 14)
+        label.textColor = UIColor.white
+        label.text = "청년이 직접 뽑은 BEST3 알아보기"
         return label
     }()
     
     let iconImageView: UIImageView = {
-        let imageView = UIImageView()
+        let imageView = UIImageView(image: UIImage(named: "party"))
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = AppColor.blue100
+        backgroundColor = AppColor.blue700
         layer.cornerRadius = 10
         setupLayout()
     }
@@ -48,14 +50,14 @@ class BannerView: UIView {
         addSubview(iconImageView)
         
         iconImageView.snp.makeConstraints { make in
-            make.top.trailing.equalToSuperview().inset(-10)
+            make.top.trailing.equalToSuperview().inset(8)
             make.trailing.equalToSuperview().inset(16)
             make.width.height.equalTo(90)
         }
         
         titleLabel.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(22)
-            make.trailing.equalTo(iconImageView.snp.leading).offset(-8)
+            make.trailing.equalTo(iconImageView.snp.leading).offset(-5)
         }
         
         subtitleLabel.snp.makeConstraints { make in

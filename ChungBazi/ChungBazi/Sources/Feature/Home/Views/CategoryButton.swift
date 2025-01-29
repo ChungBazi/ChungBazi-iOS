@@ -7,7 +7,7 @@
 
 import UIKit
 
-class CategoryButton: UIView {
+class CategoryButton: UIButton {
 
     let iconImageView: UIImageView = {
         let imageView = UIImageView()
@@ -15,7 +15,7 @@ class CategoryButton: UIView {
         return imageView
     }()
 
-    let titleLabel: UILabel = {
+    let customTitleLabel: UILabel = { 
         let label = UILabel()
         label.textAlignment = .center
         label.font = UIFont(name: AppFontName.pMedium, size: 16)
@@ -28,6 +28,7 @@ class CategoryButton: UIView {
         backgroundColor = AppColor.blue100
         layer.cornerRadius = 10
         setupLayout()
+        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) {
@@ -36,7 +37,7 @@ class CategoryButton: UIView {
 
     private func setupLayout() {
         addSubview(iconImageView)
-        addSubview(titleLabel)
+        addSubview(customTitleLabel)
 
         iconImageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
@@ -44,9 +45,13 @@ class CategoryButton: UIView {
             make.width.height.equalTo(20)
         }
 
-        titleLabel.snp.makeConstraints { make in
+        customTitleLabel.snp.makeConstraints { make in
             make.top.equalTo(iconImageView.snp.bottom).offset(5)
             make.centerX.equalToSuperview()
         }
+    }
+
+    @objc private func buttonTapped() {
+        print("카테고리 버튼 클릭됨: \(customTitleLabel.text ?? "알 수 없음")")
     }
 }

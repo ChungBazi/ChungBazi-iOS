@@ -9,10 +9,10 @@ import UIKit
 import SnapKit
 import Then
 
-class RecommendViewController: UIViewController, CustomDropdownDelegate {
+class RecommendViewController: UIViewController, CompactDropdownDelegate {
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "OO님께 딱 맞는 주거 정책\n추천 리스트를 준비했어요!"
+        label.text = "바로님께 딱 맞는 주거 정책\n추천 리스트를 준비했어요!"
         label.numberOfLines = 2
         label.font = UIFont(name: AppFontName.pSemiBold, size: 20)
         label.textAlignment = .left
@@ -32,16 +32,16 @@ class RecommendViewController: UIViewController, CustomDropdownDelegate {
         return tableView
     }()
     
-    private let interestDropdown: CustomDropdown = CustomDropdown(
+    private lazy var interestDropdown = CompactDropdown(
         title: "관심",
         hasBorder: false,
         items: Constants.interestItems
     )
 
-    private let sortDropdown: CustomDropdown = CustomDropdown(
+    private lazy var sortDropdown = CompactDropdown(
         title: "최신순",
         hasBorder: false,
-        items: ["최신순", "마감순"]
+        items: Constants.sortItems
     )
 
     private var policies: [PolicyItem] = [
@@ -75,29 +75,28 @@ class RecommendViewController: UIViewController, CustomDropdownDelegate {
         view.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
-            make.leading.trailing.equalToSuperview().inset(16)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
-
+        
         view.addSubview(interestDropdown)
-        view.addSubview(sortDropdown)
-                
-        interestDropdown.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.leading.equalTo(view.safeAreaLayoutGuide).offset(160)
-            $0.width.equalTo(91)
-            $0.height.equalTo(36 * Constants.interestItems.count + 36 + 8)
+        interestDropdown.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.leading.equalToSuperview().offset(160)
+            make.width.equalTo(91)
+            make.height.equalTo(36 * Constants.interestItems.count + 36 + 8)
         }
 
-        sortDropdown.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(16)
-            $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
-            $0.width.equalTo(91)
-            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+        view.addSubview(sortDropdown)
+        sortDropdown.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
+            make.trailing.equalToSuperview().offset(-16)
+            make.width.equalTo(91)
+            make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
         
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).offset(-60)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(-80)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
@@ -114,34 +113,17 @@ class RecommendViewController: UIViewController, CustomDropdownDelegate {
     }
 
     // MARK: - CustomDropdownDelegate
-    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+    func dropdown(_ dropdown: CompactDropdown, didSelectItem item: String) {
         if dropdown == interestDropdown {
             print("관심 분야 선택: \(item)")
+            
+            guard let categoryPolicy = PolicyData.getPolicies(for: item) else { return }
+            
             let categoryVC = CategoryPolicyViewController()
-            switch item {
-            case "일자리":
-                let jobPolicies = [
-                    PolicyItem(title: "<청년 맞춤형 일자리 매칭 지원 프로그램>", region: "강남구", period: "2024.12.11 - 2025.01.31", badge: "D-0"),
-                    PolicyItem(title: "<청년 일자리 디딤돌: 취업 준비 지원 패키지>", region: "서대문구", period: "2024.12.11 - 2025.01.31", badge: "D-1"),
-                    PolicyItem(title: "<청년 IT 직무 역량 강화와 일자리 연결 프로젝트>", region: "구로구", period: "2024.12.11 - 2025.01.31", badge: "D-2"),
-                    PolicyItem(title: "<문화·예술 분야 청년 일자리 창출 지원 사업>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-5"),
-                    PolicyItem(title: "<청년 스타트업 창업 지원 및 일자리 창출 프로젝트>", region: "금천구", period: "2024.12.11 - 2025.01.31", badge: "마감")
-                ]
-                categoryVC.configure(categoryTitle: "일자리", policies: jobPolicies)
-            case "주거":
-                categoryVC.configure(categoryTitle: "주거")
-            case "교육":
-                categoryVC.configure(categoryTitle: "교육")
-            case "복지,문화":
-                categoryVC.configure(categoryTitle: "복지,문화")
-            case "참여,권리":
-                categoryVC.configure(categoryTitle: "참여,권리")
-            default:
-                break
-            }
+            categoryVC.configure(categoryTitle: categoryPolicy.title, policies: categoryPolicy.policies)
             navigationController?.pushViewController(categoryVC, animated: true)
         } else if dropdown == sortDropdown {
-            print("정렬 방식 선택: \(item)")
+            print("Selected item: \(item)")
         }
     }
 }

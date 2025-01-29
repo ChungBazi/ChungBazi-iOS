@@ -9,10 +9,10 @@ import Then
 
 class CategoryPolicyViewController: UIViewController {
     
-    private let sortDropdown: CustomDropdown = CustomDropdown(
+    private let sortDropdown: CompactDropdown = CompactDropdown(
         title: "최신순",
         hasBorder: false,
-        items: ["최신순", "마감순"]
+        items: Constants.sortItems
     )
 
     private let tableView: UITableView = {
@@ -69,7 +69,7 @@ class CategoryPolicyViewController: UIViewController {
         
         view.addSubview(tableView)
         tableView.snp.makeConstraints {
-            $0.top.equalTo(sortDropdown.snp.bottom).offset(-60)
+            $0.top.equalTo(sortDropdown.snp.bottom).offset(-70)
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }

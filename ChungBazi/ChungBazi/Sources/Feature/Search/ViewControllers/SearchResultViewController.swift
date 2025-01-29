@@ -55,6 +55,12 @@ class SearchResultViewController: UIViewController {
         return collectionView
     }()
     
+    private let sortDropdown = CompactDropdown(
+        title: "최신순",
+        hasBorder: false,
+        items: Constants.sortItems
+    )
+    
     private let tableView: UITableView = {
         let tableView = UITableView()
         tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
@@ -101,6 +107,7 @@ class SearchResultViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
+        sortDropdown.isHidden = true
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -143,9 +150,17 @@ class SearchResultViewController: UIViewController {
             make.height.equalTo(36)
         }
         
+        view.addSubview(sortDropdown)
+        sortDropdown.snp.makeConstraints { make in
+            make.top.equalTo(searchView.snp.bottom).offset(16)
+            make.trailing.equalToSuperview().offset(-16)
+            make.width.equalTo(91)
+            make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+        }
+        
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(searchView.snp.bottom).offset(16)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(-70)
             make.leading.trailing.bottom.equalToSuperview()
         }
         
@@ -172,6 +187,10 @@ class SearchResultViewController: UIViewController {
         }
         
         policies = allPolicies.filter { $0.title.contains(keyword) }
+        popularSearchLabel.isHidden = true
+        popularKeywordsCollectionView.isHidden = true
+        tabBarController?.tabBar.isHidden = false
+        sortDropdown.isHidden = policies.isEmpty
         updateUI()
     }
     
@@ -179,6 +198,11 @@ class SearchResultViewController: UIViewController {
         emptyStateLabel.isHidden = !policies.isEmpty
         tableView.isHidden = policies.isEmpty
         tableView.reloadData()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        view.bringSubviewToFront(sortDropdown)
     }
     
     private func configureTableView() {

@@ -8,4 +8,5 @@
 struct CategoryItem {
     let title: String
     let iconName: String
+    let policies: [PolicyItem]
 }

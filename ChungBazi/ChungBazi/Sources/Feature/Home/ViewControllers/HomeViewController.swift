@@ -49,11 +49,11 @@ class HomeViewController: UIViewController {
     }()
 
     private let categories: [CategoryItem] = [
-        CategoryItem(title: "일자리", iconName: "policy_job_icon"),
-        CategoryItem(title: "주거", iconName: "policy_housing_icon"),
-        CategoryItem(title: "교육", iconName: "policy_education_icon"),
-        CategoryItem(title: "복지,문화", iconName: "policy_welfare_culture_icon"),
-        CategoryItem(title: "참여,권리", iconName: "policy_participation_icon")
+        CategoryItem(title: "일자리", iconName: "policy_job_icon", policies: []),
+        CategoryItem(title: "주거", iconName: "policy_housing_icon", policies: []),
+        CategoryItem(title: "교육", iconName: "policy_education_icon", policies: []),
+        CategoryItem(title: "복지,문화", iconName: "policy_welfare_culture_icon", policies: []),
+        CategoryItem(title: "참여,권리", iconName: "policy_participation_icon", policies: [])
     ]
  
     private let categoriesGridStackView: UIStackView = {
@@ -78,7 +78,6 @@ class HomeViewController: UIViewController {
                 backgroundColor: .gray50
             )
         setupLayout()
-        configureHighlightCard()
         configureCategoriesWithChatbot()
         configureSearchViewTap()
     }
@@ -121,36 +120,27 @@ class HomeViewController: UIViewController {
         banner.snp.makeConstraints { make in
             make.top.equalTo(policyIconImageView.snp.bottom).offset(4)
             make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(100)
+            make.height.equalTo(110)
         }
 
         view.addSubview(categoriesGridStackView)
         categoriesGridStackView.snp.makeConstraints { make in
-            make.top.equalTo(banner.snp.bottom).offset(16)
+            make.top.equalTo(banner.snp.bottom).offset(10)
             make.leading.trailing.equalToSuperview().inset(16)
         }
-    }
-
-    private func configureHighlightCard() {
-        banner.titleLabel.text = "청년이라면 누구나\n누릴 수 있는 정부혜택"
-        banner.subtitleLabel.text = "청년이 직접 뽑은 BEST3 알아보기"
-        banner.iconImageView.image = UIImage(named: "party")
-        banner.backgroundColor = AppColor.blue700
-        banner.titleLabel.textColor = .white
-        banner.subtitleLabel.textColor = .white
     }
 
     private func configureCategoriesWithChatbot() {
         let firstRowStackView = UIStackView()
         firstRowStackView.axis = .horizontal
-        firstRowStackView.spacing = 16
+        firstRowStackView.spacing = 10
         firstRowStackView.alignment = .fill
         firstRowStackView.distribution = .fillEqually
         categoriesGridStackView.addArrangedSubview(firstRowStackView)
 
         let secondRowStackView = UIStackView()
         secondRowStackView.axis = .horizontal
-        secondRowStackView.spacing = 16
+        secondRowStackView.spacing = 14
         secondRowStackView.alignment = .fill
         secondRowStackView.distribution = .fillEqually
         categoriesGridStackView.addArrangedSubview(secondRowStackView)
@@ -158,9 +148,10 @@ class HomeViewController: UIViewController {
         for (index, category) in categories.enumerated() {
             let button = CategoryButton()
             button.iconImageView.image = UIImage(named: category.iconName)
-            button.titleLabel.text = category.title
+            button.customTitleLabel.text = category.title
             button.tag = index
-          
+            button.addTarget(self, action: #selector(categoryButtonTapped(_:)), for: .touchUpInside)
+                
             if index < 3 {
                 firstRowStackView.addArrangedSubview(button)
             } else {
@@ -171,6 +162,7 @@ class HomeViewController: UIViewController {
                 make.width.height.equalTo(105)
             }
         }
+        categoriesGridStackView.setCustomSpacing(10, after: firstRowStackView)
 
         let chatbotButtonContainer = UIView()
 
@@ -188,8 +180,9 @@ class HomeViewController: UIViewController {
         chatbotButtonContainer.addSubview(chatbotButton)
         
         chatbotButton.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().offset(-4)
+            make.trailing.equalToSuperview().offset(-8)
             make.width.height.equalTo(78)
-            make.center.equalToSuperview()
         }
 
         let chatbotIcon = UIImageView(image: UIImage(named: "chatbot"))
@@ -211,5 +204,13 @@ class HomeViewController: UIViewController {
     @objc private func didTapSearchView() {
         let searchResultVC = SearchResultViewController()
         navigationController?.pushViewController(searchResultVC, animated: true)
+    }
+    
+    @objc private func categoryButtonTapped(_ sender: UIButton) {
+        guard let categoryPolicy = PolicyData.getPolicies(for: categories[sender.tag].title) else { return }
+        
+        let categoryVC = CategoryPolicyViewController()
+        categoryVC.configure(categoryTitle: categoryPolicy.title, policies: categoryPolicy.policies)
+        navigationController?.pushViewController(categoryVC, animated: true)
     }
 }
