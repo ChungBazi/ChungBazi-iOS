@@ -18,19 +18,19 @@ class MainTabBarController: UITabBarController {
     }
     
     private func createHomeViewController() -> UIViewController {
-        return createNavigationController(for: HomeViewController(), title: "홈", image: .home, tag: 0)
+        return createNavigationController(for: HomeViewController(), title: "홈", image: .tabHomeIcon, tag: 0)
     }
     
     private func createCalendarViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "캘린더", image: .calendar, tag: 1)
+        return createNavigationController(for: CalenderViewController(), title: "캘린더", image: .tabCalendarIcon, tag: 1)
     }
     
     private func createCommunityViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "커뮤니티", image: .community, tag: 2)
+        return createNavigationController(for: UIViewController(), title: "커뮤니티", image: .tabCommunityIcon, tag: 2)
     }
     
     private func createProfileViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "프로필", image: .profile, tag: 3)
+        return createNavigationController(for: ProfileViewController(), title: "프로필", image: .tabProfileIcon, tag: 3)
     }
     
     private func createNavigationController(for viewController: UIViewController, title: String, image: UIImage?, tag: Int) -> UINavigationController {
@@ -43,7 +43,6 @@ class MainTabBarController: UITabBarController {
         let customTabbar = CustomTabBar()
         setValue(customTabbar, forKey: "tabBar")
 
-        tabBar.backgroundColor = .white
         tabBar.tintColor = .blue700
         tabBar.unselectedItemTintColor = .gray800
 
@@ -89,7 +88,6 @@ class MainTabBarController: UITabBarController {
     }
     
     private class CustomTabBar: UITabBar {
-        var customHeight: CGFloat = 68
         private var backgroundView = UIView()
         
         override init(frame: CGRect) {
@@ -106,7 +104,7 @@ class MainTabBarController: UITabBarController {
             
             let safeAreaBottom = superview.safeAreaInsets.bottom
             var newFrame = frame
-            newFrame.size.height = customHeight + safeAreaBottom
+            newFrame.size.height = Constants.tabBarHeight + safeAreaBottom
             newFrame.origin.y = superview.bounds.height - newFrame.size.height
             frame = newFrame
             
