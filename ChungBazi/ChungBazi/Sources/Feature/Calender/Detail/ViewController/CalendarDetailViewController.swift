@@ -39,7 +39,6 @@ final class CalendarDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        fetchData()
         if let policy = policy {
             bindPolicyData(policy)
         }
@@ -153,25 +152,6 @@ final class CalendarDetailViewController: UIViewController {
     }
     
     // MARK: - Data
-    private func fetchData() {
-        let samplePolicy = createSamplePolicy()
-        bindPolicyData(samplePolicy)
-    }
-
-    private func createSamplePolicy() -> Policy {
-        return Policy(
-            policyId: 1,
-            policyName: "양진구청 마라톤 참가자 모집",
-            startDate: "2024-12-12",
-            endDate: "2024-12-23",
-            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
-            userDocuments: [
-                Document(documentId: 1, name: "주민등록본", isChecked: true),
-                Document(documentId: 2, name: "학생증", isChecked: false)
-            ]
-        )
-    }
-    
     private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)

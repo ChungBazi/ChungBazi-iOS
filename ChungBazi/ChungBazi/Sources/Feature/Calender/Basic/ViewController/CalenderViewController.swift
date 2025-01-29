@@ -50,8 +50,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 1,
                 policyName: "양진구청 마라톤 참가자 모집",
-                startDate: "2025-01-12",
-                endDate: "2025-01-23",
+                startDate: "2025-02-01",
+                endDate: "2025-02-10",
                 documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
                 userDocuments: [
                     Document(documentId: 1, name: "주민등록본", isChecked: true),
@@ -61,8 +61,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 2,
                 policyName: "청바지 동아리 회원 모집",
-                startDate: "2025-01-15",
-                endDate: "2025-02-01",
+                startDate: "2025-02-03",
+                endDate: "2025-02-15",
                 documentText: "1단계: 동아리 홈페이지 지원서 작성 -> 2단계: 인터뷰 진행 후 결과 통보",
                 userDocuments: [
                     Document(documentId: 3, name: "졸업증명서", isChecked: true),
@@ -72,8 +72,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 3,
                 policyName: "지역 사회봉사단 모집",
-                startDate: "2025-01-12",
-                endDate: "2025-01-15",
+                startDate: "2025-02-05",
+                endDate: "2025-02-08",
                 documentText: "1단계: 지원서 제출 -> 2단계: 간단한 면접 진행",
                 userDocuments: [
                     Document(documentId: 5, name: "주민등록초본", isChecked: true),
@@ -83,8 +83,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 4,
                 policyName: "공공 미술 프로젝트 지원",
-                startDate: "2025-01-15",
-                endDate: "2025-01-23",
+                startDate: "2025-02-10",
+                endDate: "2025-02-20",
                 documentText: "1단계: 프로젝트 계획서 제출 -> 2단계: 현장 실사 후 최종 발표",
                 userDocuments: [
                     Document(documentId: 7, name: "프로젝트 계획서", isChecked: true),
@@ -94,8 +94,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 5,
                 policyName: "학생 창업 지원 모집",
-                startDate: "2025-01-12",
-                endDate: "2025-01-29",
+                startDate: "2025-02-01",
+                endDate: "2025-02-15",
                 documentText: "1단계: 사업 계획서 제출 -> 2단계: 발표 심사 진행",
                 userDocuments: [
                     Document(documentId: 9, name: "사업 계획서", isChecked: true),
@@ -105,8 +105,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 6,
                 policyName: "시민 체육대회 참가자 모집",
-                startDate: "2025-01-12",
-                endDate: "2025-01-29",
+                startDate: "2025-02-03",
+                endDate: "2025-02-20",
                 documentText: "1단계: 참가 신청서 작성 -> 2단계: 참가비 납부",
                 userDocuments: [
                     Document(documentId: 11, name: "참가 신청서", isChecked: true),
