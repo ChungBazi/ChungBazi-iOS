@@ -28,8 +28,13 @@ final class AuthService: NetworkManager {
     // MARK: - DTO funcs
     
     /// 카카오 로그인 데이터 구조 생성
-    public func makeKakaoDTO(name: String, email: String) -> KakaoLoginRequestDto {
-        return KakaoLoginRequestDto(name: name, email: email)
+    public func makeKakaoDTO(name: String, email: String, fcmToken: String) -> KakaoLoginRequestDto {
+        return KakaoLoginRequestDto(name: name, email: email, fcmToken: fcmToken)
+    }
+    
+    /// accessToken 재발급 request 데이터 구조 생성
+    public func makeReIssueDTO(refreshToken: String) -> ReIssueRequestDto {
+        return ReIssueRequestDto(refreshToken: refreshToken)
     }
 
     //MARK: - API funcs
@@ -39,29 +44,17 @@ final class AuthService: NetworkManager {
     }
     
     /// 로그아웃 API
-    public func logout(completion: @escaping (Result<Void, NetworkError>) -> Void) {
-        provider.request(.postLogout) { result in
-            switch result {
-            case .success(let response):
-                if response.statusCode == 200 {
-                    completion(.success(()))
-                } else {
-                    let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: response.data)
-                    let finalMessage = errorResponse?.message ?? "에러 메세지 없음"
-                    return completion(.failure(.serverError(statusCode: response.statusCode, message: finalMessage)))
-                }
-                
-            case .failure(let error):
-                let networkError = self.handleNetworkError(error)
-                completion(.failure(networkError))
-            }
-        }
+    public func logout(completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .postLogout, decodingType: String.self, completion: completion)
     }
     
     /// 토큰 재발급 API
-    public func reissueToken(completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postReIssueToken, decodingType: KakaoLoginResponseDto.self, completion: completion)
+    public func reissueToken(data: ReIssueRequestDto, completion: @escaping (Result<ReIssueResponseDto, NetworkError>) -> Void) {
+        request(target: .postReIssueToken(data: data), decodingType: ReIssueResponseDto.self, completion: completion)
     }
     
-    /// 회원 탈퇴 API 해야함
+    /// 회원 탈퇴 API
+    public func deleteUser(completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .deleteUser, decodingType: String.self, completion: completion)
+    }
 }

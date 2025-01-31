@@ -12,7 +12,7 @@ enum AuthEndpoints {
     case postKakaoLogin(data: KakaoLoginRequestDto)
     case postLogout
     case deleteUser
-    case postReIssueToken
+    case postReIssueToken(data: ReIssueRequestDto)
 }
 
 extension AuthEndpoints: TargetType {
@@ -38,18 +38,18 @@ extension AuthEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .deleteUser:
-            return .delete
-        case .postLogout, .postReIssueToken, .postKakaoLogin:
+//        case .deleteUser:
+//            return .delete
+        case .postLogout, .postReIssueToken, .postKakaoLogin, .deleteUser:
             return .post
         }
     }
     
     var task: Task {
         switch self {
-        case .postLogout, .deleteUser, .postReIssueToken:
+        case .postLogout, .deleteUser:
             return .requestPlain
-        case .postKakaoLogin(let data) :
+        case .postKakaoLogin(let data), .postReIssueToken(let data) :
             return .requestJSONEncodable(data)
         }
     }
