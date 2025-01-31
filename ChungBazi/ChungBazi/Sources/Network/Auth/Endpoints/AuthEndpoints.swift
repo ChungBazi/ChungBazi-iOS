@@ -49,7 +49,9 @@ extension AuthEndpoints: TargetType {
         switch self {
         case .postLogout, .deleteUser:
             return .requestPlain
-        case .postKakaoLogin(let data), .postReIssueToken(let data) :
+        case .postKakaoLogin(let data):
+            return .requestJSONEncodable(data)
+        case .postReIssueToken(let data):
             return .requestJSONEncodable(data)
         }
     }
