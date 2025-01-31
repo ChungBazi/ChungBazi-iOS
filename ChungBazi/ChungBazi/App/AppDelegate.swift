@@ -7,14 +7,48 @@
 
 import UIKit
 import CoreData
+import SwiftyToaster
+
+import KakaoSDKCommon
+import KakaoSDKAuth
+
+import FirebaseCore
+import FirebaseMessaging
+import KeychainSwift
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
-
-
+    
+    var window: UIWindow?
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
+        
+        if let kakaoAPIkey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
+            KakaoSDK.initSDK(appKey: "\(kakaoAPIkey)")
+        }
+        
+        // 파이어베이스 설정
+        FirebaseApp.configure()
+        if FirebaseApp.app() == nil {
+            Toaster.shared.makeToast("FirebaseApp 시작 에러 : 어플을 재실행 해주세요")
+//            print("FirebaseApp is not initialized. Configuring now...")
+            FirebaseApp.configure()
+        }
+        // 앱 실행 시 사용자에게 알림 허용 권한을 받음
+        UNUserNotificationCenter.current().delegate = self
+        let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound] // 필요한 알림 권한을 설정
+        UNUserNotificationCenter.current().requestAuthorization(options: authOptions) { granted, error in
+            if granted {
+                DispatchQueue.main.async {
+                    // UNUserNotificationCenterDelegate를 구현한 메서드를 실행시킴
+                    UIApplication.shared.registerForRemoteNotifications()
+                }
+            }
+        }
+        // 파이어베이스 Meesaging 설정
+        Messaging.messaging().delegate = self
+
         return true
     }
 
@@ -78,4 +112,45 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     }
 
 }
+
+extension AppDelegate: UNUserNotificationCenterDelegate {
+    
+    // 백그라운드에서 푸시 알림을 탭했을 때 실행
+    func application(_ application: UIApplication,
+                     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
+        Messaging.messaging().apnsToken = deviceToken
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
+        completionHandler([.badge, .sound, .banner, .list])
+    }
+    
+    func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
+        Toaster.shared.makeToast("APNs 등록 및 디바이스 토큰 받기 실패 : 어플을 재실행 해주세요")
+    }
+}
+
+extension AppDelegate: MessagingDelegate {
+    // 파이어베이스 MessagingDelegate 설정
+    func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
+        KeychainSwift().set(fcmToken!, forKey: "FCMToken")
+        
+        let dataDict: [String: String] = ["token": fcmToken ?? ""]
+        NotificationCenter.default.post(
+            name: Notification.Name("FCMToken"),
+            object: nil,
+            userInfo: dataDict
+        )
+        
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+      
+            } else if let token = token {
+                print("----FCM registration token: \(token)")
+            }
+        }
+    }
+}
+
 
