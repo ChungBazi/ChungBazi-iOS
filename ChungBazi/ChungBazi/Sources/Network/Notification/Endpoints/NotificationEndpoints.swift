@@ -9,7 +9,7 @@ import Foundation
 import Moya
 
 enum NotificationEndpoints {
-    case fetchAlarmList(type: String, cursor: Int, limit: Int)
+    case fetchAlarmList(type: String, cursor: Int)
 }
 
 extension NotificationEndpoints: TargetType {
@@ -37,7 +37,7 @@ extension NotificationEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .fetchAlarmList(let type, let cursor, let limit):
+        case .fetchAlarmList(let type, let cursor):
             return .requestParameters(parameters: ["type": type, "cursor": cursor, "limit": 15], encoding: URLEncoding.default)
         }
     }

@@ -6,18 +6,18 @@
 //
 
 struct NoticeListResponseDto: Decodable {
-    let notifications: [notificationInfo]
+    let notifications: [NotificationInfo]
     let nextCursor: Int
     let hasNext: Bool
     
-    init(notifications: [notificationInfo], nextCursor: Int, hasNext: Bool) {
+    init(notifications: [NotificationInfo], nextCursor: Int, hasNext: Bool) {
         self.notifications = notifications
         self.nextCursor = nextCursor
         self.hasNext = hasNext
     }
 }
 
-struct notificationInfo: Decodable {
+struct NotificationInfo: Decodable {
     let notificationId: Int
     let message: String
     let type: String

@@ -32,8 +32,8 @@ final class NotificationService: NetworkManager {
 
     //MARK: - API funcs
     /// 알림 리스트 조회 API
-    public func fetchAlarmList(type: String, cursor: Int, limit: Int, completion: @escaping (Result<NoticeListResponseDto, NetworkError>) -> Void) {
-        request(target: .fetchAlarmList(type: type, cursor: cursor, limit: limit), decodingType: NoticeListResponseDto.self, completion: completion)
+    public func fetchAlarmList(type: String, cursor: Int, completion: @escaping (Result<NoticeListResponseDto, NetworkError>) -> Void) {
+        request(target: .fetchAlarmList(type: type, cursor: cursor), decodingType: NoticeListResponseDto.self, completion: completion)
     }
     
     /// more...
