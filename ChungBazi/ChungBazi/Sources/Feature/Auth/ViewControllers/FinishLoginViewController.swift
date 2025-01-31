@@ -9,6 +9,8 @@ import UIKit
 
 class FinishLoginViewController: UIViewController {
     
+    var isFirst: Bool?
+    
     private let finishLoginView = LogoWithTitleView(image: "heartBaro", title: "로그인 완료!\n정책을 쉽고 간편하게 확인하세요")
 
     override func viewDidLoad() {
@@ -20,11 +22,16 @@ class FinishLoginViewController: UIViewController {
     private func goToNextView() {
         // 최초 로그인 시, StartSurveyViewController로
         // 그 외에는 BaseTabBarController로
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let vc = StartSurveyViewController()
-            let navController = UINavigationController(rootViewController: vc)
-            navController.modalPresentationStyle = .fullScreen
-            self.present(navController, animated: true, completion: nil)
+        if self.isFirst ?? true {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                let vc = StartSurveyViewController()
+                let navController = UINavigationController(rootViewController: vc)
+                navController.modalPresentationStyle = .fullScreen
+                self.present(navController, animated: true, completion: nil)
+            }
+        } else {
+            let homeViewController = MainTabBarController()
+            navigationController?.pushViewController(homeViewController, animated: true)
         }
     }
 }
