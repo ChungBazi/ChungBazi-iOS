@@ -25,6 +25,7 @@ class StartSurveyViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         self.view = finishLoginView
+        self.navigationController?.navigationBar.isHidden = true
         addComponents()
         setConstraints()
     }

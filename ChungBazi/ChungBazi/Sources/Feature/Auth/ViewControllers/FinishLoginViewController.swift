@@ -20,18 +20,19 @@ class FinishLoginViewController: UIViewController {
     }
     
     private func goToNextView() {
+        guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
         // 최초 로그인 시, StartSurveyViewController로
         // 그 외에는 BaseTabBarController로
         if self.isFirst ?? true {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 let vc = StartSurveyViewController()
-                let navController = UINavigationController(rootViewController: vc)
-                navController.modalPresentationStyle = .fullScreen
-                self.present(navController, animated: true, completion: nil)
+                sceneDelegate.window?.rootViewController = vc
+                sceneDelegate.window?.makeKeyAndVisible()
             }
         } else {
-            let homeViewController = MainTabBarController()
-            navigationController?.pushViewController(homeViewController, animated: true)
+            let vc = MainTabBarController()
+            sceneDelegate.window?.rootViewController = vc
+            sceneDelegate.window?.makeKeyAndVisible()
         }
     }
 }
