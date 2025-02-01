@@ -21,6 +21,10 @@
 		1F09A25C2D35825A000E8762 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A25B2D35825A000E8762 /* Kingfisher */; };
 		1F09A25F2D358271000E8762 /* FSCalendar in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A25E2D358271000E8762 /* FSCalendar */; };
 		1F09A2622D3582C5000E8762 /* SwiftyToaster in Frameworks */ = {isa = PBXBuildFile; productRef = 1F09A2612D3582C5000E8762 /* SwiftyToaster */; };
+		1FEC1C762D4BE73400FC4B1E /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1C752D4BE73400FC4B1E /* FirebaseAnalytics */; };
+		1FEC1DC92D4BF45400FC4B1E /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DC82D4BF45400FC4B1E /* FirebaseAuth */; };
+		1FEC1DCB2D4BF45400FC4B1E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */; };
+		1FEC1DCE2D4BF70600FC4B1E /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */; };
 		5E819E932D3E1D36005FC310 /* SafeAreaBrush in Frameworks */ = {isa = PBXBuildFile; productRef = 5E819E922D3E1D36005FC310 /* SafeAreaBrush */; };
 /* End PBXBuildFile section */
 
@@ -54,8 +58,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1FEC1DCB2D4BF45400FC4B1E /* FirebaseMessaging in Frameworks */,
 				1F09A25C2D35825A000E8762 /* Kingfisher in Frameworks */,
 				1F09A25F2D358271000E8762 /* FSCalendar in Frameworks */,
+				1FEC1DC92D4BF45400FC4B1E /* FirebaseAuth in Frameworks */,
+				1FEC1DCE2D4BF70600FC4B1E /* KeychainSwift in Frameworks */,
 				1F09A1D22D3580E2000E8762 /* Then in Frameworks */,
 				1F09A2622D3582C5000E8762 /* SwiftyToaster in Frameworks */,
 				1F09A1E02D35814E000E8762 /* KakaoSDKCommon in Frameworks */,
@@ -64,6 +71,7 @@
 				1F09A2572D35820C000E8762 /* ReactiveMoya in Frameworks */,
 				1F09A1D52D358125000E8762 /* SnapKit in Frameworks */,
 				1F09A1DE2D35814E000E8762 /* KakaoSDKCertCore in Frameworks */,
+				1FEC1C762D4BE73400FC4B1E /* FirebaseAnalytics in Frameworks */,
 				1F09A1D82D35814E000E8762 /* KakaoSDK in Frameworks */,
 				1F09A1DA2D35814E000E8762 /* KakaoSDKAuth in Frameworks */,
 				5E819E932D3E1D36005FC310 /* SafeAreaBrush in Frameworks */,
@@ -126,6 +134,10 @@
 				1F09A25E2D358271000E8762 /* FSCalendar */,
 				1F09A2612D3582C5000E8762 /* SwiftyToaster */,
 				5E819E922D3E1D36005FC310 /* SafeAreaBrush */,
+				1FEC1C752D4BE73400FC4B1E /* FirebaseAnalytics */,
+				1FEC1DC82D4BF45400FC4B1E /* FirebaseAuth */,
+				1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */,
+				1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */,
 			);
 			productName = ChungBazi;
 			productReference = 1F09A0A42D357328000E8762 /* ChungBazi.app */;
@@ -164,6 +176,8 @@
 				1F09A25D2D358271000E8762 /* XCRemoteSwiftPackageReference "FSCalendar" */,
 				1F09A2602D3582C5000E8762 /* XCRemoteSwiftPackageReference "SwiftyToaster" */,
 				5E819E912D3E1D36005FC310 /* XCRemoteSwiftPackageReference "SafeAreaBrush" */,
+				1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
+				1FEC1DCC2D4BF70600FC4B1E /* XCRemoteSwiftPackageReference "keychain-swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1F09A0A52D357328000E8762 /* Products */;
@@ -201,8 +215,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChungBazi/ChungBazi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UKY6HK6U6Y;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -212,6 +227,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -236,8 +252,9 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = ChungBazi/ChungBazi.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = UKY6HK6U6Y;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -247,6 +264,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				INFOPLIST_KEY_UIUserInterfaceStyle = Light;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -465,6 +483,22 @@
 				minimumVersion = 1.0.2;
 			};
 		};
+		1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/firebase/firebase-ios-sdk";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 11.7.0;
+			};
+		};
+		1FEC1DCC2D4BF70600FC4B1E /* XCRemoteSwiftPackageReference "keychain-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/evgenyneu/keychain-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 24.0.0;
+			};
+		};
 		5E819E912D3E1D36005FC310 /* XCRemoteSwiftPackageReference "SafeAreaBrush" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/WallabyStuff/SafeAreaBrush";
@@ -545,6 +579,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1F09A2602D3582C5000E8762 /* XCRemoteSwiftPackageReference "SwiftyToaster" */;
 			productName = SwiftyToaster;
+		};
+		1FEC1C752D4BE73400FC4B1E /* FirebaseAnalytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAnalytics;
+		};
+		1FEC1DC82D4BF45400FC4B1E /* FirebaseAuth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseAuth;
+		};
+		1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseMessaging;
+		};
+		1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1DCC2D4BF70600FC4B1E /* XCRemoteSwiftPackageReference "keychain-swift" */;
+			productName = KeychainSwift;
 		};
 		5E819E922D3E1D36005FC310 /* SafeAreaBrush */ = {
 			isa = XCSwiftPackageProductDependency;
