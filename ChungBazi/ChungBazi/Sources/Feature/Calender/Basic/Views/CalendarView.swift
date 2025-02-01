@@ -303,7 +303,9 @@ final class CustomCalendarCell: FSCalendarCell {
         eventLayers.forEach { $0.removeFromSuperlayer() }
         eventLayers.removeAll()
 
-        guard let date = date, let eventTypes = events[date] else { return }
+        guard let date = date, var eventTypes = events[date] else { return }
+
+        eventTypes.sort { $0 < $1 }
 
         let markerSize: CGFloat = 5
         let spacing: CGFloat = 3

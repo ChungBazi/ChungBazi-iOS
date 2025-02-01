@@ -53,7 +53,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 1,
                 policyName: "양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집",
-                startDate: "2025-02-01",
+                startDate: "2025-01-31",
                 endDate: "2025-02-10",
                 documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
                 userDocuments: [
@@ -86,7 +86,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 4,
                 policyName: "공공 미술 프로젝트 지원",
-                startDate: "2025-02-10",
+                startDate: "2025-02-15",
                 endDate: "2025-02-20",
                 documentText: "1단계: 프로젝트 계획서 제출 -> 2단계: 현장 실사 후 최종 발표",
                 userDocuments: [
@@ -97,7 +97,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             Policy(
                 policyId: 5,
                 policyName: "학생 창업 지원 모집",
-                startDate: "2025-02-01",
+                startDate: "2025-02-15",
                 endDate: "2025-02-15",
                 documentText: "1단계: 사업 계획서 제출 -> 2단계: 발표 심사 진행",
                 userDocuments: [
