@@ -85,7 +85,7 @@ class HomeViewController: UIViewController {
     private func setupLayout() {
         view.addSubview(searchView)
         searchView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(40)
         }
