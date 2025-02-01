@@ -101,7 +101,7 @@ extension UIViewController {
         navigationBarView.addSubview(buttonStackView)
 
         buttonStackView.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().inset(-10)
+            make.bottom.equalToSuperview().inset(10)
             make.leading.equalToSuperview().offset(30)
         }
     }
