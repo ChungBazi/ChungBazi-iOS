@@ -39,6 +39,9 @@ final class CalendarView: UIView {
     private let dateFormatter = DateFormatter().then {
         $0.locale = Locale(identifier: "ko_KR")
     }
+    private let linkedView = UIView().then {
+        $0.backgroundColor = .white
+    }
     private let calendar = FSCalendar().then {
         $0.backgroundColor = .white
         $0.clipsToBounds = true
@@ -61,7 +64,7 @@ final class CalendarView: UIView {
             tintColor: .gray500,
             target: target,
             action: action,
-            touchAreaInsets: UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+            touchAreaInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         )
     }
     
@@ -89,20 +92,20 @@ final class CalendarView: UIView {
         customHeader.addSubviews(previousBtn, nextBtn, customMonth, customYear)
         
         customHeader.snp.makeConstraints {
-            $0.top.equalTo(safeAreaLayoutGuide.snp.top).offset(Constants.navigationHeight + 20)
+            $0.top.equalToSuperview().offset(6)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.height.equalTo(92)
+            $0.height.equalTo(94)
         }
         previousBtn.snp.makeConstraints {
-            $0.leading.equalToSuperview().inset(55)
+            $0.leading.equalToSuperview().inset(54)
             $0.centerY.equalToSuperview()
         }
         nextBtn.snp.makeConstraints {
-            $0.trailing.equalToSuperview().inset(55)
+            $0.trailing.equalToSuperview().inset(54)
             $0.centerY.equalToSuperview()
         }
         customMonth.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(24)
+            $0.top.equalToSuperview().offset(23)
             $0.centerX.equalToSuperview()
         }
         customYear.snp.makeConstraints {
@@ -112,13 +115,19 @@ final class CalendarView: UIView {
     }
     
     private func setupCalendar() {
+        addSubview(linkedView)
+        linkedView.snp.makeConstraints {
+            $0.top.equalTo(customHeader.snp.bottom)
+            $0.leading.trailing.equalTo(customHeader)
+            $0.height.equalTo(2)
+        }
         addSubview(calendar)
         configureCalendarAppearance()
         calendar.register(CustomCalendarCell.self, forCellReuseIdentifier: "CustomCalendarCell")
         calendar.snp.makeConstraints {
-            $0.top.equalTo(customHeader.snp.bottom)
+            $0.top.equalTo(linkedView.snp.bottom)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.bottom.equalTo(safeAreaLayoutGuide.snp.bottom).inset(26)
+            $0.bottom.equalToSuperview()
         }
     }
     
@@ -130,7 +139,7 @@ final class CalendarView: UIView {
         calendar.appearance.titlePlaceholderColor = .gray300
         calendar.appearance.borderRadius = 1.0
         calendar.appearance.weekdayTextColor = .gray800
-        calendar.weekdayHeight = 20
+        calendar.weekdayHeight = 24
         calendar.rowHeight = 70
         calendar.locale = Locale(identifier: "ko_KR")
         calendar.headerHeight = 0
@@ -242,6 +251,8 @@ final class CustomCalendarCell: FSCalendarCell {
         layoutTitleLabel()
         layoutShapeLayer()
         layoutEventMarkers()
+        
+        updateCellAppearance()
     }
     
     private func layoutTitleLabel() {
@@ -275,7 +286,7 @@ final class CustomCalendarCell: FSCalendarCell {
         let calendar = Calendar.current
 
         if calendar.isDate(date, inSameDayAs: today) {
-            customShapeLayer.backgroundColor = UIColor.green300.cgColor
+            customShapeLayer.backgroundColor = isSelected ? UIColor.blue700.cgColor : UIColor.green300.cgColor
             titleLabel.textColor = isSelected ? UIColor.white : UIColor.gray800
         } else if isSelected {
             customShapeLayer.backgroundColor = UIColor.blue700.cgColor

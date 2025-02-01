@@ -10,7 +10,7 @@ import Then
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, backgroundColor: UIColor = .clear, showRightCartButton: Bool = false) {
         
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -55,6 +55,17 @@ extension UIViewController {
             let alarmButton = UIButton().then {
                 $0.setImage(.alarmIcon, for: .normal)
                 $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(alarmButton)
+            alarmButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        if showRightCartButton {
+            let alarmButton = UIButton().then {
+                $0.setImage(.cartIcon, for: .normal)
+                $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(alarmButton)
             alarmButton.snp.makeConstraints { make in

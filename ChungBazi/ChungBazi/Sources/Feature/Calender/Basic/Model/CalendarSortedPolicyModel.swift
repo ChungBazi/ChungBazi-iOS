@@ -8,6 +8,7 @@
 import Foundation
 
 struct SortedPolicy {
+    let policyId: Int
     let startDate: Date
     let endDate: Date
     let policyName: String

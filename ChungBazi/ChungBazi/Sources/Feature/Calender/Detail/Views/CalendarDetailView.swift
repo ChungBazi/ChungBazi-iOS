@@ -93,7 +93,8 @@ final class CalendarDetailView: UIView {
         policyInfoTextView.snp.makeConstraints {
             $0.leading.equalTo(dDayPocketContainerView.snp.trailing).offset(28)
             $0.trailing.equalToSuperview().inset(34)
-            $0.centerY.equalTo(dDayPocketContainerView)
+            $0.top.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
         
         policyInfoTextView.addSubviews(policyName, startText, startDate, endText, endDate)

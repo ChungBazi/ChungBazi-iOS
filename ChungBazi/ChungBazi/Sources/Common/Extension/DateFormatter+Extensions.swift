@@ -6,31 +6,36 @@
 //
 
 import Foundation
+import Then
 
 extension DateFormatter {
-    static let shared: DateFormatter = {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        return formatter
-    }()
-    
-    static let yearMonthDay: DateFormatter = {
-        let formatter = DateFormatter.shared
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter
-    }()
-    
-    static let monthDay: DateFormatter = {
-        let formatter = DateFormatter.shared
-        formatter.dateFormat = "M월 d일"
-        return formatter
-    }()
-    
+    static let shared = DateFormatter().then {
+        $0.locale = Locale(identifier: "ko_KR")
+    }
+
+    static let yearMonthDay = DateFormatter().then {
+        $0.locale = Locale(identifier: "ko_KR")
+        $0.timeZone = TimeZone(identifier: "Asia/Seoul")
+        $0.dateFormat = "yyyy-MM-dd"
+    }
+
+    static let yearMonthDayDot = DateFormatter().then {
+        $0.locale = Locale(identifier: "ko_KR")
+        $0.timeZone = TimeZone(identifier: "Asia/Seoul")
+        $0.dateFormat = "yyyy.MM.dd"
+    }
+
+    static let monthDay = DateFormatter().then {
+        $0.locale = Locale(identifier: "ko_KR")
+        $0.timeZone = TimeZone(identifier: "Asia/Seoul")
+        $0.dateFormat = "M월 d일"
+    }
+
     static func convertToDate(_ dateString: String) -> Date? {
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "ko_KR")
-        formatter.timeZone = TimeZone(identifier: "Asia/Seoul")
-        formatter.dateFormat = "yyyy-MM-dd"
-        return formatter.date(from: dateString)
+        return DateFormatter().then {
+            $0.locale = Locale(identifier: "ko_KR")
+            $0.timeZone = TimeZone(identifier: "Asia/Seoul")
+            $0.dateFormat = "yyyy-MM-dd"
+        }.date(from: dateString)
     }
 }

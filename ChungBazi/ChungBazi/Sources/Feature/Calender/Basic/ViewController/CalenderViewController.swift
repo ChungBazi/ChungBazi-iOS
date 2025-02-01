@@ -24,12 +24,14 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = .gray50
         view.addSubview(calendarView)
         calendarView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
+            $0.leading.trailing.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: false, showRightCartButton: true)
     }
     
     // MARK: - Data
@@ -37,6 +39,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         let samplePolicies = createSamplePolicy()
         policies = samplePolicies.map { policy in
             SortedPolicy(
+                policyId: policy.policyId,
                 startDate: DateFormatter.yearMonthDay.date(from: policy.startDate) ?? Date(),
                 endDate: DateFormatter.yearMonthDay.date(from: policy.endDate) ?? Date(),
                 policyName: policy.policyName)
@@ -49,7 +52,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         return [
             Policy(
                 policyId: 1,
-                policyName: "양진구청 마라톤 참가자 모집",
+                policyName: "양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집",
                 startDate: "2025-02-01",
                 endDate: "2025-02-10",
                 documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
@@ -147,8 +150,6 @@ extension CalenderViewController: CalendarViewDelegate {
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.selectedDetentIdentifier = .medium
-            sheet.largestUndimmedDetentIdentifier = .large
-            sheet.prefersGrabberVisible = false
             sheet.delegate = self
         }
 
@@ -159,40 +160,49 @@ extension CalenderViewController: CalendarViewDelegate {
         policyListVC.view.layer.shadowColor = UIColor.black.cgColor
         policyListVC.view.layer.shadowOpacity = 0.16
         policyListVC.view.layer.shadowOffset = CGSize(width: 0, height: 3)
-        policyListVC.view.layer.shadowRadius = 15
+        policyListVC.view.layer.shadowRadius = 30
         policyListVC.view.layer.masksToBounds = false
 
-        navigationController.isModalInPresentation = false
+        let dimmingView = UIView(frame: view.bounds)
+        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        dimmingView.alpha = 0
+        dimmingView.tag = 999
 
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissModal))
-        view.addGestureRecognizer(tapGesture)
-        tapGesture.name = "dismissGesture"
+        view.addSubview(dimmingView)
+        dimmingView.alpha = 1
 
-        present(navigationController, animated: true, completion: nil)
+        policyListVC.presentationController?.delegate = self
+
+        present(navigationController, animated: true)
     }
 
-    @objc private func dismissModal() {
-        dismiss(animated: true, completion: nil)
-
-        if let gestures = view.gestureRecognizers {
-            for gesture in gestures where gesture.name == "dismissGesture" {
-                view.removeGestureRecognizer(gesture)
+    func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
+        if let dimmingView = view.viewWithTag(999) {
+            UIView.animate(withDuration: 0.2, animations: {
+                dimmingView.alpha = 0
+            }) { _ in
+                dimmingView.removeFromSuperview()
             }
         }
     }
     
     private func getPolicies(for date: Date) -> [Policy] {
-        let filteredPolicies = policies.filter { policy in
-            policy.startDate <= date && policy.endDate >= date
-        }
-        
-        let originalPolicies = createSamplePolicy()
-        return filteredPolicies.compactMap { sortedPolicy in
-            originalPolicies.first { originalPolicy in
-                originalPolicy.policyName == sortedPolicy.policyName &&
-                originalPolicy.startDate == DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate) &&
-                originalPolicy.endDate == DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
-            }
+        return policies.compactMap { sortedPolicy in
+            let startDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate)
+            let endDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
+
+            return Policy(
+                policyId: sortedPolicy.policyId,
+                policyName: sortedPolicy.policyName,
+                startDate: startDateString,
+                endDate: endDateString,
+                documentText: "",
+                userDocuments: []
+            )
+        }.filter { policy in
+            guard let policyStart = DateFormatter.yearMonthDay.date(from: policy.startDate),
+                  let policyEnd = DateFormatter.yearMonthDay.date(from: policy.endDate) else { return false }
+            return policyStart <= date && policyEnd >= date
         }
     }
     
