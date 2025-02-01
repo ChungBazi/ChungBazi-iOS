@@ -7,11 +7,14 @@ import UIKit
 
 class SetInterestViewController: UIViewController {
     
+    let userInfoData = UserInfoDataManager.shared
+    let networkService = UserService()
+    
     private var checkStatus: [Bool] // 체크 상태를 저장
     
     private lazy var baseSurveyView = BasicSurveyView(title: "관심 있는 분야를\n선택해주세요", logo: "sixthPageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
-        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToFinish), for: .touchUpInside)
     }
     
     private lazy var checkCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
@@ -68,9 +71,31 @@ class SetInterestViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    @objc private func goToSetPlus() {
+    @objc private func goToFinish() {
+        let selectedInterests = Constants.interestCheckMenu.enumerated().compactMap { index, interest in
+            checkStatus[index] ? interest : nil
+        }
+        // 싱글톤에 관심사 저장
+        UserInfoDataManager.shared.setInterests(selectedInterests)
+        
+        registerUserInfo()
         let vc = FinishSurveyViewController()
         navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    private func registerUserInfo() {
+        let userInfo = userInfoData.getUserInfo()
+        let userInfoDTO = self.networkService.makeUserInfoDTO(region: userInfo.region, employment: userInfo.employment, income: userInfo.income, education: userInfo.education, interests: userInfo.interests, additionInfo: userInfo.additionInfo)
+        self.networkService.postUserInfo(body: userInfoDTO) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
+        }
     }
 }
 

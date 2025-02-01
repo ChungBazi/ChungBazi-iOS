@@ -7,9 +7,11 @@ import UIKit
 
 class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
     
+    let userInfoData = UserInfoDataManager.shared
+    
     private lazy var baseSurveyView = BasicSurveyView(title: "소득분위", logo: "fourthPageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
-        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetRegion), for: .touchUpInside)
     }
     
     private lazy var dropdown = CustomDropdown(title: "분위", hasBorder: true, items: Constants.incomeDropDownItems)
@@ -43,13 +45,14 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         // 드롭다운에서 선택된 항목에 따라 버튼 활성화
         baseSurveyView.nextBtn.setEnabled(isEnabled: true)
+        userInfoData.setIncome(item)
     }
     
     @objc private func goToback() {
         navigationController?.popViewController(animated: true)
     }
     
-    @objc private func goToSetPlus() {
+    @objc private func goToSetRegion() {
         let vc = SetRegionViewController()
         navigationController?.pushViewController(vc, animated: true)
     }

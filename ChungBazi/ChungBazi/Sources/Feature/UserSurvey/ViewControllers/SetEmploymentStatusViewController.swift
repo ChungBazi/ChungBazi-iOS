@@ -7,6 +7,8 @@ import UIKit
 
 class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegate {
     
+    let userInfoData = UserInfoDataManager.shared
+    
     private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: "twicePageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
@@ -43,6 +45,7 @@ class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegat
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         // 드롭다운에서 선택된 항목에 따라 버튼 활성화
         baseSurveyView.nextBtn.setEnabled(isEnabled: true)
+        userInfoData.setEmployment(item)
     }
     
     @objc private func goToback() {
