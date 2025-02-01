@@ -73,4 +73,3 @@ class CustomDropdownView: UIView {
         onDropdownTapped?() // 외부에서 정의한 동작 실행
     }
 }
-

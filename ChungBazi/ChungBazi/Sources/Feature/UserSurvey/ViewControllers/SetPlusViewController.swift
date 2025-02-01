@@ -7,11 +7,13 @@ import UIKit
 
 class SetPlusViewController: UIViewController {
     
+    let userInfoData = UserInfoDataManager.shared
+    
     private var checkStatus: [Bool] // 체크 상태를 저장
     
     private lazy var baseSurveyView = BasicSurveyView(title: "추가사항을\n선택해주세요", logo: "thirdPageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
-        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetIncome), for: .touchUpInside)
     }
     
     private lazy var checkCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
@@ -67,7 +69,13 @@ class SetPlusViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    @objc private func goToSetPlus() {
+    @objc private func goToSetIncome() {
+        let selectedPlus = Constants.plusCheckMenu.enumerated().compactMap { index, plus in
+            checkStatus[index] ? plus : nil
+        }
+        // 싱글톤에 관심사 저장
+        UserInfoDataManager.shared.setAdditionInfo(selectedPlus)
+        
         let vc = SetIncomeLevelViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
