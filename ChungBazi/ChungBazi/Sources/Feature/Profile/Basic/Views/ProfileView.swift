@@ -11,6 +11,8 @@ import Then
 
 protocol ProfileViewDelegate: AnyObject {
     func didTapEditProfile()
+    func didTapNotificationSettings()
+    func didTapAppInfo()
     func didTapLogout()
     func didTapWithdraw()
     func didTapMyRewardView()
@@ -59,7 +61,7 @@ final class ProfileView: UIView {
         $0.backgroundColor = .gray100
     }
     private let tableView = UITableView()
-    private let menuItems = ["알림 설정", "공지사항", "1:1 문의하기", "앱정보", "로그아웃", "탈퇴"]
+    private let menuItems = ["알림 설정", "공지사항", "문의하기", "앱 정보", "로그아웃", "탈퇴"]
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -70,6 +72,15 @@ final class ProfileView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        let totalHeight = CGFloat(menuItems.count * 70)
+        tableView.snp.updateConstraints {
+            $0.height.equalTo(totalHeight)
+        }
     }
     
     private func setupUI() {
@@ -143,7 +154,8 @@ final class ProfileView: UIView {
         tableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(83)
+            $0.bottom.equalToSuperview().inset(70)
+            $0.height.equalTo(1)
         }
         tableView.register(ProfileTableCell.self, forCellReuseIdentifier: "ProfileTableCell")
     }
@@ -180,6 +192,10 @@ extension ProfileView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         switch menuItems[indexPath.row] {
+        case "알림 설정":
+            delegate?.didTapNotificationSettings()
+        case "앱 정보":
+            delegate?.didTapAppInfo()
         case "로그아웃":
             delegate?.didTapLogout()
         case "탈퇴":
