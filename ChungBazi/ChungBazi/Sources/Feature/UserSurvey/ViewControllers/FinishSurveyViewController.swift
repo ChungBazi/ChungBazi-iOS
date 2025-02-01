@@ -20,7 +20,7 @@ class FinishSurveyViewController: UIViewController {
     
     private func goToNextView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            let vc = BaseTabBarController()
+            let vc = MainTabBarController()
             self.navigationController?.pushViewController(vc, animated: true)
         }
     }
