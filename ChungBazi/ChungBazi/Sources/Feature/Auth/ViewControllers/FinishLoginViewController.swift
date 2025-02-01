@@ -26,13 +26,17 @@ class FinishLoginViewController: UIViewController {
         if self.isFirst ?? true {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 let vc = StartSurveyViewController()
-                sceneDelegate.window?.rootViewController = vc
+                let navController = UINavigationController(rootViewController: vc)
+                sceneDelegate.window?.rootViewController = navController
                 sceneDelegate.window?.makeKeyAndVisible()
             }
         } else {
-            let vc = MainTabBarController()
-            sceneDelegate.window?.rootViewController = vc
-            sceneDelegate.window?.makeKeyAndVisible()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                let vc = MainTabBarController()
+                let navController = UINavigationController(rootViewController: vc)
+                sceneDelegate.window?.rootViewController = navController
+                sceneDelegate.window?.makeKeyAndVisible()
+            }
         }
     }
 }
