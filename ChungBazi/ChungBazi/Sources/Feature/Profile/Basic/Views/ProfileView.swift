@@ -161,7 +161,7 @@ final class ProfileView: UIView {
     }
     
     func configure(with data: ProfileModel) {
-        nameLabel.text = data.nickname
+        nameLabel.text = data.name
         emailLabel.text = data.email
     }
     

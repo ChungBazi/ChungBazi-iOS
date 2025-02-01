@@ -24,12 +24,12 @@ import Then
  */
 
 extension UIViewController {
-    func showCustomAlert(title: String, rightButtonText: String, rightButtonAction: (() -> Void)?) {
+    func showCustomAlert(headerTitle: String? = nil, title: String, rightButtonText: String, rightButtonAction: (() -> Void)?) {
         let alertVC = CustomAlertViewController()
         alertVC.modalPresentationStyle = .overFullScreen
         alertVC.modalTransitionStyle = .crossDissolve
         
-        alertVC.configureAlert(title: title, rightButtonText: rightButtonText, rightButtonAction: rightButtonAction)
+        alertVC.configureAlert(headerTitle: headerTitle, title: title, rightButtonText: rightButtonText, rightButtonAction: rightButtonAction)
         
         self.present(alertVC, animated: true, completion: nil)
     }
@@ -44,6 +44,9 @@ class CustomAlertViewController: UIViewController {
         $0.backgroundColor = .gray50
         $0.layer.cornerRadius = 10
     }
+    private let headerLabel = B16_SB(text: "", textColor: .buttonAccent).then {
+        $0.textAlignment = .center
+    }
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
     }
@@ -51,12 +54,37 @@ class CustomAlertViewController: UIViewController {
     private let rightBtn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .buttonAccent, borderWidth: 1, borderColor: .buttonAccent)
     private var rightButtonAction: (() -> Void)?
     
+    private var titleLabelTopConstraint: Constraint?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
     }
     
+    override func updateViewConstraints() {
+        super.updateViewConstraints()
+
+        headerLabel.snp.remakeConstraints { make in
+            if let headerText = headerLabel.text, !headerText.isEmpty {
+                make.top.equalToSuperview().offset(38)
+                make.centerX.equalToSuperview()
+            }
+        }
+        
+        titleLabel.snp.remakeConstraints { make in
+            if let headerText = headerLabel.text, !headerText.isEmpty {
+                make.top.equalTo(headerLabel.snp.bottom).offset(21)
+            } else {
+                make.top.equalToSuperview().offset(38)
+            }
+            make.centerX.equalToSuperview()
+        }
+    }
+    
     private func setupUI() {
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissAlert))
+        dimView.addGestureRecognizer(tapGesture)
+        
         view.addSubviews(dimView, alertView)
         dimView.snp.makeConstraints {
             $0.edges.equalToSuperview()
@@ -66,11 +94,18 @@ class CustomAlertViewController: UIViewController {
             $0.width.equalTo(273)
         }
         
-        alertView.addSubviews(titleLabel, leftBtn, rightBtn)
-        titleLabel.snp.makeConstraints {
+        alertView.addSubviews(headerLabel, titleLabel, leftBtn, rightBtn)
+
+        headerLabel.snp.makeConstraints {
             $0.top.equalToSuperview().inset(40)
             $0.leading.trailing.equalToSuperview().inset(14)
         }
+
+        titleLabel.snp.makeConstraints {
+            titleLabelTopConstraint = $0.top.equalTo(alertView.snp.top).inset(38).constraint
+            $0.leading.trailing.equalToSuperview().inset(14)
+        }
+
         leftBtn.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(27)
             $0.leading.bottom.equalToSuperview().inset(14)
@@ -86,7 +121,8 @@ class CustomAlertViewController: UIViewController {
         rightBtn.addTarget(self, action: #selector(rightButtonTapped), for: .touchUpInside)
     }
     
-    func configureAlert(title: String, rightButtonText: String, rightButtonAction: (() -> Void)?) {
+    func configureAlert(headerTitle: String?, title: String, rightButtonText: String, rightButtonAction: (() -> Void)?) {
+        self.headerLabel.text = headerTitle
         self.titleLabel.text = title
         self.rightBtn.setTitle(rightButtonText, for: .normal)
         self.rightButtonAction = rightButtonAction
@@ -100,5 +136,9 @@ class CustomAlertViewController: UIViewController {
         dismiss(animated: true) {
             self.rightButtonAction?()
         }
+    }
+    
+    @objc private func dismissAlert() {
+        dismiss(animated: true, completion: nil)
     }
 }

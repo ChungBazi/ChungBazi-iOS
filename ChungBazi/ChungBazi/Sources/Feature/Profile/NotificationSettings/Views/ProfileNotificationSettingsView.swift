@@ -49,8 +49,17 @@ extension ProfileNotificationSettingsView: UITableViewDelegate, UITableViewDataS
         cell.configure(with: title, isToggle: true)
         cell.backgroundColor = .gray50
 
-        cell.toggleChangedHandler = { isOn in
+        cell.toggleChangedHandler = { [weak self] isOn in
+            guard let self = self else { return }
             print("\(title) 설정 변경됨: \(isOn)")
+            
+            if indexPath.row == 0 {
+                for i in 1..<self.menuItems.count {
+                    if let otherCell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as? ProfileTableCell {
+                        otherCell.setToggleState(isOn)
+                    }
+                }
+            }
         }
 
         return cell
