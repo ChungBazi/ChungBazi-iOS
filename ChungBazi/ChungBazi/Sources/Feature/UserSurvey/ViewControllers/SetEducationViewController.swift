@@ -8,6 +8,8 @@ import Then
 
 class SetEducationViewController: UIViewController, CustomDropdownDelegate {
     
+    let userInfoData = UserInfoDataManager.shared
+    
     private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
         $0.toggleBackButton()
         $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
@@ -44,6 +46,7 @@ class SetEducationViewController: UIViewController, CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         // 드롭다운에서 선택된 항목에 따라 버튼 활성화
         baseSurveyView.nextBtn.setEnabled(isEnabled: true)
+        userInfoData.setEducation(item)
     }
     
     @objc private func goToSetEmploymentStatus() {

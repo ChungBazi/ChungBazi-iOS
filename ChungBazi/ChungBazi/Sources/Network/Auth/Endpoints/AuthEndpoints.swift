@@ -7,6 +7,7 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 enum AuthEndpoints {
     case postKakaoLogin(data: KakaoLoginRequestDto)
@@ -57,22 +58,15 @@ extension AuthEndpoints: TargetType {
     }
     
     var headers: [String : String]? {
-        var headers: [String: String] = [
-            "Content-type": "application/json"
-        ]
-        
         switch self {
-        case .postReIssueToken, .postLogout, .deleteUser:
-            if let cookies = HTTPCookieStorage.shared.cookies {
-                let cookieHeader = HTTPCookie.requestHeaderFields(with: cookies)
-                for (key, value) in cookieHeader {
-                    headers[key] = value // 쿠키를 헤더에 추가
-                }
-            }
+        case .postKakaoLogin:
+            return ["Content-Type": "application/json"]
         default:
-            break
+            let accessToken = KeychainSwift().get("serverAccessToken")
+            return [
+                "Authorization": "Bearer \(accessToken!)",
+                "Content-type": "application/json"
+            ]
         }
-        
-        return headers
     }
 }
