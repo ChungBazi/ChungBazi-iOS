@@ -19,17 +19,16 @@ class ProfileViewController: UIViewController {
         setupUI()
         profileView.delegate = self
         fetchData()
-        fetchRewardData()
     }
     
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "프로필", showBackButton: false, showCartButton: false, showAlarmButton: false)
+        addCustomNavigationBar(titleText: "프로필", showBackButton: false, showCartButton: false, showAlarmButton: true)
         view.addSubview(profileView)
         profileView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
         }
     }
@@ -40,9 +39,6 @@ class ProfileViewController: UIViewController {
         if let profileData = profileData {
             profileView.configure(with: profileData)
         }
-    }
-    
-    private func fetchRewardData() {
         rewardData = RewardModel(currentReward: 1, myPosts: 2, myComments: 3)
     }
     
@@ -56,11 +52,29 @@ class ProfileViewController: UIViewController {
         }
         navigationController?.pushViewController(editVC, animated: true)
     }
+    
+    private func navigateToNotificationSettings() {
+        let vc = ProfileNotificationSettingsViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    private func navigateToAppInfo() {
+        let vc = ProfileAppInfoViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
 extension ProfileViewController: ProfileViewDelegate {
     func didTapEditProfile() {
         navigateToEditProfile()
+    }
+    
+    func didTapNotificationSettings() {
+        navigateToNotificationSettings()
+    }
+    
+    func didTapAppInfo() {
+        navigateToAppInfo()
     }
     
     func didTapLogout() {

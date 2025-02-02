@@ -39,7 +39,6 @@ final class CalendarDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        fetchData()
         if let policy = policy {
             bindPolicyData(policy)
         }
@@ -50,12 +49,17 @@ final class CalendarDetailViewController: UIViewController {
         self.didChangeValue(segment: self.segmentedControl)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
+        addCustomGrabber(to: view)
+    }
+    
     // MARK: - Setup
     private func setupUI() {
-        view.backgroundColor = .gray50
+        view.backgroundColor = .white
         
         setupCalendarDetailView()
-        setupNavigationBar()
         segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
         segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
     }
@@ -64,8 +68,8 @@ final class CalendarDetailViewController: UIViewController {
         view.addSubview(calendarDetailView)
         calendarDetailView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
+            $0.top.equalTo(view.safeAreaLayoutGuide.snp.top)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         
         let contentView = calendarDetailView.accessibleContentView
@@ -95,17 +99,6 @@ final class CalendarDetailViewController: UIViewController {
         
         firstView.isHidden = false
         secondView.isHidden = true
-    }
-    
-    private func setupNavigationBar() {
-        fillSafeArea(position: .top, color: .white)
-        addCustomNavigationBar(
-            titleText: "",
-            showBackButton: false,
-            showCartButton: true,
-            showAlarmButton: true,
-            backgroundColor: .white
-        )
     }
     
     private var shouldHideFirstView: Bool? {
@@ -159,25 +152,6 @@ final class CalendarDetailViewController: UIViewController {
     }
     
     // MARK: - Data
-    private func fetchData() {
-        let samplePolicy = createSamplePolicy()
-        bindPolicyData(samplePolicy)
-    }
-
-    private func createSamplePolicy() -> Policy {
-        return Policy(
-            policyId: 1,
-            policyName: "양진구청 마라톤 참가자 모집",
-            startDate: "2024-12-12",
-            endDate: "2024-12-23",
-            documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
-            userDocuments: [
-                Document(documentId: 1, name: "주민등록본", isChecked: true),
-                Document(documentId: 2, name: "학생증", isChecked: false)
-            ]
-        )
-    }
-    
     private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)

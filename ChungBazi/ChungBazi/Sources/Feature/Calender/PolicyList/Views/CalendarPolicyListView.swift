@@ -16,6 +16,7 @@ protocol CalendarPolicyListViewDelegate: AnyObject {
 final class CalendarPolicyListView: UIView {
     
     weak var delegate: CalendarPolicyListViewDelegate?
+    private var selectedDate: String = ""
     
     private let titleLabel = T20_SB(text: "나의 정책")
     private let tableView = UITableView()
@@ -34,30 +35,43 @@ final class CalendarPolicyListView: UIView {
     
     private func setupUI() {
         addSubviews(titleLabel, tableView)
+        
         titleLabel.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(36)
+            $0.top.equalToSuperview().inset(41)
             $0.centerX.equalToSuperview()
+        }
+        
+        tableView.snp.makeConstraints {
+            $0.top.equalTo(titleLabel.snp.bottom).offset(26)
+            $0.leading.trailing.bottom.equalToSuperview().inset(12)
         }
         
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
-        tableView.layer.cornerRadius = 10
-        tableView.snp.makeConstraints {
-            $0.top.equalTo(titleLabel.snp.bottom).offset(26)
-            $0.leading.trailing.bottom.equalToSuperview()
-        }
-        
-        tableView.register(CalendarPolicyListCell.self, forCellReuseIdentifier: "PolicyCell")
+        tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 50
+        tableView.contentInset = UIEdgeInsets(top: 0, left: 0, bottom: 12, right: 0)
+        tableView.register(CalendarPolicyListCell.self, forCellReuseIdentifier: "CalendarPolicyListCell")
     }
     
     func updateView(with date: String, policies: [Policy]) {
+        self.selectedDate = date
         self.policies = policies
         
         guard let dateObject = DateFormatter.yearMonthDay.date(from: date) else {
-            print("잘못된 날짜 형식: \(date)")
+            print("🚨 잘못된 날짜 형식: \(date)")
             return
         }
-        
+
+        self.policies = policies.filter {
+            guard let start = DateFormatter.yearMonthDay.date(from: $0.startDate),
+                  let end = DateFormatter.yearMonthDay.date(from: $0.endDate) else {
+                print("🚨 날짜 변환 실패 - 정책: \($0.policyName)")
+                return false
+            }
+            return start == dateObject || end == dateObject
+        }
+
         let monthDayDate = DateFormatter.monthDay.string(from: dateObject)
         titleLabel.text = "\(monthDayDate) 나의 정책"
         tableView.reloadData()
@@ -65,40 +79,30 @@ final class CalendarPolicyListView: UIView {
 }
 
 extension CalendarPolicyListView: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 81
-    }
-    
-    func tableView(_ tableView: UITableView, willDisplay cell: UITableViewCell, forRowAt indexPath: IndexPath) {
-        cell.backgroundColor = .blue100
-    }
-    
-    func tableView(_ tableView: UITableView, heightForFooterInSection section: Int) -> CGFloat {
-        12
-    }
-    
-    func tableView(_ tableView: UITableView, viewForFooterInSection section: Int) -> UIView? {
-        let spacer = UIView()
-        spacer.backgroundColor = .clear
-        return spacer
-    }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedPolicy = policies[indexPath.row]
         delegate?.presentCalendarDetailViewController(for: selectedPolicy)
     }
     
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return policies.count
-    }
-    
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "PolicyCell", for: indexPath) as? CalendarPolicyListCell else {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "CalendarPolicyListCell", for: indexPath) as? CalendarPolicyListCell else {
             return UITableViewCell()
         }
         let policy = policies[indexPath.row]
-        cell.configure(with: policy)
+        cell.configure(with: policy, isStart: policy.startDate == selectedDate)
         return cell
     }
-}
 
+    func numberOfSections(in tableView: UITableView) -> Int {
+        return 1
+    }
+
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return policies.count
+    }
+
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return UITableView.automaticDimension
+    }
+}

@@ -8,14 +8,16 @@ import Then
 
 class SetRegionViewController: UIViewController {
     
+    let userInfoData = UserInfoDataManager.shared
+    
     private let firstSlotItems = Constants.regionSiMenu
     private let secondSlotItems = Constants.regionGuMenu
-    private var selectedFirstSlot: String?
-    private var selectedSecondSlot: String?
+    private var selectedFirstSlot: String = "서울시"
+    private var selectedSecondSlot: String = ""
     
     private lazy var baseSurveyView = BasicSurveyView(title: "정책 확인을 원하는 지역을\n선택해주세요", logo: "fifthPageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
-        $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
+        $0.nextBtn.addTarget(self, action: #selector(goToSetInterests), for: .touchUpInside)
     }
     
     private lazy var regionPickerView = UIPickerView().then {
@@ -48,7 +50,7 @@ class SetRegionViewController: UIViewController {
     }
     
     private func updateNextButtonState() {
-        let isEnabled = selectedSecondSlot != nil
+        let isEnabled = selectedSecondSlot != ""
         baseSurveyView.nextBtn.setEnabled(isEnabled: isEnabled)
     }
     
@@ -56,7 +58,10 @@ class SetRegionViewController: UIViewController {
         navigationController?.popViewController(animated: true)
     }
     
-    @objc private func goToSetPlus() {
+    @objc private func goToSetInterests() {
+        
+        userInfoData.setRegion("\(selectedFirstSlot) \(selectedSecondSlot)")
+        
         let vc = SetInterestViewController()
         navigationController?.pushViewController(vc, animated: true)
     }

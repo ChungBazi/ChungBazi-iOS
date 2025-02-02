@@ -11,7 +11,7 @@ import Then
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -63,6 +63,17 @@ extension UIViewController {
                 make.trailing.equalToSuperview().inset(28)
             }
         }
+        if showRightCartButton {
+            let alarmButton = UIButton().then {
+                $0.setImage(.cartIcon, for: .normal)
+                $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(alarmButton)
+            alarmButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
         
         titleLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
@@ -101,7 +112,7 @@ extension UIViewController {
         navigationBarView.addSubview(buttonStackView)
 
         buttonStackView.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().inset(-10)
+            make.bottom.equalToSuperview().inset(10)
             make.leading.equalToSuperview().offset(30)
         }
     }

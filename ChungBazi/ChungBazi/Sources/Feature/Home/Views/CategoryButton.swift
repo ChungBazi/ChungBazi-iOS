@@ -42,7 +42,7 @@ class CategoryButton: UIButton {
         iconImageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()
             make.centerY.equalToSuperview().offset(-10)
-            make.width.height.equalTo(20)
+            make.width.height.equalTo(31)
         }
 
         customTitleLabel.snp.makeConstraints { make in

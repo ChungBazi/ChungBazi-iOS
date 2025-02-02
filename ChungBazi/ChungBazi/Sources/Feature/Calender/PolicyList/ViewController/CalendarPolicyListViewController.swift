@@ -20,6 +20,10 @@ final class CalendarPolicyListViewController: UIViewController {
         calendarPolicyListView.delegate = self
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        addCustomGrabber(to: view)
+    }
     private func setupUI() {
         view.backgroundColor = .white
         view.addSubview(calendarPolicyListView)

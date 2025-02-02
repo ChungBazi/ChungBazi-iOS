@@ -50,8 +50,8 @@ class MainTabBarController: UITabBarController {
     }
 
     private func configureTabBarItemFonts() {
-        let selectedFont = UIFont.ptdMediumFont(ofSize: 12)
-        let unselectedFont = UIFont.ptdMediumFont(ofSize: 12)
+        let selectedFont = UIFont.ptdMediumFont(ofSize: 14)
+        let unselectedFont = UIFont.ptdMediumFont(ofSize: 14)
 
         let selectedAttributes: [NSAttributedString.Key: Any] = [
             .font: selectedFont,
@@ -71,8 +71,10 @@ class MainTabBarController: UITabBarController {
     }
     
     private func createTabBarItem(title: String, image: UIImage?, tag: Int) -> UITabBarItem {
-        let tabBarItem = UITabBarItem(title: title, image: image, tag: tag)
-        tabBarItem.imageInsets = UIEdgeInsets(top: 6, left: 0, bottom: -6, right: 0)
+        let resizedImage = image?.resize(to: CGSize(width: 24, height: 24))
+        let tabBarItem = UITabBarItem(title: title, image: resizedImage?.withRenderingMode(.alwaysTemplate), tag: tag)
+        tabBarItem.selectedImage = resizedImage?.withTintColor(.blue700, renderingMode: .alwaysOriginal)
+        
         tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 3)
         
         return tabBarItem
@@ -92,32 +94,52 @@ class MainTabBarController: UITabBarController {
         
         override init(frame: CGRect) {
             super.init(frame: frame)
+            setupBackgroundView()
         }
         
         required init?(coder: NSCoder) {
             fatalError("init(coder:) has not been implemented")
         }
         
+        private func setupBackgroundView() {
+            backgroundView.layer.cornerRadius = 10
+            backgroundView.layer.masksToBounds = true
+            backgroundView.backgroundColor = .white
+            addSubview(backgroundView)
+            sendSubviewToBack(backgroundView)
+        }
+        
         override func layoutSubviews() {
             super.layoutSubviews()
-            guard let superview = self.superview else { return }
             
+            guard let superview = self.superview else { return }
             let safeAreaBottom = superview.safeAreaInsets.bottom
             var newFrame = frame
             newFrame.size.height = Constants.tabBarHeight + safeAreaBottom
             newFrame.origin.y = superview.bounds.height - newFrame.size.height
             frame = newFrame
             
-            let roundedPath = UIBezierPath(
-                roundedRect: bounds,
-                byRoundingCorners: [.topLeft, .topRight],
-                cornerRadii: CGSize(width: 10, height: 10)
-            )
-            let maskLayer = CAShapeLayer()
-            maskLayer.path = roundedPath.cgPath
-            layer.mask = maskLayer
+            backgroundView.frame = bounds
             
-            backgroundColor = .white
+            layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
+            layer.shadowOffset = CGSize(width: 0, height: 3)
+            layer.shadowRadius = 10
+            layer.shadowOpacity = 1
+            layer.masksToBounds = false
+            
+            let padding: CGFloat = 15
+            let tabBarItemWidth = (bounds.width - (2 * padding)) / CGFloat(items?.count ?? 1)
+            var startX = padding
+
+            for subview in subviews where subview is UIControl {
+                subview.frame = CGRect(
+                    x: startX,
+                    y: subview.frame.origin.y,
+                    width: tabBarItemWidth,
+                    height: subview.frame.height
+                )
+                startX += tabBarItemWidth
+            }
         }
     }
 }

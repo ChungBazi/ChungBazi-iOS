@@ -43,7 +43,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false)
+        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: true)
         
         view.addSubview(scrollView)
         scrollView.addSubview(profileEditView)
