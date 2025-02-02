@@ -13,6 +13,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     private let calendarView = CalendarView()
     private var selectedDate: String?
     private var policies: [SortedPolicy] = []
+    private var dimmingView: UIView?
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -139,6 +140,8 @@ extension CalenderViewController: CalendarViewDelegate {
     }
     
     func presentPolicyListViewController(for date: Date) {
+        addDimmingView()
+
         let policyListVC = CalendarPolicyListViewController()
         policyListVC.modalPresentationStyle = .pageSheet
         policyListVC.selectedDate = DateFormatter.yearMonthDay.string(from: date)
@@ -151,39 +154,14 @@ extension CalenderViewController: CalendarViewDelegate {
             sheet.detents = [.medium(), .large()]
             sheet.selectedDetentIdentifier = .medium
             sheet.delegate = self
+            sheet.largestUndimmedDetentIdentifier = .large
         }
-
-        navigationController.view.layer.masksToBounds = false
-        navigationController.view.clipsToBounds = false
-
-        policyListVC.view.layer.cornerRadius = 20
-        policyListVC.view.layer.shadowColor = UIColor.black.cgColor
-        policyListVC.view.layer.shadowOpacity = 0.16
-        policyListVC.view.layer.shadowOffset = CGSize(width: 0, height: 3)
-        policyListVC.view.layer.shadowRadius = 30
-        policyListVC.view.layer.masksToBounds = false
-
-        let dimmingView = UIView(frame: view.bounds)
-        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.35)
-        dimmingView.alpha = 0
-        dimmingView.tag = 999
-
-        view.addSubview(dimmingView)
-        dimmingView.alpha = 1
-
-        policyListVC.presentationController?.delegate = self
 
         present(navigationController, animated: true)
     }
 
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
-        if let dimmingView = view.viewWithTag(999) {
-            UIView.animate(withDuration: 0.2, animations: {
-                dimmingView.alpha = 0
-            }) { _ in
-                dimmingView.removeFromSuperview()
-            }
-        }
+        removeDimmingView()
     }
     
     private func getPolicies(for date: Date) -> [Policy] {
@@ -215,6 +193,40 @@ extension CalenderViewController: CalendarViewDelegate {
     }
 }
 
-extension CalendarDetailViewController: UISheetPresentationControllerDelegate {
+// MARK: - Dimming View Handling
+extension CalenderViewController {
+    private func addDimmingView() {
+        let dimmingView = UIView(frame: view.bounds)
+        dimmingView.backgroundColor = UIColor.black.withAlphaComponent(0.35)
+        dimmingView.tag = 999
+        dimmingView.alpha = 0
+        view.addSubview(dimmingView)
+        
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissPresentedController))
+        dimmingView.addGestureRecognizer(tapGesture)
+        
+        UIView.animate(withDuration: 0.2) {
+            dimmingView.alpha = 1
+        }
+        
+        self.dimmingView = dimmingView
+    }
+
+    private func removeDimmingView() {
+        if let dimmingView = view.viewWithTag(999) {
+            UIView.animate(withDuration: 0.2, animations: {
+                dimmingView.alpha = 0
+            }) { _ in
+                dimmingView.removeFromSuperview()
+            }
+        }
+    }
     
+    @objc private func dismissPresentedController() {
+        dismiss(animated: true) {
+            self.removeDimmingView()
+        }
+    }
 }
+
+extension CalendarDetailViewController: UISheetPresentationControllerDelegate { }

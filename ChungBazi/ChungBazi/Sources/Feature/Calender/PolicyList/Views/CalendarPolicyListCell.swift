@@ -11,6 +11,7 @@ import Then
 
 final class CalendarPolicyListCell: UITableViewCell {
     
+    private let containerView = UIView()
     private let dotView = UIView()
     private let policyName = B16_M(text: "policyName", textColor: .black)
     private let dateLabel = B14_M(text: "date", textColor: .blue700)
@@ -27,8 +28,19 @@ final class CalendarPolicyListCell: UITableViewCell {
     
     private func setupUI() {
         selectionStyle = .none
-        addSubviews(dotView, policyName, dateLabel)
-        layer.cornerRadius = 10
+        
+        backgroundColor = .clear
+        contentView.addSubview(containerView)
+        
+        containerView.layer.cornerRadius = 10
+        containerView.backgroundColor = .white
+
+        containerView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(12)
+        }
+
+        containerView.addSubviews(dotView, policyName, dateLabel)
         
         dotView.layer.cornerRadius = 6
         dotView.layer.masksToBounds = true
@@ -52,17 +64,17 @@ final class CalendarPolicyListCell: UITableViewCell {
     
     func configure(with policy: Policy, isStart: Bool) {
         if isStart {
-            backgroundColor = .white
-            layer.borderColor = UIColor.gray400.cgColor
-            layer.borderWidth = 1
+            containerView.backgroundColor = .white
+            containerView.layer.borderColor = UIColor.gray400.cgColor
+            containerView.layer.borderWidth = 1
             
             dotView.layer.cornerRadius = 6
             dotView.layer.borderWidth = 2
             dotView.layer.borderColor = UIColor.blue700.cgColor
             dotView.backgroundColor = .clear
         } else {
-            backgroundColor = .blue100
-            layer.borderWidth = 0
+            containerView.backgroundColor = .blue100
+            containerView.layer.borderWidth = 0
             
             dotView.layer.cornerRadius = 6
             dotView.backgroundColor = .blue700
