@@ -31,7 +31,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
             $0.leading.trailing.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: false, showRightCartButton: true)
+        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: false, showRightCartButton: true, showLeftSearchButton: true)
     }
     
     // MARK: - Data

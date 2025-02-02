@@ -35,7 +35,7 @@ class ProfileViewController: UIViewController {
     
     private func fetchData() {
         // FIXME: 추후 서버 연결 시 아래 코드 제거
-        profileData = ProfileModel(nickname: "홍길동", email: "hong@example.com")
+        profileData = ProfileModel(nickname: "서은혜", email: "seoeh@example.com")
         if let profileData = profileData {
             profileView.configure(with: profileData)
         }
