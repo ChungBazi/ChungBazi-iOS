@@ -53,14 +53,11 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         return [
             Policy(
                 policyId: 1,
-                policyName: "양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집양진구청 마라톤 참가자 모집",
+                policyName: "양진구청 마라톤 참가자 모집",
                 startDate: "2025-01-31",
                 endDate: "2025-02-10",
                 documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
-                userDocuments: [
-                    Document(documentId: 1, name: "주민등록본", isChecked: true),
-                    Document(documentId: 2, name: "학생증", isChecked: false)
-                ]
+                userDocuments: []
             ),
             Policy(
                 policyId: 2,
@@ -166,6 +163,10 @@ extension CalenderViewController: CalendarViewDelegate {
     
     private func getPolicies(for date: Date) -> [Policy] {
         return policies.compactMap { sortedPolicy in
+            guard let originalPolicy = createSamplePolicy().first(where: { $0.policyId == sortedPolicy.policyId }) else {
+                return nil
+            }
+
             let startDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate)
             let endDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
 
@@ -174,8 +175,8 @@ extension CalenderViewController: CalendarViewDelegate {
                 policyName: sortedPolicy.policyName,
                 startDate: startDateString,
                 endDate: endDateString,
-                documentText: "",
-                userDocuments: []
+                documentText: originalPolicy.documentText,
+                userDocuments: originalPolicy.userDocuments
             )
         }.filter { policy in
             guard let policyStart = DateFormatter.yearMonthDay.date(from: policy.startDate),

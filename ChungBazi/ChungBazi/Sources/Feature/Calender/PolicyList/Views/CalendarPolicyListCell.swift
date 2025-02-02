@@ -36,7 +36,7 @@ final class CalendarPolicyListCell: UITableViewCell {
         containerView.backgroundColor = .white
 
         containerView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+            $0.top.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview().inset(12)
         }
 
