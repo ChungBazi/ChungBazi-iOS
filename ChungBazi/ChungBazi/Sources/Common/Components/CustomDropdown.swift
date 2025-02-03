@@ -38,11 +38,11 @@ class CustomDropdown: UIView {
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initializer
-    init(height: CGFloat, title: String, hasBorder: Bool, items: [String]) {
+    init(height: CGFloat, fontSize: CGFloat, title: String, hasBorder: Bool, items: [String]) {
         self.viewHeight = height
         self.cellHeight = height
         self.dropdownItems = items
-        self.dropdownView = CustomDropdownView(title: title, hasBorder: hasBorder)
+        self.dropdownView = CustomDropdownView(title: title, fontSize: fontSize, hasBorder: hasBorder)
         super.init(frame: .zero)
         setupUI()
         setupGesture()

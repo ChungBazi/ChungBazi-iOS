@@ -14,7 +14,7 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
         $0.nextBtn.addTarget(self, action: #selector(goToSetRegion), for: .touchUpInside)
     }
     
-    private lazy var dropdown = CustomDropdown(height: 48, title: "분위", hasBorder: true, items: Constants.incomeDropDownItems)
+    private lazy var dropdown = CustomDropdown(height: 48, fontSize: 16, title: "분위", hasBorder: true, items: Constants.incomeDropDownItems)
 
     override func viewDidLoad() {
         super.viewDidLoad()
