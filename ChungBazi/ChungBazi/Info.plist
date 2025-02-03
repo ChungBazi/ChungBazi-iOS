@@ -40,6 +40,7 @@
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
+        <string>AssacomFreeGothic-Regular.otf</string>
 		<string>Pretendard-Black.otf</string>
 		<string>Pretendard-Bold.otf</string>
 		<string>Pretendard-ExtraBold.otf</string>
@@ -49,7 +50,6 @@
 		<string>Pretendard-Regular.otf</string>
 		<string>Pretendard-SemiBold.otf</string>
 		<string>Pretendard-Thin.otf</string>
-		<string>AssacomFreeGothic.otf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
