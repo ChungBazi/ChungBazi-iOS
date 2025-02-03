@@ -39,6 +39,7 @@ class SplashViewController: UIViewController {
         // 1초 후 텍스트 업데이트
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.splashLabel.text = "청바지"
+            self.splashLabel.font = UIFont.afgRegularFont(ofSize: 28)
             
             // 1초 후 메인 화면으로 전환
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {

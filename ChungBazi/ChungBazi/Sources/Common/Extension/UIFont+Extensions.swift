@@ -17,7 +17,7 @@ struct AppFontName {
     static let pBold = "Pretendard-Bold"
     static let pSemiBold = "Pretendard-SemiBold"
     static let pBlack = "Pretendard-Black"
-    static let afgRegular = "AssacomFreeGothic"
+    static let afgRegular = "AssacomFreeGothic-Regular"
 }
 
 extension UIFont {
@@ -71,5 +71,3 @@ extension UIFont {
         return UIFont(name: AppFontName.afgRegular, size: size)!
     }
 }
-
-UIFont.afg
