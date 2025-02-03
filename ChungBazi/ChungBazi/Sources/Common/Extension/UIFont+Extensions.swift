@@ -17,6 +17,7 @@ struct AppFontName {
     static let pBold = "Pretendard-Bold"
     static let pSemiBold = "Pretendard-SemiBold"
     static let pBlack = "Pretendard-Black"
+    static let afgRegular = "AssacomFreeGothic"
 }
 
 extension UIFont {
@@ -64,4 +65,11 @@ extension UIFont {
     public class func ptdBlackFont(ofSize size: CGFloat) -> UIFont {
         return UIFont(name: AppFontName.pBlack, size: size)!
     }
+    
+    // AssacomFreeGothic Regular Font - '청바지'에만 쓰임
+    public class func afgRegularFont(ofSize size: CGFloat) -> UIFont {
+        return UIFont(name: AppFontName.afgRegular, size: size)!
+    }
 }
+
+UIFont.afg
