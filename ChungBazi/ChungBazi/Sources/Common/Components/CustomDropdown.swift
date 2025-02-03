@@ -16,8 +16,8 @@ class CustomDropdown: UIView {
     // MARK: - Properties
     weak var delegate: CustomDropdownDelegate?
     
-    private let viewHeight: CGFloat = 48
-    private let cellHeight: CGFloat = 48 // 각 셀의 높이
+    private var viewHeight: CGFloat = 0
+    private var cellHeight: CGFloat = 0 // 각 셀의 높이
     
     private let dropdownView: CustomDropdownView
     
@@ -38,7 +38,9 @@ class CustomDropdown: UIView {
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initializer
-    init(title: String, hasBorder: Bool, items: [String]) {
+    init(height: CGFloat, title: String, hasBorder: Bool, items: [String]) {
+        self.viewHeight = height
+        self.cellHeight = height
         self.dropdownItems = items
         self.dropdownView = CustomDropdownView(title: title, hasBorder: hasBorder)
         super.init(frame: .zero)
