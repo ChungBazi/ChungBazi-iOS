@@ -18,6 +18,7 @@ class CustomDropdown: UIView {
     
     private var viewHeight: CGFloat = 0
     private var cellHeight: CGFloat = 0 // 각 셀의 높이
+    private var fontSize: CGFloat = 0 // 폰트 크기
     
     private let dropdownView: CustomDropdownView
     
@@ -41,6 +42,7 @@ class CustomDropdown: UIView {
     init(height: CGFloat, fontSize: CGFloat, title: String, hasBorder: Bool, items: [String]) {
         self.viewHeight = height
         self.cellHeight = height
+        self.fontSize = fontSize
         self.dropdownItems = items
         self.dropdownView = CustomDropdownView(title: title, fontSize: fontSize, hasBorder: hasBorder)
         super.init(frame: .zero)
@@ -152,7 +154,7 @@ extension CustomDropdown: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "DropdownCell") ?? UITableViewCell(style: .default, reuseIdentifier: "DropdownCell")
         cell.textLabel?.text = dropdownItems[indexPath.row]
-        cell.textLabel?.font = UIFont.ptdMediumFont(ofSize: 16)
+        cell.textLabel?.font = UIFont.ptdMediumFont(ofSize: fontSize)
         cell.textLabel?.textColor = UIColor.gray400
         
         cell.selectionStyle = .none
