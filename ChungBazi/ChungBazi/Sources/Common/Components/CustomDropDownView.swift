@@ -12,7 +12,6 @@ class CustomDropdownView: UIView {
     // MARK: - Properties
     public lazy var titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "취업 상태를 선택하세요"
         label.font = UIFont.ptdMediumFont(ofSize: 16) // 원하는 폰트
         label.textColor = UIColor.gray400
         label.textAlignment = .left
@@ -31,9 +30,10 @@ class CustomDropdownView: UIView {
     public var onDropdownTapped: (() -> Void)? // 드롭다운 클릭 시 동작
     
     // MARK: - Initializer
-    init(title: String, hasBorder: Bool) {
+    init(title: String, fontSize: CGFloat, hasBorder: Bool) {
         super.init(frame: .zero)
         titleLabel.text = title
+        titleLabel.font = UIFont.ptdMediumFont(ofSize: fontSize)
         layer.borderWidth = hasBorder ? 1 : 0
         layer.borderColor = hasBorder ? UIColor.gray400.cgColor : nil
         setupUI()

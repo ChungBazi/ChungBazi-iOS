@@ -23,6 +23,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         window?.rootViewController = navigationController
         window?.makeKeyAndVisible()
+        for fontFamily in UIFont.familyNames {
+            for fontName in UIFont.fontNames(forFamilyName: fontFamily) {
+                print(fontName)
+            }
+        }
     }
 
     // 🔹 카카오 로그인 리다이렉트 처리 추가
