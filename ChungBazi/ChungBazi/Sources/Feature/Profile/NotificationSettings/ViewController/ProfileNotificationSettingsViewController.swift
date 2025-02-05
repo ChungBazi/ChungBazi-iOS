@@ -11,6 +11,8 @@ final class ProfileNotificationSettingsViewController: UIViewController {
     
     private let profileNotificationSettingsView = ProfileNotificationSettingsView()
     
+    let networkService = NotificationService()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -35,6 +37,36 @@ final class ProfileNotificationSettingsViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
+        }
+    }
+    
+    private func fetchAlarmSetting() {
+        self.networkService.fetchAlarmSetting() { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                self.notificationSettings = NotificationSettings(
+                    push: response.,
+                    cart: response.policyAlarm,
+                    community: response.communityAlarm,
+                    reward: response.rewardAlarm
+                )
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func patchAlarmSetting(data: [NotificationModel]) {
+        let noticeSetting = self.networkService.makeNoticeSettingDTO(policyAlarm: data[0].isOn, communityAlarm: data[1].isOn, rewardAlarm: menuItems[2].isOn, noticeAlarm: true)
+        self.networkService.patchAlarmSetting(body: noticeSetting) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+            case .failure(let error):
+                print(error)
+            }
         }
     }
     
