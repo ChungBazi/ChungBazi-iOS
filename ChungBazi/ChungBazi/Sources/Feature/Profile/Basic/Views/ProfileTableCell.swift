@@ -68,4 +68,9 @@ final class ProfileTableCell: UITableViewCell {
     @objc private func toggleValueChanged(_ sender: UISwitch) {
         toggleChangedHandler?(sender.isOn)
     }
+    
+    func setToggleState(_ isOn: Bool) {
+        toggleSwitch.setOn(isOn, animated: true)
+        toggleChangedHandler?(isOn)
+    }
 }

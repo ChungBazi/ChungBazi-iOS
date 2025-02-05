@@ -31,7 +31,6 @@ extension UIButton {
     static func createWithImage(
         image: UIImage?,
         contentMode: UIView.ContentMode = .scaleAspectFit,
-        tintColor: UIColor? = .gray800,
         cornerRadius: CGFloat = 0,
         target: Any? = nil,
         action: Selector? = nil,
@@ -41,9 +40,6 @@ extension UIButton {
             $0.setImage(image, for: .normal)
             $0.imageView?.contentMode = contentMode
             $0.clipsToBounds = true
-            if let tintColor = tintColor {
-                $0.tintColor = tintColor
-            }
             $0.layer.cornerRadius = cornerRadius
             $0.backgroundColor = .clear
             $0.contentEdgeInsets = touchAreaInsets

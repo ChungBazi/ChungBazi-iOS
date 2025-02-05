@@ -37,7 +37,9 @@ final class ProfileView: UIView {
         image: .moveIcon,
         target: self,
         action: #selector(editProfileBtnTapped)
-    )
+    ).then {
+        $0.tintColor = .gray800
+    }
     private let emailLabel = B14_M(text: "", textColor: .gray500)
     
     private let myRewardView = UIView()
@@ -161,7 +163,7 @@ final class ProfileView: UIView {
     }
     
     func configure(with data: ProfileModel) {
-        nameLabel.text = data.nickname
+        nameLabel.text = data.name
         emailLabel.text = data.email
     }
     
