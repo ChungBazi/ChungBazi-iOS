@@ -30,3 +30,18 @@ struct NotificationInfo: Decodable {
         self.read = read
     }
 }
+
+struct NoticeSettingResponseDto: Decodable {
+    let policyAlarm: Bool
+    let communityAlarm: Bool
+    let rewardAlarm: Bool
+    let noticeAlarm: Bool
+    
+    init(policyAlarm: Bool, communityAlarm: Bool, rewardAlarm: Bool, noticeAlarm: Bool) {
+        self.policyAlarm = policyAlarm
+        self.communityAlarm = communityAlarm
+        self.rewardAlarm = rewardAlarm
+        self.noticeAlarm = noticeAlarm
+    }
+}
+
