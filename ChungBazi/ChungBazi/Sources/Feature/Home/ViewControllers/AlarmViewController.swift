@@ -7,13 +7,21 @@ import UIKit
 
 class AlarmViewController: UIViewController {
     
+    let networkService = NotificationService()
+    var alarmList: [AlarmModel] = []
+    var alarmType: String?
+    var nextCursor = 0
+    var hasNext: Bool = false
+    
     private lazy var entireBtn = createAlarmKindButton(title: "전체", action: #selector(alarmKindButtonTapped))
     
     private lazy var calendarBtn = createAlarmKindButton(title: "캘린더", action: #selector(alarmKindButtonTapped))
     
     private lazy var communityBtn = createAlarmKindButton(title: "커뮤니티", action: #selector(alarmKindButtonTapped))
     
-    private lazy var buttonStackView = UIStackView(arrangedSubviews: [entireBtn, calendarBtn, communityBtn]).then {
+    private lazy var rewardBtn = createAlarmKindButton(title: "리워드", action: #selector(alarmKindButtonTapped))
+    
+    private lazy var buttonStackView = UIStackView(arrangedSubviews: [entireBtn, calendarBtn, communityBtn, rewardBtn]).then {
         $0.axis = .horizontal // 가로 방향으로 정렬
         $0.spacing = 11       // 버튼 간 간격
         $0.alignment = .leading  // 버튼의 크기를 동일하게
@@ -40,7 +48,9 @@ class AlarmViewController: UIViewController {
         addCustomNavigationBar(titleText: "알림", showBackButton: true, showCartButton: false, showAlarmButton: false)
         addComoponents()
         setConstraints()
+        setBtnTag()
         alarmKindButtonTapped(entireBtn)
+     //   fetchAlarmList(type: "", cursor: 0)
     }
     
     private func createAlarmKindButton(
@@ -77,7 +87,7 @@ class AlarmViewController: UIViewController {
     }
     
     @objc private func alarmKindButtonTapped(_ sender: UIButton) {
-        let buttons = [entireBtn, calendarBtn, communityBtn]
+        let buttons = [entireBtn, calendarBtn, communityBtn, rewardBtn]
         buttons.forEach { button in
             button.backgroundColor = .clear
             button.setTitleColor(UIColor.gray800, for: .normal)
@@ -90,6 +100,23 @@ class AlarmViewController: UIViewController {
         sender.setTitleColor(.white, for: .normal)
         sender.layer.borderWidth = 0
         sender.layer.borderColor = nil
+        
+        let type: AlarmType
+        
+        switch sender.tag {
+        case 0:
+            type = .entire
+        case 1:
+            type = .policy
+        case 2:
+            type = .community
+        case 3:
+            type = .reward
+        default:
+            type = .unknown
+        }
+        
+        fetchAlarmList(type: type.rawValue, cursor: 0)
     }
     
     private func addComoponents() {
@@ -108,20 +135,89 @@ class AlarmViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
+    
+    private func setBtnTag() {
+        entireBtn.tag = 0
+        calendarBtn.tag = 1
+        communityBtn.tag = 2
+        rewardBtn.tag = 3
+    }
+    
+    private func fetchAlarmList(type: String, cursor: Int) {
+        self.networkService.fetchAlarmList(type: type, cursor: cursor) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let response = response,
+                      let alarmContent = response.notifications else { return }
+                // 알림 15개 매핑
+                let nextAlarmDatas: [AlarmModel] = alarmContent.compactMap { data in
+                    guard let notificationId = data.notificationId,
+                          let message = data.message,
+                          let typeString = data.type else {
+                        print("작성된 리뷰가 없습니다.")
+                        return nil
+                    }
+                    let type = AlarmType.from(typeString)
+                    return AlarmModel(notificationId: notificationId, message: message, type: type, sentTime: "15분전")
+                }
+                
+                self.nextCursor = response.nextCursor ?? 0
+                self.hasNext = response.hasNext
+                if response.nextCursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
+                    // 리스트 뒤에다가 넣어준다!
+                    self.alarmList.append(contentsOf: alarmList)
+                } else {
+                    // 아니면 리스트 자체에 설정
+                    self.alarmList = alarmList
+                }
+                DispatchQueue.main.async {
+                    self.alarmListCollectionView.reloadData()
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
 }
 
-extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
+extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout, UIScrollViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 20
+        return alarmList.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: AlarmListCollecionViewCell.identifier, for: indexPath) as! AlarmListCollecionViewCell
+        
+        let alarm = alarmList[indexPath.item]
+        cell.configure(alarm)
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 106)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        if scrollView.contentOffset.y < 0 {
+            scrollView.contentOffset.y = 0 // 위쪽 바운스 막기
+        }
+        
+        guard let collectionView = scrollView as? UICollectionView else { return }
+        
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+        
+        // Check if user has scrolled to the bottom
+        if contentOffsetY > contentHeight - scrollViewHeight { // Trigger when arrive the bottom
+            guard hasNext else { return }
+            DispatchQueue.main.async {
+                // 강제로 맨위로 올리기
+                self.alarmListCollectionView.setContentOffset(.zero, animated: true)
+            }
+            fetchAlarmList(type: alarmType ?? "", cursor: nextCursor)
+        }
     }
 }

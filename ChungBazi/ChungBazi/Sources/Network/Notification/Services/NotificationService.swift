@@ -18,7 +18,6 @@ final class NotificationService: NetworkManager {
     public init(provider: MoyaProvider<NotificationEndpoints>? = nil) {
         // 플러그인 추가
         let plugins: [PluginType] = [
-            CookiePlugin(),
             NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)) // 로그 플러그인
         ]
         
@@ -35,8 +34,8 @@ final class NotificationService: NetworkManager {
 
     //MARK: - API funcs
     /// 알림 리스트 조회 API
-    public func fetchAlarmList(type: String, cursor: Int, completion: @escaping (Result<NoticeListResponseDto, NetworkError>) -> Void) {
-        request(target: .fetchAlarmList(type: type, cursor: cursor), decodingType: NoticeListResponseDto.self, completion: completion)
+    public func fetchAlarmList(type: String, cursor: Int, completion: @escaping (Result<NoticeListResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .fetchAlarmList(type: type, cursor: cursor), decodingType: NoticeListResponseDto.self, completion: completion)
     }
     
     /// 알림 수신 설정 조회 API

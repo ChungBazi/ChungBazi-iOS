@@ -13,18 +13,16 @@ class AlarmListCollecionViewCell: UICollectionViewCell {
     static let identifier = "AlarmListCollecionViewCell"
     
     private lazy var image = UIImageView().then {
-        $0.image = UIImage.alarmIcon
+        $0.contentMode = .scaleAspectFit
     }
     
     private lazy var title = UILabel().then {
         $0.numberOfLines = 2
-        $0.text = "청년 월세 지원 정책 2024 상반기 모집이 3일 뒤 마감됩니다!"
         $0.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.textColor = .black
     }
     
     private lazy var time = UILabel().then {
-        $0.text = "15분전"
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
         $0.textColor = UIColor.gray400
     }
@@ -40,7 +38,9 @@ class AlarmListCollecionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        //self.contents.text = nil
+        self.title.text = nil
+        self.time.text = nil
+        self.image.image = nil
     }
         
     required init?(coder: NSCoder) {
@@ -70,7 +70,9 @@ class AlarmListCollecionViewCell: UICollectionViewCell {
         }
     }
     
-    public func configure() {
-        
+    public func configure(_ model: AlarmModel) {
+        title.text = model.message
+        time.text = model.sentTime
+        image.image = model.type.image
     }
 }
