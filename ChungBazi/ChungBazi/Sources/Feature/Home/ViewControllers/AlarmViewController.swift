@@ -158,12 +158,13 @@ class AlarmViewController: UIViewController {
                 let nextAlarmDatas: [AlarmModel] = alarmContent.compactMap { data in
                     guard let notificationId = data.notificationId,
                           let message = data.message,
-                          let typeString = data.type else {
+                          let typeString = data.type,
+                          let sentTime = data.formattedCreatedAt else {
                         print("알림이 없습니다.")
                         return nil
                     }
                     let type = AlarmType.from(typeString)
-                    return AlarmModel(notificationId: notificationId, message: message, type: type, sentTime: "15분전")
+                    return AlarmModel(notificationId: notificationId, message: message, type: type, sentTime: sentTime)
                 }
                 
                 if cursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
