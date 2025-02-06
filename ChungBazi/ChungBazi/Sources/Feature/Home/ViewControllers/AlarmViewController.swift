@@ -50,7 +50,6 @@ class AlarmViewController: UIViewController {
         setConstraints()
         setBtnTag()
         alarmKindButtonTapped(entireBtn)
-     //   fetchAlarmList(type: "", cursor: 0)
     }
     
     private func createAlarmKindButton(
@@ -116,7 +115,12 @@ class AlarmViewController: UIViewController {
             type = .unknown
         }
         
-        fetchAlarmList(type: type.rawValue, cursor: 9)
+        DispatchQueue.main.async {
+            // 강제로 맨위로 올리기
+            self.alarmListCollectionView.setContentOffset(.zero, animated: true)
+        }
+        
+        fetchAlarmList(type: type.rawValue, cursor: 0)
     }
     
     private func addComoponents() {
@@ -155,22 +159,24 @@ class AlarmViewController: UIViewController {
                     guard let notificationId = data.notificationId,
                           let message = data.message,
                           let typeString = data.type else {
-                        print("작성된 리뷰가 없습니다.")
+                        print("알림이 없습니다.")
                         return nil
                     }
                     let type = AlarmType.from(typeString)
                     return AlarmModel(notificationId: notificationId, message: message, type: type, sentTime: "15분전")
                 }
                 
-                self.nextCursor = response.nextCursor ?? 0
-                self.hasNext = response.hasNext
-                if response.nextCursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
+                if cursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
                     // 리스트 뒤에다가 넣어준다!
-                    self.alarmList.append(contentsOf: alarmList)
+                    self.alarmList.append(contentsOf: nextAlarmDatas)
                 } else {
                     // 아니면 리스트 자체에 설정
-                    self.alarmList = alarmList
+                    self.alarmList = nextAlarmDatas
                 }
+                
+                self.nextCursor = response.nextCursor ?? 0
+                self.hasNext = response.hasNext
+                
                 DispatchQueue.main.async {
                     self.alarmListCollectionView.reloadData()
                 }
@@ -213,10 +219,6 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
         // Check if user has scrolled to the bottom
         if contentOffsetY > contentHeight - scrollViewHeight { // Trigger when arrive the bottom
             guard hasNext else { return }
-            DispatchQueue.main.async {
-                // 강제로 맨위로 올리기
-                self.alarmListCollectionView.setContentOffset(.zero, animated: true)
-            }
             fetchAlarmList(type: alarmType ?? "", cursor: nextCursor)
         }
     }
