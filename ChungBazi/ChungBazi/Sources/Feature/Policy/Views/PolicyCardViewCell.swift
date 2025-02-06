@@ -11,6 +11,35 @@ import SnapKit
 class PolicyCardViewCell: UITableViewCell {
     static let identifier = "PolicyCardViewCell"
 
+    var selectionHandler: ((Bool) -> Void)?
+    var deleteHandler: (() -> Void)?
+
+    var showControls: Bool = false {
+        didSet {
+            checkBoxButton.isHidden = !showControls
+            deleteButton.isHidden = !showControls
+
+            containerView.snp.updateConstraints { make in
+                make.height.equalTo(showControls ? 131 : 94)
+            }
+        }
+    }
+
+    private let checkBoxButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
+        button.setImage(UIImage(named: "checkbox_checked"), for: .selected)
+        button.isHidden = true
+        return button
+    }()
+
+    private let deleteButton: UIButton = {
+        let button = UIButton(type: .custom)
+        button.setImage(UIImage(named: "x_icon"), for: .normal)
+        button.isHidden = true 
+        return button
+    }()
+
     private let badgeImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -22,14 +51,6 @@ class PolicyCardViewCell: UITableViewCell {
         label.font = UIFont(name: AppFontName.pSemiBold, size: 14)
         label.textAlignment = .center
         label.numberOfLines = 1
-        return label
-    }()
-
-    private let regionLabel: UILabel = {
-        let label = UILabel()
-        label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
-        label.textColor = .black
-        label.numberOfLines = 2
         return label
     }()
 
@@ -52,11 +73,6 @@ class PolicyCardViewCell: UITableViewCell {
         let view = UIView()
         view.backgroundColor = .white
         view.layer.cornerRadius = 10
-        view.layer.masksToBounds = true
-        view.layer.shadowColor = UIColor.black.cgColor
-        view.layer.shadowOpacity = 0.1
-        view.layer.shadowOffset = CGSize(width: 0, height: 2)
-        view.layer.shadowRadius = 4
         return view
     }()
 
@@ -64,6 +80,7 @@ class PolicyCardViewCell: UITableViewCell {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
         setupLayout()
+        configureActions()
     }
 
     required init?(coder: NSCoder) {
@@ -72,18 +89,34 @@ class PolicyCardViewCell: UITableViewCell {
 
     private func setupLayout() {
         contentView.addSubview(containerView)
+        containerView.addSubview(checkBoxButton)
+        containerView.addSubview(deleteButton)
         containerView.addSubview(badgeImageView)
         containerView.addSubview(badgeTextLabel)
+        containerView.addSubview(titleLabel)
+        containerView.addSubview(periodLabel)
 
         containerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
             make.top.bottom.equalToSuperview().inset(8)
-            make.height.equalTo(102)
+            make.height.equalTo(showControls ? 131 : 94)
+        }
+        
+        checkBoxButton.snp.makeConstraints { make in
+            make.leading.equalToSuperview().offset(16)
+            make.top.equalToSuperview().offset(8)
+            make.width.height.equalTo(24)
+        }
+
+        deleteButton.snp.makeConstraints { make in
+            make.trailing.equalToSuperview().offset(-16)
+            make.top.equalToSuperview().offset(8)
+            make.width.height.equalTo(24)
         }
 
         badgeImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(17)
-            make.centerY.equalToSuperview()
+            make.leading.equalToSuperview().offset(16)
+            make.top.equalTo(checkBoxButton.snp.bottom).offset(8)
             make.width.equalTo(52)
             make.height.equalTo(60)
         }
@@ -92,18 +125,54 @@ class PolicyCardViewCell: UITableViewCell {
             make.center.equalTo(badgeImageView)
         }
 
-        let labelStackView = UIStackView(arrangedSubviews: [regionLabel, titleLabel, periodLabel])
-        labelStackView.axis = .vertical
-        labelStackView.spacing = 4
-        labelStackView.alignment = .leading
-
-        containerView.addSubview(labelStackView)
-        labelStackView.snp.makeConstraints { make in
-            make.leading.equalTo(badgeImageView.snp.trailing).offset(15)
-            make.trailing.equalToSuperview().offset(-17)
-            make.top.equalToSuperview().offset(19)
-            make.bottom.equalToSuperview().offset(-17)
+        titleLabel.snp.makeConstraints { make in
+            make.leading.equalTo(badgeImageView.snp.trailing).offset(12)
+            make.trailing.equalTo(deleteButton.snp.leading).offset(-12)
+            make.top.equalTo(badgeImageView.snp.top)
         }
+
+        periodLabel.snp.makeConstraints { make in
+            make.leading.equalTo(titleLabel)
+            make.top.equalTo(titleLabel.snp.bottom).offset(4)
+        }
+
+        updateLayoutForControls()
+    }
+
+    private func updateLayoutForControls() {
+        checkBoxButton.isHidden = !showControls
+        deleteButton.isHidden = !showControls
+
+        containerView.snp.updateConstraints { make in
+            make.height.equalTo(showControls ? 131 : 94)
+        }
+    }
+
+    private func configureActions() {
+        checkBoxButton.addTarget(self, action: #selector(handleCheckBoxTap), for: .touchUpInside)
+        deleteButton.addTarget(self, action: #selector(handleDeleteButtonTap), for: .touchUpInside)
+    }
+
+    @objc private func handleCheckBoxTap() {
+        checkBoxButton.isSelected.toggle()
+        selectionHandler?(checkBoxButton.isSelected)
+    }
+
+    @objc private func handleDeleteButtonTap() {
+        deleteHandler?()
+    }
+
+    func setCheckBoxState(isSelected: Bool) {
+        checkBoxButton.isSelected = isSelected
+    }
+
+    func configure(with item: PolicyItem, keyword: String?) {
+        badgeImageView.image = badgeImage(for: item.badge)
+        badgeTextLabel.text = item.badge
+        badgeTextLabel.textColor = badgeTextColor(for: item.badge)
+        
+        titleLabel.text = "\(item.region) \(item.title)"
+        periodLabel.text = item.period
     }
 
     private func badgeImage(for badge: String) -> UIImage? {
@@ -148,22 +217,5 @@ class PolicyCardViewCell: UITableViewCell {
         default:
             return AppColor.gray800
         }
-    }
-    
-    func configure(with item: PolicyItem, keyword: String?) {
-        badgeImageView.image = badgeImage(for: item.badge)
-        badgeTextLabel.text = item.badge
-        badgeTextLabel.textColor = badgeTextColor(for: item.badge)
-        regionLabel.text = item.region
-        
-        let fullText = "\(item.region) \(item.title)"
-        if let keyword = keyword, let range = fullText.range(of: keyword) {
-            let attributedString = NSMutableAttributedString(string: fullText)
-            attributedString.addAttribute(.foregroundColor, value: AppColor.blue700, range: NSRange(range, in: fullText))
-            regionLabel.attributedText = attributedString
-        } else {
-            regionLabel.text = fullText
-        }
-        periodLabel.text = item.period
     }
 }
