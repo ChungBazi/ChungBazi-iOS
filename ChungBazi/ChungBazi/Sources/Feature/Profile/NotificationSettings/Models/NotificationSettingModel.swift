@@ -6,8 +6,13 @@
 //
 
 struct NotificationSettingModel {
-    var push
+    var push: Bool
     var policy: Bool
     var community: Bool
     var reward: Bool
+}
+
+struct NotificationItem {
+    let title: String
+    var isOn: Bool
 }

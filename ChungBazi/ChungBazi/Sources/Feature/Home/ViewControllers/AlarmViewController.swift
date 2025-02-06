@@ -116,7 +116,7 @@ class AlarmViewController: UIViewController {
             type = .unknown
         }
         
-        fetchAlarmList(type: type.rawValue, cursor: 0)
+        fetchAlarmList(type: type.rawValue, cursor: 9)
     }
     
     private func addComoponents() {

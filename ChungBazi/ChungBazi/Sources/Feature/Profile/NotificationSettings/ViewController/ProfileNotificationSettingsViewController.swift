@@ -11,22 +11,46 @@ final class ProfileNotificationSettingsViewController: UIViewController {
     
     private let profileNotificationSettingsView = ProfileNotificationSettingsView()
     
+    private var alarmSettings: NotificationSettingModel = NotificationSettingModel(push: false, policy: false, community: false, reward: false)
+    
     let networkService = NotificationService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
         setupUI()
+        
+        profileNotificationSettingsView.onToggleChanged = { [weak self] title, isOn in
+            guard let self = self else { return }
+            
+            switch title {
+            case "푸시 알림":
+                self.alarmSettings.push = isOn
+                self.alarmSettings.policy = isOn
+                self.alarmSettings.community = isOn
+                self.alarmSettings.reward = isOn
+            case "장바구니 알림":
+                self.alarmSettings.policy = isOn
+            case "커뮤니티 알림":
+                self.alarmSettings.community = isOn
+            case "리워드 알림":
+                self.alarmSettings.reward = isOn
+            default:
+                break
+            }
+        }
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
+        fetchAlarmSetting()
     }
     
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
+        patchAlarmSetting(data: alarmSettings)
     }
     
     private func setupUI() {
@@ -45,29 +69,34 @@ final class ProfileNotificationSettingsViewController: UIViewController {
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                self.notificationSettings = NotificationSettings(
-                    push: response.,
-                    cart: response.policyAlarm,
+                let pushAlarm = [response.policyAlarm, response.communityAlarm, response.rewardAlarm].allSatisfy { $0 }
+                self.alarmSettings = NotificationSettingModel(
+                    push: pushAlarm,
+                    policy: response.policyAlarm,
                     community: response.communityAlarm,
                     reward: response.rewardAlarm
                 )
+                
+                DispatchQueue.main.async {
+                    self.profileNotificationSettingsView.updateData(self.alarmSettings)
+                }
+                
             case .failure(let error):
                 print(error)
             }
         }
     }
     
-    private func patchAlarmSetting(data: [NotificationModel]) {
-        let noticeSetting = self.networkService.makeNoticeSettingDTO(policyAlarm: data[0].isOn, communityAlarm: data[1].isOn, rewardAlarm: menuItems[2].isOn, noticeAlarm: true)
+    private func patchAlarmSetting(data: NotificationSettingModel) {
+        let noticeSetting = self.networkService.makeNoticeSettingDTO(policyAlarm: data.policy, communityAlarm: data.community, rewardAlarm: data.reward, noticeAlarm: true)
         self.networkService.patchAlarmSetting(body: noticeSetting) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
-            case .success(let response):
+            case .success(let response): break
             case .failure(let error):
                 print(error)
             }
         }
     }
-    
 }

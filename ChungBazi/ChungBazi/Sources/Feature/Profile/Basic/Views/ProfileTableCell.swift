@@ -53,9 +53,10 @@ final class ProfileTableCell: UITableViewCell {
         }
     }
     
-    func configure(with title: String, isToggle: Bool = false) {
+    func configure(with title: String, isToggle: Bool = false, isOn: Bool = false) {
         titleLabel.text = title
         toggleSwitch.isHidden = !isToggle
+        toggleSwitch.isOn = isOn
 
         selectionStyle = isToggle ? .none : .default
         contentView.isUserInteractionEnabled = !isToggle
