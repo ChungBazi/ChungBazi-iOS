@@ -9,10 +9,39 @@ import UIKit
 import SnapKit
 
 class PolicyView: UIView {
-    private let categoryLabel = UILabel()
-    private let titleLabel = UILabel()
-    private let introLabel = UILabel()
-    private let detailsStackView = UIStackView()
+
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+
+    private let categoryLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: AppFontName.pMedium, size: 14)
+        label.textAlignment = .center
+        label.backgroundColor = AppColor.blue100
+        label.textColor = .black
+        label.layer.cornerRadius = 10
+        label.clipsToBounds = true
+        return label
+    }()
+
+    private let titleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: AppFontName.pSemiBold, size: 20)
+        label.textColor = AppColor.gray800
+        label.numberOfLines = 0
+        return label
+    }()
+
+    private let policyInfoStack = UIStackView()
+    private let detailInfoStack = UIStackView()
+
+    private let detailSubtitleLabel: UILabel = {
+        let label = UILabel()
+        label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
+        label.textColor = AppColor.gray800
+        label.text = "상세정보"
+        return label
+    }()
 
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -24,66 +53,122 @@ class PolicyView: UIView {
     }
 
     private func setupLayout() {
-        categoryLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
-        categoryLabel.textAlignment = .center
-        categoryLabel.backgroundColor = AppColor.blue100
-        categoryLabel.textColor = .black
-        categoryLabel.layer.cornerRadius = 10
-        categoryLabel.clipsToBounds = true
-        addSubview(categoryLabel)
+        addSubview(scrollView)
+        scrollView.addSubview(contentView)
 
-        titleLabel.font = UIFont(name: AppFontName.pSemiBold, size: 20)
-        titleLabel.numberOfLines = 0
-        addSubview(titleLabel)
+        scrollView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+        }
 
-        introLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
-        introLabel.textColor = .gray500
-        introLabel.numberOfLines = 0
-        addSubview(introLabel)
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView)
+        }
 
-        detailsStackView.axis = .vertical
-        detailsStackView.spacing = 8
-        addSubview(detailsStackView)
-
+        contentView.addSubview(categoryLabel)
         categoryLabel.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(16)
             make.width.equalTo(45)
             make.height.equalTo(31)
         }
 
+        contentView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
-            make.top.equalTo(categoryLabel.snp.bottom).offset(8)
+            make.top.equalTo(categoryLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
-        introLabel.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(8)
+        policyInfoStack.axis = .vertical
+        policyInfoStack.spacing = 16
+        contentView.addSubview(policyInfoStack)
+        policyInfoStack.snp.makeConstraints { make in
+            make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.trailing.equalToSuperview().inset(16)
         }
 
-        detailsStackView.snp.makeConstraints { make in
-            make.top.equalTo(introLabel.snp.bottom).offset(16)
-            make.leading.trailing.bottom.equalToSuperview().inset(16)
+        addDivider()
+
+        contentView.addSubview(detailSubtitleLabel)
+        detailSubtitleLabel.snp.makeConstraints { make in
+            make.top.equalTo(policyInfoStack.snp.bottom).offset(64)
+            make.leading.equalToSuperview().inset(16)
+        }
+
+        detailInfoStack.axis = .vertical
+        detailInfoStack.spacing = 16
+        contentView.addSubview(detailInfoStack)
+        detailInfoStack.snp.makeConstraints { make in
+            make.top.equalTo(detailSubtitleLabel.snp.bottom).offset(16)
+            make.leading.trailing.equalToSuperview().inset(16)
+            make.bottom.equalToSuperview().offset(-16)
         }
     }
 
     func configure(with policy: PolicyModel) {
         categoryLabel.text = policy.category
         titleLabel.text = policy.policyName
-        introLabel.text = "정책 소개: \(policy.intro)"
-        detailsStackView.addArrangedSubview(createDetailLabel(title: "신청 기간", value: "\(policy.startDate) ~ \(policy.endDate)"))
-        detailsStackView.addArrangedSubview(createDetailLabel(title: "신청 대상", value: "\(policy.target.age), \(policy.target.residenceIncome), \(policy.target.education)"))
-        detailsStackView.addArrangedSubview(createDetailLabel(title: "구비 서류", value: policy.document))
-        detailsStackView.addArrangedSubview(createDetailLabel(title: "신청 절차", value: policy.applyProcedure))
-        detailsStackView.addArrangedSubview(createDetailLabel(title: "결과 발표", value: policy.result))
+
+        addPolicyInfo(title: "정책 소개", value: policy.intro)
+        addPolicyInfo(title: "신청 기간", value: "\(policy.startDate) ~ \(policy.endDate)")
+        addPolicyInfo(title: "신청 대상", value: """
+        - \(policy.target.age)
+        - \(policy.target.residenceIncome)
+        - \(policy.target.education)
+        """)
+        addPolicyInfo(title: "심사 결과", value: policy.result)
+        addPolicyInfo(title: "참고 링크", value: policy.referenceUrls.compactMap { $0 }.joined(separator: "\n"))
+
+        addDetailInfo(title: "지원내용", value: policy.content)
+        addDetailInfo(title: "신청절차", value: policy.applyProcedure)
+        addDetailInfo(title: "구비서류", value: policy.document)
     }
 
-    private func createDetailLabel(title: String, value: String) -> UILabel {
-        let label = UILabel()
-        label.font = UIFont.systemFont(ofSize: 14)
-        label.textColor = .darkGray
-        label.numberOfLines = 0
-        label.text = "\(title): \(value)"
-        return label
+    private func addPolicyInfo(title: String, value: String) {
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
+        titleLabel.textColor = AppColor.gray500
+
+        let valueLabel = UILabel()
+        valueLabel.text = value
+        valueLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
+        valueLabel.textColor = AppColor.gray800
+        valueLabel.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
+        stack.axis = .horizontal
+        stack.alignment = .leading
+        stack.spacing = 16
+        policyInfoStack.addArrangedSubview(stack)
+    }
+
+    private func addDetailInfo(title: String, value: String) {
+        let titleLabel = UILabel()
+        titleLabel.text = title
+        titleLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
+        titleLabel.textColor = AppColor.gray500
+
+        let valueLabel = UILabel()
+        valueLabel.text = value
+        valueLabel.font = UIFont(name: AppFontName.pMedium, size: 14)
+        valueLabel.textColor = AppColor.gray500
+        valueLabel.numberOfLines = 0
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel])
+        stack.axis = .horizontal
+        stack.alignment = .leading
+        stack.spacing = 16
+        detailInfoStack.addArrangedSubview(stack)
+    }
+
+    private func addDivider() {
+        let divider = UIView()
+        divider.backgroundColor = AppColor.gray50
+        contentView.addSubview(divider)
+        divider.snp.makeConstraints { make in
+            make.top.equalTo(policyInfoStack.snp.bottom).offset(32)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(8)
+        }
     }
 }

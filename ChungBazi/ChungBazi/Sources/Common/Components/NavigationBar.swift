@@ -11,7 +11,7 @@ import Then
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -70,6 +70,18 @@ extension UIViewController {
             }
             navigationBarView.addSubview(alarmButton)
             alarmButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        
+        if showShareButton {
+            let shareButton = UIButton().then {
+                $0.setImage(UIImage(named: "share_icon"), for: .normal)
+                $0.addTarget(self, action: #selector(handleShareButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(shareButton)
+            shareButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
                 make.trailing.equalToSuperview().inset(28)
             }
@@ -151,6 +163,12 @@ extension UIViewController {
     
     @objc private func popViewController() {
         self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func handleShareButtonTapped() {
+        let shareText = ""
+        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
+        present(activityViewController, animated: true, completion: nil)
     }
     
     // MARK: - Custom TransitionEffects
