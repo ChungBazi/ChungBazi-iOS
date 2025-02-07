@@ -162,7 +162,7 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         headerView.addSubview(separatorLine)
         separatorLine.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview()
-            make.top.equalToSuperview()
+            make.top.equalToSuperview().offset(8)
             make.height.equalTo(1)
         }
 
@@ -170,14 +170,15 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         titleLabel.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(16)
             make.trailing.equalToSuperview().offset(-16)
-            make.bottom.equalToSuperview().offset(-8)
+            make.top.equalTo(separatorLine.snp.bottom).offset(32)
+            make.bottom.equalToSuperview().offset(-16)
         }
 
         return headerView
     }
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 40
+        return 80
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
