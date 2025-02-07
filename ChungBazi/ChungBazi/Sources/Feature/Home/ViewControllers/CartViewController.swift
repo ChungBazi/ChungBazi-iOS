@@ -6,13 +6,13 @@
 import UIKit
 import SnapKit
 
-class CartViewController: UIViewController {
+final class CartViewController: UIViewController {
     private let tableView = UITableView(frame: .zero, style: .grouped)
     private var cartItems: [String: [PolicyItem]] = [:]
     private var selectedItems: Set<IndexPath> = []
 
     private let headerView = UIView()
-
+    
     private let allSelectButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
@@ -145,13 +145,26 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
         let category = Array(cartItems.keys)[section]
 
-        let headerView = UIView()
-        headerView.backgroundColor = .clear
+        let headerView = UIView().then {
+            $0.backgroundColor = .clear
+        }
 
-        let titleLabel = UILabel()
-        titleLabel.text = category
-        titleLabel.font = UIFont(name: AppFontName.pSemiBold, size: 20)
-        titleLabel.textColor = .black
+        let separatorLine = DottedLineView().then {
+            $0.backgroundColor = .clear
+        }
+
+        let titleLabel = UILabel().then {
+            $0.text = category
+            $0.font = UIFont(name: AppFontName.pSemiBold, size: 20)
+            $0.textColor = .black
+        }
+
+        headerView.addSubview(separatorLine)
+        separatorLine.snp.makeConstraints { make in
+            make.leading.trailing.equalToSuperview()
+            make.top.equalToSuperview()
+            make.height.equalTo(1)
+        }
 
         headerView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in

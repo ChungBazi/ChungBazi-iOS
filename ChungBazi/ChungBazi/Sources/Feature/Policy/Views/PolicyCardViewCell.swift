@@ -8,7 +8,7 @@
 import UIKit
 import SnapKit
 
-class PolicyCardViewCell: UITableViewCell {
+final class PolicyCardViewCell: UITableViewCell {
     static let identifier = "PolicyCardViewCell"
 
     var selectionHandler: ((Bool) -> Void)?
@@ -21,6 +21,10 @@ class PolicyCardViewCell: UITableViewCell {
 
             containerView.snp.updateConstraints { make in
                 make.height.equalTo(showControls ? 131 : 94)
+            }
+
+            badgeImageView.snp.updateConstraints { make in
+                make.top.equalToSuperview().offset(showControls ? 48 : 16)
             }
         }
     }
@@ -58,7 +62,7 @@ class PolicyCardViewCell: UITableViewCell {
         let label = UILabel()
         label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
         label.textColor = .black
-        label.numberOfLines = 2
+        label.numberOfLines = 0
         return label
     }()
 
@@ -116,7 +120,7 @@ class PolicyCardViewCell: UITableViewCell {
 
         badgeImageView.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(16)
-            make.top.equalTo(checkBoxButton.snp.bottom).offset(8)
+            make.top.equalToSuperview().offset(16)
             make.width.equalTo(52)
             make.height.equalTo(60)
         }
@@ -126,25 +130,14 @@ class PolicyCardViewCell: UITableViewCell {
         }
 
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(badgeImageView.snp.trailing).offset(12)
-            make.trailing.equalTo(deleteButton.snp.leading).offset(-12)
+            make.leading.equalTo(badgeImageView.snp.trailing).offset(16)
+            make.trailing.equalTo(deleteButton.snp.leading).offset(-8)
             make.top.equalTo(badgeImageView.snp.top)
         }
 
         periodLabel.snp.makeConstraints { make in
             make.leading.equalTo(titleLabel)
             make.top.equalTo(titleLabel.snp.bottom).offset(4)
-        }
-
-        updateLayoutForControls()
-    }
-
-    private func updateLayoutForControls() {
-        checkBoxButton.isHidden = !showControls
-        deleteButton.isHidden = !showControls
-
-        containerView.snp.updateConstraints { make in
-            make.height.equalTo(showControls ? 131 : 94)
         }
     }
 
@@ -170,7 +163,6 @@ class PolicyCardViewCell: UITableViewCell {
         badgeImageView.image = badgeImage(for: item.badge)
         badgeTextLabel.text = item.badge
         badgeTextLabel.textColor = badgeTextColor(for: item.badge)
-        
         titleLabel.text = "\(item.region) \(item.title)"
         periodLabel.text = item.period
     }
