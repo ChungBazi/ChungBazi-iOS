@@ -19,12 +19,13 @@ class FinishSurveyViewController: UIViewController {
     }
     
     private func goToNextView() {
-        guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            let vc = MainTabBarController()
-            sceneDelegate.window?.rootViewController = vc
-            sceneDelegate.window?.makeKeyAndVisible()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            let termsOfServiceVC = MainTabBarController()
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = termsOfServiceVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
         }
     }
 }
