@@ -22,3 +22,7 @@ struct UserInfoRequestDto: Codable {
         self.additionInfo = additionInfo
     }
 }
+
+struct ProfileUpdateRequestDto: Codable {
+    let name: String
+}

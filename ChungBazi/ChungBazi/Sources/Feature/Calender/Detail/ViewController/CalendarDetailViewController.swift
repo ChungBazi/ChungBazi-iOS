@@ -7,7 +7,6 @@
 
 import UIKit
 import SnapKit
-import SafeAreaBrush
 
 final class CalendarDetailViewController: UIViewController {
     
