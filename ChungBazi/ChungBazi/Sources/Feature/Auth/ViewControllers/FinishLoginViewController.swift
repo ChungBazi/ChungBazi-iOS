@@ -12,7 +12,7 @@ class FinishLoginViewController: UIViewController {
     var isFirst: Bool?
     
     private let finishLoginView = LogoWithTitleView(image: "heartBaro", title: "로그인 완료!\n정책을 쉽고 간편하게 확인하세요")
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
