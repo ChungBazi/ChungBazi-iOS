@@ -7,6 +7,7 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 enum CommunityEndpoints {
     case getCommunityPosts(data: CommunityRequestDTO)
@@ -54,7 +55,7 @@ extension CommunityEndpoints: TargetType {
                 parameters["category"] = data.category.rawValue
             }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
-        
+            
         case .getCommunityPost:
             return .requestPlain
             
@@ -71,8 +72,10 @@ extension CommunityEndpoints: TargetType {
     }
     
     var headers: [String : String]? {
+        let accessToken = KeychainSwift().get("serverAccessToken")
         return [
-            "Content-type" : "application/json"
+            "Authorization": "Bearer \(accessToken!)",
+            "Content-type": "application/json"
         ]
     }
 }
