@@ -109,6 +109,12 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedPolicy = policies[indexPath.row]
+        
         print("Selected policy: \(selectedPolicy.title)")
+
+        let detailVC = PolicyDetailViewController()
+        detailVC.policyId = selectedPolicy.policyId
+
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
