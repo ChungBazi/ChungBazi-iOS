@@ -72,31 +72,31 @@ final class PolicyView: UIView {
         }
 
         categoryLabel.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().inset(8)
+            make.top.leading.equalToSuperview().inset(20)
             make.width.equalTo(45)
             make.height.equalTo(31)
         }
 
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(categoryLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(8)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
 
         policyInfoStack.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(8)
+            make.leading.trailing.equalToSuperview().inset(20)
         }
 
         addDivider()
 
         detailSubtitleLabel.snp.makeConstraints { make in
             make.top.equalTo(policyInfoStack.snp.bottom).offset(64)
-            make.leading.equalToSuperview().inset(8)
+            make.leading.equalToSuperview().inset(20)
         }
 
         detailInfoStack.snp.makeConstraints { make in
             make.top.equalTo(detailSubtitleLabel.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(8)
+            make.leading.trailing.equalToSuperview().inset(20)
             make.bottom.equalToSuperview().offset(-16)
         }
     }
@@ -104,7 +104,7 @@ final class PolicyView: UIView {
     func configure(with policy: PolicyModel) {
         categoryLabel.text = policy.category
         let firstWord = policy.policyName.components(separatedBy: " ").first ?? ""
-        titleLabel.text = "\(firstWord)<\(policy.policyName)>"
+        titleLabel.text = "\(firstWord) <\(policy.policyName)>"
             
         addPolicyInfo(title: "정책소개", value: policy.intro)
         addPolicyInfo(title: "신청기간", value: "\(policy.startDate) ~ \(policy.endDate)")

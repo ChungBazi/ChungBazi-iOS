@@ -7,22 +7,19 @@
 
 import UIKit
 import SnapKit
+import Then
 
-class PosterView: UIView {
+final class PosterView: UIView {
     
-    private let blurBackgroundImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
-        imageView.clipsToBounds = true
-        return imageView
-    }()
+    private let blurBackgroundImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFill
+        $0.clipsToBounds = true
+    }
     
-    private let posterImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        return imageView
-    }()
+    private let posterImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+        $0.clipsToBounds = true
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -34,17 +31,16 @@ class PosterView: UIView {
     }
     
     private func setupLayout() {
-        addSubview(blurBackgroundImageView)
-        addSubview(posterImageView)
+        addSubviews(blurBackgroundImageView, posterImageView)
         
         blurBackgroundImageView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
         }
         
         posterImageView.snp.makeConstraints { make in
+            make.top.equalToSuperview()
             make.centerX.equalToSuperview()
-            make.centerY.equalToSuperview()
-            make.width.height.equalTo(207) 
+            make.width.height.equalTo(207)
         }
     }
     

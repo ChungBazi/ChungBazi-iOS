@@ -5,28 +5,44 @@
 
 import UIKit
 import SnapKit
+import Then
 
-class PolicyDetailViewController: UIViewController {
+final class PolicyDetailViewController: UIViewController {
 
     var policyId: Int?
-    
-    private let posterView = PosterView()
-    private let policyView = PolicyView()
-    
-    private let expandButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "expand_icon"), for: .normal)
-        button.backgroundColor = .white
-        button.layer.cornerRadius = 19.5
-        button.layer.shadowColor = UIColor.black.cgColor
-        button.layer.shadowOpacity = 0.1
-        button.layer.shadowOffset = CGSize(width: 0, height: 4)
-        button.layer.shadowRadius = 4
-        button.addTarget(self, action: #selector(handleExpandButtonTap), for: .touchUpInside)
-        return button
-    }()
+    private var policy: PolicyModel?
 
-    private let bottomBackgroundView = UIView()
+    private let posterView = PosterView().then {
+        $0.backgroundColor = .clear
+    }
+
+    private let policyView = PolicyView().then {
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 10
+        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        $0.clipsToBounds = true
+    }
+
+    private let expandButton = UIButton(type: .custom).then {
+        $0.setImage(UIImage(named: "expand_icon"), for: .normal)
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 19.5
+        $0.layer.shadowColor = UIColor.black.cgColor
+        $0.layer.shadowOpacity = 0.1
+        $0.layer.shadowOffset = CGSize(width: 0, height: 4)
+        $0.layer.shadowRadius = 4
+    }
+
+    private let bottomBackgroundView = UIView().then {
+        $0.layer.cornerRadius = 10
+        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        $0.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
+        $0.layer.shadowOffset = CGSize(width: 0, height: -1)
+        $0.layer.shadowRadius = 5
+        $0.layer.shadowOpacity = 1
+        $0.backgroundColor = .white
+    }
+
     private lazy var cartButton = CustomButton(
         backgroundColor: .white,
         titleText: "장바구니",
@@ -34,12 +50,12 @@ class PolicyDetailViewController: UIViewController {
         borderWidth: 1,
         borderColor: .gray400
     )
-    
+
     private lazy var registerButton = CustomActiveButton(
         title: "담당기관 바로가기",
         isEnabled: true
     )
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -53,20 +69,19 @@ class PolicyDetailViewController: UIViewController {
         )
         setupLayout()
         loadPolicyData()
-        configureBottomBackgroundView()
         setupActions()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
     }
-    
+
     private func setupLayout() {
         view.addSubviews(posterView, expandButton, policyView, bottomBackgroundView)
         bottomBackgroundView.addSubviews(cartButton, registerButton)
@@ -74,18 +89,18 @@ class PolicyDetailViewController: UIViewController {
         posterView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(65)
             make.leading.trailing.equalToSuperview()
-            make.height.equalTo(207)
+            make.height.equalTo(237)
         }
         
         expandButton.snp.makeConstraints { make in
-            make.bottom.equalTo(posterView).offset(-8)
-            make.trailing.equalTo(posterView).offset(-10)
+            make.bottom.equalTo(posterView).offset(-40)
+            make.trailing.equalTo(posterView).offset(-15)
             make.width.height.equalTo(39)
         }
 
         policyView.snp.makeConstraints { make in
-            make.top.equalTo(posterView.snp.bottom).offset(16)
-            make.leading.trailing.equalToSuperview().inset(16)
+            make.top.equalTo(posterView.snp.bottom).offset(-30)
+            make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(bottomBackgroundView.snp.top).offset(-16)
         }
 
@@ -109,16 +124,6 @@ class PolicyDetailViewController: UIViewController {
         }
     }
 
-    private func configureBottomBackgroundView() {
-        bottomBackgroundView.layer.cornerRadius = 10
-        bottomBackgroundView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        bottomBackgroundView.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
-        bottomBackgroundView.layer.shadowOffset = CGSize(width: 0, height: -1)
-        bottomBackgroundView.layer.shadowRadius = 5
-        bottomBackgroundView.layer.shadowOpacity = 1
-        bottomBackgroundView.backgroundColor = .white
-    }
-
     private func loadPolicyData() {
         let examplePolicy = PolicyModel(
             policyId: 1,
@@ -138,15 +143,17 @@ class PolicyDetailViewController: UIViewController {
             document: "서류내용\n1. 주민등록 등본\n2. 건강보험증 사본",
             applyProcedure: "접수처: 신청서 본인 주민등록지 주소 주민센터(방문접수)",
             result: "합격자 발표 : 2024. 12. 12.(목)한 ☞ 선발 및 연수기관(부서) 매칭결과 개별안내",
-            referenceUrls: ["https://example.com"],
+            referenceUrls: ["url1", "url2"],
             registerUrl: "https://example.com"
         )
 
+        self.policy = examplePolicy
         posterView.configure(with: UIImage(named: "poster_example"))
         policyView.configure(with: examplePolicy)
     }
 
     private func setupActions() {
+        expandButton.addTarget(self, action: #selector(handleExpandButtonTap), for: .touchUpInside)
         cartButton.addTarget(self, action: #selector(handleCartButtonTap), for: .touchUpInside)
         registerButton.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
     }
@@ -164,12 +171,21 @@ class PolicyDetailViewController: UIViewController {
     }
 
     @objc private func handleRegisterButtonTap() {
-        guard let policy = PolicyDataManager.shared.getPolicy(by: policyId ?? 0),
-              let firstUrlString = policy.referenceUrls.compactMap({ $0 }).first,
-              let url = URL(string: firstUrlString) else {
-            print("Error: URL을 열 수 없음")
+        guard let urls = policy?.referenceUrls.compactMap({ $0 }), !urls.isEmpty else {
+            print("Error: URL 정보가 없습니다.")
             return
         }
-        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+
+        if urls.count > 1 {
+            showMultipleUrlsAlert(urls: urls)
+        } else if let urlString = urls.first, let url = URL(string: urlString) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+
+    private func showMultipleUrlsAlert(urls: [String]) {
+        let customAlert = CustomAlertView()
+        customAlert.configure(message: "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개 이상입니다.", urls: urls)
+        customAlert.show(in: self)
     }
 }
