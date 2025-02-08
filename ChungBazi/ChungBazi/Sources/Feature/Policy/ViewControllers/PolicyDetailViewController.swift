@@ -12,6 +12,13 @@ final class PolicyDetailViewController: UIViewController {
     var policyId: Int?
     private var policy: PolicyModel?
 
+    private let scrollView = UIScrollView().then {
+        $0.showsVerticalScrollIndicator = false
+        $0.showsHorizontalScrollIndicator = false
+    }
+
+    private let contentView = UIView()
+
     private let posterView = PosterView().then {
         $0.backgroundColor = .clear
     }
@@ -83,11 +90,26 @@ final class PolicyDetailViewController: UIViewController {
     }
 
     private func setupLayout() {
-        view.addSubviews(posterView, expandButton, policyView, bottomBackgroundView)
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubviews(posterView, expandButton, policyView)
+
+        view.addSubview(bottomBackgroundView)
         bottomBackgroundView.addSubviews(cartButton, registerButton)
 
-        posterView.snp.makeConstraints { make in
+        scrollView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(65)
+            make.leading.trailing.equalToSuperview()
+            make.bottom.equalTo(bottomBackgroundView.snp.top)
+        }
+
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView)
+        }
+
+        posterView.snp.makeConstraints { make in
+            make.top.equalTo(scrollView.snp.top)
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(237)
         }
@@ -101,7 +123,7 @@ final class PolicyDetailViewController: UIViewController {
         policyView.snp.makeConstraints { make in
             make.top.equalTo(posterView.snp.bottom).offset(-30)
             make.leading.trailing.equalToSuperview()
-            make.bottom.equalTo(bottomBackgroundView.snp.top).offset(-16)
+            make.bottom.equalTo(contentView.snp.bottom).offset(-16)
         }
 
         bottomBackgroundView.snp.makeConstraints { make in

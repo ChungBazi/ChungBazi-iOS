@@ -11,10 +11,6 @@ import Then
 
 final class PolicyView: UIView {
 
-    private let scrollView = UIScrollView().then {
-        $0.showsVerticalScrollIndicator = false
-        $0.showsHorizontalScrollIndicator = false
-    }
     private let contentView = UIView()
 
     private let categoryLabel = UILabel().then {
@@ -58,17 +54,11 @@ final class PolicyView: UIView {
     }
 
     private func setupLayout() {
-        addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        addSubview(contentView)
         contentView.addSubviews(categoryLabel, titleLabel, policyInfoStack, detailSubtitleLabel, detailInfoStack)
-
-        scrollView.snp.makeConstraints { make in
-            make.edges.equalToSuperview()
-        }
 
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
-            make.width.equalTo(scrollView)
         }
 
         categoryLabel.snp.makeConstraints { make in
