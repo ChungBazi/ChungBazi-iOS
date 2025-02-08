@@ -27,7 +27,7 @@ class CharacterEditViewController: UIViewController {
         //$0.sectionInset = UIEdgeInsets(top: 3, left: 10, bottom: 3, right: 10)
         $0.estimatedItemSize = .zero
     }).then {
-        $0.register(MyCharacterCollectionViewCell.self, forCellWithReuseIdentifier: MyCharacterCollectionViewCell.identifier)
+        $0.register(CharacterEditCollectionViewCell.self, forCellWithReuseIdentifier: CharacterEditCollectionViewCell.identifier)
         $0.backgroundColor = .clear
         $0.delegate = self
         $0.dataSource = self
@@ -105,7 +105,7 @@ extension CharacterEditViewController: UICollectionViewDataSource, UICollectionV
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: MyCharacterCollectionViewCell.identifier, for: indexPath) as! MyCharacterCollectionViewCell
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CharacterEditCollectionViewCell.identifier, for: indexPath) as! CharacterEditCollectionViewCell
         
         //cell.configure()
         

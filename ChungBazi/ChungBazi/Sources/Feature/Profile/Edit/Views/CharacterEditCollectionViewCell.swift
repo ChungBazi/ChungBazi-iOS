@@ -7,9 +7,9 @@
 
 import UIKit
 
-class MyCharacterCollectionViewCell: UICollectionViewCell {
+class CharacterEditCollectionViewCell: UICollectionViewCell {
     
-    static let identifier = "MyCharacterCollectionViewCell"
+    static let identifier = "CharacterEditCollectionViewCell"
     
     private lazy var character = UIImageView().then {
         $0.contentMode = .scaleAspectFit
