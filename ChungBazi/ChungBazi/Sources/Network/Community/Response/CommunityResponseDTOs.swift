@@ -56,5 +56,5 @@ struct CommunityCommentResponseDTO: Decodable {
         let characterImg: String
     }
     
-    let result: [Comment]
+    let result: [Comment]?
 }

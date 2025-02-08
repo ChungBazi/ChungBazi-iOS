@@ -34,8 +34,12 @@ final class CommunityService: NetworkManager {
         request(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId, size: size), decodingType: CommunityCommentResponseDTO.self) { result in
             switch result {
             case .success(let response):
-                completion(.success(response.result))
+                print("🔹 디코딩된 JSON: \(response)")
+
+                completion(.success(response.result ?? []))
+                
             case .failure(let error):
+                print("❌ JSON 디코딩 실패: \(error.localizedDescription)")
                 completion(.failure(error))
             }
         }

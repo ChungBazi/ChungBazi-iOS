@@ -123,7 +123,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
             $0.bottom.equalTo(communityRuleView.snp.top).offset(-22)
         }
         contentView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.top.leading.trailing.width.equalToSuperview()
             $0.bottom.equalTo(photoCollectionView).offset(20)
         }
         
