@@ -16,6 +16,7 @@ protocol ProfileViewDelegate: AnyObject {
     func didTapLogout()
     func didTapWithdraw()
     func didTapMyRewardView()
+    func didTapMyCharacterView()
 }
 
 final class ProfileView: UIView {
@@ -144,6 +145,8 @@ final class ProfileView: UIView {
         myCharacterLabel.snp.makeConstraints {
             $0.bottom.centerX.equalToSuperview()
         }
+        myCharacterView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(myCharacterTapped)))
+        myCharacterView.isUserInteractionEnabled = true
         
         gray100View.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
@@ -175,6 +178,10 @@ final class ProfileView: UIView {
     
     @objc private func myRewardViewTapped() {
         delegate?.didTapMyRewardView()
+    }
+    
+    @objc private func myCharacterTapped() {
+        delegate?.didTapMyCharacterView()
     }
 }
 
