@@ -40,12 +40,11 @@ final class ExpandImageViewController: UIViewController {
 
     private func setupLayout() {
         
-        view.addSubview(closeButton)
-        view.addSubview(expandImageView)
+        view.addSubviews(closeButton, expandImageView)
 
         closeButton.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(16)
-            make.leading.equalToSuperview().offset(16)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(50)
+            make.leading.equalToSuperview().offset(20)
         }
                 
         expandImageView.snp.makeConstraints { make in

@@ -89,11 +89,11 @@ final class CartViewController: UIViewController {
     private func loadCartData() {
         cartItems = [
             "일자리": [
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-1")
+                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-1", policyId: 30)
             ],
             "주거": [
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-5"),
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-11")
+                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-5", policyId: 31),
+                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 32)
             ]
         ]
         tableView.reloadData()
