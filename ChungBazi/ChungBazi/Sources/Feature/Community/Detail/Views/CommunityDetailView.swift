@@ -36,7 +36,7 @@ final class CommunityDetailView: UIView {
         addSubviews(postView, gray100View, commentTableView)
         
         postView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.top.leading.trailing.equalToSuperview()
         }
         
         gray100View.snp.makeConstraints {

@@ -60,4 +60,8 @@ final class CommunityWritePhotoCell: UICollectionViewCell {
     @objc private func handleDeleteTap() {
         onDeleteTapped?(xButton.tag)
     }
+    
+    func configure(with url: URL) {
+        photoImageView.kf.setImage(with: url)
+    }
 }

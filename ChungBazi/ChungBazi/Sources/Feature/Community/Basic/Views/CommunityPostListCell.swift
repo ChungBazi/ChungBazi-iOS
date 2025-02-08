@@ -35,6 +35,7 @@ final class CommunityPostListCell: UICollectionViewCell {
     private let contentLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray500
+        $0.numberOfLines = 0
     }
     private let thumbnailImgView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
@@ -47,6 +48,10 @@ final class CommunityPostListCell: UICollectionViewCell {
         $0.alignment = .leading
     }
     
+     private let separatorView = UIView().then {
+         $0.backgroundColor = .gray100
+     }
+
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -75,7 +80,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         postContentView.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(66)
+            $0.bottom.equalTo(contentLabel.snp.bottom)
         }
         
         categoryLabel.snp.makeConstraints {
@@ -101,6 +106,14 @@ final class CommunityPostListCell: UICollectionViewCell {
             $0.leading.equalToSuperview()
             $0.bottom.equalToSuperview().inset(17)
         }
+        
+        addSubviews(separatorView)
+        separatorView.snp.makeConstraints {
+            $0.top.equalTo(socialInfoStackView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
+            $0.height.equalTo(1)
+        }
     }
     
     private func setupSocialInfoStackView() {
@@ -125,7 +138,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         return view
     }
     
-    func configure(with post: CommunityPost) {
+    func configure(with post: CommunityPost, isLastCell: Bool) {
         profileView.configure(
             userName: post.userName,
             userLevel: "Lv.\(post.reward.replacingOccurrences(of: "LEVEL_", with: ""))",
@@ -155,6 +168,11 @@ final class CommunityPostListCell: UICollectionViewCell {
         } else {
             thumbnailImgView.image = nil
         }
+        
+        separatorView.isHidden = isLastCell
+        
+        contentLabel.sizeToFit()
+        layoutIfNeeded()
     }
 
     private func createSocialLabel(text: String) -> UILabel {

@@ -52,12 +52,11 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
         textView.addSubviews(userNameLabel, userLevelLabel, createdAtLabel)
         textView.snp.makeConstraints {
             $0.leading.equalTo(characterImgView.snp.trailing).offset(10)
-            $0.centerY.equalToSuperview()
-            $0.height.equalTo(22)
+            $0.centerY.equalTo(characterImgView)
+            $0.height.equalTo(42)
         }
         userNameLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview()
-            $0.top.equalToSuperview()
+            $0.top.leading.equalToSuperview()
         }
         userLevelLabel.snp.makeConstraints {
             $0.leading.equalTo(userNameLabel.snp.trailing).offset(7)
