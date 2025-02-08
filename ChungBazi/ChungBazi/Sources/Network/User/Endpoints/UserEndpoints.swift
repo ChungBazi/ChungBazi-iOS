@@ -6,14 +6,15 @@
 //
 
 import Foundation
+import UIKit
 import Moya
 import KeychainSwift
 
 enum UserEndpoints {
     case fetchProfile
-    case updateUserInfo(data: UserInfoRequestDto)
+    case updateProfile(data: ProfileUpdateRequestDto, profileImg: UIImage)
     case postUserInfo(data: UserInfoRequestDto)
-    case updateProfile(data: ProfileUpdateRequestDto)
+    case updateUserInfo(data: UserInfoRequestDto)
 }
 
 extension UserEndpoints: TargetType {
@@ -56,8 +57,31 @@ extension UserEndpoints: TargetType {
             return .requestJSONEncodable(data)
         case .postUserInfo(let data):
             return .requestJSONEncodable(data)
-        case .updateProfile(let data):
-            return .requestJSONEncodable(data)
+        case .updateProfile(let data, let profileImg):
+            var multipartData: [MultipartFormData] = []
+            
+            if let jsonData = try? JSONEncoder().encode(data) {
+                let jsonFormData = MultipartFormData(
+                    provider: .data(jsonData),
+                    name: "info",
+                    fileName: "info.json",
+                    mimeType: "application/json"
+                )
+                multipartData.append(jsonFormData)
+            }
+            
+            let fileName = "\(UUID().uuidString).jpeg"
+            if let imageData = profileImg.jpegData(compressionQuality: 0.8) {
+                let imageFormData = MultipartFormData(
+                    provider: .data(imageData),
+                    name: "profileImg",
+                    fileName: fileName,
+                    mimeType: "image/jpeg"
+                )
+                multipartData.append(imageFormData)
+            }
+            
+            return .uploadMultipart(multipartData)
         }
     }
     

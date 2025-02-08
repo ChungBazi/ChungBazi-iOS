@@ -14,4 +14,16 @@ extension UIImage {
         self.draw(in: CGRect(origin: .zero, size: size))
         return UIGraphicsGetImageFromCurrentImageContext()
     }
+    
+    func applyBlurEffect() -> UIImage? {
+        guard let ciImage = CIImage(image: self) else { return nil }
+        let blurFilter = CIFilter(name: "CIGaussianBlur")
+        blurFilter?.setValue(ciImage, forKey: kCIInputImageKey)
+        blurFilter?.setValue(10.0, forKey: kCIInputRadiusKey)
+            
+        guard let outputImage = blurFilter?.outputImage else { return nil }
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(outputImage, from: ciImage.extent) else { return nil }
+        return UIImage(cgImage: cgImage)
+    }
 }

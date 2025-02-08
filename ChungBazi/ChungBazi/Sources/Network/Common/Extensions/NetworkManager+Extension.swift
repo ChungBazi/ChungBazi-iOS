@@ -1,6 +1,7 @@
 
 import Moya
 import Foundation
+import KeychainSwift
 
 extension NetworkManager {
     // 1. 필수 데이터 요청
@@ -174,10 +175,27 @@ extension NetworkManager {
                 default:
                     errorMessage = "알 수 없는 오류 발생: \(response.statusCode)"
                 }
-
+                
                 // 2. 서버 응답 메시지 처리
                 let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: response.data)
                 let finalMessage = errorResponse?.message ?? errorMessage
+                
+                if errorResponse?.code == "TOKEN4011" {
+                    print("[토큰 만료] 토큰 재발급 시도 중...")
+                    
+                    AuthService().reIssueAccesToken { success in
+                        if success {
+                            print("[토큰 재발급 완료] API 재요청 실행...")
+                            handleResponse(response, decodingType: decodingType)
+                        } else {
+                            print("[토큰 재발급 실패] 로그아웃 처리 필요")
+                        }
+                    }
+                    return .failure(.tokenExpiredError)
+                    
+                } else if errorResponse?.code == "TOKEN4012" {
+                    return .failure(.refreshTokenExpiredError)
+                }
                 return .failure(.serverError(statusCode: response.statusCode, message: finalMessage))
             }
 

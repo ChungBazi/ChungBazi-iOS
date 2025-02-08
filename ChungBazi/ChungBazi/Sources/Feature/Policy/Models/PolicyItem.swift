@@ -9,5 +9,6 @@ struct PolicyItem {
     let title: String
     let region: String
     let period: String
-    let badge: String     
+    let badge: String
+    let policyId : Int
 }

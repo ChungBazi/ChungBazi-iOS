@@ -15,27 +15,32 @@ class FinishLoginViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        navigationController?.navigationBar.isHidden = true
         self.view = finishLoginView
         goToNextView()
     }
     
     private func goToNextView() {
-        guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
         // 최초 로그인 시, StartSurveyViewController로
         // 그 외에는 BaseTabBarController로
         if self.isFirst ?? true {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                let vc = StartSurveyViewController()
-                let navController = UINavigationController(rootViewController: vc)
-                sceneDelegate.window?.rootViewController = navController
-                sceneDelegate.window?.makeKeyAndVisible()
+                let termsOfServiceVC = StartSurveyViewController()
+                let navigationController = UINavigationController(rootViewController: termsOfServiceVC)
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    window.rootViewController = navigationController
+                    UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+                }
             }
         } else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                let vc = MainTabBarController()
-                let navController = UINavigationController(rootViewController: vc)
-                sceneDelegate.window?.rootViewController = navController
-                sceneDelegate.window?.makeKeyAndVisible()
+                let termsOfServiceVC = MainTabBarController()
+                if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+                   let window = windowScene.windows.first {
+                    window.rootViewController = termsOfServiceVC
+                    UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+                }
             }
         }
     }

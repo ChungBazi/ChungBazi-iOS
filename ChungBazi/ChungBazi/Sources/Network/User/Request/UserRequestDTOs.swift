@@ -25,5 +25,4 @@ struct UserInfoRequestDto: Codable {
 
 struct ProfileUpdateRequestDto: Codable {
     let name: String
-    let profileImg: String?
 }

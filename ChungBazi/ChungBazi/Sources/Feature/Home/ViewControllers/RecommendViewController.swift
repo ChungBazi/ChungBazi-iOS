@@ -45,10 +45,10 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
     )
 
     private var policies: [PolicyItem] = [
-        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3"),
-        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11"),
-        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2"),
-        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감")
+        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3", policyId: 10),
+        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 11),
+        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2", policyId: 12),
+        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 13)
     ]
 
     override func viewDidLoad() {

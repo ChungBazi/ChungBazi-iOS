@@ -83,9 +83,9 @@ class SearchResultViewController: UIViewController {
 
     private var policies: [PolicyItem] = []
     private let allPolicies: [PolicyItem] = [
-        PolicyItem(title: "<청년 신체 건강 챌린지! 운동 비용 지원>", region: "서초구", period: "2024.12.11 - 2025.01.31", badge: "D-21"),
-        PolicyItem(title: "<청년 신체 건강 회복을 위한 피트니스 수강 지원>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "D-17"),
-        PolicyItem(title: "<청년 신체 건강 증진을 위한 피트니스 지원 프로그램>", region: "강남구", period: "2024.12.11 - 2025.01.31", badge: "마감")
+        PolicyItem(title: "<청년 신체 건강 챌린지! 운동 비용 지원>", region: "서초구", period: "2024.12.11 - 2025.01.31", badge: "D-21", policyId: 20),
+        PolicyItem(title: "<청년 신체 건강 회복을 위한 피트니스 수강 지원>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "D-17", policyId: 21),
+        PolicyItem(title: "<청년 신체 건강 증진을 위한 피트니스 지원 프로그램>", region: "강남구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 22)
     ]
     
     override func viewDidLoad() {

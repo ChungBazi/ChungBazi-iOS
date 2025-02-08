@@ -6,13 +6,16 @@
 //
 
 import Foundation
+import UIKit
 import Moya
 import KeychainSwift
 
 enum CommunityEndpoints {
-    case getCommunityPosts(data: CommunityRequestDTO)
+    case getCommunityPosts(category: String, lastPostId: Int)
     case getCommunityPost(postId: Int)
-    case getCommunityComments(postId: Int, lastCommentId: Int?, size: Int)
+    case getCommunityComments(postId: Int, lastCommentId: Int)
+    case postCommunityPost(data: CommunityPostRequestDto, imageList: [UIImage])
+    case postCommunityComment(data: CommunityCommentRequestDto)
 }
 
 extension CommunityEndpoints: TargetType {
@@ -32,6 +35,10 @@ extension CommunityEndpoints: TargetType {
             return "/posts/\(postId)"
         case .getCommunityComments:
             return "/comments"
+        case .postCommunityPost:
+            return "/posts/upload"
+        case .postCommunityComment:
+            return "/comments/upload"
         }
     }
     
@@ -39,35 +46,48 @@ extension CommunityEndpoints: TargetType {
         switch self {
         case .getCommunityPosts, .getCommunityPost, .getCommunityComments:
             return .get
+        case .postCommunityPost, .postCommunityComment:
+            return .post
         }
     }
     
     var task: Task {
         switch self {
-        case .getCommunityPosts(let data):
-            var parameters: [String: Any] = [
-                "size": data.size
-            ]
-            if data.lastPostId != nil {
-                parameters["lastPostId"] = data.lastPostId
-            }
-            if data.category != .all {
-                parameters["category"] = data.category.rawValue
-            }
-            return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
-            
+        case .getCommunityPosts(let category, let lastPostId):
+            return .requestParameters(parameters: ["category": category, "lastPostId": lastPostId, "size": 10], encoding: URLEncoding.default)
         case .getCommunityPost:
             return .requestPlain
+        case .getCommunityComments(let postId, let lastCommentId):
+            return .requestParameters(parameters: ["postId": postId, "lastCommentId": lastCommentId, "size": 10], encoding: URLEncoding.default)
+        case .postCommunityPost(let data, let imageList):
+            var multipartData: [MultipartFormData] = []
             
-        case .getCommunityComments(let postId, let lastCommentId, let size):
-            var parameters: [String: Any] = [
-                "postId": postId,
-                "size": size
-            ]
-            if let lastCommentId = lastCommentId {
-                parameters["lastCommentId"] = lastCommentId
+            if let jsonData = try? JSONEncoder().encode(data) {
+                let jsonFormData = MultipartFormData(
+                    provider: .data(jsonData),
+                    name: "info",
+                    fileName: "info.json",
+                    mimeType: "application/json"
+                )
+                multipartData.append(jsonFormData)
             }
-            return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
+            
+            for image in imageList {
+                let fileName = "\(UUID().uuidString).jpeg"
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    let imageFormData = MultipartFormData(
+                        provider: .data(imageData),
+                        name: "imageList", // 같은 key로 여러 개의 파일을 보냄
+                        fileName: fileName,
+                        mimeType: "image/jpeg"
+                    )
+                    multipartData.append(imageFormData)
+                }
+            }
+            
+            return .uploadMultipart(multipartData)
+        case .postCommunityComment(let data):
+            return .requestJSONEncodable(data)
         }
     }
     

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 import Moya
 
 final class UserService: NetworkManager {
@@ -49,8 +50,8 @@ final class UserService: NetworkManager {
     }
     
     /// 프로필 수정 API
-    public func updateProfile(body: ProfileUpdateRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
-        request(target: .updateProfile(data: body), decodingType: String.self, completion: completion)
+    public func updateProfile(body: ProfileUpdateRequestDto, profileImg: UIImage, completion: @escaping (Result<ProfileUpdateResponseDto, NetworkError>) -> Void) {
+        request(target: .updateProfile(data: body, profileImg: profileImg), decodingType: ProfileUpdateResponseDto.self, completion: completion)
     }
     
     /// more...
