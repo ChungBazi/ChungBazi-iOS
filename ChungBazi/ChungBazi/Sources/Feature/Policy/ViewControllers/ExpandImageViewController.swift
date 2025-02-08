@@ -7,7 +7,7 @@
 
 import UIKit
 
-class ExpandImageViewController: UIViewController {
+final class ExpandImageViewController: UIViewController {
     
     private let closeButton: UIButton = {
         let button = UIButton(type: .system)
