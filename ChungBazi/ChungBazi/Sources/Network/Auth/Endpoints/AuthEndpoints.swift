@@ -39,8 +39,10 @@ extension AuthEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postLogout, .postReIssueToken, .postKakaoLogin, .deleteUser:
+        case .postLogout, .postReIssueToken, .postKakaoLogin:
             return .post
+        case .deleteUser:
+            return .delete
         }
     }
     

@@ -93,9 +93,10 @@ class SplashViewController: UIViewController {
     }
     
     private func checkIsFirst() {
-        let isFirstString = KeychainSwift().getBool("isFirst")
-        if isFirstString == true || isFirstString == nil {
-            navigateToLoginScreen()
+        guard let isFirstString = KeychainSwift().get("isFirst") else { return }
+        let isFirst = Bool(isFirstString)
+        if isFirst == true || isFirst == nil {
+            navigateToSurveyScreen()
         } else { navigateToMainScreen() }
     }
     
@@ -115,6 +116,15 @@ class SplashViewController: UIViewController {
             window.rootViewController = vc
             UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
         }
-        
+    }
+    
+    private func navigateToSurveyScreen() {
+        let vc = StartSurveyViewController()
+        let navigationController = UINavigationController(rootViewController: vc)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = navigationController
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+        }
     }
 }

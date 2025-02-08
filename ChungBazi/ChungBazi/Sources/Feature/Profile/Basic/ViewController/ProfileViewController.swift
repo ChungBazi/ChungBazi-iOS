@@ -86,7 +86,6 @@ extension ProfileViewController: ProfileViewDelegate {
             title: "로그아웃 하시겠습니까?",
             rightButtonText: "확인",
             rightButtonAction: {
-                // FIXME: 로그아웃 처리
                 self.logout()
             }
         )
@@ -98,8 +97,7 @@ extension ProfileViewController: ProfileViewDelegate {
             title: "탈퇴한 계정 정보와 서비스\n이용기록 등은 복구할 수 없으니\n신중하게 선택하시길 바랍니다.",
             rightButtonText: "확인",
             rightButtonAction: {
-                // FIXME: 탈퇴 처리
-                print("탈퇴 처리")
+                self.deleteUser()
             }
         )
     }
@@ -116,9 +114,7 @@ extension ProfileViewController: ProfileViewDelegate {
             case .success(_):
                 kakaoAuthVM.kakaoLogout()
                 Toaster.shared.makeToast("로그아웃 성공")
-                KeychainSwift().set("", forKey: "serverAccessToken")
-                KeychainSwift().set("", forKey: "serverAccessTokenExp")
-                KeychainSwift().set("", forKey: "serverRefreshToken")
+                self.clearForQuit()
                 DispatchQueue.main.async {
                     self.showSplashScreen()
                 }
@@ -128,6 +124,34 @@ extension ProfileViewController: ProfileViewDelegate {
         }
     }
     
+    private func deleteUser() {
+        networkService.deleteUser { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(_):
+                kakaoAuthVM.unlinkKakaoAccount { success in
+                    if success {
+                        Toaster.shared.makeToast("회원탈퇴 성공")
+                        self.clearForQuit()
+                        DispatchQueue.main.async {
+                            self.showSplashScreen()
+                        }
+                    } else {
+                        Toaster.shared.makeToast("회원탈퇴 실패")
+                    }
+                }
+            case .failure(_):
+                Toaster.shared.makeToast("회원탈퇴 실패")
+            }
+        }
+    }
+    
+    func clearForQuit() {
+        ["serverAccessToken", "serverAccessTokenExp", "serverRefreshToken"].forEach {
+            KeychainSwift().delete($0)
+        }
+    }
+        
     func showSplashScreen() {
         let splashViewController = SplashViewController()
         
@@ -145,3 +169,4 @@ extension ProfileViewController: ProfileViewDelegate {
         }, completion: nil)
     }
 }
+

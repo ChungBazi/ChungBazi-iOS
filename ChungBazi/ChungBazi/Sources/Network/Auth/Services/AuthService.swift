@@ -66,7 +66,8 @@ final class AuthService: NetworkManager {
             switch result {
             case .success(let response):
                 KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                KeychainSwift().set(String(response.accessExp), forKey: "serverAccessTokenExp")
+                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
+                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
                 completion(true)
             case .failure:
                 completion(false)
