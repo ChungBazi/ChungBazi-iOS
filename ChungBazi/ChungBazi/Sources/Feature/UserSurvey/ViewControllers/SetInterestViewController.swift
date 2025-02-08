@@ -4,6 +4,7 @@
 //
 
 import UIKit
+import KeychainSwift
 
 class SetInterestViewController: UIViewController {
     
@@ -90,10 +91,10 @@ class SetInterestViewController: UIViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success(let response):
+            case .success(_):
+                KeychainSwift().set("false", forKey: "isFirst")
+            case .failure(let response):
                 print(response)
-            case .failure(let error):
-                print(error)
             }
         }
     }

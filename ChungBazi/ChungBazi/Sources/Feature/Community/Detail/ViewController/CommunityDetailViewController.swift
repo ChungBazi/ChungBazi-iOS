@@ -87,26 +87,26 @@ final class CommunityDetailViewController: UIViewController {
         
         // MARK: - API 요청: 개별 게시글의 댓글 가져오기
         private func fetchCommentData() {
-            communityService.getCommunityComments(postId: postId, lastCommentId: nil, size: 10) { [weak self] result in
-                guard let self = self else { return }
-                switch result {
-                case .success(let success):
-                    self.comments = success.map { comment in
-                        CommunityDetailCommentModel(
-                            postId: comment.postId,
-                            content: comment.content,
-                            formattedCreatedAt: comment.formattedCreatedAt,
-                            commentId: comment.commentId,
-                            userId: comment.userId,
-                            userName: comment.userName,
-                            reward: comment.reward,
-                            characterImg: comment.characterImg
-                        )
-                    }
-                    self.communityDetailView.updateComments(self.comments)
-                case .failure(let error):
-                    print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
-                }
-            }
+//            communityService.getCommunityComments(postId: postId, lastCommentId: nil, size: 10) { [weak self] result in
+//                guard let self = self else { return }
+//                switch result {
+//                case .success(let success):
+//                    self.comments = success.map { comment in
+//                        CommunityDetailCommentModel(
+//                            postId: comment.postId,
+//                            content: comment.content,
+//                            formattedCreatedAt: comment.formattedCreatedAt,
+//                            commentId: comment.commentId,
+//                            userId: comment.userId,
+//                            userName: comment.userName,
+//                            reward: comment.reward,
+//                            characterImg: comment.characterImg
+//                        )
+//                    }
+//                    self.communityDetailView.updateComments(self.comments)
+//                case .failure(let error):
+//                    print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
+//                }
+//            }
         }
     }

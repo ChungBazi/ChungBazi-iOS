@@ -29,6 +29,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
         profileEditView.configure(with: profileData)
+        fillSafeArea(position: .top, color: .white)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,7 +44,10 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+        scrollView.showsVerticalScrollIndicator = false
+        
+        profileEditView.settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)
         
         view.addSubview(scrollView)
         scrollView.addSubview(profileEditView)
@@ -57,25 +61,30 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
             $0.edges.width.equalToSuperview()
         }
     }
+    
+    @objc private func settingCharacterBtnTapped() {
+        let vc = CharacterEditViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 
     func didCompleteEditing(nickname: String, selectedImage: String) {
-        let userService = UserService()
-        let requestBody = ProfileUpdateRequestDto(name: nickname, profileImg: selectedImage)
-
-        userService.updateProfile(body: requestBody) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let response):
-                self.profileData.name = nickname
-                self.profileData.characterImg = selectedImage
-                self.onProfileUpdated?(self.profileData)
-                DispatchQueue.main.async {
-                    self.navigationController?.popViewController(animated: true)
-                }
-            case .failure(let error):
-                print("❌ 프로필 수정 실패: \(error.localizedDescription)")
-            }
-        }
+//        let userService = UserService()
+//        let requestBody = ProfileUpdateRequestDto(name: nickname, profileImg: selectedImage)
+//
+//        userService.updateProfile(body: requestBody) { [weak self] result in
+//            guard let self = self else { return }
+//            switch result {
+//            case .success(let response):
+//                self.profileData.name = nickname
+//                self.profileData.characterImg = selectedImage
+//                self.onProfileUpdated?(self.profileData)
+//                DispatchQueue.main.async {
+//                    self.navigationController?.popViewController(animated: true)
+//                }
+//            case .failure(let error):
+//                print("❌ 프로필 수정 실패: \(error.localizedDescription)")
+//            }
+//        }
     }
 }
 
