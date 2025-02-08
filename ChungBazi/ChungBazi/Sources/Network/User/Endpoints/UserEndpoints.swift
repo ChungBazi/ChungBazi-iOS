@@ -13,6 +13,7 @@ enum UserEndpoints {
     case fetchProfile
     case updateUserInfo(data: UserInfoRequestDto)
     case postUserInfo(data: UserInfoRequestDto)
+    case updateProfile(data: ProfileUpdateRequestDto)
 }
 
 extension UserEndpoints: TargetType {
@@ -31,6 +32,8 @@ extension UserEndpoints: TargetType {
             return "/update"
         case .postUserInfo:
             return "/register"
+        case .updateProfile:
+            return "/profile/update"
         }
     }
     
@@ -38,7 +41,7 @@ extension UserEndpoints: TargetType {
         switch self {
         case .fetchProfile:
             return .get
-        case .updateUserInfo:
+        case .updateUserInfo, .updateProfile:
             return .patch
         case .postUserInfo:
             return .post
@@ -49,7 +52,11 @@ extension UserEndpoints: TargetType {
         switch self {
         case .fetchProfile:
             return .requestPlain
-        case .updateUserInfo(let data), .postUserInfo(let data) :
+        case .updateUserInfo(let data):
+            return .requestJSONEncodable(data)
+        case .postUserInfo(let data):
+            return .requestJSONEncodable(data)
+        case .updateProfile(let data):
             return .requestJSONEncodable(data)
         }
     }

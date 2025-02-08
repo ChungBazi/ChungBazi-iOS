@@ -58,10 +58,24 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         }
     }
 
-    func didCompleteEditing(nickname: String) {
-        let updatedProfile = ProfileModel(userId: profileData.userId, name: profileData.name, email: profileData.email, profileImg: profileData.profileImg)
-        onProfileUpdated?(updatedProfile)
-        navigationController?.popViewController(animated: true)
+    func didCompleteEditing(nickname: String, selectedImage: String) {
+        let userService = UserService()
+        let requestBody = ProfileUpdateRequestDto(name: nickname, profileImg: selectedImage)
+
+        userService.updateProfile(body: requestBody) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                self.profileData.name = nickname
+                self.profileData.characterImg = selectedImage
+                self.onProfileUpdated?(self.profileData)
+                DispatchQueue.main.async {
+                    self.navigationController?.popViewController(animated: true)
+                }
+            case .failure(let error):
+                print("❌ 프로필 수정 실패: \(error.localizedDescription)")
+            }
+        }
     }
 }
 

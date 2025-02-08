@@ -48,5 +48,10 @@ final class UserService: NetworkManager {
         request(target: .postUserInfo(data: body), decodingType: String.self, completion: completion)
     }
     
+    /// 프로필 수정 API
+    public func updateProfile(body: ProfileUpdateRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .updateProfile(data: body), decodingType: String.self, completion: completion)
+    }
+    
     /// more...
 }

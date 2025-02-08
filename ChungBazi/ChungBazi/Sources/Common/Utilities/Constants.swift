@@ -31,4 +31,6 @@ struct Constants {
     static let interestItems = ["일자리", "주거", "교육", "복지,문화", "참여,권리"]
     
     static let sortItems = ["최신순", "마감순"]
+    
+    static let communityCategoryItems = CommunityCategory.allCases.map { $0.displayName }
 }

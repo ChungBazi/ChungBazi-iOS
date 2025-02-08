@@ -17,6 +17,11 @@ class MainTabBarController: UITabBarController {
         configureTabBarItemFonts()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        navigationController?.navigationBar.isHidden = true
+    }
+    
     private func createHomeViewController() -> UIViewController {
         return createNavigationController(for: HomeViewController(), title: "홈", image: .tabHomeIcon, tag: 0)
     }
@@ -26,7 +31,7 @@ class MainTabBarController: UITabBarController {
     }
     
     private func createCommunityViewController() -> UIViewController {
-        return createNavigationController(for: UIViewController(), title: "커뮤니티", image: .tabCommunityIcon, tag: 2)
+        return createNavigationController(for: CommunityViewController(), title: "커뮤니티", image: .tabCommunityIcon, tag: 2)
     }
     
     private func createProfileViewController() -> UIViewController {
