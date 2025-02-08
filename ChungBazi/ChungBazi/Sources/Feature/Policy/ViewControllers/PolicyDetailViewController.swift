@@ -68,12 +68,8 @@ class PolicyDetailViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(posterView)
-        view.addSubview(expandButton)
-        view.addSubview(policyView)
-        view.addSubview(bottomBackgroundView)
-        bottomBackgroundView.addSubview(cartButton)
-        bottomBackgroundView.addSubview(registerButton)
+        view.addSubviews(posterView, expandButton, policyView, bottomBackgroundView)
+        bottomBackgroundView.addSubviews(cartButton, registerButton)
 
         posterView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(65)
@@ -100,14 +96,14 @@ class PolicyDetailViewController: UIViewController {
 
         cartButton.snp.makeConstraints { make in
             make.leading.equalToSuperview().inset(16)
-            make.centerY.equalToSuperview().offset(-view.safeAreaInsets.bottom / 2 - 5)
+            make.centerY.equalToSuperview().offset(-view.safeAreaInsets.bottom / 2 - 7)
             make.width.equalTo(view.frame.width / 2 - 24)
             make.height.equalTo(48)
         }
 
         registerButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(16)
-            make.centerY.equalToSuperview().offset(-view.safeAreaInsets.bottom / 2 - 5)
+            make.centerY.equalToSuperview().offset(-view.safeAreaInsets.bottom / 2 - 7)
             make.width.equalTo(view.frame.width / 2 - 24)
             make.height.equalTo(48)
         }
@@ -117,8 +113,8 @@ class PolicyDetailViewController: UIViewController {
         bottomBackgroundView.layer.cornerRadius = 10
         bottomBackgroundView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         bottomBackgroundView.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
-        bottomBackgroundView.layer.shadowOffset = CGSize(width: 0, height: -3)
-        bottomBackgroundView.layer.shadowRadius = 10
+        bottomBackgroundView.layer.shadowOffset = CGSize(width: 0, height: -1)
+        bottomBackgroundView.layer.shadowRadius = 5
         bottomBackgroundView.layer.shadowOpacity = 1
         bottomBackgroundView.backgroundColor = .white
     }
@@ -140,8 +136,8 @@ class PolicyDetailViewController: UIViewController {
                 education: "추가신청자격: 없음"
             ),
             document: "서류내용\n1. 주민등록 등본\n2. 건강보험증 사본",
-            applyProcedure: "접수처: 신청서 본인 주민등록지 주소 주민센터 방문접수",
-            result: "합격자 발표: 2024년 12월 12일 (목)",
+            applyProcedure: "접수처: 신청서 본인 주민등록지 주소 주민센터(방문접수)",
+            result: "합격자 발표 : 2024. 12. 12.(목)한 ☞ 선발 및 연수기관(부서) 매칭결과 개별안내",
             referenceUrls: ["https://example.com"],
             registerUrl: "https://example.com"
         )
