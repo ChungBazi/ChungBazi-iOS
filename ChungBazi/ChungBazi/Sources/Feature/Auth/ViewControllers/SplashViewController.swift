@@ -65,24 +65,27 @@ class SplashViewController: UIViewController {
     }
     
     func checkAuthenticationStatus() {
-        //토큰 유효 검증
-        if let expirationString = KeychainSwift().get("serverAccessTokenExp"),
-           let expirationTimestamp = Int(expirationString) {
-            
-            let expirationDate = Date(timeIntervalSince1970: TimeInterval(expirationTimestamp))
-            
-            if Date() < expirationDate {
-                print("토큰이 아직 유효함")
-                checkIsFirst()
-            } else {
-                print("토큰이 만료됨")
-                networkService.reIssueAccesToken { success in
-                    if success {
-                        self.checkIsFirst()
-                    } else {
-                        DispatchQueue.main.async {
-                            self.navigateToLoginScreen()
-                        }
+        guard let expirationString = KeychainSwift().get("serverAccessTokenExp"),
+              let expirationTimestamp = Int(expirationString) else {
+            DispatchQueue.main.async {
+                self.navigateToLoginScreen()
+            }
+            return
+        }
+
+        let expirationDate = Date(timeIntervalSince1970: TimeInterval(expirationTimestamp))
+
+        if Date() < expirationDate {
+            print("토큰이 아직 유효함")
+            checkIsFirst()
+        } else {
+            print("토큰이 만료됨 → 재발급 시도")
+            networkService.reIssueAccesToken { success in
+                if success {
+                    self.checkIsFirst()
+                } else {
+                    DispatchQueue.main.async {
+                        self.navigateToLoginScreen()
                     }
                 }
             }

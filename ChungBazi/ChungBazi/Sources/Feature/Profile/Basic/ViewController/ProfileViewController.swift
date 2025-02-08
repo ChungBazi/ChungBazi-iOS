@@ -6,12 +6,16 @@
 //
 
 import UIKit
+import SwiftyToaster
+import KeychainSwift
 
 class ProfileViewController: UIViewController {
     
     private let profileView = ProfileView()
     private var profileData: ProfileModel?
     private var rewardData: RewardModel?
+    let networkService = AuthService()
+    let kakaoAuthVM = KakaoAuthVM()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -83,7 +87,7 @@ extension ProfileViewController: ProfileViewDelegate {
             rightButtonText: "확인",
             rightButtonAction: {
                 // FIXME: 로그아웃 처리
-                print("로그아웃 처리")
+                self.logout()
             }
         )
     }
@@ -103,5 +107,41 @@ extension ProfileViewController: ProfileViewDelegate {
     func didTapMyRewardView() {
         guard let rewardData = rewardData else { return }
         showProfileMyRewardView(rewardData: rewardData)
+    }
+    
+    private func logout() {
+        networkService.logout() { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(_):
+                kakaoAuthVM.kakaoLogout()
+                Toaster.shared.makeToast("로그아웃 성공")
+                KeychainSwift().set("", forKey: "serverAccessToken")
+                KeychainSwift().set("", forKey: "serverAccessTokenExp")
+                KeychainSwift().set("", forKey: "serverRefreshToken")
+                DispatchQueue.main.async {
+                    self.showSplashScreen()
+                }
+            case .failure(_):
+                Toaster.shared.makeToast("로그아웃 실패")
+            }
+        }
+    }
+    
+    func showSplashScreen() {
+        let splashViewController = SplashViewController()
+        
+        // 현재 윈도우 가져오기
+        guard let window = UIApplication.shared.connectedScenes
+            .compactMap({ $0 as? UIWindowScene })
+            .first?.windows
+            .first else {
+            print("윈도우를 가져올 수 없습니다.")
+            return
+        }
+        
+        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
+            window.rootViewController = splashViewController
+        }, completion: nil)
     }
 }
