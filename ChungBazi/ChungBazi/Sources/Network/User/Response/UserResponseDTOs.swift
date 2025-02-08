@@ -18,3 +18,7 @@ struct ProfileResponseDto: Decodable {
         self.characterImg = characterImg
     }
 }
+
+struct ProfileUpdateResponseDto: Decodable {
+    let name: String
+}
