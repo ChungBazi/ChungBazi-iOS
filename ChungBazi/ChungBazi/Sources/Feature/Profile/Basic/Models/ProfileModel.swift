@@ -7,9 +7,11 @@
 
 import Foundation
 
-struct ProfileModel {
-    let nickname: String
+struct ProfileModel: Codable {
+    let userId: Int
+    let name: String
     let email: String
+    let profileImg: String
 }
 
 struct RewardModel {

@@ -35,7 +35,7 @@ class ProfileViewController: UIViewController {
     
     private func fetchData() {
         // FIXME: 추후 서버 연결 시 아래 코드 제거
-        profileData = ProfileModel(nickname: "홍길동", email: "hong@example.com")
+        profileData = ProfileModel(userId: 0, name: "hy", email: "hello@world.com", profileImg: "")
         if let profileData = profileData {
             profileView.configure(with: profileData)
         }
@@ -90,7 +90,8 @@ extension ProfileViewController: ProfileViewDelegate {
     
     func didTapWithdraw() {
         showCustomAlert(
-            title: "탈퇴 하시겠습니까?\n\n탈퇴한 계정 정보와 서비스\n이용기록 등은 복구할 수 없으니\n신중하게 선택하시길 바랍니다.",
+            headerTitle: "탈퇴 하시겠습니까?",
+            title: "탈퇴한 계정 정보와 서비스\n이용기록 등은 복구할 수 없으니\n신중하게 선택하시길 바랍니다.",
             rightButtonText: "확인",
             rightButtonAction: {
                 // FIXME: 탈퇴 처리

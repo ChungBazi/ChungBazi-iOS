@@ -31,8 +31,22 @@ final class CalendarView: UIView {
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 14)
     }
-    private let previousBtn = createNavigationButton(image: .arrowLeft, action: #selector(prevPage), target: self)
-    private let nextBtn = createNavigationButton(image: .arrowRight, action: #selector(nextPage), target: self)
+    private let previousBtn = UIButton.createWithImage(
+        image: .arrowLeft,
+        target: self,
+        action: #selector(prevPage),
+        touchAreaInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    ).then {
+        $0.tintColor = .gray500
+    }
+    private let nextBtn = UIButton.createWithImage(
+        image: .arrowRight,
+        target: self,
+        action: #selector(nextPage),
+        touchAreaInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+    ).then {
+        $0.tintColor = .gray500
+    }
     
     private var currentPage: Date?
     private let today = Date()
@@ -57,15 +71,6 @@ final class CalendarView: UIView {
             $0.layer.cornerRadius = 10
             $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         }
-    }
-    private static func createNavigationButton(image: UIImage, action: Selector, target: Any) -> UIButton {
-        return UIButton.createWithImage(
-            image: image,
-            tintColor: .gray500,
-            target: target,
-            action: action,
-            touchAreaInsets: UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
-        )
     }
     
     // MARK: - Initializers

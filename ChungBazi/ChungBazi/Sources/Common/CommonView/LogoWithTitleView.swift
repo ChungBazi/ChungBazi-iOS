@@ -24,6 +24,7 @@ class LogoWithTitleView: UIView {
     init(image: String, title: String) {
         super.init(frame: .zero)
         self.title.text = title
+        self.title.setLineSpacing()
         self.logo.image = UIImage(named: image)
         self.backgroundColor = .blue700
         addComponents()

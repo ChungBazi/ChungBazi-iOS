@@ -59,7 +59,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     }
 
     func didCompleteEditing(nickname: String) {
-        let updatedProfile = ProfileModel(nickname: nickname, email: profileData.email)
+        let updatedProfile = ProfileModel(userId: profileData.userId, name: profileData.name, email: profileData.email, profileImg: profileData.profileImg)
         onProfileUpdated?(updatedProfile)
         navigationController?.popViewController(animated: true)
     }

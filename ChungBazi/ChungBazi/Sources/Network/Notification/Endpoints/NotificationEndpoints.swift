@@ -7,9 +7,12 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 enum NotificationEndpoints {
     case fetchAlarmList(type: String, cursor: Int)
+    case fetchAlarmSetting
+    case patchAlarmSetting(data: NoticeSettingRequestDto)
 }
 
 extension NotificationEndpoints: TargetType {
@@ -24,14 +27,20 @@ extension NotificationEndpoints: TargetType {
     var path: String {
         switch self {
         case .fetchAlarmList:
-            return "/notifications"
+            return ""
+        case .fetchAlarmSetting:
+            return "/settings"
+        case .patchAlarmSetting:
+            return "settings-up"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .fetchAlarmList:
+        case .fetchAlarmList, .fetchAlarmSetting:
             return .get
+        case .patchAlarmSetting:
+            return .patch
         }
     }
     
@@ -39,11 +48,17 @@ extension NotificationEndpoints: TargetType {
         switch self {
         case .fetchAlarmList(let type, let cursor):
             return .requestParameters(parameters: ["type": type, "cursor": cursor, "limit": 15], encoding: URLEncoding.default)
+        case .fetchAlarmSetting:
+            return .requestPlain
+        case .patchAlarmSetting(let data):
+            return .requestJSONEncodable(data)
         }
     }
     
     var headers: [String : String]? {
+        let accessToken = KeychainSwift().get("serverAccessToken")
         return [
+            "Authorization": "Bearer \(accessToken!)",
             "Content-type": "application/json"
         ]
     }

@@ -18,8 +18,21 @@ class SelectLoginView: UIView {
     }
     
     private let title = UILabel().then {
-        $0.text = "전정책도 쉽고 간편하게,\n청바지"
-        $0.font = UIFont.ptdSemiBoldFont(ofSize: 32)
+        let fullText = "정책도 쉽고 간편하게,\n청바지"
+        let attributedString = NSMutableAttributedString(string: fullText, attributes: [.font: UIFont.ptdSemiBoldFont(ofSize: 32)])
+        
+        attributedString.addAttribute(.font, value: UIFont.afgRegularFont(ofSize: 32), range: (fullText as NSString).range(of: "청바지"))
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineHeightMultiple = 1.2 // 줄 간격 적용
+        
+        attributedString.addAttribute(
+            .paragraphStyle,
+            value: paragraphStyle,
+            range: NSRange(location: 0, length: attributedString.length)
+        )
+        
+        $0.attributedText = attributedString
         $0.textColor = .white
         $0.numberOfLines = 2
     }
