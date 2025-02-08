@@ -91,18 +91,6 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         $0.tintColor = .gray500
     }
     
-    private let buttonContainerView = UIView().then {
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 10
-        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        $0.layer.shadowColor = UIColor.black.cgColor
-        $0.layer.shadowOffset = CGSize(width: 0, height: 3)
-        $0.layer.shadowOpacity = 0.18
-        $0.layer.shadowRadius = 10
-    }
-    
-    private let postButton = CustomActiveButton(title: "완료", isEnabled: false)
-    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -114,7 +102,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
     
     private func setupUI() {
-        addSubviews(scrollView, communityRuleView, buttonContainerView)
+        addSubviews(scrollView, communityRuleView)
         
         scrollView.addSubview(contentView)
         contentView.addSubviews(dropdownView, cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView)
@@ -164,7 +152,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         
         communityRuleView.addSubviews(communityRuleLabel, communityRuleIcon)
         communityRuleView.snp.makeConstraints {
-            $0.bottom.equalTo(buttonContainerView.snp.top).offset(-22)
+            $0.bottom.equalToSuperview().inset(22)
             $0.trailing.equalToSuperview().inset(Constants.gutter)
             $0.height.equalTo(20)
         }
@@ -178,15 +166,8 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
             $0.trailing.centerY.equalToSuperview()
         }
         
-        buttonContainerView.addSubviews(postButton)
-        buttonContainerView.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalToSuperview()
-            $0.height.equalTo(58)
-        }
-        
-        postButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(10)
-            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+        contentView.snp.makeConstraints {
+            $0.bottom.equalTo(communityRuleView.snp.top).inset(22)
         }
     }
     
