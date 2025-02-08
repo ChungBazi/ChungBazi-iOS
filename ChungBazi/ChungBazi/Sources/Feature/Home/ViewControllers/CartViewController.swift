@@ -88,12 +88,12 @@ final class CartViewController: UIViewController {
 
     private func loadCartData() {
         cartItems = [
+            "일자리": [
+                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-1")
+            ],
             "주거": [
                 PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-5"),
                 PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-11")
-            ],
-            "일자리": [
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-1")
             ]
         ]
         tableView.reloadData()
@@ -191,16 +191,18 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
             cell.setCheckBoxState(isSelected: selectedItems.contains(indexPath))
 
             cell.selectionHandler = { [weak self] isSelected in
+                guard let self = self else { return }
                 if isSelected {
-                    self?.selectedItems.insert(indexPath)
+                    self.selectedItems.insert(indexPath)
                 } else {
-                    self?.selectedItems.remove(indexPath)
+                    self.selectedItems.remove(indexPath)
                 }
             }
 
             cell.deleteHandler = { [weak self] in
-                self?.deleteItem(at: indexPath)
-                self?.tableView.reloadData()
+                guard let self = self else { return }
+                self.deleteItem(at: indexPath)
+                self.tableView.reloadData()
             }
             cell.showControls = true 
         }
