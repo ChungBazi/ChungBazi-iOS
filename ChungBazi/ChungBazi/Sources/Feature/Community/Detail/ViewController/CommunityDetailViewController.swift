@@ -75,7 +75,8 @@ final class CommunityDetailViewController: UIViewController {
                         userId: success.userId,
                         userName: success.userName,
                         reward: success.reward,
-                        characterImg: success.characterImg
+                        characterImg: success.characterImg,
+                        imageUrls: success.imageUrls
                     )
                     self.communityDetailView.updatePost(self.postData!)
                 case .failure(let error):

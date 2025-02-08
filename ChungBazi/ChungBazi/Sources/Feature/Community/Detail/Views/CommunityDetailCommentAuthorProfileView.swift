@@ -24,7 +24,7 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
     }
     
     private let userLevelLabel = UILabel().then {
-        $0.font = .ptdBoldFont(ofSize: 16)
+        $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray300
     }
     
