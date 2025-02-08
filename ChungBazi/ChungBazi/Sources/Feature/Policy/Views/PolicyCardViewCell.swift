@@ -24,7 +24,7 @@ final class PolicyCardViewCell: UITableViewCell {
             }
 
             badgeImageView.snp.updateConstraints { make in
-                make.top.equalToSuperview().offset(showControls ? 48 : 16)
+                make.top.equalToSuperview().offset(showControls ? 42 : 16)
             }
         }
     }
@@ -63,6 +63,7 @@ final class PolicyCardViewCell: UITableViewCell {
         label.font = UIFont(name: AppFontName.pSemiBold, size: 16)
         label.textColor = .black
         label.numberOfLines = 0
+        label.lineBreakMode = .byCharWrapping
         return label
     }()
 
@@ -93,12 +94,7 @@ final class PolicyCardViewCell: UITableViewCell {
 
     private func setupLayout() {
         contentView.addSubview(containerView)
-        containerView.addSubview(checkBoxButton)
-        containerView.addSubview(deleteButton)
-        containerView.addSubview(badgeImageView)
-        containerView.addSubview(badgeTextLabel)
-        containerView.addSubview(titleLabel)
-        containerView.addSubview(periodLabel)
+        containerView.addSubviews(checkBoxButton, deleteButton, badgeImageView, badgeTextLabel, titleLabel, periodLabel)
 
         containerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
@@ -131,7 +127,7 @@ final class PolicyCardViewCell: UITableViewCell {
 
         titleLabel.snp.makeConstraints { make in
             make.leading.equalTo(badgeImageView.snp.trailing).offset(16)
-            make.trailing.equalTo(deleteButton.snp.leading).offset(-8)
+            make.trailing.equalTo(deleteButton.snp.leading).offset(32)
             make.top.equalTo(badgeImageView.snp.top)
         }
 

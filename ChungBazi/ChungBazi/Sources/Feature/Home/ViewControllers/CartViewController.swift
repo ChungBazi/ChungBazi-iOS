@@ -53,8 +53,7 @@ final class CartViewController: UIViewController {
     private func setupHeaderView() {
         headerView.backgroundColor = .clear
         view.addSubview(headerView)
-        headerView.addSubview(allSelectButton)
-        headerView.addSubview(deleteButton)
+        headerView.addSubviews(allSelectButton, deleteButton)
 
         headerView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(65)
@@ -168,10 +167,10 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
 
         headerView.addSubview(titleLabel)
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(16)
+            make.leading.equalToSuperview().offset(32)
             make.trailing.equalToSuperview().offset(-16)
-            make.top.equalTo(separatorLine.snp.bottom).offset(32)
-            make.bottom.equalToSuperview().offset(-16)
+            make.top.equalTo(separatorLine.snp.bottom).offset(16)
+            make.bottom.equalToSuperview().offset(-8)
         }
 
         return headerView
