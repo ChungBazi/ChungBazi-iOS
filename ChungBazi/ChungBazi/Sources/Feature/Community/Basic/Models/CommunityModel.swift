@@ -20,9 +20,10 @@ struct CommunityPost: Codable {
     let formattedCreatedAt: String
     let views: Int
     let commentCount: Int
+    let postLikes: Int
     let userId: Int
     let userName: String
-    let reward: Int
+    let reward: String
     let characterImg: String?
     let thumbnailUrl: String?
 }

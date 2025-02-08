@@ -20,6 +20,8 @@ final class CommunityView: UIView {
     weak var delegate: CommunityViewDelegate?
     private var posts: [CommunityPost] = []
     
+    private var collectionViewHeightConstraint: Constraint?
+    
     private lazy var segmentedControl = UISegmentedControl(items: Constants.communityCategoryItems).then {
         $0.selectedSegmentIndex = 0
         $0.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
@@ -66,6 +68,8 @@ final class CommunityView: UIView {
         $0.dataSource = self
         $0.delegate = self
         $0.register(CommunityPostListCell.self, forCellWithReuseIdentifier: "CommunityPostListCell")
+        $0.isScrollEnabled = false
+        $0.backgroundColor = .clear
     }
     
     override init(frame: CGRect) {
@@ -114,6 +118,14 @@ final class CommunityView: UIView {
         totalPostCountLabel.snp.makeConstraints {
             $0.top.leading.equalToSuperview().inset(Constants.gutter)
         }
+        
+        contentView.addSubview(collectionView)
+        collectionView.snp.makeConstraints {
+            $0.top.equalTo(totalPostCountLabel.snp.bottom)
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.bottom.equalToSuperview().inset(Constants.gutter)
+            collectionViewHeightConstraint = $0.height.equalTo(0).constraint
+        }
     }
     
     override func layoutSubviews() {
@@ -149,6 +161,9 @@ final class CommunityView: UIView {
             self.posts = posts
             self.totalPostCountLabel.text = "총 \(totalPostCount)개의 글"
             self.collectionView.reloadData()
+            self.collectionView.layoutIfNeeded()
+            let contentHeight = self.collectionView.contentSize.height
+            self.collectionViewHeightConstraint?.update(offset: contentHeight)
         }
     }
     
@@ -170,10 +185,10 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.width - 16, height: 100)
+        return CGSize(width: collectionView.bounds.width - 16, height: 177)
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let selectedPost = posts[indexPath.row]
         delegate?.didSelectPost(postId: selectedPost.postId)
     }

@@ -45,9 +45,11 @@ extension CommunityEndpoints: TargetType {
         switch self {
         case .getCommunityPosts(let data):
             var parameters: [String: Any] = [
-                "lastPostId": data.lastPostId,
                 "size": data.size
             ]
+            if data.lastPostId != nil {
+                parameters["lastPostId"] = data.lastPostId
+            }
             if data.category != .all {
                 parameters["category"] = data.category.rawValue
             }

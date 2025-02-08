@@ -23,10 +23,14 @@ final class CommunityPostListCell: UICollectionViewCell {
     private let categoryLabel = UILabel().then {
         $0.font = .ptdSemiBoldFont(ofSize: 16)
         $0.textColor = .blue700
+        $0.setContentHuggingPriority(.required, for: .horizontal)
+        $0.setContentCompressionResistancePriority(.required, for: .horizontal)
     }
     private let postTitleLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .black
+        $0.textAlignment = .left
+        $0.lineBreakMode = .byCharWrapping
     }
     private let contentLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
@@ -57,12 +61,13 @@ final class CommunityPostListCell: UICollectionViewCell {
         addSubviews(profileView, createdAtLabel, postContentView, socialInfoStackView)
         
         profileView.snp.makeConstraints {
-            $0.top.leading.equalToSuperview().inset(17)
+            $0.top.equalToSuperview().inset(17)
+            $0.leading.equalToSuperview()
             $0.height.equalTo(33)
         }
         
         createdAtLabel.snp.makeConstraints {
-            $0.leading.equalTo(profileView.snp.trailing).offset(8)
+            $0.trailing.equalToSuperview()
             $0.centerY.equalTo(profileView)
         }
         
@@ -123,18 +128,40 @@ final class CommunityPostListCell: UICollectionViewCell {
     func configure(with post: CommunityPost) {
         profileView.configure(
             userName: post.userName,
-            userLevel: "LV.\(post.reward)",
+            userLevel: "Lv.\(post.reward.replacingOccurrences(of: "LEVEL_", with: ""))",
             characterImageUrl: post.characterImg
         )
+
         createdAtLabel.text = post.formattedCreatedAt
         categoryLabel.text = post.category.displayName
+
         postTitleLabel.text = post.title
         contentLabel.text = post.content
-        
+
+        let likeText = "좋아요 \(post.postLikes)"
+        let commentText = "댓글 \(post.commentCount)"
+        let viewText = "조회 \(post.views)"
+
+        socialInfoStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        socialInfoStackView.addArrangedSubview(createSocialLabel(text: likeText))
+        socialInfoStackView.addArrangedSubview(createSeparatedLineView())
+        socialInfoStackView.addArrangedSubview(createSocialLabel(text: commentText))
+        socialInfoStackView.addArrangedSubview(createSeparatedLineView())
+        socialInfoStackView.addArrangedSubview(createSocialLabel(text: viewText))
+
         if let thumbnailUrl = post.thumbnailUrl, let url = URL(string: thumbnailUrl) {
             thumbnailImgView.kf.setImage(with: url)
         } else {
             thumbnailImgView.image = nil
         }
+    }
+
+    private func createSocialLabel(text: String) -> UILabel {
+        let label = UILabel()
+        label.text = text
+        label.font = .ptdMediumFont(ofSize: 14)
+        label.textColor = .gray500
+        return label
     }
 }
