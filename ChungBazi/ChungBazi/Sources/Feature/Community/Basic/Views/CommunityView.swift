@@ -12,12 +12,12 @@ import Then
 protocol CommunityViewDelegate: AnyObject {
     func didTapWriteButton()
     func didSelectCategory(index: Int)
+    func didSelectPost(postId: Int)
 }
 
 final class CommunityView: UIView {
     
     weak var delegate: CommunityViewDelegate?
-    
     private var posts: [CommunityPost] = []
     
     private lazy var segmentedControl = UISegmentedControl(items: Constants.communityCategoryItems).then {
@@ -171,5 +171,10 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.bounds.width - 16, height: 100)
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedPost = posts[indexPath.row]
+        delegate?.didSelectPost(postId: selectedPost.postId)
     }
 }

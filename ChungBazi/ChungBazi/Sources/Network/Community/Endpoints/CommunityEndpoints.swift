@@ -10,6 +10,8 @@ import Moya
 
 enum CommunityEndpoints {
     case getCommunityPosts(data: CommunityRequestDTO)
+    case getCommunityPost(postId: Int)
+    case getCommunityComments(postId: Int, lastCommentId: Int?, size: Int)
 }
 
 extension CommunityEndpoints: TargetType {
@@ -25,12 +27,16 @@ extension CommunityEndpoints: TargetType {
         switch self {
         case .getCommunityPosts:
             return "/posts"
+        case .getCommunityPost(let postId):
+            return "/posts/\(postId)"
+        case .getCommunityComments:
+            return "/comments"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .getCommunityPosts:
+        case .getCommunityPosts, .getCommunityPost, .getCommunityComments:
             return .get
         }
     }
@@ -45,7 +51,19 @@ extension CommunityEndpoints: TargetType {
             if data.category != .all {
                 parameters["category"] = data.category.rawValue
             }
-
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
+        
+        case .getCommunityPost:
+            return .requestPlain
+            
+        case .getCommunityComments(let postId, let lastCommentId, let size):
+            var parameters: [String: Any] = [
+                "postId": postId,
+                "size": size
+            ]
+            if let lastCommentId = lastCommentId {
+                parameters["lastCommentId"] = lastCommentId
+            }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
         }
     }

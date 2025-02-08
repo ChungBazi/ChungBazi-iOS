@@ -10,3 +10,9 @@ struct CommunityRequestDTO: Codable {
     let lastPostId: Int
     let size: Int
 }
+
+struct CommunityCommentRequestDTO: Codable {
+    let postId: Int
+    let lastCommentId: Int?
+    let size: Int
+}

@@ -33,7 +33,7 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     
     private func fetchData(for categoryIndex: Int) {
         guard let category = CommunityCategory.allCases[safe: categoryIndex] else { return }
-        let requestDTO = communityService.makeCommunityDTO(category: category, lastPostId: 0, size: 10)
+        let requestDTO = CommunityRequestDTO(category: category, lastPostId: 0, size: 10)
 
         communityService.getCommunityPosts(data: requestDTO) { [weak self] result in
             guard let self = self else { return }
@@ -73,5 +73,10 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     func didTapWriteButton() {
         let nextVC = CommunityWriteViewController()
         navigationController?.pushViewController(nextVC, animated: true)
+    }
+    
+    func didSelectPost(postId: Int) {
+        let detailVC = CommunityDetailViewController(postId: postId)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }

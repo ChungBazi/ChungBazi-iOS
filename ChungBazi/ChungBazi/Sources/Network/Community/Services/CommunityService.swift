@@ -22,11 +22,22 @@ final class CommunityService: NetworkManager {
         self.provider = provider ?? MoyaProvider<CommunityEndpoints>(plugins: plugins)
     }
     
-    public func makeCommunityDTO(category: CommunityCategory, lastPostId: Int, size: Int) -> CommunityRequestDTO {
-        return CommunityRequestDTO(category: category, lastPostId: lastPostId, size: size)
-    }
-    
     public func getCommunityPosts(data: CommunityRequestDTO, completion: @escaping (Result<CommunityResponseDTO, NetworkError>) -> Void) {
         request(target: .getCommunityPosts(data: data), decodingType: CommunityResponseDTO.self, completion: completion)
+    }
+    
+    public func getCommunityPost(postId: Int, completion: @escaping (Result<CommunityDetailResponseDTO, NetworkError>) -> Void) {
+        request(target: .getCommunityPost(postId: postId), decodingType: CommunityDetailResponseDTO.self, completion: completion)
+    }
+    
+    public func getCommunityComments(postId: Int, lastCommentId: Int?, size: Int, completion: @escaping (Result<[CommunityCommentResponseDTO.Comment], NetworkError>) -> Void) {
+        request(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId, size: size), decodingType: CommunityCommentResponseDTO.self) { result in
+            switch result {
+            case .success(let response):
+                completion(.success(response.result))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
 }

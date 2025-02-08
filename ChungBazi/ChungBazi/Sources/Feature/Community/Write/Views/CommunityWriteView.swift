@@ -114,14 +114,16 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
     
     private func setupUI() {
-        addSubviews(scrollView, contentView, communityRuleView, buttonContainerView)
+        addSubviews(scrollView, communityRuleView, buttonContainerView)
+        
+        scrollView.addSubview(contentView)
         contentView.addSubviews(dropdownView, cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView)
         scrollView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.bottom.equalTo(communityRuleView.snp.top).offset(-22)
         }
         contentView.snp.makeConstraints {
-            $0.top.width.equalToSuperview()
+            $0.top.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(photoCollectionView).offset(20)
         }
         
@@ -164,6 +166,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         communityRuleView.snp.makeConstraints {
             $0.bottom.equalTo(buttonContainerView.snp.top).offset(-22)
             $0.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.height.equalTo(20)
         }
         
         communityRuleLabel.snp.makeConstraints {
@@ -177,8 +180,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         
         buttonContainerView.addSubviews(postButton)
         buttonContainerView.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.bottom.equalToSuperview()
             $0.height.equalTo(58)
         }
         

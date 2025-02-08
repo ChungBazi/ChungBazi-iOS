@@ -12,18 +12,8 @@ import Kingfisher
 
 final class CommunityPostListCell: UICollectionViewCell {
     
-    private let profileView = UIView()
-    private let characterImgView = UIImageView().then {
-        $0.backgroundColor = .green300
-        $0.contentMode = .scaleAspectFill
-    }
-    private let userNameLabel = UILabel().then {
-        $0.font = .ptdMediumFont(ofSize: 16)
-    }
-    private let userLevelLabel = UILabel().then {
-        $0.font = .ptdBoldFont(ofSize: 16)
-        $0.textColor = .gray300
-    }
+    private let profileView = CommunityDetailCommentAuthorProfileView()
+    
     private let createdAtLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray300
@@ -64,30 +54,16 @@ final class CommunityPostListCell: UICollectionViewCell {
     }
     
     private func setupUI() {
-        addSubviews(profileView, postContentView, socialInfoStackView)
+        addSubviews(profileView, createdAtLabel, postContentView, socialInfoStackView)
         
-        profileView.addSubviews(characterImgView, userNameLabel, userLevelLabel, createdAtLabel)
         profileView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(17)
-            $0.leading.trailing.equalToSuperview()
+            $0.top.leading.equalToSuperview().inset(17)
             $0.height.equalTo(33)
         }
-        characterImgView.layer.cornerRadius = 16.5
-        characterImgView.snp.makeConstraints {
-            $0.top.leading.equalToSuperview()
-            $0.size.equalTo(33)
-        }
-        userNameLabel.snp.makeConstraints {
-            $0.leading.equalTo(characterImgView.snp.trailing).offset(8)
-            $0.centerY.equalToSuperview()
-        }
-        userLevelLabel.snp.makeConstraints {
-            $0.leading.equalTo(userNameLabel.snp.trailing).offset(5)
-            $0.centerY.equalToSuperview()
-        }
+        
         createdAtLabel.snp.makeConstraints {
-            $0.trailing.equalToSuperview()
-            $0.centerY.equalToSuperview()
+            $0.leading.equalTo(profileView.snp.trailing).offset(8)
+            $0.centerY.equalTo(profileView)
         }
         
         postContentView.addSubviews(categoryLabel, postTitleLabel, contentLabel, thumbnailImgView)
@@ -96,6 +72,7 @@ final class CommunityPostListCell: UICollectionViewCell {
             $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(66)
         }
+        
         categoryLabel.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
         }
@@ -144,20 +121,16 @@ final class CommunityPostListCell: UICollectionViewCell {
     }
     
     func configure(with post: CommunityPost) {
-        userNameLabel.text = post.userName
+        profileView.configure(
+            userName: post.userName,
+            userLevel: "LV.\(post.reward)",
+            characterImageUrl: post.characterImg
+        )
         createdAtLabel.text = post.formattedCreatedAt
         categoryLabel.text = post.category.displayName
         postTitleLabel.text = post.title
         contentLabel.text = post.content
         
-        // FIXME: - 프로필 이미지 형식에 따라 코드 수정 필요
-        let defaultProfileImage = UIImage(named: "basicBaro")
-        if let imageUrl = post.characterImg, !imageUrl.isEmpty {
-            characterImgView.kf.setImage(with: URL(string: imageUrl), placeholder: defaultProfileImage)
-        } else {
-            characterImgView.image = defaultProfileImage
-        }
-
         if let thumbnailUrl = post.thumbnailUrl, let url = URL(string: thumbnailUrl) {
             thumbnailImgView.kf.setImage(with: url)
         } else {

@@ -11,12 +11,14 @@ import PhotosUI
 
 final class CommunityWriteViewController: UIViewController, CommunityWriteViewDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate, PHPickerViewControllerDelegate {
     
+    private let scrollView = UIScrollView()
     private let communityWriteView = CommunityWriteView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         communityWriteView.delegate = self
+        enableKeyboardHandling(for: scrollView)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -33,12 +35,19 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
         view.backgroundColor = .gray50
         fillSafeArea(position: .top, color: .white)
         fillSafeArea(position: .bottom, color: .white)
+        
         addCustomNavigationBar(titleText: "글쓰기", showBackButton: true, showCartButton: false, showAlarmButton: true, backgroundColor: .white)
-        view.addSubview(communityWriteView)
-        communityWriteView.snp.makeConstraints {
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(communityWriteView)
+        
+        scrollView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
+        }
+        communityWriteView.snp.makeConstraints {
+            $0.edges.width.equalToSuperview()
         }
     }
     
