@@ -57,7 +57,7 @@ extension AuthEndpoints: TargetType {
     
     var headers: [String : String]? {
         switch self {
-        case .postKakaoLogin:
+        case .postKakaoLogin, .postReIssueToken:
             return ["Content-Type": "application/json"]
         default:
             let accessToken = KeychainSwift().get("serverAccessToken")

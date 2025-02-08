@@ -7,9 +7,12 @@
 
 import UIKit
 import Then
-import UIKit
+import KeychainSwift
+
 
 class SplashViewController: UIViewController {
+    
+    let networkService = AuthService()
     
     private let splashLabel = UILabel().then {
         $0.text = "정책도 쉽고 간편하게"
@@ -23,6 +26,24 @@ class SplashViewController: UIViewController {
         addComponents()
         setConstraints()
         updateLabelText()
+        
+        // 현재 뷰 컨트롤러가 내비게이션 컨트롤러 안에 있는지 확인
+        if self.navigationController == nil {
+            // 네비게이션 컨트롤러가 없으면 새로 설정
+            let navController = UINavigationController(rootViewController: self)
+            navController.modalPresentationStyle = .fullScreen
+            
+            // 현재 창의 rootViewController 교체
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navController
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
+        }
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.checkAuthenticationStatus()
+        }
     }
     
     private func addComponents() {
@@ -40,14 +61,57 @@ class SplashViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.splashLabel.text = "청바지"
             self.splashLabel.font = UIFont.afgRegularFont(ofSize: 28)
+        }
+    }
+    
+    func checkAuthenticationStatus() {
+        //토큰 유효 검증
+        if let expirationString = KeychainSwift().get("serverAccessTokenExp"),
+           let expirationTimestamp = Int(expirationString) {
             
-            // 1초 후 메인 화면으로 전환
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                let vc = SelectLoginTypeViewController()
-                let navController = UINavigationController(rootViewController: vc)
-                navController.modalPresentationStyle = .fullScreen
-                self.present(navController, animated: true, completion: nil)
+            let expirationDate = Date(timeIntervalSince1970: TimeInterval(expirationTimestamp))
+            
+            if Date() < expirationDate {
+                print("토큰이 아직 유효함")
+                checkIsFirst()
+            } else {
+                print("토큰이 만료됨")
+                networkService.reIssueAccesToken { success in
+                    if success {
+                        self.checkIsFirst()
+                    } else {
+                        DispatchQueue.main.async {
+                            self.navigateToLoginScreen()
+                        }
+                    }
+                }
             }
         }
+    }
+    
+    private func checkIsFirst() {
+        let isFirstString = KeychainSwift().getBool("isFirst")
+        if isFirstString == true || isFirstString == nil {
+            navigateToLoginScreen()
+        } else { navigateToMainScreen() }
+    }
+    
+    private func navigateToMainScreen() {
+        let mainTabBarController = MainTabBarController()
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = mainTabBarController
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+        }
+    }
+    
+    private func navigateToLoginScreen() {
+        let vc = SelectLoginTypeViewController()
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = vc
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+        }
+        
     }
 }
