@@ -156,5 +156,9 @@ final class CalendarDetailViewController: UIViewController {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)
         secondView.update(policy: policy)
+        
+        if let userDocuments = policy.userDocuments, !userDocuments.isEmpty {
+            firstView.updateDocuments(documents: userDocuments)
+        } else { return }
     }
 }

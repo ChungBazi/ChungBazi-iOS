@@ -116,7 +116,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     func configure(with data: ProfileModel) {
-        nickNameTextField.text = data.nickname
+        nickNameTextField.text = data.name
         emailLabel.text = data.email
     }
     
