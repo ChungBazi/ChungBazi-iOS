@@ -10,15 +10,16 @@ import SnapKit
 import Then
 
 protocol ProfileEditViewDelegate: AnyObject {
-    func didCompleteEditing(nickname: String)
+    func didCompleteEditing(nickname: String, selectedImage: String)
 }
 
 final class ProfileEditView: UIView, UITextFieldDelegate {
     
     weak var delegate: ProfileEditViewDelegate?
+    private var selectedCharacter: String? = CharacterImage.default
     
     private let profileImageView = UIImageView().then {
-        $0.backgroundColor = .blue700
+        $0.backgroundColor = .green300
         $0.image = .basicBaro
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
@@ -116,7 +117,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     func configure(with data: ProfileModel) {
-        nickNameTextField.text = data.nickname
+        nickNameTextField.text = data.name
         emailLabel.text = data.email
     }
     
@@ -129,11 +130,11 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     @objc private func completeBtnTapped() {
-        // FIXME: 예외 처리 구현
         guard let nickname = nickNameTextField.text, !nickname.isEmpty else {
             print("닉네임이 비어있습니다.")
             return
         }
-        delegate?.didCompleteEditing(nickname: nickname)
+        let selectedImage = self.selectedCharacter ?? CharacterImage.default
+        delegate?.didCompleteEditing(nickname: nickname, selectedImage: selectedImage)
     }
 }

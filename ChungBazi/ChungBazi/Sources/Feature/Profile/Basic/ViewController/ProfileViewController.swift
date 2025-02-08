@@ -12,6 +12,7 @@ class ProfileViewController: UIViewController {
     private let profileView = ProfileView()
     private var profileData: ProfileModel?
     private var rewardData: RewardModel?
+    private let service = UserService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,12 +35,20 @@ class ProfileViewController: UIViewController {
     }
     
     private func fetchData() {
-        // FIXME: 추후 서버 연결 시 아래 코드 제거
-        profileData = ProfileModel(nickname: "서은혜", email: "seoeh@example.com")
-        if let profileData = profileData {
-            profileView.configure(with: profileData)
+        service.fetchProfile { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let profile):
+                self.profileData = ProfileModel(userId: profile.userId, name: profile.name, email: profile.email, characterImg: profile.characterImg)
+                DispatchQueue.main.async {
+                    if let profileData = self.profileData {
+                        self.profileView.configure(with: profileData)
+                    }
+                }
+            case .failure(let error):
+                print("❌프로필 불러오기 실패: \(error.localizedDescription)")
+            }
         }
-        rewardData = RewardModel(currentReward: 1, myPosts: 2, myComments: 3)
     }
     
     private func navigateToEditProfile() {

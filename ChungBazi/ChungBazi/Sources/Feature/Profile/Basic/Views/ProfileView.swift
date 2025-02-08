@@ -26,7 +26,7 @@ final class ProfileView: UIView {
     private let contentView = UIView()
     
     private let profileImageView = UIImageView().then {
-        $0.backgroundColor = .blue700
+        $0.backgroundColor = .green300
         $0.image = .basicBaro
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
@@ -161,8 +161,10 @@ final class ProfileView: UIView {
     }
     
     func configure(with data: ProfileModel) {
-        nameLabel.text = data.nickname
+        nameLabel.text = data.name
         emailLabel.text = data.email
+        
+        let defaultProfileImage = UIImage(named: "basicBaro")
     }
     
     @objc private func editProfileBtnTapped() {
