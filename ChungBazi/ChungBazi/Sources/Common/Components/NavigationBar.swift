@@ -11,7 +11,7 @@ import Then
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -72,6 +72,19 @@ extension UIViewController {
             alarmButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
                 make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        if showLeftSearchButton {
+            let searchButton = UIButton().then {
+                let searchIcon = UIImage(resource: .searchIcon).withRenderingMode(.alwaysTemplate) 
+                $0.setImage(searchIcon, for: .normal)
+                $0.tintColor = .gray800
+                $0.addTarget(self, action: #selector(handleSearchButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(searchButton)
+            searchButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(78)
             }
         }
         
@@ -154,6 +167,11 @@ extension UIViewController {
     @objc private func handleCartButtonTapped() {
         let cartViewController = CartViewController()
         self.navigationController?.pushViewController(cartViewController, animated: true)
+    }
+    
+    @objc private func handleSearchButtonTapped() {
+        let searchViewController = CommunitySearchViewController()
+        self.navigationController?.pushViewController(searchViewController, animated: true)
     }
     
     @objc private func handleAlarmButtonTapped() {

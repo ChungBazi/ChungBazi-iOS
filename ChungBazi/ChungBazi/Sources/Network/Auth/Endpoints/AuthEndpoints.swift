@@ -39,10 +39,10 @@ extension AuthEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-//        case .deleteUser:
-//            return .delete
-        case .postLogout, .postReIssueToken, .postKakaoLogin, .deleteUser:
+        case .postLogout, .postReIssueToken, .postKakaoLogin:
             return .post
+        case .deleteUser:
+            return .delete
         }
     }
     
@@ -59,7 +59,7 @@ extension AuthEndpoints: TargetType {
     
     var headers: [String : String]? {
         switch self {
-        case .postKakaoLogin:
+        case .postKakaoLogin, .postReIssueToken:
             return ["Content-Type": "application/json"]
         default:
             let accessToken = KeychainSwift().get("serverAccessToken")

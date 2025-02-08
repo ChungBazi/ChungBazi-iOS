@@ -121,6 +121,11 @@ class CompactDropdown: UIView {
         dropdownTableView.snp.updateConstraints { make in
             make.height.equalTo(isDropdownOpen ? tableHeight : 0)
         }
+        
+        /// 드롭다운이 열릴 때, 최상단으로 올림
+        if isDropdownOpen {
+            superview?.bringSubviewToFront(self)
+        }
     }
     
     func didSelectItem(at index: Int) {
