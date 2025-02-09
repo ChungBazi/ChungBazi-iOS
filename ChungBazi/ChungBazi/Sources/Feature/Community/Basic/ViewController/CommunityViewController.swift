@@ -16,7 +16,7 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        //fetchData(for: 0)
+        fetchData(for: 0)
     }
     
     private func setupUI() {
