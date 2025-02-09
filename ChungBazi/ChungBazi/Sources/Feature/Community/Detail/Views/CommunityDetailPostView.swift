@@ -54,6 +54,7 @@ final class CommunityDetailPostView: UIView {
         super.init(frame: frame)
         setupUI()
         photoCollectionView.dataSource = self
+        photoCollectionView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -80,7 +81,7 @@ final class CommunityDetailPostView: UIView {
         }
         likeButton.snp.makeConstraints {
             $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
-            $0.leading.equalToSuperview().offset(Constants.gutter)
+            $0.bottom.leading.equalToSuperview().inset(Constants.gutter)
         }
         likeCountLabel.snp.makeConstraints {
             $0.centerY.equalTo(likeButton)
@@ -116,18 +117,18 @@ final class CommunityDetailPostView: UIView {
         if imageUrls.isEmpty {
             likeButton.snp.remakeConstraints {
                 $0.top.equalTo(contentLabel.snp.bottom).offset(23)
-                $0.leading.equalToSuperview().offset(Constants.gutter)
+                $0.leading.bottom.equalToSuperview().inset(Constants.gutter)
             }
         } else {
             likeButton.snp.remakeConstraints {
                 $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
-                $0.leading.equalToSuperview().offset(Constants.gutter)
+                $0.leading.bottom.equalToSuperview().inset(Constants.gutter)
             }
         }
     }
 }
 
-extension CommunityDetailPostView: UICollectionViewDataSource {
+extension CommunityDetailPostView: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return imageUrls.count
     }

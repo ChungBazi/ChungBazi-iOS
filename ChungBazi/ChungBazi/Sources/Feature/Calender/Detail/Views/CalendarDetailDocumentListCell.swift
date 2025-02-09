@@ -11,7 +11,13 @@ import Then
 
 final class CalendarDetailDocumentListCell: UITableViewCell {
     
-    private let checkButton = UIButton.createWithImage(image: .checkboxUnchecked, target: self, action: #selector(didTapCheckButton))
+    private let checkButton = UIButton().then {
+        $0.setImage(UIImage(named: "checkbox_unchecked")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        $0.tintColor = .gray500
+        $0.addTarget(self, action: #selector(didTapCheckButton), for: .touchUpInside)
+        $0.isUserInteractionEnabled = true
+    }
+    
     private let textField = UITextField().then {
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
@@ -19,6 +25,7 @@ final class CalendarDetailDocumentListCell: UITableViewCell {
             string: "서류 내용을 입력하세요",
             attributes: [.foregroundColor: UIColor.gray300]
         )
+        $0.isUserInteractionEnabled = false
     }
     
     private var document: Document?
@@ -33,6 +40,8 @@ final class CalendarDetailDocumentListCell: UITableViewCell {
     }
     
     private func setupUI() {
+        selectionStyle = .none
+        contentView.isUserInteractionEnabled = false
         addSubviews(checkButton, textField)
         checkButton.snp.makeConstraints {
             $0.top.equalToSuperview().inset(20)
@@ -50,13 +59,19 @@ final class CalendarDetailDocumentListCell: UITableViewCell {
     func configure(with document: Document) {
         self.document = document
         textField.text = document.name
-        checkButton.setImage(document.isChecked ? .checkboxChecked : .checkboxUnchecked, for: .normal)
+        updateCheckButton()
     }
 
     @objc private func didTapCheckButton() {
-        guard let document = document else { return }
-        self.document?.isChecked.toggle()
-        checkButton.setImage(document.isChecked ? .checkboxChecked : .checkboxUnchecked, for: .normal)
+        guard var document = document else { return }
+        document.isChecked.toggle()
+        self.document = document
+        updateCheckButton()
     }
-    
+
+    private func updateCheckButton() {
+        let imageName = document?.isChecked == true ? "checkbox_checked" : "checkbox_unchecked"
+        checkButton.setImage(UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate), for: .normal)
+        checkButton.tintColor = document?.isChecked == true ? .blue700 : .gray500
+    }
 }

@@ -6,29 +6,29 @@
 //
 
 import UIKit
+import SnapKit
+import Then
 
 class CategoryButton: UIButton {
 
-    let iconImageView: UIImageView = {
-        let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFit
-        return imageView
-    }()
+    let iconImageView = UIImageView().then {
+        $0.contentMode = .scaleAspectFit
+    }
 
-    let customTitleLabel: UILabel = { 
-        let label = UILabel()
-        label.textAlignment = .center
-        label.font = UIFont(name: AppFontName.pMedium, size: 16)
-        label.textColor = AppColor.gray800
-        return label
-    }()
+    let customTitleLabel = UILabel().then {
+        $0.textAlignment = .center
+        $0.font = .ptdMediumFont(ofSize: 14)
+        $0.textColor = .gray800
+    }
 
     override init(frame: CGRect) {
         super.init(frame: frame)
-        backgroundColor = AppColor.blue100
-        layer.cornerRadius = 10
+        self.do {
+            $0.backgroundColor = .blue100
+            $0.layer.cornerRadius = 10
+            $0.addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
+        }
         setupLayout()
-        addTarget(self, action: #selector(buttonTapped), for: .touchUpInside)
     }
 
     required init?(coder: NSCoder) {
@@ -36,8 +36,7 @@ class CategoryButton: UIButton {
     }
 
     private func setupLayout() {
-        addSubview(iconImageView)
-        addSubview(customTitleLabel)
+        addSubviews(iconImageView, customTitleLabel)
 
         iconImageView.snp.makeConstraints { make in
             make.centerX.equalToSuperview()

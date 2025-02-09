@@ -40,6 +40,7 @@ final class CalendarDetailDocumentListView: UIView {
         addButton.addTarget(self, action: #selector(tabAddButton), for: .touchUpInside)
         tableView.snp.makeConstraints {
             $0.top.leading.trailing.equalToSuperview()
+            $0.height.equalTo(1)
         }
         plusCircleButton.snp.makeConstraints {
             $0.top.equalTo(tableView.snp.bottom).offset(14)
@@ -57,11 +58,38 @@ final class CalendarDetailDocumentListView: UIView {
     
     private func setupUITableView() {
         tableView.dataSource = self
+        tableView.delegate = self
     }
     
     func updateDocuments(documents: [Document]) {
         self.documentList = documents
         tableView.reloadData()
+        
+        DispatchQueue.main.async {
+            self.tableView.snp.updateConstraints {
+                $0.height.equalTo(self.tableView.contentSize.height).priority(.required)
+            }
+
+            if !self.documentList.isEmpty {
+                self.addButton.snp.remakeConstraints {
+                    $0.top.equalTo(self.tableView.snp.bottom).offset(20)
+                    $0.centerX.equalToSuperview()
+                    $0.bottom.equalToSuperview().inset(20)
+                    $0.width.equalTo(118)
+                    $0.height.equalTo(40)
+                }
+            } else {
+                self.addButton.snp.remakeConstraints {
+                    $0.top.equalToSuperview().offset(20)
+                    $0.centerX.equalToSuperview()
+                    $0.bottom.equalToSuperview().inset(20)
+                    $0.width.equalTo(118)
+                    $0.height.equalTo(40)
+                }
+            }
+            
+            self.layoutIfNeeded()
+        }
     }
     
     @objc private func tabAddButton() {
@@ -119,7 +147,7 @@ final class CalendarDetailDocumentListView: UIView {
 }
 
 // MARK: - UITableViewDataSource
-extension CalendarDetailDocumentListView: UITableViewDataSource {
+extension CalendarDetailDocumentListView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return documentList.count
     }

@@ -7,9 +7,11 @@ import UIKit
 import SnapKit
 import Then
 
-class CategoryPolicyViewController: UIViewController {
+final class CategoryPolicyViewController: UIViewController {
     
-    private let sortDropdown: CompactDropdown = CompactDropdown(
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "최신순",
         hasBorder: false,
         items: Constants.sortItems
@@ -59,7 +61,8 @@ class CategoryPolicyViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(sortDropdown)
+        view.addSubviews(sortDropdown, tableView)
+        
         sortDropdown.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
@@ -67,7 +70,6 @@ class CategoryPolicyViewController: UIViewController {
             $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
         
-        view.addSubview(tableView)
         tableView.snp.makeConstraints {
             $0.top.equalTo(sortDropdown.snp.bottom).offset(-70)
             $0.leading.trailing.bottom.equalToSuperview()
@@ -109,6 +111,12 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
         let selectedPolicy = policies[indexPath.row]
+        
         print("Selected policy: \(selectedPolicy.title)")
+
+        let detailVC = PolicyDetailViewController()
+        detailVC.policyId = selectedPolicy.policyId
+
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }

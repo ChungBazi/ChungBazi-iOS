@@ -1,5 +1,5 @@
 //
-//  SearchViewController.swift
+//  CommunitySearchViewController.swift
 //  ChungBazi
 //
 //  Created by 신호연 on 2/2/25.
@@ -10,6 +10,7 @@ import UIKit
 final class CommunitySearchViewController: UIViewController {
     
     private let commuintySearchView = CommunitySearchView()
+    private let scrollView = UIScrollView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -30,12 +31,20 @@ final class CommunitySearchViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        view.addSubview(commuintySearchView)
-        commuintySearchView.snp.makeConstraints {
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
             $0.leading.trailing.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        scrollView.isScrollEnabled = false
+        
+        scrollView.addSubview(commuintySearchView)
+        commuintySearchView.snp.makeConstraints {
+            $0.edges.width.equalToSuperview()
+        }
+        
+        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false)
+        enableKeyboardHandling(for: scrollView)
     }
 }

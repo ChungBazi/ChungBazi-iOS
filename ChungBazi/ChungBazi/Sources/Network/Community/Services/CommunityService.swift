@@ -40,7 +40,7 @@ final class CommunityService: NetworkManager {
     //MARK: - API funcs
     
     /// 커뮤니티 글 리스트 조회 API
-    public func getCommunityPosts(category: String, lastPostId: Int, completion: @escaping (Result<CommunityResponseDTO?, NetworkError>) -> Void) {
+    public func getCommunityPosts(category: String, lastPostId: Int?, completion: @escaping (Result<CommunityResponseDTO?, NetworkError>) -> Void) {
         requestOptional(target: .getCommunityPosts(category: category, lastPostId: lastPostId), decodingType: CommunityResponseDTO.self, completion: completion)
     }
     
@@ -48,9 +48,9 @@ final class CommunityService: NetworkManager {
     public func getCommunityPost(postId: Int, completion: @escaping (Result<CommunityDetailResponseDTO, NetworkError>) -> Void) {
         request(target: .getCommunityPost(postId: postId), decodingType: CommunityDetailResponseDTO.self, completion: completion)
     }
-    
+  
     /// 커뮤니티 댓글 리스트 조회 API
-    public func getCommunityComments(postId: Int, lastCommentId: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
+    public func getCommunityComments(postId: Int, lastCommentId: Int?, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
         requestOptional(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId), decodingType: CommunityCommentResponseDTO.self, completion: completion)
     }
     
@@ -58,7 +58,6 @@ final class CommunityService: NetworkManager {
     public func postCommunityPost(body: CommunityPostRequestDto, imageList: [UIImage], completion: @escaping (Result<PostPostResponse, NetworkError>) -> Void) {
         request(target: .postCommunityPost(data: body, imageList: imageList), decodingType: PostPostResponse.self, completion: completion)
     }
-    
     
     /// 커뮤니티 댓글 작성 API
     public func postCommunityComment(body: CommunityCommentRequestDto, completion: @escaping (Result<PostCommentResponse, NetworkError>) -> Void) {
