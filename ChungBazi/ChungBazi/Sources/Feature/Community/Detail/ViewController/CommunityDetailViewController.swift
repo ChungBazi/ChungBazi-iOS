@@ -136,33 +136,34 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
+    // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
-        communityService.getCommunityComments(postId: postId, lastCommentId: nil, size: 10) { [weak self] result in
+        communityService.getCommunityComments(postId: postId, lastCommentId: nil) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
             case .success(let success):
                 print("🔹 서버 응답 데이터: \(success)")
 
-                if success.isEmpty {
+                if success?.result?.isEmpty ?? true {
                     print("⚠️ 댓글이 없습니다.")
                     self.comments = []
                     self.communityDetailView.updateComments(self.comments)
                     return
                 }
 
-                self.comments = success.map { comment in
+                self.comments = success?.result?.map { comment in
                     CommunityDetailCommentModel(
-                        postId: comment.postId,
-                        content: comment.content,
-                        formattedCreatedAt: comment.formattedCreatedAt,
-                        commentId: comment.commentId,
-                        userId: comment.userId,
-                        userName: comment.userName,
-                        reward: comment.reward,
-                        characterImg: comment.characterImg
+                        postId: comment.postId ?? 0,
+                        content: comment.content ?? "내용 없음",
+                        formattedCreatedAt: comment.formattedCreatedAt ?? "",
+                        commentId: comment.commentId ?? 0,
+                        userId: comment.userId ?? 0,
+                        userName: comment.userName ?? "익명",
+                        reward: comment.reward ?? "",
+                        characterImg: comment.characterImg ?? ""
                     )
-                }
+                } ?? []
                 self.communityDetailView.updateComments(self.comments)
                 
             case .failure(let error):
