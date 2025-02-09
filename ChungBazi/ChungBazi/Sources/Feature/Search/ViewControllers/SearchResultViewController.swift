@@ -5,79 +5,67 @@
 
 import UIKit
 import SnapKit
+import Then
 
-class SearchResultViewController: UIViewController {
-        
-    private let searchView: UIView = {
-        let view = UIView()
-        view.backgroundColor = .white
-        view.layer.cornerRadius = 10
-        return view
-    }()
+final class SearchResultViewController: UIViewController {
+    
+    private let searchView = UIView().then {
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 10
+    }
 
-    private let searchTextField: UITextField = {
-        let textField = UITextField()
-        textField.placeholder = "검색어를 입력하세요"
-        textField.font = UIFont(name: AppFontName.pMedium, size: 16)
-        textField.textColor = AppColor.gray800
-        textField.returnKeyType = .search
-        return textField
-    }()
+    private let searchTextField = UITextField().then {
+        $0.placeholder = "검색어를 입력하세요"
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.textColor = .gray800
+        $0.returnKeyType = .search
+    }
     
-    private let searchButton: UIButton = {
-        let button = UIButton(type: .system)
-        button.setImage(UIImage(named: "search_icon"), for: .normal)
-        button.tintColor = AppColor.gray800
-        return button
-    }()
+    private let searchButton = UIButton(type: .system).then {
+        $0.setImage(UIImage(named: "search_icon"), for: .normal)
+        $0.tintColor = .gray800
+    }
     
-    private let popularSearchLabel: UILabel = {
-        let label = UILabel()
-        label.text = "인기 검색어"
-        label.textColor = AppColor.gray800
-        label.font = UIFont(name: AppFontName.pSemiBold, size: 20)
-        return label
-    }()
+    private let popularSearchLabel = UILabel().then {
+        $0.text = "인기 검색어"
+        $0.textColor = .gray800
+        $0.font = .ptdSemiBoldFont(ofSize: 20)
+    }
 
-    private lazy var popularKeywordsCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
-        layout.scrollDirection = .horizontal
-        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        layout.itemSize = CGSize(width: UICollectionViewFlowLayout.automaticSize.width, height: 36)
-        layout.minimumLineSpacing = 10
-        
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.showsHorizontalScrollIndicator = false
-        collectionView.backgroundColor = .clear
-        collectionView.delegate = self
-        collectionView.dataSource = self
-        collectionView.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
-        return collectionView
-    }()
+    private lazy var popularKeywordsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
+        $0.scrollDirection = .horizontal
+        $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+        $0.itemSize = CGSize(width: UICollectionViewFlowLayout.automaticSize.width, height: 36)
+        $0.minimumLineSpacing = 10
+    }).then {
+        $0.showsHorizontalScrollIndicator = false
+        $0.backgroundColor = .clear
+        $0.delegate = self
+        $0.dataSource = self
+        $0.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
+    }
     
-    private let sortDropdown = CompactDropdown(
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "최신순",
         hasBorder: false,
         items: Constants.sortItems
     )
+
+    private let tableView = UITableView().then {
+        $0.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
+        $0.separatorStyle = .none
+        $0.backgroundColor = .clear
+    }
     
-    private let tableView: UITableView = {
-        let tableView = UITableView()
-        tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
-        tableView.separatorStyle = .none
-        tableView.backgroundColor = .clear
-        return tableView
-    }()
-    
-    private let emptyStateLabel: UILabel = {
-        let label = UILabel()
-        label.text = "검색 결과가 없습니다."
-        label.textAlignment = .center
-        label.textColor = AppColor.gray600
-        label.font = UIFont(name: AppFontName.pMedium, size: 16)
-        label.isHidden = true
-        return label
-    }()
+    private let emptyStateLabel = UILabel().then {
+        $0.text = "검색 결과가 없습니다."
+        $0.textAlignment = .center
+        $0.textColor = .gray600
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.isHidden = true
+    }
     
     private let popularKeywords = ["일자리", "주거", "교육", "진로", "창업", "금융"]
 
@@ -90,7 +78,7 @@ class SearchResultViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        view.backgroundColor = AppColor.gray50
+        view.backgroundColor = .gray50
         addCustomNavigationBar(
             titleText: "",
             showBackButton: true,
@@ -116,55 +104,51 @@ class SearchResultViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(searchView)
+        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyStateLabel)
+
         searchView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(40)
         }
-        
-        searchView.addSubview(searchTextField)
+
+        searchView.addSubviews(searchTextField, searchButton)
+
         searchTextField.snp.makeConstraints { make in
             make.leading.equalToSuperview().offset(10)
             make.centerY.equalToSuperview()
             make.trailing.equalToSuperview().offset(-40)
         }
-        
-        searchView.addSubview(searchButton)
+
         searchButton.snp.makeConstraints { make in
             make.trailing.equalToSuperview().offset(-10)
             make.centerY.equalToSuperview()
             make.width.height.equalTo(24)
         }
-        
-        view.addSubview(popularSearchLabel)
+
         popularSearchLabel.snp.makeConstraints { make in
             make.top.equalTo(searchView.snp.bottom).offset(32)
             make.leading.equalToSuperview().offset(18)
         }
-            
-        view.addSubview(popularKeywordsCollectionView)
+
         popularKeywordsCollectionView.snp.makeConstraints { make in
             make.top.equalTo(popularSearchLabel.snp.bottom).offset(18)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(36)
         }
-        
-        view.addSubview(sortDropdown)
+
         sortDropdown.snp.makeConstraints { make in
             make.top.equalTo(searchView.snp.bottom).offset(16)
             make.trailing.equalToSuperview().offset(-16)
             make.width.equalTo(91)
             make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
-        
-        view.addSubview(tableView)
+
         tableView.snp.makeConstraints { make in
             make.top.equalTo(sortDropdown.snp.bottom).offset(-70)
             make.leading.trailing.bottom.equalToSuperview()
         }
-        
-        view.addSubview(emptyStateLabel)
+
         emptyStateLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
@@ -227,7 +211,6 @@ extension SearchResultViewController: UICollectionViewDelegate, UICollectionView
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
-
 extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return policies.count
@@ -244,12 +227,10 @@ extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        print("Selected Policy: \(policies[indexPath.row].title)")
     }
 }
 
 // MARK: - UITextFieldDelegate
-
 extension SearchResultViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         searchForKeyword(textField.text)
