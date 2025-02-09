@@ -11,7 +11,7 @@ import Then
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
-    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -98,7 +98,9 @@ extension UIViewController {
         
         if showShareButton {
             let shareButton = UIButton().then {
-                $0.setImage(UIImage(named: "share_icon"), for: .normal)
+                let shareIcon = UIImage(resource: .shareIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(shareIcon, for: .normal)
+                $0.tintColor = .gray800
                 $0.addTarget(self, action: #selector(handleShareButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(shareButton)
