@@ -62,7 +62,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         let userService = UserService()
         let requestBody = ProfileUpdateRequestDto(name: nickname, profileImg: selectedImage)
 
-        userService.updateProfile(body: requestBody) { [weak self] result in
+        userService.updateProfile(body: requestBody, profileImg: selectedImage) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):

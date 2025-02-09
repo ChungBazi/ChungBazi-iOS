@@ -50,7 +50,7 @@ final class UserService: NetworkManager {
     }
     
     /// 프로필 수정 API
-    public func updateProfile(body: ProfileUpdateRequestDto, profileImg: UIImage, completion: @escaping (Result<ProfileUpdateResponseDto, NetworkError>) -> Void) {
+    public func updateProfile(body: ProfileUpdateRequestDto, profileImg: String, completion: @escaping (Result<ProfileUpdateResponseDto, NetworkError>) -> Void) {
         request(target: .updateProfile(data: body, profileImg: profileImg), decodingType: ProfileUpdateResponseDto.self, completion: completion)
     }
     
