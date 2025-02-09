@@ -73,7 +73,7 @@ struct PostPostResponse: Decodable {
     let reward: String
     let characterImg: String
     let thumbnailUrl: String
-    let imageUrls: [String]
+    let imageUrls: [String]?
 }
 
 struct PostCommentResponse: Decodable {
