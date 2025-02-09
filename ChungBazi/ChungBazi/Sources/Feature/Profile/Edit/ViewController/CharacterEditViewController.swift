@@ -62,7 +62,7 @@ class CharacterEditViewController: UIViewController {
     }
     
     private func setNavBar() {
-        addCustomNavigationBar(titleText: "마이 캐릭터", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .blue700)
+        addCustomNavigationBar(titleText: "마이 캐릭터", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
         fillSafeArea(position: .top, color: .white)
     }
     
