@@ -48,7 +48,7 @@ final class CommunityService: NetworkManager {
     public func getCommunityPost(postId: Int, completion: @escaping (Result<CommunityDetailResponseDTO, NetworkError>) -> Void) {
         request(target: .getCommunityPost(postId: postId), decodingType: CommunityDetailResponseDTO.self, completion: completion)
     }
-    
+  
     /// 커뮤니티 댓글 리스트 조회 API
     public func getCommunityComments(postId: Int, lastCommentId: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
         requestOptional(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId), decodingType: CommunityCommentResponseDTO.self, completion: completion)

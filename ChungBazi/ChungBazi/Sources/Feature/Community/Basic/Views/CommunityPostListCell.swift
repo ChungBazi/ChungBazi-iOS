@@ -35,6 +35,7 @@ final class CommunityPostListCell: UICollectionViewCell {
     private let contentLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray500
+        $0.numberOfLines = 0
     }
     private let thumbnailImgView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
@@ -45,6 +46,10 @@ final class CommunityPostListCell: UICollectionViewCell {
         $0.axis = .horizontal
         $0.spacing = 14
         $0.alignment = .leading
+    }
+    
+    private let separatorView = UIView().then {
+        $0.backgroundColor = .gray100
     }
     
     override init(frame: CGRect) {
@@ -75,7 +80,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         postContentView.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(10)
             $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(66)
+            $0.bottom.equalTo(contentLabel.snp.bottom)
         }
         
         categoryLabel.snp.makeConstraints {
@@ -101,6 +106,14 @@ final class CommunityPostListCell: UICollectionViewCell {
             $0.leading.equalToSuperview()
             $0.bottom.equalToSuperview().inset(17)
         }
+        
+        addSubviews(separatorView)
+        separatorView.snp.makeConstraints {
+            $0.top.equalTo(socialInfoStackView.snp.bottom)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
+            $0.height.equalTo(1)
+        }
     }
     
     private func setupSocialInfoStackView() {
@@ -109,7 +122,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         let commentCountText = B14_M(text: "댓글", textColor: .gray500)
         let secondSeparatedLineView = createSeparatedLineView()
         let viewsText = B14_M(text: "조회", textColor: .gray500)
-
+        
         socialInfoStackView.addArrangedSubview(likeText)
         socialInfoStackView.addArrangedSubview(firstSeparatedLineView)
         socialInfoStackView.addArrangedSubview(commentCountText)
@@ -125,38 +138,63 @@ final class CommunityPostListCell: UICollectionViewCell {
         return view
     }
     
-    func configure(with post: CommunityPost) {
+    func configure(with post: CommunityPost, isLastCell: Bool) {
         profileView.configure(
             userName: post.userName,
             userLevel: "Lv.\(post.reward.replacingOccurrences(of: "LEVEL_", with: ""))",
             characterImageUrl: post.characterImg
         )
-
+        
         createdAtLabel.text = post.formattedCreatedAt
         categoryLabel.text = post.category.displayName
-
+        
         postTitleLabel.text = post.title
         contentLabel.text = post.content
-
+        
         let likeText = "좋아요 \(post.postLikes)"
         let commentText = "댓글 \(post.commentCount)"
         let viewText = "조회 \(post.views)"
-
+        
         socialInfoStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
-
+        
         socialInfoStackView.addArrangedSubview(createSocialLabel(text: likeText))
         socialInfoStackView.addArrangedSubview(createSeparatedLineView())
         socialInfoStackView.addArrangedSubview(createSocialLabel(text: commentText))
         socialInfoStackView.addArrangedSubview(createSeparatedLineView())
         socialInfoStackView.addArrangedSubview(createSocialLabel(text: viewText))
-
-        if let thumbnailUrl = post.thumbnailUrl, let url = URL(string: thumbnailUrl) {
-            thumbnailImgView.kf.setImage(with: url)
+        
+        if let thumbnailUrl = post.thumbnailUrl, !thumbnailUrl.isEmpty, let url = URL(string: thumbnailUrl) {
+            let processor = DownsamplingImageProcessor(size: thumbnailImgView.bounds.size)
+            |> RoundCornerImageProcessor(cornerRadius: 10)
+            thumbnailImgView.kf.indicatorType = .activity
+            thumbnailImgView.kf.setImage(
+                with: url,
+                placeholder: UIImage(named: "placeholder"), // 기본 이미지 설정
+                options: [
+                    .processor(processor),
+                    .scaleFactor(UIScreen.main.scale),
+                    .transition(.fade(0.3)), // 부드러운 페이드 효과
+                    .cacheOriginalImage
+                ],
+                completionHandler: { result in
+                    switch result {
+                    case .success(let value):
+                        print("✅ 썸네일 로드 성공: \(value.source.url?.absoluteString ?? "")")
+                    case .failure(let error):
+                        print("❌ 썸네일 로드 실패: \(error.localizedDescription)")
+                    }
+                }
+            )
         } else {
-            thumbnailImgView.image = nil
+            thumbnailImgView.image = UIImage(named: "placeholder") // 기본 이미지 설정
         }
+        
+        separatorView.isHidden = isLastCell
+        
+        contentLabel.sizeToFit()
+        layoutIfNeeded()
     }
-
+    
     private func createSocialLabel(text: String) -> UILabel {
         let label = UILabel()
         label.text = text

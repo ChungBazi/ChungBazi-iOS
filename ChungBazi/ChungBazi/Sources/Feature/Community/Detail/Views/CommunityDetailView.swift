@@ -10,13 +10,20 @@ import SnapKit
 import Then
 
 final class CommunityDetailView: UIView {
+
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
     
     private let postView = CommunityDetailPostView()
     
-    private let gray100View = UIView()
+    private let gray100View = UIView().then {
+        $0.backgroundColor = .gray100
+    }
     
     private let commentTableView = UITableView().then {
         $0.register(CommunityDetailCommentCell.self, forCellReuseIdentifier: CommunityDetailCommentCell.identifier)
+        $0.rowHeight = UITableView.automaticDimension
+        $0.estimatedRowHeight = 136
     }
     
     private var comments: [CommunityDetailCommentModel] = []
@@ -33,21 +40,31 @@ final class CommunityDetailView: UIView {
     }
     
     private func setupUI() {
-        addSubviews(postView, gray100View, commentTableView)
+        addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        scrollView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        contentView.snp.makeConstraints {
+            $0.edges.width.equalToSuperview()
+        }
+        
+        contentView.addSubviews(postView, gray100View, commentTableView)
         
         postView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.top.leading.trailing.equalToSuperview()
         }
         
         gray100View.snp.makeConstraints {
             $0.height.equalTo(8)
             $0.top.equalTo(postView.snp.bottom)
-            $0.bottom.equalTo(commentTableView.snp.top)
             $0.leading.trailing.equalToSuperview()
         }
         
         commentTableView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
+            $0.top.equalTo(gray100View.snp.bottom)
+            $0.leading.trailing.bottom.equalToSuperview()
+            $0.height.greaterThanOrEqualTo(1)
         }
     }
     

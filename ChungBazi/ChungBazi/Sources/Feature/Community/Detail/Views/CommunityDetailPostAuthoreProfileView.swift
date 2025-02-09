@@ -52,12 +52,11 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
         textView.addSubviews(userNameLabel, userLevelLabel, createdAtLabel)
         textView.snp.makeConstraints {
             $0.leading.equalTo(characterImgView.snp.trailing).offset(10)
-            $0.centerY.equalToSuperview()
-            $0.height.equalTo(22)
+            $0.centerY.equalTo(characterImgView)
+            $0.height.equalTo(42)
         }
         userNameLabel.snp.makeConstraints {
-            $0.leading.equalToSuperview()
-            $0.top.equalToSuperview()
+            $0.top.leading.equalToSuperview()
         }
         userLevelLabel.snp.makeConstraints {
             $0.leading.equalTo(userNameLabel.snp.trailing).offset(7)
@@ -75,18 +74,21 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     
     func configure(userName: String, userLevel: String?, characterImageUrl: String?, createdAt: String) {
         userNameLabel.text = userName
-        userLevelLabel.text = userLevel ?? ""
+        userLevelLabel.text = formatUserLevel(userLevel)
         createdAtLabel.text = createdAt
         
-        let defaultProfileImage = UIImage(named: "basicBaro")
-        if let imageUrl = characterImageUrl, !imageUrl.isEmpty {
-            characterImgView.kf.setImage(with: URL(string: imageUrl), placeholder: defaultProfileImage)
-        } else {
-            characterImgView.image = defaultProfileImage
-        }
+        if let assetName = characterImageUrl, !assetName.isEmpty {
+            characterImgView.image = UIImage(named: assetName) ?? UIImage(named: "basicBaro")
+        } else { return }
     }
     
     @objc private func moreBtnTapped() {
         
+    }
+    
+    func formatUserLevel(_ level: String?) -> String {
+        guard let level = level, level.starts(with: "LEVEL_") else { return "" }
+        let levelNumber = level.replacingOccurrences(of: "LEVEL_", with: "")
+        return "Lv.\(levelNumber)"
     }
 }

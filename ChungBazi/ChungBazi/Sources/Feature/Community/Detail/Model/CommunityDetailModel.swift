@@ -29,4 +29,5 @@ struct CommunityDetailPostModel {
     let userName: String
     let reward: String
     let characterImg: String?
+    let imageUrls: [String]?
 }

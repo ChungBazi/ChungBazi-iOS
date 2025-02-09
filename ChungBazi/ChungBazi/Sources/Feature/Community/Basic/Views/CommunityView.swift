@@ -64,13 +64,18 @@ final class CommunityView: UIView {
         $0.textColor = .gray800
     }
     
-    private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
-        $0.dataSource = self
-        $0.delegate = self
-        $0.register(CommunityPostListCell.self, forCellWithReuseIdentifier: "CommunityPostListCell")
-        $0.isScrollEnabled = false
-        $0.backgroundColor = .clear
-    }
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(CommunityPostListCell.self, forCellWithReuseIdentifier: "CommunityPostListCell")
+        collectionView.isScrollEnabled = false
+        collectionView.backgroundColor = .clear
+        return collectionView
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -180,12 +185,31 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityPostListCell", for: indexPath) as! CommunityPostListCell
         let post = posts[indexPath.row]
-        cell.configure(with: post)
+
+        let isLastCell = indexPath.row == posts.count - 1
+        cell.configure(with: post, isLastCell: isLastCell)
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.width - 16, height: 177)
+        let post = posts[indexPath.row]
+        
+        let contentWidth = collectionView.bounds.width - 32
+        
+        let tempLabel = UILabel()
+        tempLabel.font = .ptdMediumFont(ofSize: 14)
+        tempLabel.text = post.content
+        tempLabel.numberOfLines = 2
+        tempLabel.lineBreakMode = .byWordWrapping
+        tempLabel.preferredMaxLayoutWidth = contentWidth
+        
+        let estimatedSize = tempLabel.sizeThatFits(CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude))
+
+        let baseHeight: CGFloat = 157
+        let totalHeight = baseHeight + estimatedSize.height
+
+        return CGSize(width: collectionView.bounds.width - 16, height: totalHeight)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
