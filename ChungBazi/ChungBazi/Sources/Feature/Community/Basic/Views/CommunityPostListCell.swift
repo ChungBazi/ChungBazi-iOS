@@ -47,7 +47,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         $0.spacing = 14
         $0.alignment = .leading
     }
-    
+  
     private let separatorView = UIView().then {
         $0.backgroundColor = .gray100
     }

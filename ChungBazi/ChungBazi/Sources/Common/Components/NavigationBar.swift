@@ -11,7 +11,7 @@ import Then
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
-    func addCustomNavigationBar(titleText: String?, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor
@@ -26,13 +26,15 @@ extension UIViewController {
         
         let titleLabel = T20_SB(text: titleText ?? "")
         titleLabel.textAlignment = .center
-        titleLabel.textColor = .black
+        titleLabel.textColor = tintColor
         
         navigationBarView.addSubview(titleLabel)
         
         if showBackButton {
             let backButton = UIButton().then {
-                $0.setImage(.backIcon, for: .normal)
+                let backIcon = UIImage(resource: .backIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(backIcon, for: .normal)
+                $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(backButton)
@@ -43,7 +45,9 @@ extension UIViewController {
         }
         if showCartButton {
             let cartButton = UIButton().then {
-                $0.setImage(.cartIcon, for: .normal)
+                let cartIcon = UIImage(resource: .cartIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(cartIcon, for: .normal)
+                $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(cartButton)
@@ -54,7 +58,9 @@ extension UIViewController {
         }
         if showAlarmButton {
             let alarmButton = UIButton().then {
-                $0.setImage(.alarmIcon, for: .normal)
+                let alarmIcon = UIImage(resource: .alarmIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(alarmIcon, for: .normal)
+                $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(alarmButton)
@@ -65,7 +71,9 @@ extension UIViewController {
         }
         if showRightCartButton {
             let alarmButton = UIButton().then {
-                $0.setImage(.cartIcon, for: .normal)
+                let cartIcon = UIImage(resource: .cartIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(cartIcon, for: .normal)
+                $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(alarmButton)

@@ -79,6 +79,11 @@ class ProfileViewController: UIViewController {
 }
 
 extension ProfileViewController: ProfileViewDelegate {
+    func didTapMyCharacterView() {
+        let vc = MyCharacterViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
     func didTapEditProfile() {
         navigateToEditProfile()
     }

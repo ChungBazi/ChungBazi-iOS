@@ -29,6 +29,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
         profileEditView.configure(with: profileData)
+        fillSafeArea(position: .top, color: .white)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,7 +44,10 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+        scrollView.showsVerticalScrollIndicator = false
+        
+        profileEditView.settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)
         
         view.addSubview(scrollView)
         scrollView.addSubview(profileEditView)
@@ -56,6 +60,11 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         profileEditView.snp.makeConstraints {
             $0.edges.width.equalToSuperview()
         }
+    }
+    
+    @objc private func settingCharacterBtnTapped() {
+        let vc = CharacterEditViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
 
     func didCompleteEditing(nickname: String, selectedImage: String) {
