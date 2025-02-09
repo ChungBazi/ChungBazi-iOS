@@ -45,7 +45,9 @@ final class SearchResultViewController: UIViewController {
         $0.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
     }
     
-    private let sortDropdown = CompactDropdown(
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "최신순",
         hasBorder: false,
         items: Constants.sortItems
