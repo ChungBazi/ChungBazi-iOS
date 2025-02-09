@@ -27,11 +27,12 @@ final class HomeViewController: UIViewController {
         let attributedText = NSMutableAttributedString(string: text)
         
         let firstPartRange = (text as NSString).range(of: "정책도 쉽고 간편하게")
-        attributedText.addAttribute(.font, value: UIFont(name: AppFontName.pSemiBold, size: 20)!, range: firstPartRange)
-        attributedText.addAttribute(.foregroundColor, value: UIColor.black, range: firstPartRange)
-        
         let secondPartRange = (text as NSString).range(of: "청바지")
-        attributedText.addAttribute(.font, value: UIFont(name: "afgRegularFont", size: 20)!, range: secondPartRange)
+
+        attributedText.addAttribute(.font, value: UIFont.ptdSemiBoldFont(ofSize: 20), range: firstPartRange)
+        attributedText.addAttribute(.foregroundColor, value: UIColor.black, range: firstPartRange)
+
+        attributedText.addAttribute(.font, value: UIFont.afgRegularFont(ofSize: 20), range: secondPartRange)
         attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: secondPartRange)
         
         $0.numberOfLines = 2
@@ -117,7 +118,7 @@ final class HomeViewController: UIViewController {
         }
 
         categoriesGridStackView.snp.makeConstraints { make in
-            make.top.equalTo(banner.snp.bottom).offset(10)
+            make.top.equalTo(banner.snp.bottom).offset(14)
             make.leading.trailing.equalToSuperview().inset(16)
         }
     }
@@ -125,7 +126,7 @@ final class HomeViewController: UIViewController {
     private func configureCategoriesWithChatbot() {
         let firstRowStackView = UIStackView().then {
             $0.axis = .horizontal
-            $0.spacing = 10
+            $0.spacing = 14
             $0.alignment = .fill
             $0.distribution = .fillEqually
         }
@@ -157,7 +158,7 @@ final class HomeViewController: UIViewController {
                 make.width.height.equalTo(105)
             }
         }
-        categoriesGridStackView.setCustomSpacing(10, after: firstRowStackView)
+        categoriesGridStackView.setCustomSpacing(14, after: firstRowStackView)
 
         let chatbotButtonContainer = UIView().then {
             $0.snp.makeConstraints { make in

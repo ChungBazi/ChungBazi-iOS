@@ -7,7 +7,7 @@ import UIKit
 import SnapKit
 import Then
 
-class CategoryPolicyViewController: UIViewController {
+final class CategoryPolicyViewController: UIViewController {
     
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
