@@ -11,6 +11,8 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     
     static let identifier = "GetCharacterCollectionViewCell"
     
+    private var isLocked: Bool = false
+    
     private lazy var character = UIImageView().then {
         $0.image = .LEVEL_1
         $0.contentMode = .scaleAspectFit
@@ -124,6 +126,7 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         background.backgroundColor = .blue100
         locked.isHidden = false
         unlocked.isHidden = true
+        isLocked = true
     }
     
     //cell을 unlock상태로 만드는 함수
@@ -132,6 +135,7 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         background.backgroundColor = UIColor(hex: "#FFF260")
         locked.isHidden = true
         unlocked.isHidden = false
+        isLocked = false
     }
     
     //cell을 완전히 잠금해제로 만드는 함수
@@ -139,5 +143,11 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         background.isHidden = true
         locked.isHidden = true
         unlocked.isHidden = true
+        isLocked = false
+    }
+    
+    //현재 완전히 잠겨있는지 상태 반환
+    public func getLockStatus() -> Bool {
+        return isLocked
     }
 }
