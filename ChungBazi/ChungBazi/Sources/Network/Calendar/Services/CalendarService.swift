@@ -22,7 +22,7 @@ final class CalendarService: NetworkManager {
         self.provider = provider ?? MoyaProvider<CalendarEndpoints>(plugins: plugins)
     }
     
-    public func getCalendarPolicies(yearMonth: String, completion: @escaping (Result<CalendarResponseDTO, NetworkError>) -> Void) {
-        request(target: .getCalendarPolicies(yearMonth: yearMonth), decodingType: CalendarResponseDTO.self, completion: completion)
+    public func getCalendarPolicies(yearMonth: String, completion: @escaping (Result<[CalendarResponseDTO]?, NetworkError>) -> Void) {
+        requestOptional(target: .getCalendarPolicies(yearMonth: yearMonth), decodingType: [CalendarResponseDTO].self, completion: completion)
     }
 }
