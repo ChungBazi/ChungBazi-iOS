@@ -77,7 +77,7 @@ final class CommunitySearchView: UIView {
         
         searchbarView.addSubview(searchButton)
         searchbarView.snp.makeConstraints {
-            $0.top.equalTo(dropdownPeriodView.snp.bottom).offset(10)
+            $0.top.equalToSuperview().offset(46)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.height.equalTo(40)
         }

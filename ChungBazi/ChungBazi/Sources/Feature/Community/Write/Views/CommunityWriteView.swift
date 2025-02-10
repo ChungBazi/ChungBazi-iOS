@@ -5,11 +5,14 @@ import Then
 protocol CommunityWriteViewDelegate: AnyObject {
     func didTapCameraButton()
     func didSelectDropdownItem(_ item: String)
+    func checkIfPostCanBeEnabled()
 }
 
-final class CommunityWriteView: UIView {
-    
+final class CommunityWriteView: UIView, UITextViewDelegate {
+
     weak var viewDelegate: CommunityWriteViewDelegate?
+    
+    var selectedCategory: String?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -31,7 +34,7 @@ final class CommunityWriteView: UIView {
         action: #selector(handleCameraButtonTap)
     )
     
-    private let titleTextField = UITextField().then {
+    let titleTextField = UITextField().then {
         $0.attributedPlaceholder = NSAttributedString(
             string: "제목을 입력해주세요.",
             attributes: [
@@ -44,15 +47,14 @@ final class CommunityWriteView: UIView {
             .foregroundColor: UIColor.black
         ]
         $0.backgroundColor = .clear
-    }.then {
-        $0.isUserInteractionEnabled = true
+        $0.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
     private let separateLine = UIView().then {
         $0.backgroundColor = .gray300
     }
     
-    private let contentTextView = UITextView().then {
+    let contentTextView = UITextView().then {
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
         $0.textColor = UIColor.gray300
         $0.text = "자유롭게 얘기해보세요."
@@ -81,6 +83,7 @@ final class CommunityWriteView: UIView {
             }
             DispatchQueue.main.async {
                 self.photoCollectionView.reloadData()
+                self.viewDelegate?.checkIfPostCanBeEnabled()
             }
         }
     }
@@ -100,6 +103,7 @@ final class CommunityWriteView: UIView {
         setupUI()
         setupHandlers()
         dropdownView.delegate = self
+        contentTextView.delegate = self
 
         DispatchQueue.main.async {
             self.bringSubviewToFront(self.dropdownView)
@@ -135,12 +139,12 @@ final class CommunityWriteView: UIView {
         }
 
         cameraButton.snp.makeConstraints {
-            $0.centerY.equalTo(dropdownView)
+            $0.top.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().inset(28)
         }
 
         titleTextField.snp.makeConstraints {
-            $0.top.equalTo(dropdownView.snp.bottom).offset(16)
+            $0.top.equalToSuperview().offset(66)
             $0.leading.trailing.equalToSuperview().inset(24)
         }
 
@@ -185,6 +189,14 @@ final class CommunityWriteView: UIView {
         selectedImages.remove(at: index)
         photoCollectionView.reloadData()
     }
+    
+    @objc private func textFieldDidChange() {
+        viewDelegate?.checkIfPostCanBeEnabled()
+    }
+
+    func textViewDidChange(_ textView: UITextView) {
+        viewDelegate?.checkIfPostCanBeEnabled()
+    }
 }
 
 final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
@@ -228,12 +240,8 @@ final class CommunityWriteCollectionViewHandler: NSObject, UICollectionViewDeleg
 
 extension CommunityWriteView: CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        selectedCategory = item
         viewDelegate?.didSelectDropdownItem(item)
-
-        DispatchQueue.main.async {
-            dropdown.dropdownView.titleLabel.text = item
-            dropdown.dropdownView.titleLabel.textColor = .black
-            self.layoutIfNeeded()
-        }
+        viewDelegate?.checkIfPostCanBeEnabled()
     }
 }

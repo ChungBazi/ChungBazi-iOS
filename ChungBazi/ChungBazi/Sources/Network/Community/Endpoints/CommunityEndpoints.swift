@@ -73,23 +73,28 @@ extension CommunityEndpoints: TargetType {
 
         case .postCommunityPost(let data, let imageList):
             var multipartData: [MultipartFormData] = []
-            
-            let compressionQuality: CGFloat = 0.8
-            
-            if let jsonData = try? JSONEncoder().encode(data) {
-                multipartData.append(
-                    MultipartFormData(provider: .data(jsonData), name: "info", fileName: "info.json", mimeType: "application/json")
-                )
-            }
-            
-            for image in imageList where !imageList.isEmpty {
-                if let imageData = image.jpegData(compressionQuality: compressionQuality) {
+
+            do {
+                let jsonData = try JSONEncoder().encode(data)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
                     multipartData.append(
-                        MultipartFormData(provider: .data(imageData), name: "imageList", fileName: "\(UUID().uuidString).jpeg", mimeType: "image/jpeg")
+                        MultipartFormData(provider: .data(jsonData), name: "info", mimeType: "application/json")
+                    )
+                }
+            } catch {
+                print("JSON 인코딩 실패: \(error.localizedDescription)")
+                return .requestPlain
+            }
+
+            for image in imageList.prefix(10) {
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    let fileName = "\(UUID().uuidString).jpg"
+                    multipartData.append(
+                        MultipartFormData(provider: .data(imageData), name: "imageList", fileName: fileName, mimeType: "image/jpeg")
                     )
                 }
             }
-            
+
             return .uploadMultipart(multipartData)
 
         case .postCommunityComment(let data):
