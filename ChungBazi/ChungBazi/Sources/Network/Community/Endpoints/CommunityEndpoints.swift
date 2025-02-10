@@ -11,9 +11,9 @@ import Moya
 import KeychainSwift
 
 enum CommunityEndpoints {
-    case getCommunityPosts(category: String, lastPostId: Int?)
+    case getCommunityPosts(category: String, cursor: Int)
     case getCommunityPost(postId: Int)
-    case getCommunityComments(postId: Int, lastCommentId: Int?)
+    case getCommunityComments(postId: Int, cursor: Int)
     case postCommunityPost(data: CommunityPostRequestDto, imageList: [UIImage])
     case postCommunityComment(data: CommunityCommentRequestDto)
 }
@@ -53,18 +53,19 @@ extension CommunityEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .getCommunityPosts(let category, let lastPostId):
-            var parameters: [String: Any] = ["category": category, "size": 10]
-            if let lastPostId = lastPostId {
-                parameters["lastPostId"] = lastPostId
+        case .getCommunityPosts(let category, let cursor):
+            var parameters: [String: Any] = ["size": 10, "cursor": 0]
+            if !category.isEmpty {
+                parameters["category"] = category
             }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
 
-        case .getCommunityComments(let postId, let lastCommentId):
-            var parameters: [String: Any] = ["postId": postId, "size": 10]
-            if let lastCommentId = lastCommentId {
-                parameters["lastCommentId"] = lastCommentId
-            }
+        case .getCommunityComments(let postId, let cursor):
+            let parameters: [String: Any] = [
+                "postId": postId,
+                "cursor": cursor,
+                "size": 10
+            ]
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
 
         case .getCommunityPost:

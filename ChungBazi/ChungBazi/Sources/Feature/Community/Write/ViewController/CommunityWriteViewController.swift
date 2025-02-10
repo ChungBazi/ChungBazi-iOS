@@ -88,6 +88,10 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
         present(picker, animated: true)
     }
     
+    func didSelectDropdownItem(_ item: String) {
+        print("선택된 카테고리: \(item)")
+    }
+
     func picker(_ picker: PHPickerViewController, didFinishPicking results: [PHPickerResult]) {
         picker.dismiss(animated: true)
         

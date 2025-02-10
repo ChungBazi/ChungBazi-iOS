@@ -24,6 +24,7 @@ final class CommunityDetailView: UIView {
         $0.register(CommunityDetailCommentCell.self, forCellReuseIdentifier: CommunityDetailCommentCell.identifier)
         $0.rowHeight = UITableView.automaticDimension
         $0.estimatedRowHeight = 136
+        $0.isScrollEnabled = false
     }
     
     private var comments: [CommunityDetailCommentModel] = []
@@ -63,7 +64,7 @@ final class CommunityDetailView: UIView {
         
         commentTableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
+            $0.bottom.leading.trailing.equalToSuperview()
             $0.height.greaterThanOrEqualTo(1)
         }
     }
@@ -84,6 +85,7 @@ final class CommunityDetailView: UIView {
                 $0.top.equalTo(self.gray100View.snp.bottom)
                 $0.leading.trailing.equalToSuperview()
                 $0.height.equalTo(tableHeight)
+                $0.bottom.equalToSuperview()
             }
             
             self.layoutIfNeeded()

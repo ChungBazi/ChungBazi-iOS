@@ -195,23 +195,18 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let cell = CommunityPostListCell()
         let post = posts[indexPath.row]
-        
-        let contentWidth = collectionView.bounds.width - 32
-        
-        let tempLabel = UILabel()
-        tempLabel.font = .ptdMediumFont(ofSize: 14)
-        tempLabel.text = post.content
-        tempLabel.numberOfLines = 2
-        tempLabel.lineBreakMode = .byWordWrapping
-        tempLabel.preferredMaxLayoutWidth = contentWidth
-        
-        let estimatedSize = tempLabel.sizeThatFits(CGSize(width: contentWidth, height: CGFloat.greatestFiniteMagnitude))
 
-        let baseHeight: CGFloat = 157
-        let totalHeight = baseHeight + estimatedSize.height
+        cell.configure(with: post, isLastCell: false)
 
-        return CGSize(width: collectionView.bounds.width - 16, height: totalHeight)
+        let targetSize = CGSize(width: collectionView.bounds.width - 16, height: UIView.layoutFittingCompressedSize.height)
+
+        let estimatedSize = cell.systemLayoutSizeFitting(targetSize,
+                                                         withHorizontalFittingPriority: .required,
+                                                         verticalFittingPriority: .fittingSizeLevel)
+
+        return CGSize(width: collectionView.bounds.width - 16, height: estimatedSize.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

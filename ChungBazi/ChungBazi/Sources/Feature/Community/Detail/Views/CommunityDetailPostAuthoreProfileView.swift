@@ -14,7 +14,7 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     
     private let characterImgView = UIImageView().then {
         $0.backgroundColor = .green300
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
         $0.layer.cornerRadius = 23.5
         $0.clipsToBounds = true
     }

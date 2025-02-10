@@ -40,8 +40,8 @@ final class CommunityService: NetworkManager {
     //MARK: - API funcs
     
     /// 커뮤니티 글 리스트 조회 API
-    public func getCommunityPosts(category: String, lastPostId: Int?, completion: @escaping (Result<CommunityResponseDTO?, NetworkError>) -> Void) {
-        requestOptional(target: .getCommunityPosts(category: category, lastPostId: lastPostId), decodingType: CommunityResponseDTO.self, completion: completion)
+    public func getCommunityPosts(category: String, cursor: Int, completion: @escaping (Result<CommunityResponseDTO?, NetworkError>) -> Void) {
+        requestOptional(target: .getCommunityPosts(category: category, cursor: cursor), decodingType: CommunityResponseDTO.self, completion: completion)
     }
     
     /// 커뮤니티 글 상세 조회 API
@@ -50,8 +50,8 @@ final class CommunityService: NetworkManager {
     }
   
     /// 커뮤니티 댓글 리스트 조회 API
-    public func getCommunityComments(postId: Int, lastCommentId: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
-        requestOptional(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId), decodingType: CommunityCommentResponseDTO.self, completion: completion)
+    public func getCommunityComments(postId: Int, cursor: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
+        requestOptional(target: .getCommunityComments(postId: postId, cursor: cursor), decodingType: CommunityCommentResponseDTO.self, completion: completion)
     }
     
     /// 커뮤니티 글 작성 API

@@ -156,40 +156,52 @@ final class CommunityDetailViewController: UIViewController {
             print("✅ 모든 댓글을 불러왔습니다.")
             return
         }
-        
-        print("🔍 댓글 데이터를 요청합니다. (cursor: \(nextCursor))")
-        communityService.getCommunityComments(postId: postId, lastCommentId: nextCursor) { [weak self] result in
+
+        communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
             guard let self = self else { return }
-            
+
             switch result {
-            case .success(let success):
-                guard let result = success?.result else {
-                    print("⚠️ 댓글 데이터가 없습니다.")
+            case .success(let response):
+                guard let response = response else { return }
+
+                let newComments = response.commentsList
+                if newComments.isEmpty {
+                    print("✅ 서버에서 반환된 댓글이 없으므로 추가 로드 중지")
                     return
                 }
-                
-                print("✅ 댓글 데이터 수신 완료: \(result.commentsList.count)개")
-                
-                self.comments.append(contentsOf: result.commentsList.map { comment in
-                    CommunityDetailCommentModel(
-                        postId: comment.postId ?? 0,
-                        content: comment.content ?? "내용 없음",
-                        formattedCreatedAt: comment.formattedCreatedAt ?? "",
-                        commentId: comment.commentId ?? 0,
-                        userId: comment.userId ?? 0,
-                        userName: comment.userName ?? "익명",
-                        reward: comment.reward ?? "",
-                        characterImg: comment.characterImg ?? ""
+
+                self.comments.append(contentsOf: newComments.compactMap { comment in
+                    guard let postId = comment.postId,
+                          let content = comment.content,
+                          let formattedCreatedAt = comment.formattedCreatedAt,
+                          let commentId = comment.commentId,
+                          let userId = comment.userId,
+                          let userName = comment.userName,
+                          let reward = comment.reward,
+                          let characterImg = comment.characterImg else {
+                        print("⚠️ 일부 댓글 데이터가 nil입니다. 스킵합니다.")
+                        return nil
+                    }
+
+                    return CommunityDetailCommentModel(
+                        postId: postId,
+                        content: content,
+                        formattedCreatedAt: formattedCreatedAt,
+                        commentId: commentId,
+                        userId: userId,
+                        userName: userName,
+                        reward: reward,
+                        characterImg: characterImg
                     )
                 })
-                
-                self.nextCursor = result.nextCursor
-                self.hasNext = result.hasNext
-                
+
+                self.nextCursor = response.nextCursor
+                self.hasNext = response.hasNext
+
                 DispatchQueue.main.async {
                     self.communityDetailView.updateComments(self.comments)
                 }
-                
+
             case .failure(let error):
                 print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
             }
@@ -220,8 +232,6 @@ final class CommunityDetailViewController: UIViewController {
             
             switch result {
             case .success(let response):
-                print("⭕ 댓글 작성 성공: \(response)")
-                
                 let newComment = CommunityDetailCommentModel(
                     postId: response.postId,
                     content: response.content,
@@ -237,6 +247,9 @@ final class CommunityDetailViewController: UIViewController {
                     self.comments.insert(newComment, at: 0)
                     self.communityDetailView.updateComments(self.comments)
                     self.commentTextField.text = ""
+                    self.view.endEditing(true)
+                    self.fetchPostData()
+                    self.fetchCommentData()
                 }
                 
             case .failure(let error):

@@ -93,7 +93,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         }
         contentLabel.snp.makeConstraints {
             $0.top.equalTo(categoryLabel.snp.bottom).offset(4)
-            $0.leading.equalToSuperview()
+            $0.leading.bottom.equalToSuperview()
             $0.trailing.equalTo(postTitleLabel)
         }
         thumbnailImgView.snp.makeConstraints {
@@ -104,14 +104,12 @@ final class CommunityPostListCell: UICollectionViewCell {
         socialInfoStackView.snp.makeConstraints {
             $0.top.equalTo(postContentView.snp.bottom).offset(14)
             $0.leading.equalToSuperview()
-            $0.bottom.equalToSuperview().inset(17)
         }
         
         addSubviews(separatorView)
         separatorView.snp.makeConstraints {
-            $0.top.equalTo(socialInfoStackView.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.top.equalTo(socialInfoStackView.snp.bottom).offset(17)
+            $0.leading.trailing.bottom.equalToSuperview()
             $0.height.equalTo(1)
         }
     }
@@ -169,11 +167,11 @@ final class CommunityPostListCell: UICollectionViewCell {
             thumbnailImgView.kf.indicatorType = .activity
             thumbnailImgView.kf.setImage(
                 with: url,
-                placeholder: UIImage(named: "placeholder"), // 기본 이미지 설정
+                placeholder: UIImage(),
                 options: [
                     .processor(processor),
                     .scaleFactor(UIScreen.main.scale),
-                    .transition(.fade(0.3)), // 부드러운 페이드 효과
+                    .transition(.fade(0.3)),
                     .cacheOriginalImage
                 ],
                 completionHandler: { result in
@@ -186,7 +184,7 @@ final class CommunityPostListCell: UICollectionViewCell {
                 }
             )
         } else {
-            thumbnailImgView.image = UIImage(named: "placeholder") // 기본 이미지 설정
+            thumbnailImgView.image = UIImage()
         }
         
         separatorView.isHidden = isLastCell

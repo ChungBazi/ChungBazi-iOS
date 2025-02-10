@@ -34,7 +34,7 @@ struct Constants {
     
     static let communityCategoryItems = CommunityCategory.allCases.map { $0.displayName }
     
-    static let communitySearchPeriodCategoryItems = ["기간"]
+    static let communitySearchPeriodCategoryItems = ["전체", "1일", "7일", "1개월", "3개월", "6개월", "1년"]
     
-    static let communitySearchTitleCategoryItems = ["제목"]
+    static let communitySearchTitleCategoryItems = ["제목", "내용"]
 }

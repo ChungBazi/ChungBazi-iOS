@@ -18,18 +18,18 @@ struct CommunityCommentRequestDto: Codable {
 
 struct CommunityRequestDTO: Codable {
     let category: CommunityCategory
-    let lastPostId: Int?
+    let cursor: Int
     let size: Int
     
-    init(category: CommunityCategory, lastPostId: Int? = nil, size: Int = 10) {
+    init(category: CommunityCategory, cursor: Int = 0, size: Int = 10) {
         self.category = category
-        self.lastPostId = lastPostId
+        self.cursor = cursor
         self.size = size
     }
 }
 
 struct CommunityCommentRequestDTO: Codable {
     let postId: Int
-    let lastCommentId: Int?
+    let cursor: Int
     let size: Int
 }
