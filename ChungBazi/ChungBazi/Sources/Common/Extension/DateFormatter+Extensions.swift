@@ -38,4 +38,10 @@ extension DateFormatter {
             $0.dateFormat = "yyyy-MM-dd"
         }.date(from: dateString)
     }
+    
+    static let yearMonth = DateFormatter().then {
+        $0.locale = Locale(identifier: "ko_KR")
+        $0.timeZone = TimeZone(identifier: "Asia/Seoul")
+        $0.dateFormat = "yyyy-MM"
+    }
 }

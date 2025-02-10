@@ -100,6 +100,10 @@ final class CommunityWriteView: UIView {
         setupUI()
         setupHandlers()
         dropdownView.delegate = self
+
+        DispatchQueue.main.async {
+            self.bringSubviewToFront(self.dropdownView)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -127,7 +131,7 @@ final class CommunityWriteView: UIView {
             $0.top.equalToSuperview().inset(14)
             $0.leading.equalToSuperview().inset(Constants.gutter)
             $0.width.equalTo(91)
-            $0.height.equalTo(36)
+            $0.height.equalTo(36*Constants.communityCategoryItems.count + 36 + 8)
         }
 
         cameraButton.snp.makeConstraints {
@@ -157,8 +161,8 @@ final class CommunityWriteView: UIView {
             $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(98)
         }
-
-        self.bringSubviewToFront(dropdownView)
+        
+        scrollView.delaysContentTouches = false
     }
     
     private func setupHandlers() {
@@ -225,10 +229,11 @@ final class CommunityWriteCollectionViewHandler: NSObject, UICollectionViewDeleg
 extension CommunityWriteView: CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         viewDelegate?.didSelectDropdownItem(item)
-        
+
         DispatchQueue.main.async {
             dropdown.dropdownView.titleLabel.text = item
             dropdown.dropdownView.titleLabel.textColor = .black
+            self.layoutIfNeeded()
         }
     }
 }

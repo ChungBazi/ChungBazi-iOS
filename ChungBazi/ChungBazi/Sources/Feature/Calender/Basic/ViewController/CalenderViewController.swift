@@ -14,6 +14,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     private var selectedDate: String?
     private var policies: [SortedPolicy] = []
     private var dimmingView: UIView?
+    private var calendarService = CalendarService()
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -37,84 +38,44 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     
     // MARK: - Data
     private func fetchData() {
-        let samplePolicies = createSamplePolicy()
-        policies = samplePolicies.map { policy in
-            SortedPolicy(
-                policyId: policy.policyId,
-                startDate: DateFormatter.yearMonthDay.date(from: policy.startDate) ?? Date(),
-                endDate: DateFormatter.yearMonthDay.date(from: policy.endDate) ?? Date(),
-                policyName: policy.policyName)
+        let currentYearMonth = DateFormatter.yearMonth.string(from: Date())
+
+        calendarService.getCalendarPolicies(yearMonth: currentYearMonth) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let policyDTOs):
+                let policies: [PolicyDTO] = policyDTOs.result!!
+
+                if policies.isEmpty {
+                    print("데이터가 없습니다. API 응답 확인 필요")
+                    self.policies = []
+                    self.calendarView.clearPolicies()
+                    return
+                }
+
+                self.policies = policies.compactMap { policy in
+                    guard let startDateStr = policy.startDate,
+                          let endDateStr = policy.endDate,
+                          let startDate = DateFormatter.yearMonthDay.date(from: startDateStr),
+                          let endDate = DateFormatter.yearMonthDay.date(from: endDateStr) else {
+                        return nil
+                    }
+                    return SortedPolicy(
+                        policyId: UUID().uuidString.hashValue,
+                        startDate: startDate,
+                        endDate: endDate,
+                        policyName: policy.name ?? "이름 없음"
+                    )
+                }
+
+                self.policies = self.sortMarkers(policies: self.policies)
+                self.bindPolicyData(self.policies)
+
+            case .failure(let error):
+                print("Error fetching policies: \(error.localizedDescription)")
+            }
         }
-        policies = sortMarkers(policies: policies)
-        bindPolicyData(policies)
-    }
-    
-    private func createSamplePolicy() -> [Policy] {
-        return [
-            Policy(
-                policyId: 1,
-                policyName: "양진구청 마라톤 참가자 모집",
-                startDate: "2025-01-31",
-                endDate: "2025-02-10",
-                documentText: "1단계: 홈페이지 수강신청 -> 2단계: 자기소개서 작성 후 제출",
-                userDocuments: []
-            ),
-            Policy(
-                policyId: 2,
-                policyName: "청바지 동아리 회원 모집",
-                startDate: "2025-02-03",
-                endDate: "2025-02-15",
-                documentText: "1단계: 동아리 홈페이지 지원서 작성 -> 2단계: 인터뷰 진행 후 결과 통보",
-                userDocuments: [
-                    Document(documentId: 3, name: "졸업증명서", isChecked: true),
-                    Document(documentId: 4, name: "이력서", isChecked: false)
-                ]
-            ),
-            Policy(
-                policyId: 3,
-                policyName: "지역 사회봉사단 모집",
-                startDate: "2025-02-05",
-                endDate: "2025-02-08",
-                documentText: "1단계: 지원서 제출 -> 2단계: 간단한 면접 진행",
-                userDocuments: [
-                    Document(documentId: 5, name: "주민등록초본", isChecked: true),
-                    Document(documentId: 6, name: "면허증", isChecked: false)
-                ]
-            ),
-            Policy(
-                policyId: 4,
-                policyName: "공공 미술 프로젝트 지원",
-                startDate: "2025-02-15",
-                endDate: "2025-02-20",
-                documentText: "1단계: 프로젝트 계획서 제출 -> 2단계: 현장 실사 후 최종 발표",
-                userDocuments: [
-                    Document(documentId: 7, name: "프로젝트 계획서", isChecked: true),
-                    Document(documentId: 8, name: "포트폴리오", isChecked: false)
-                ]
-            ),
-            Policy(
-                policyId: 5,
-                policyName: "학생 창업 지원 모집",
-                startDate: "2025-02-15",
-                endDate: "2025-02-15",
-                documentText: "1단계: 사업 계획서 제출 -> 2단계: 발표 심사 진행",
-                userDocuments: [
-                    Document(documentId: 9, name: "사업 계획서", isChecked: true),
-                    Document(documentId: 10, name: "학생증 사본", isChecked: false)
-                ]
-            ),
-            Policy(
-                policyId: 6,
-                policyName: "시민 체육대회 참가자 모집",
-                startDate: "2025-02-03",
-                endDate: "2025-02-20",
-                documentText: "1단계: 참가 신청서 작성 -> 2단계: 참가비 납부",
-                userDocuments: [
-                    Document(documentId: 11, name: "참가 신청서", isChecked: true),
-                    Document(documentId: 12, name: "참가비 영수증", isChecked: false)
-                ]
-            )
-        ]
     }
     
     private func bindPolicyData(_ policies: [SortedPolicy]) {
@@ -122,6 +83,10 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         for policy in policies {
             calendarView.update(policy: policy)
         }
+    }
+    
+    private func sortMarkers(policies: [SortedPolicy]) -> [SortedPolicy] {
+        return policies.sorted { $0.startDate < $1.startDate }
     }
 }
 
@@ -138,35 +103,31 @@ extension CalenderViewController: CalendarViewDelegate {
     
     func presentPolicyListViewController(for date: Date) {
         addDimmingView()
-
+        
         let policyListVC = CalendarPolicyListViewController()
         policyListVC.modalPresentationStyle = .pageSheet
         policyListVC.selectedDate = DateFormatter.yearMonthDay.string(from: date)
         policyListVC.policies = getPolicies(for: date)
-
+        
         let navigationController = UINavigationController(rootViewController: policyListVC)
         navigationController.modalPresentationStyle = .pageSheet
-
+        
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.selectedDetentIdentifier = .medium
             sheet.delegate = self
             sheet.largestUndimmedDetentIdentifier = .large
         }
-
+        
         present(navigationController, animated: true)
     }
-
+    
     func presentationControllerWillDismiss(_ presentationController: UIPresentationController) {
         removeDimmingView()
     }
     
     private func getPolicies(for date: Date) -> [Policy] {
         return policies.compactMap { sortedPolicy in
-            guard let originalPolicy = createSamplePolicy().first(where: { $0.policyId == sortedPolicy.policyId }) else {
-                return nil
-            }
-
             let startDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate)
             let endDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
 
@@ -175,8 +136,8 @@ extension CalenderViewController: CalendarViewDelegate {
                 policyName: sortedPolicy.policyName,
                 startDate: startDateString,
                 endDate: endDateString,
-                documentText: originalPolicy.documentText,
-                userDocuments: originalPolicy.userDocuments
+                documentText: "",
+                userDocuments: []
             )
         }.filter { policy in
             guard let policyStart = DateFormatter.yearMonthDay.date(from: policy.startDate),
@@ -212,7 +173,7 @@ extension CalenderViewController {
         
         self.dimmingView = dimmingView
     }
-
+    
     private func removeDimmingView() {
         if let dimmingView = view.viewWithTag(999) {
             UIView.animate(withDuration: 0.2, animations: {
