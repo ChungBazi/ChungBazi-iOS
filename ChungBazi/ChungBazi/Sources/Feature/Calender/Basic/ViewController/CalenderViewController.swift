@@ -39,21 +39,26 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     // MARK: - Data
     private func fetchData() {
         let currentYearMonth = DateFormatter.yearMonth.string(from: Date())
-
+        
         calendarService.getCalendarPolicies(yearMonth: currentYearMonth) { [weak self] result in
             guard let self = self else { return }
             
             switch result {
-            case .success(let policyDTOs):
-                let policies: [PolicyDTO] = policyDTOs.result!!
-
+            case .success(let response):
+                guard let policies = response, !policies.isEmpty else {
+                    print("데이터가 없습니다. API 응답 확인 필요")
+                    self.policies = []
+                    self.calendarView.clearPolicies()
+                    return
+                }
+                
                 if policies.isEmpty {
                     print("데이터가 없습니다. API 응답 확인 필요")
                     self.policies = []
                     self.calendarView.clearPolicies()
                     return
                 }
-
+                
                 self.policies = policies.compactMap { policy in
                     guard let startDateStr = policy.startDate,
                           let endDateStr = policy.endDate,
@@ -68,10 +73,10 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
                         policyName: policy.name ?? "이름 없음"
                     )
                 }
-
+                
                 self.policies = self.sortMarkers(policies: self.policies)
                 self.bindPolicyData(self.policies)
-
+                
             case .failure(let error):
                 print("Error fetching policies: \(error.localizedDescription)")
             }
@@ -130,7 +135,7 @@ extension CalenderViewController: CalendarViewDelegate {
         return policies.compactMap { sortedPolicy in
             let startDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.startDate)
             let endDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
-
+            
             return Policy(
                 policyId: sortedPolicy.policyId,
                 policyName: sortedPolicy.policyName,

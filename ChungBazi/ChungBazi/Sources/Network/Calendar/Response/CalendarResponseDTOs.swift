@@ -7,9 +7,9 @@
 
 import Foundation
 
-typealias CalendarResponseDTO = ApiResponse<[PolicyDTO]?>
+//typealias CalendarResponseDTO = ApiResponse<[PolicyDTO]?>
 
-struct PolicyDTO: Decodable {
+struct CalendarResponseDTO: Decodable {
     let name: String?
     let startDate: String?
     let endDate: String?
