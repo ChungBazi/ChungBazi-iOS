@@ -14,7 +14,7 @@ class ProfileViewController: UIViewController {
     private var profileData: ProfileModel?
     private var rewardData: RewardModel?
     let userInfoData = UserProfileDataManager.shared
-
+    
     let networkService = AuthService()
     let kakaoAuthVM = KakaoAuthVM()
     private let service = UserService()
@@ -29,6 +29,7 @@ class ProfileViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchProfile()
+        fetchReward()
     }
     
     
@@ -58,6 +59,18 @@ class ProfileViewController: UIViewController {
                 }
             case .failure(let response):
                 print("❌프로필 불러오기 실패: \(response.localizedDescription)")
+            }
+        }
+    }
+    
+    private func fetchReward() {
+        service.fetchReward { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                self.rewardData = RewardModel(currentReward: response.rewardLevel, myPosts: response.postCount, myComments: response.commentCount)
+            case .failure(let error):
+                print(error)
             }
         }
     }
@@ -172,7 +185,7 @@ extension ProfileViewController: ProfileViewDelegate {
             KeychainSwift().delete($0)
         }
     }
-        
+    
     func showSplashScreen() {
         let splashViewController = SplashViewController()
         

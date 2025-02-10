@@ -18,6 +18,12 @@ struct RewardModel {
     let currentReward: Int
     let myPosts: Int
     let myComments: Int
+    
+    init(currentReward: Int, myPosts: Int, myComments: Int) {
+        self.currentReward = currentReward
+        self.myPosts = myPosts
+        self.myComments = myComments
+    }
 }
 
 public struct CharacterImage {
