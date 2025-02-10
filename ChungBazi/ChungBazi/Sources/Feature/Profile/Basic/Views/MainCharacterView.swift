@@ -25,13 +25,11 @@ class MainCharacterView: UIView {
     }
     
     private lazy var myLevel = UILabel().then {
-        $0.text = "3"
         $0.font = UIFont.ptdSemiBoldFont(ofSize: 24)
         $0.textColor = UIColor(hex: "#FFF260")
     }
     
     private lazy var myNickname = UILabel().then {
-        $0.text = "청바로"
         $0.font = UIFont.ptdSemiBoldFont(ofSize: 20)
         $0.textColor = .white
     }
@@ -42,7 +40,6 @@ class MainCharacterView: UIView {
     }
     
     private lazy var nextLevel = UILabel().then {
-        $0.text = "4"
         $0.font = UIFont.ptdSemiBoldFont(ofSize: 16)
         $0.textColor = .gray100
     }
@@ -69,13 +66,11 @@ class MainCharacterView: UIView {
     }
     
     private lazy var stageLevel = UILabel().then {
-        $0.text = "3"
         $0.font = UIFont.ptdSemiBoldFont(ofSize: 16)
         $0.textColor = .blue700
     }
     
     private lazy var character = UIImageView().then {
-        $0.image = .LEVEL_2
         $0.contentMode = .scaleAspectFit
     }
     

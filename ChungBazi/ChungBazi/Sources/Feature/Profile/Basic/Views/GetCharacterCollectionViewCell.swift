@@ -13,8 +13,11 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     
     private var isLocked: Bool = false
     
+    public var isUnlockedState: Bool {
+        return !background.isHidden && unlocked.isHidden == false
+    }
+    
     private lazy var character = UIImageView().then {
-        $0.image = .LEVEL_1
         $0.contentMode = .scaleAspectFit
     }
     
@@ -24,7 +27,6 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     }
     
     private lazy var level = UILabel().then {
-        $0.text = "1"
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
         $0.textColor = .black
     }
@@ -58,9 +60,9 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-//        self.character.image = nil
-//        self.level.text = nil
-//        self.background.backgroundColor = nil
+        self.character.image = nil
+        self.level.text = nil
+        self.background.backgroundColor = nil
     }
     
     required init?(coder: NSCoder) {
@@ -117,9 +119,12 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         return stackView
     }
     
-    public func configure() {
-        
+    public func configure(with rewardLevel: String) {
+        character.image = UIImage(named: rewardLevel)
+        guard let level = CharacterImage.levelMapping[rewardLevel] else { return }
+        self.level.text = String(level)
     }
+
     
     //cell을 lock상태로 만드는 함수
     public func setLockedState() {

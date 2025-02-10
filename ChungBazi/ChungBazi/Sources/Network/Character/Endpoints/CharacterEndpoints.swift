@@ -49,7 +49,7 @@ extension CharacterEndpoints: TargetType {
         case .fetchMainCharacter, .fetchCharacterList:
             return .requestPlain
         case .updateOpenCharacter(let selectedLevel):
-            return .requestParameters(parameters: ["selectedLevel": selectedLevel], encoding: URLEncoding.default)
+            return .requestParameters(parameters: ["selectedLevel": selectedLevel], encoding: URLEncoding.queryString)
         }
     }
     

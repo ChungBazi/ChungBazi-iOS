@@ -38,7 +38,7 @@ final class CharacterService: NetworkManager {
     }
     
     /// 개별 캐릭터 선택 및 오픈 API
-    public func updateOpenCharacter(selectedLevel: String, completion: @escaping (Result<MainCharacterResponseDto, NetworkError>) -> Void) {
-        request(target: .updateOpenCharacter(selectedLevel: selectedLevel), decodingType: MainCharacterResponseDto.self, completion: completion)
+    public func updateOpenCharacter(selectedLevel: String, completion: @escaping (Result<MainCharacterResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .updateOpenCharacter(selectedLevel: selectedLevel), decodingType: MainCharacterResponseDto.self, completion: completion)
     }
 }

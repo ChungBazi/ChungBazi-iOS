@@ -10,6 +10,7 @@ import UIKit
 class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
     
     let networkService = CharacterService()
+    var myCharacterList: [MyCharacterList] = []
     
     private lazy var mainCharacterView = MainCharacterView()
     
@@ -24,7 +25,7 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
     }
     
     private lazy var contentView = UIView()
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .blue700
@@ -37,16 +38,18 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
         fetchMainCharacter()
+        fetchCharacterList()
     }
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        
-        showCustomAlert(
-            title: "레벨업 완료!\n새로운 캐릭터가 열렸습니다.\n카드를 눌러 확인해보세요!",
-            ButtonText: "좋아요",
-            image: .confetti
-        )
+        if myCharacterList.contains { !$0.open } {
+            showCustomAlert(
+                title: "레벨업 완료!\n새로운 캐릭터가 열렸습니다.\n카드를 눌러 확인해보세요!",
+                ButtonText: "좋아요",
+                image: .confetti
+            )
+        }
     }
     
     override func viewWillDisappear(_ animated: Bool) {
@@ -98,7 +101,7 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
         }
     }
     
-    func fetchMainCharacter() {
+    private func fetchMainCharacter() {
         networkService.fetchMainCharacter { [weak self] result in
             guard let self = self else { return }
             switch result {
@@ -117,6 +120,46 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
             }
         }
     }
+    
+    private func fetchCharacterList() {
+        networkService.fetchCharacterList { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                myCharacterList = response
+                    .map { MyCharacterList(rewardLevel: $0.rewardLevel, open: $0.open) }
+                DispatchQueue.main.async {
+                    self.getCharacterListView.GetCharacterCollectionView.reloadData()
+                }
+            case .failure(let response):
+                print(response)
+            }
+        }
+    }
+    
+    private func updateOpenCharacter(selectedLevel: String, completion: @escaping (Bool) -> Void) {
+        networkService.updateOpenCharacter(selectedLevel: selectedLevel) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                DispatchQueue.main.async {
+                    self.getCharacterListView.GetCharacterCollectionView.reloadData()
+                }
+                guard let response = response else { return }
+                guard let nowLevel = CharacterImage.levelMapping[response.rewardLevel] else { return }
+                guard let nextRewardLevel = response.nextRewardLevel else { return }
+                guard let nextLevel = CharacterImage.levelMapping[nextRewardLevel] else { return }
+                
+                mainCharacterView.updateMyLevel(nickname: response.name, level: nowLevel)
+                response.nextRewardLevel == nil ? mainCharacterView.maxLevelState() : ()
+                mainCharacterView.updateNextLevel(nextLevel: nextLevel, remainPost: response.posts, remainComment: response.comments)
+                mainCharacterView.updateCharacterAndStage(characterImage: response.rewardLevel, stageLevel: nowLevel)
+                completion(true)
+            case .failure(_):
+                completion(false)
+            }
+        }
+    }
 }
 
 extension MyCharacterViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
@@ -127,14 +170,54 @@ extension MyCharacterViewController: UICollectionViewDataSource, UICollectionVie
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: GetCharacterCollectionViewCell.identifier, for: indexPath) as! GetCharacterCollectionViewCell
         
-//        let alarm = alarmList[indexPath.item]
-        //cell.configure()
+        if indexPath.item < myCharacterList.count {
+            let characterInfo = myCharacterList[indexPath.item]
+            
+            if characterInfo.open {
+                // 캐릭터가 열려 있으면 해당 이미지 표시
+                cell.configure(with: characterInfo.rewardLevel)
+                cell.setFullyUnlockedState()
+            } else {
+                // 리스트에 있지만 `open == false`면 잠금 해제 대기 상태
+                cell.setUnlockedState()
+            }
+        } else {
+            // 리스트에 없는 경우, 잠긴 상태로 설정
+            cell.setLockedState()
+        }
         
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: 106, height: 141)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        guard let cell = collectionView.cellForItem(at: indexPath) as? GetCharacterCollectionViewCell else { return }
+        
+        if cell.getLockStatus() { // `locked` 상태 → 클릭 막기
+            return
+        }
+        
+        let selectLevel = myCharacterList[indexPath.row].rewardLevel
+        guard let level = CharacterImage.levelMapping[selectLevel] else { return }
+        
+        if !cell.getLockStatus() && cell.isUnlockedState { // `unlocked` 상태 → `fullyUnlocked` 상태로 변경후, patch 부르면서 빵빠레
+            updateOpenCharacter(selectedLevel: selectLevel) { [weak self] success in
+                guard let self = self, success else { return }
+                
+                DispatchQueue.main.async {
+                    self.myCharacterList[indexPath.row].open = true
+                    cell.setFullyUnlockedState()
+                    self.mainCharacterView.updateCharacterAndStage(characterImage: selectLevel, stageLevel: level)
+                    self.mainCharacterView.showConfettiForFiveSeconds()
+                }
+            }
+        } else {
+            // `fullyUnlocked` 상태 → 메인캐릭터뷰 stage에 해당 캐릭터 띄우기
+            mainCharacterView.updateCharacterAndStage(characterImage: selectLevel, stageLevel: level)
+        }
     }
 }
 
