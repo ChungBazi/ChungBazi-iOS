@@ -63,7 +63,7 @@ final class CommunityDetailView: UIView {
         
         commentTableView.snp.makeConstraints {
             $0.top.equalTo(gray100View.snp.bottom)
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
             $0.height.greaterThanOrEqualTo(1)
         }
     }
@@ -75,6 +75,19 @@ final class CommunityDetailView: UIView {
     func updateComments(_ comments: [CommunityDetailCommentModel]) {
         self.comments = comments
         commentTableView.reloadData()
+        
+        DispatchQueue.main.async {
+            self.commentTableView.layoutIfNeeded()
+            let tableHeight = self.commentTableView.contentSize.height
+
+            self.commentTableView.snp.remakeConstraints {
+                $0.top.equalTo(self.gray100View.snp.bottom)
+                $0.leading.trailing.equalToSuperview()
+                $0.height.equalTo(tableHeight)
+            }
+            
+            self.layoutIfNeeded()
+        }
     }
 }
 

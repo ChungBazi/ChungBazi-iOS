@@ -50,7 +50,7 @@ final class CommunityService: NetworkManager {
     }
   
     /// 커뮤니티 댓글 리스트 조회 API
-    public func getCommunityComments(postId: Int, lastCommentId: Int?, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
+    public func getCommunityComments(postId: Int, lastCommentId: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
         requestOptional(target: .getCommunityComments(postId: postId, lastCommentId: lastCommentId), decodingType: CommunityCommentResponseDTO.self, completion: completion)
     }
     
