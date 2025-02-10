@@ -7,7 +7,7 @@
 struct MainCharacterResponseDto: Decodable {
     let rewardLevel: String
     let name: String
-    let nextRewardLevel: String
+    let nextRewardLevel: String?
     let posts: Int
     let comments: Int
 }

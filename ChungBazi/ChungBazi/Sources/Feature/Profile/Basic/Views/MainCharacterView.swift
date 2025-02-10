@@ -152,7 +152,7 @@ class MainCharacterView: UIView {
         
         character.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(stage.snp.bottom).offset(-34)
+            $0.bottom.equalTo(stage.snp.bottom).offset(-16)
             $0.width.equalTo(Constants.superViewWidth * 0.67)
         }
         
@@ -202,8 +202,8 @@ class MainCharacterView: UIView {
     }
     
     // 캐릭터 이미지와 stage level 변경
-    public func updateCharacterAndStage(characterImage: UIImage, stageLevel: Int) {
-        character.image = characterImage
+    public func updateCharacterAndStage(characterImage: String, stageLevel: Int) {
+        character.image = UIImage(named: characterImage)
         self.stageLevel.text = "\(stageLevel)"
     }
     

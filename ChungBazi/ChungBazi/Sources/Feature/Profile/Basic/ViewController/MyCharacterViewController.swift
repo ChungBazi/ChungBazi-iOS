@@ -9,6 +9,8 @@ import UIKit
 
 class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
     
+    let networkService = CharacterService()
+    
     private lazy var mainCharacterView = MainCharacterView()
     
     private lazy var getCharacterListView = GetCharacterListView().then {
@@ -34,6 +36,7 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
+        fetchMainCharacter()
     }
     
     override func viewDidAppear(_ animated: Bool) {
@@ -92,6 +95,26 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
         let maxOffsetY = scrollView.contentSize.height - scrollView.bounds.height
         if scrollView.contentOffset.y > maxOffsetY {
             scrollView.contentOffset.y = maxOffsetY
+        }
+    }
+    
+    func fetchMainCharacter() {
+        networkService.fetchMainCharacter { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let response = response else { return }
+                guard let nowLevel = CharacterImage.levelMapping[response.rewardLevel] else { return }
+                guard let nextRewardLevel = response.nextRewardLevel else { return }
+                guard let nextLevel = CharacterImage.levelMapping[nextRewardLevel] else { return }
+                
+                mainCharacterView.updateMyLevel(nickname: response.name, level: nowLevel)
+                response.nextRewardLevel == nil ? mainCharacterView.maxLevelState() : ()
+                mainCharacterView.updateNextLevel(nextLevel: nextLevel, remainPost: response.posts, remainComment: response.comments)
+                mainCharacterView.updateCharacterAndStage(characterImage: response.rewardLevel, stageLevel: nowLevel)
+            case .failure(let error):
+                print(error)
+            }
         }
     }
 }

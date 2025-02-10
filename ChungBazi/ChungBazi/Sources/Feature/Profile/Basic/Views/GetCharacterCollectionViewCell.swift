@@ -58,9 +58,9 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.character.image = nil
-        self.level.text = nil
-        self.background.backgroundColor = nil
+//        self.character.image = nil
+//        self.level.text = nil
+//        self.background.backgroundColor = nil
     }
     
     required init?(coder: NSCoder) {
@@ -73,8 +73,9 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     
     private func setConstraints() {
         character.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(3)
             $0.top.equalToSuperview().offset(12)
+            $0.horizontalEdges.equalToSuperview().inset(3)
+            $0.bottom.equalTo(characterInfoStackView.snp.top).offset(-8)
         }
         
         crown.snp.makeConstraints {
