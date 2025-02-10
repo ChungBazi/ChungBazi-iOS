@@ -13,18 +13,18 @@ protocol CommunityWriteViewDelegate: AnyObject {
     func didTapCameraButton()
 }
 
-final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDelegate {
+final class CommunityWriteView: UIScrollView, CustomDropdownDelegate {
     
-    weak var delegate: CommunityWriteViewDelegate?
+    weak var viewDelegate: CommunityWriteViewDelegate?
     
-    private let scrollView = UIScrollView()
-    private let contentView = UIView()
-    
-    private let dropdownView = CompactDropdown(
+    private lazy var dropdownView = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "관심",
         hasBorder: false,
         items: Constants.communityCategoryItems.filter { $0 != CommunityCategory.all.displayName }
     )
+    
     private let cameraButton = UIButton.createWithImage(
         image: .cameraIcon,
         tintColor: .gray500,
@@ -37,49 +37,39 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
             string: "제목을 입력해주세요.",
             attributes: [
                 .font: UIFont.ptdSemiBoldFont(ofSize: 20),
-                NSAttributedString.Key.foregroundColor: UIColor.gray300
+                .foregroundColor: UIColor.gray300
             ]
         )
         $0.defaultTextAttributes = [
             .font: UIFont.ptdSemiBoldFont(ofSize: 20),
             .foregroundColor: UIColor.black
         ]
+        $0.backgroundColor = .clear
     }
     
     private let separateLine = UIView().then {
         $0.backgroundColor = .gray300
     }
     
-    private let contentTextView = UITextView().then {
-        $0.font = UIFont.ptdMediumFont(ofSize: 14)
-        $0.textColor = UIColor.gray300
-        $0.text = "자유롭게 얘기해보세요."
-        $0.isScrollEnabled = false
-        $0.backgroundColor = .clear
-        $0.textContainerInset = .zero
-        $0.textContainer.lineFragmentPadding = 0
-    }
-    
-    private let photoCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
+    private let contentTextView = UITextView()
+
+    private lazy var photoCollectionView: UICollectionView = {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.minimumInteritemSpacing = 9
         layout.itemSize = CGSize(width: 80, height: 80)
         layout.sectionInset = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
-        $0.collectionViewLayout = layout
-        $0.backgroundColor = .clear
-        $0.showsHorizontalScrollIndicator = false
-        $0.register(CommunityWritePhotoCell.self, forCellWithReuseIdentifier: "CommunityWritePhotoCell")
-    }
+        
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.backgroundColor = .clear
+        collectionView.showsHorizontalScrollIndicator = false
+        return collectionView
+    }()
     
     var selectedImages: [UIImage] = [] {
         didSet {
-            if selectedImages.count > 10 {
-                selectedImages = Array(selectedImages.prefix(10))
-            }
-            DispatchQueue.main.async {
-                self.photoCollectionView.reloadData()
-            }
+            selectedImages = Array(selectedImages.prefix(10))
+            DispatchQueue.main.async { self.photoCollectionView.reloadData() }
         }
     }
     
@@ -91,10 +81,13 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         $0.tintColor = .gray500
     }
     
+    private let textViewHandler = CommunityWriteTextViewHandler()
+    private let collectionViewHandler = CommunityWriteCollectionViewHandler()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        setupDelegates()
+        setupHandlers()
     }
     
     required init?(coder: NSCoder) {
@@ -102,18 +95,13 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
     
     private func setupUI() {
-        addSubviews(scrollView, communityRuleView)
+        contentTextView.delegate = textViewHandler
+        photoCollectionView.delegate = collectionViewHandler
+        photoCollectionView.dataSource = collectionViewHandler
         
-        scrollView.addSubview(contentView)
-        contentView.addSubviews(dropdownView, cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView)
-        scrollView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.bottom.equalTo(communityRuleView.snp.top).offset(-22)
-        }
-        contentView.snp.makeConstraints {
-            $0.top.leading.trailing.width.equalToSuperview()
-            $0.bottom.equalTo(photoCollectionView).offset(20)
-        }
+        dropdownView.delegate = self // 드롭다운 선택 반영을 위해 delegate 설정
+        
+        addSubviews(dropdownView, cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView, communityRuleView)
         
         dropdownView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(14)
@@ -165,20 +153,21 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         communityRuleIcon.snp.makeConstraints {
             $0.trailing.centerY.equalToSuperview()
         }
-        
-        contentView.snp.makeConstraints {
-            $0.bottom.equalTo(communityRuleView.snp.top).inset(22)
+    }
+    
+    private func setupHandlers() {
+        textViewHandler.contentTextView = contentTextView
+        collectionViewHandler.photoCollectionView = photoCollectionView
+        collectionViewHandler.selectedImages = { [weak self] in
+            self?.selectedImages ?? []
+        }
+        collectionViewHandler.removeImage = { [weak self] index in
+            self?.removeImage(at: index)
         }
     }
     
-    private func setupDelegates() {
-        contentTextView.delegate = self
-        photoCollectionView.dataSource = self
-        photoCollectionView.delegate = self
-    }
-    
     @objc private func handleCameraButtonTap() {
-        delegate?.didTapCameraButton()
+        viewDelegate?.didTapCameraButton()
     }
     
     func removeImage(at index: Int) {
@@ -187,7 +176,15 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         photoCollectionView.reloadData()
     }
     
-    // MARK: - UITextViewDelegate
+    // MARK: - CustomDropdownDelegate
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        print("선택된 카테고리: \(item)")
+        dropdownView.setItems(Constants.communityCategoryItems.filter { $0 != CommunityCategory.all.displayName })
+    }
+}
+
+final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
+    weak var contentTextView: UITextView?
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == "자유롭게 얘기해보세요." {
@@ -204,17 +201,21 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
 }
 
-extension CommunityWriteView: UICollectionViewDataSource {
+final class CommunityWriteCollectionViewHandler: NSObject, UICollectionViewDelegate, UICollectionViewDataSource {
+    weak var photoCollectionView: UICollectionView?
+    var selectedImages: (() -> [UIImage])?
+    var removeImage: ((Int) -> Void)?
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return selectedImages.count
+        return selectedImages?().count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityWritePhotoCell", for: indexPath) as! CommunityWritePhotoCell
-        let image = selectedImages[indexPath.item]
+        let image = selectedImages?()[indexPath.item] ?? UIImage()
         
         cell.configure(with: image, index: indexPath.item, onDelete: { [weak self] index in
-            self?.removeImage(at: index)
+            self?.removeImage?(index)
         })
         
         return cell

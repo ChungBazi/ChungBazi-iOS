@@ -87,7 +87,7 @@ final class CommunityView: UIView {
     }
     
     private func setupUI() {
-        addSubviews(segmentedControl, underlineBaseView, underlineView, writeButton)
+        addSubviews(writeButton, segmentedControl, underlineBaseView, underlineView)
         segmentedControl.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
@@ -131,6 +131,8 @@ final class CommunityView: UIView {
             $0.bottom.equalToSuperview().inset(Constants.gutter)
             collectionViewHeightConstraint = $0.height.equalTo(0).constraint
         }
+        
+        bringSubviewToFront(writeButton)
     }
     
     override func layoutSubviews() {

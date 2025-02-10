@@ -9,10 +9,9 @@ import UIKit
 import SafeAreaBrush
 import PhotosUI
 
-final class CommunityWriteViewController: UIViewController, CommunityWriteViewDelegate, UIImagePickerControllerDelegate & UINavigationControllerDelegate, PHPickerViewControllerDelegate {
+final class CommunityWriteViewController: UIViewController, CommunityWriteViewDelegate, PHPickerViewControllerDelegate {
     
     private let scrollView = UIScrollView()
-    private let contentView = UIView()
     private let communityWriteView = CommunityWriteView()
     
     private let buttonContainerView = UIView().then {
@@ -30,7 +29,7 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        communityWriteView.delegate = self
+        communityWriteView.viewDelegate = self
         enableKeyboardHandling(for: scrollView, inputView: buttonContainerView)
     }
     
@@ -49,34 +48,28 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
         fillSafeArea(position: .top, color: .white)
         fillSafeArea(position: .bottom, color: .white)
         
-        addCustomNavigationBar(titleText: "글쓰기", showBackButton: true, showCartButton: false, showAlarmButton: true, backgroundColor: .white)
+        addCustomNavigationBar(titleText: "글쓰기", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
         
         view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
-        contentView.addSubview(communityWriteView)
+        scrollView.addSubview(communityWriteView)
 
         scrollView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.width.equalToSuperview()
         }
-        scrollView.isScrollEnabled = false
         
-        contentView.snp.makeConstraints {
+        communityWriteView.snp.makeConstraints {
             $0.edges.width.equalToSuperview()
             $0.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.height)
         }
-
-        communityWriteView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
-        }
         
-        scrollView.addSubview(buttonContainerView)
+        view.addSubview(buttonContainerView)
         buttonContainerView.addSubviews(postButton)
         buttonContainerView.snp.makeConstraints {
-            $0.leading.trailing.bottom.equalToSuperview()
+            $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(58)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
         }
         
         postButton.snp.makeConstraints {
