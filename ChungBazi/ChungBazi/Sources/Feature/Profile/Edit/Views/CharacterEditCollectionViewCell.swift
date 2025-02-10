@@ -45,6 +45,7 @@ class CharacterEditCollectionViewCell: UICollectionViewCell {
         }
     }
     
-    public func configure() {
+    public func configure(character: String) {
+        self.character.image = UIImage(named: character)
     }
 }

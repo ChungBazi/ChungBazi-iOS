@@ -9,10 +9,18 @@ import UIKit
 import SnapKit
 import Then
 
+protocol CharacterEditDelegate: AnyObject {
+    func didSelectCharacter(characterImage: String)
+}
+
 class CharacterEditViewController: UIViewController {
     
     var selectedIndexPath: IndexPath?
     let userInfoData = UserProfileDataManager.shared
+    let networkService = CharacterService()
+    var myCharacterList: [String] = []
+    
+    weak var delegate: CharacterEditDelegate?
     
     private let myCharacterTitle = UILabel().then {
         $0.text = "마이 캐릭터"
@@ -42,13 +50,13 @@ class CharacterEditViewController: UIViewController {
         addComoponents()
         setConstraints()
         setAction()
+        fetchCharacterList()
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
-        //selectedIndexPath?.item = userInfoData.getCharacterNum() - 1
-        selectedIndexPath = IndexPath(item: 0, section: 0)
+        selectedIndexPath = IndexPath(item: userInfoData.getCharacterNum() - 1, section: 0)
         DispatchQueue.main.async {
             if let selectedIndexPath = self.selectedIndexPath {
                 self.myCharacterCollectionView.reloadItems(at: [selectedIndexPath])
@@ -95,19 +103,39 @@ class CharacterEditViewController: UIViewController {
     @objc private func didCompleteCharacterEditing() {
         guard let selectCharacter = selectedIndexPath?.item else { return }
         userInfoData.setCharacterNum(selectCharacter + 1)
+        
+        let selectedCharacterImage = myCharacterList[selectCharacter]
+        delegate?.didSelectCharacter(characterImage: selectedCharacterImage)
         navigationController?.popViewController(animated: true)
+    }
+    
+    private func fetchCharacterList() {
+        networkService.fetchCharacterList() {[weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                myCharacterList = response
+                    .filter { $0.open } //open이 true인 항목만 선택해서
+                    .map { $0.rewardLevel } //rewardLevel 값만 추출
+                DispatchQueue.main.async {
+                    self.myCharacterCollectionView.reloadData()
+                }
+            case .failure(let response):
+                print(response)
+            }
+        }
     }
 }
 
 extension CharacterEditViewController: UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 6
+        return myCharacterList.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CharacterEditCollectionViewCell.identifier, for: indexPath) as! CharacterEditCollectionViewCell
         
-        //cell.configure()
+        cell.configure(character: myCharacterList[indexPath.row])
         
         if indexPath == selectedIndexPath {
             cell.layer.borderColor = UIColor.blue700.cgColor

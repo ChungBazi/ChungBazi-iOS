@@ -47,7 +47,7 @@ extension NotificationEndpoints: TargetType {
     var task: Task {
         switch self {
         case .fetchAlarmList(let type, let cursor):
-            return .requestParameters(parameters: ["type": type, "cursor": cursor, "limit": 15], encoding: URLEncoding.default)
+            return .requestParameters(parameters: ["type": type, "cursor": cursor, "limit": 15], encoding: URLEncoding.queryString)
         case .fetchAlarmSetting:
             return .requestPlain
         case .patchAlarmSetting(let data):
