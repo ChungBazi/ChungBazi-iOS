@@ -20,7 +20,7 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         $0.contentMode = .scaleAspectFit
         $0.image = .rewardColorIcon
     }
-
+    
     private lazy var level = UILabel().then {
         $0.text = "1"
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
@@ -60,7 +60,7 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
         self.level.text = nil
         self.background.backgroundColor = nil
     }
-        
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -72,16 +72,16 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     private func setConstraints() {
         character.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(3)
-            $0.top.equalToSuperview()
+            $0.top.equalToSuperview().offset(12)
         }
         
-        crown.snp.makeConstraints { 
+        crown.snp.makeConstraints {
             $0.size.equalTo(18)
         }
         
         characterInfoStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.top.equalTo(character.snp.bottom).offset(3)
+            $0.bottom.equalToSuperview().offset(-9)
         }
         
         background.snp.makeConstraints {
@@ -115,11 +115,29 @@ class GetCharacterCollectionViewCell: UICollectionViewCell {
     }
     
     public func configure() {
-
+        
     }
     
     //cell을 lock상태로 만드는 함수
-    //cell을 unlock상태로 만드는 함수
-    //cell을 완전히 잠금해제로 만드는 함수
+    public func setLockedState() {
+        background.isHidden = false
+        background.backgroundColor = .blue100
+        locked.isHidden = false
+        unlocked.isHidden = true
+    }
     
+    //cell을 unlock상태로 만드는 함수
+    public func setUnlockedState() {
+        background.isHidden = false
+        background.backgroundColor = UIColor(hex: "#FFF260")
+        locked.isHidden = true
+        unlocked.isHidden = false
+    }
+    
+    //cell을 완전히 잠금해제로 만드는 함수
+    public func setFullyUnlockedState() {
+        background.isHidden = true
+        locked.isHidden = true
+        unlocked.isHidden = true
+    }
 }
