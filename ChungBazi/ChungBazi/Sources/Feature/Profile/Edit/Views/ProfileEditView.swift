@@ -11,12 +11,15 @@ import Then
 
 protocol ProfileEditViewDelegate: AnyObject {
     func didCompleteEditing(nickname: String, selectedImage: String)
+    func didSelectCharacter(characterImage: String)
 }
 
 final class ProfileEditView: UIView, UITextFieldDelegate {
     
+    let userInfoData = UserProfileDataManager.shared
+    
     weak var delegate: ProfileEditViewDelegate?
-    private var selectedCharacter: String? = CharacterImage.default
+    private lazy var selectedCharacter = userInfoData.getCharacter()
     
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .green300
@@ -29,8 +32,8 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     public let settingCharacterBtn = CustomButton(backgroundColor: .white, titleText: "캐릭터 설정", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
     private let nickNameTitle = B14_M(text: "닉네임", textColor: .gray500)
-    private let nickNameTextField = UITextField().then {
-        $0.text = ""
+    public let nickNameTextField = UITextField().then {
+        $0.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.clearButtonMode = .always
         $0.returnKeyType = .done
@@ -113,6 +116,12 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     func configure(with data: ProfileModel) {
         nickNameTextField.text = data.name
         emailLabel.text = data.email
+        profileImageView.image = UIImage(named: data.characterImg)
+    }
+    
+    func updateProfileImage(characterImage: String) {
+        profileImageView.image = UIImage(named: characterImage)
+        selectedCharacter = characterImage
     }
     
     @objc private func completeBtnTapped() {
@@ -120,7 +129,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
             print("닉네임이 비어있습니다.")
             return
         }
-        let selectedImage = self.selectedCharacter ?? CharacterImage.default
+        let selectedImage = self.selectedCharacter
         delegate?.didCompleteEditing(nickname: nickname, selectedImage: selectedImage)
     }
 }

@@ -33,8 +33,8 @@ final class CharacterService: NetworkManager {
     }
     
     /// 보유 캐릭터 리스트 조회 API
-    public func fetchCharacterList(completion: @escaping (Result<CharacterListResponseDto, NetworkError>) -> Void) {
-        request(target: .fetchCharacterList, decodingType: CharacterListResponseDto.self, completion: completion)
+    public func fetchCharacterList(completion: @escaping (Result<[CharacterListResponseDto], NetworkError>) -> Void) {
+        request(target: .fetchCharacterList, decodingType: [CharacterListResponseDto].self, completion: completion)
     }
     
     /// 개별 캐릭터 선택 및 오픈 API

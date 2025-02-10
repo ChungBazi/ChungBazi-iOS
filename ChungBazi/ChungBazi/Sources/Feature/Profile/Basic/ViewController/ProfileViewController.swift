@@ -10,10 +10,10 @@ import SwiftyToaster
 import KeychainSwift
 
 class ProfileViewController: UIViewController {
-    
     private let profileView = ProfileView()
     private var profileData: ProfileModel?
     private var rewardData: RewardModel?
+    let userInfoData = UserProfileDataManager.shared
 
     let networkService = AuthService()
     let kakaoAuthVM = KakaoAuthVM()
@@ -24,7 +24,11 @@ class ProfileViewController: UIViewController {
         
         setupUI()
         profileView.delegate = self
-        fetchData()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchProfile()
     }
     
     
@@ -39,19 +43,21 @@ class ProfileViewController: UIViewController {
         }
     }
     
-    private func fetchData() {
+    private func fetchProfile() {
         service.fetchProfile { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let profile):
-                self.profileData = ProfileModel(userId: profile.userId, name: profile.name, email: profile.email, characterImg: profile.characterImg)
+            case .success(let response):
+                self.profileData = ProfileModel(userId: response.userId, name: response.name, email: response.email, characterImg: response.characterImg)
+                userInfoData.setNickname(response.name)
+                userInfoData.setCharacter(response.characterImg)
                 DispatchQueue.main.async {
                     if let profileData = self.profileData {
                         self.profileView.configure(with: profileData)
                     }
                 }
-            case .failure(let error):
-                print("❌프로필 불러오기 실패: \(error.localizedDescription)")
+            case .failure(let response):
+                print("❌프로필 불러오기 실패: \(response.localizedDescription)")
             }
         }
     }

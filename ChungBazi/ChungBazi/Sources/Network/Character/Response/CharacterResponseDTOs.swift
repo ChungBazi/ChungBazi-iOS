@@ -13,10 +13,6 @@ struct MainCharacterResponseDto: Decodable {
 }
 
 struct CharacterListResponseDto: Decodable {
-    let character: [CharacterInfo]
-}
-
-struct CharacterInfo: Decodable {
     let rewardLevel: String
     let open: Bool
 }

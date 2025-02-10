@@ -180,7 +180,7 @@ extension NetworkManager {
                 let errorResponse = try? JSONDecoder().decode(ErrorResponse.self, from: response.data)
                 let finalMessage = errorResponse?.message ?? errorMessage
                 
-                if errorResponse?.code == "TOKEN4011" {
+                if errorResponse?.code == "TOKEN4011" || errorResponse?.code == "TOKEN4012" {
                     print("[토큰 만료] 토큰 재발급 시도 중...")
                     
                     AuthService().reIssueAccesToken { success in
@@ -193,9 +193,8 @@ extension NetworkManager {
                     }
                     return .failure(.tokenExpiredError)
                     
-                } else if errorResponse?.code == "TOKEN4012" {
-                    return .failure(.refreshTokenExpiredError)
                 }
+                
                 return .failure(.serverError(statusCode: response.statusCode, message: finalMessage))
             }
 

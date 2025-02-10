@@ -28,7 +28,6 @@ final class ProfileView: UIView {
     
     private let profileImageView = UIImageView().then {
         $0.backgroundColor = .green300
-        $0.image = .basicBaro
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
         $0.createRoundedView(radius: 57)
@@ -164,12 +163,11 @@ final class ProfileView: UIView {
         }
         tableView.register(ProfileTableCell.self, forCellReuseIdentifier: "ProfileTableCell")
     }
-    
+
     func configure(with data: ProfileModel) {
         nameLabel.text = data.name
         emailLabel.text = data.email
-        
-        let defaultProfileImage = UIImage(named: "basicBaro")
+        profileImageView.image = UIImage(named: "\(data.characterImg)")
     }
     
     @objc private func editProfileBtnTapped() {
