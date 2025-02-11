@@ -74,7 +74,7 @@ struct PostPostResponse: Decodable {
     let userName: String
     let reward: String
     let characterImg: String
-    let thumbnailUrl: String
+    let thumbnailUrl: String?
     let imageUrls: [String]?
 }
 

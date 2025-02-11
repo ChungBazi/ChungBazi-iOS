@@ -55,6 +55,11 @@ enum CommunityCategory: String, CaseIterable, Codable {
     static func index(of category: CommunityCategory) -> Int? {
         return CommunityCategory.allCases.firstIndex(of: category)
     }
+    
+    /// 대문자로 변환 후 매칭
+    static func fromString(_ value: String) -> CommunityCategory? {
+        return CommunityCategory.allCases.first { $0.displayName == value } ?? CommunityCategory(rawValue: value.uppercased())
+    }
 }
 
 extension Collection {

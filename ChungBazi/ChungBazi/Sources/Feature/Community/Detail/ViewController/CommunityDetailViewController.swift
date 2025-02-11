@@ -165,10 +165,7 @@ final class CommunityDetailViewController: UIViewController {
                 guard let response = response else { return }
 
                 let newComments = response.commentsList
-                if newComments.isEmpty {
-                    print("✅ 서버에서 반환된 댓글이 없으므로 추가 로드 중지")
-                    return
-                }
+                if newComments.isEmpty { return }
 
                 self.comments.append(contentsOf: newComments.compactMap { comment in
                     guard let postId = comment.postId,

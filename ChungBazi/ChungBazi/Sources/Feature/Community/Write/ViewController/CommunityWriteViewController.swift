@@ -131,18 +131,20 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
 
     @objc private func didTapPostButton() {
         guard let title = communityWriteView.titleTextField.text,
-              let category = communityWriteView.selectedCategory,
+              let categoryString = communityWriteView.selectedCategory,
+              let communityCategory = CommunityCategory.fromString(categoryString),
               let content = communityWriteView.contentTextView.text else { return }
 
-        let requestBody = CommunityPostRequestDto(title: title, content: content, category: category)
+        let requestBody = CommunityPostRequestDto(title: title, content: content, category: communityCategory.rawValue)
         let images = communityWriteView.selectedImages
 
         communityService.postCommunityPost(body: requestBody, imageList: images) { result in
             switch result {
             case .success(let response):
-                print("✅ 게시글 업로드 성공: \(response)")
-                self.dismiss(animated: true)
-
+                DispatchQueue.main.async {
+                    let detailVC = CommunityDetailViewController(postId: response.postId)
+                    self.navigationController?.pushViewController(detailVC, animated: true)
+                }
             case .failure(let error):
                 print("🚨 게시글 업로드 실패: \(error.localizedDescription)")
             }

@@ -78,6 +78,7 @@ final class CommunityDetailPostView: UIView {
         photoCollectionView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.top.equalTo(contentLabel.snp.bottom).offset(23)
+            $0.height.equalTo(131)
         }
         likeButton.snp.makeConstraints {
             $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
@@ -109,21 +110,13 @@ final class CommunityDetailPostView: UIView {
         commentCountLabel.text = "댓글 \(post.commentCount)"
         viewCountLabel.text = "조회 \(post.views)"
         
+        print("✅ 이미지 URLs: \(post.imageUrls ?? [])")
+        
         imageUrls = post.imageUrls ?? []
-        photoCollectionView.reloadData()
         
-        photoCollectionView.isHidden = imageUrls.isEmpty
-        
-        if imageUrls.isEmpty {
-            likeButton.snp.remakeConstraints {
-                $0.top.equalTo(contentLabel.snp.bottom).offset(23)
-                $0.leading.bottom.equalToSuperview().inset(Constants.gutter)
-            }
-        } else {
-            likeButton.snp.remakeConstraints {
-                $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
-                $0.leading.bottom.equalToSuperview().inset(Constants.gutter)
-            }
+        DispatchQueue.main.async {
+            self.photoCollectionView.reloadData()
+            self.photoCollectionView.layoutIfNeeded()
         }
     }
 }
@@ -136,7 +129,7 @@ extension CommunityDetailPostView: UICollectionViewDataSource, UICollectionViewD
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityWritePhotoCell", for: indexPath) as! CommunityWritePhotoCell
         if let url = URL(string: imageUrls[indexPath.item]) {
-            cell.configure(with: url)
+            cell.configure(with: url, showDeleteButton: false)
         }
         return cell
     }

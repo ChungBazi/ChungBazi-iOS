@@ -9,6 +9,12 @@ struct CommunityPostRequestDto: Codable {
     let title: String
     let content: String
     let category: String
+    
+    init(title: String, content: String, category: String) {
+        self.title = title
+        self.content = content
+        self.category = category
+    }
 }
 
 struct CommunityCommentRequestDto: Codable {

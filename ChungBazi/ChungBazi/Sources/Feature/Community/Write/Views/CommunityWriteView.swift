@@ -232,7 +232,7 @@ final class CommunityWriteCollectionViewHandler: NSObject, UICollectionViewDeleg
         
         cell.configure(with: image, index: indexPath.item, onDelete: { [weak self] index in
             self?.removeImage?(index)
-        })
+        }, showDeleteButton: true)
         
         return cell
     }

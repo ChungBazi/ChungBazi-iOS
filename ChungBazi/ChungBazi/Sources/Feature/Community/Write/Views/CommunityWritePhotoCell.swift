@@ -25,6 +25,12 @@ final class CommunityWritePhotoCell: UICollectionViewCell {
     private let xButton = UIButton.createWithImage(image: .xIcon)
     var onDeleteTapped: ((Int) -> Void)?
     
+    private var shouldShowDeleteButton: Bool = true {
+        didSet {
+            xButtonContainerView.isHidden = !shouldShowDeleteButton
+        }
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -50,18 +56,20 @@ final class CommunityWritePhotoCell: UICollectionViewCell {
         }
     }
     
-    func configure(with image: UIImage, index: Int, onDelete: @escaping (Int) -> Void) {
+    func configure(with image: UIImage, index: Int, onDelete: @escaping (Int) -> Void, showDeleteButton: Bool) {
         photoImageView.image = image
         onDeleteTapped = onDelete
         xButton.tag = index
         xButton.addTarget(self, action: #selector(handleDeleteTap), for: .touchUpInside)
+        self.shouldShowDeleteButton = showDeleteButton
     }
     
     @objc private func handleDeleteTap() {
         onDeleteTapped?(xButton.tag)
     }
     
-    func configure(with url: URL) {
+    func configure(with url: URL, showDeleteButton: Bool) {
         photoImageView.kf.setImage(with: url)
+        self.shouldShowDeleteButton = showDeleteButton
     }
 }

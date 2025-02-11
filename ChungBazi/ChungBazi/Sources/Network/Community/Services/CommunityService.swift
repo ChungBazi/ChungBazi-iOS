@@ -55,8 +55,43 @@ final class CommunityService: NetworkManager {
     }
     
     /// 커뮤니티 글 작성 API
-    public func postCommunityPost(body: CommunityPostRequestDto, imageList: [UIImage], completion: @escaping (Result<PostPostResponse, NetworkError>) -> Void) {
-        request(target: .postCommunityPost(data: body, imageList: imageList), decodingType: PostPostResponse.self, completion: completion)
+    func postCommunityPost(body: CommunityPostRequestDto, imageList: [UIImage], completion: @escaping (Result<PostPostResponse, Error>) -> Void) {
+        
+        var multipartData: [MultipartFormData] = []
+
+        if let jsonData = try? JSONEncoder().encode(body) {
+            multipartData.append(MultipartFormData(provider: .data(jsonData), name: "info", mimeType: "application/json"))
+        } else {
+            print("🚨 JSON 인코딩 실패")
+            return
+        }
+
+        for (index, image) in imageList.enumerated() {
+            if let imageData = image.jpegData(compressionQuality: 0.8) {
+                let imagePart = MultipartFormData(provider: .data(imageData), name: "imageList", fileName: "image\(index).jpg", mimeType: "image/jpeg")
+                multipartData.append(imagePart)
+            }
+        }
+
+        provider.request(.postCommunityPost(data: body, imageList: imageList)) { result in
+            switch result {
+            case .success(let response):
+                do {
+                    let jsonObject = try JSONSerialization.jsonObject(with: response.data, options: []) as? [String: Any]
+                    if let resultData = jsonObject?["result"] {
+                        let resultJson = try JSONSerialization.data(withJSONObject: resultData, options: [])
+                        let responseObject = try JSONDecoder().decode(PostPostResponse.self, from: resultJson)
+                        completion(.success(responseObject))
+                    } else {
+                        completion(.failure(NSError(domain: "", code: -1, userInfo: [NSLocalizedDescriptionKey: "result 데이터가 없습니다."])))
+                    }
+                } catch {
+                    completion(.failure(error))
+                }
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
     
     /// 커뮤니티 댓글 작성 API
