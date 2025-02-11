@@ -126,7 +126,15 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     // 백그라운드에서 푸시 알림을 탭했을 때 실행
     func application(_ application: UIApplication,
                      didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data) {
-        Messaging.messaging().apnsToken = deviceToken
+        Messaging.messaging().apnsToken = deviceToken // APNs 토큰 등록
+        Messaging.messaging().token { token, error in
+            if let error = error {
+                print("Error fetching FCM registration token: \(error)")
+            } else if let token = token {
+                print("----FCM registration token: \(token)")
+                KeychainSwift().set(token, forKey: "FCMToken")
+            }
+        }
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, willPresent notification: UNNotification, withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void) {
@@ -141,23 +149,21 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
 extension AppDelegate: MessagingDelegate {
     // 파이어베이스 MessagingDelegate 설정
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
-        KeychainSwift().set(fcmToken!, forKey: "FCMToken")
+        guard let fcmToken = fcmToken else { return }
         
-        let dataDict: [String: String] = ["token": fcmToken ?? ""]
+        let storedToken = KeychainSwift().get("FCMToken")
+        if storedToken != fcmToken { // 기존 토큰과 다를 때만 업데이트
+            KeychainSwift().set(fcmToken, forKey: "FCMToken")
+            print("🔄 FCM Token 업데이트됨: \(fcmToken)")
+        } else {
+            print("✅ 기존 FCM Token 유지됨")
+        }
+        
         NotificationCenter.default.post(
             name: Notification.Name("FCMToken"),
             object: nil,
-            userInfo: dataDict
+            userInfo: ["token": fcmToken]
         )
-        
-        Messaging.messaging().token { token, error in
-            if let error = error {
-                print("Error fetching FCM registration token: \(error)")
-      
-            } else if let token = token {
-                print("----FCM registration token: \(token)")
-            }
-        }
     }
 }
 
