@@ -51,4 +51,6 @@ final class PolicyService: NetworkManager {
     public func fetchCalendarPolicyList(yearMonth: String, completion: @escaping (Result<CalendarPolicyListResponseDto?, NetworkError>) -> Void) {
         requestOptional(target: .fetchCalendarPolicyList(yearMonth: yearMonth), decodingType: CalendarPolicyListResponseDto.self, completion: completion)
     }
+    
+    /// 정책 추천 조회
 }
