@@ -45,7 +45,9 @@ struct CommunityDetailResponseDTO: Decodable {
 }
 
 struct CommunityCommentResponseDTO: Decodable {
-    let result: [Comment]?
+    let commentsList: [Comment]
+    let nextCursor: Int
+    let hasNext: Bool
 }
 
 struct Comment: Decodable {
@@ -72,7 +74,7 @@ struct PostPostResponse: Decodable {
     let userName: String
     let reward: String
     let characterImg: String
-    let thumbnailUrl: String
+    let thumbnailUrl: String?
     let imageUrls: [String]?
 }
 

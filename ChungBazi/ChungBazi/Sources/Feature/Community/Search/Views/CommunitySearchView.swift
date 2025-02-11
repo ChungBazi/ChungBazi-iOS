@@ -66,18 +66,18 @@ final class CommunitySearchView: UIView {
             $0.top.equalToSuperview()
             $0.leading.equalToSuperview().inset(Constants.gutter)
             $0.width.equalTo(91)
-            $0.height.equalTo(36)
+            $0.height.equalTo(36*Constants.communitySearchPeriodCategoryItems.count + 36 + 8)
         }
         dropdownTitleView.snp.makeConstraints {
-            $0.centerY.equalTo(dropdownPeriodView)
+            $0.top.equalTo(dropdownPeriodView)
             $0.leading.equalTo(dropdownPeriodView.snp.trailing).offset(9)
             $0.width.equalTo(91)
-            $0.height.equalTo(36)
+            $0.height.equalTo(36*Constants.communitySearchTitleCategoryItems.count + 36 + 8)
         }
         
         searchbarView.addSubview(searchButton)
         searchbarView.snp.makeConstraints {
-            $0.top.equalTo(dropdownPeriodView.snp.bottom).offset(10)
+            $0.top.equalToSuperview().offset(46)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.height.equalTo(40)
         }

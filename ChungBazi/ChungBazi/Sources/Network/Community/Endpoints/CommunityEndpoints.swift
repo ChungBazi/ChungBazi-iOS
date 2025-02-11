@@ -11,9 +11,9 @@ import Moya
 import KeychainSwift
 
 enum CommunityEndpoints {
-    case getCommunityPosts(category: String, lastPostId: Int?)
+    case getCommunityPosts(category: String, cursor: Int)
     case getCommunityPost(postId: Int)
-    case getCommunityComments(postId: Int, lastCommentId: Int?)
+    case getCommunityComments(postId: Int, cursor: Int)
     case postCommunityPost(data: CommunityPostRequestDto, imageList: [UIImage])
     case postCommunityComment(data: CommunityCommentRequestDto)
 }
@@ -53,18 +53,19 @@ extension CommunityEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .getCommunityPosts(let category, let lastPostId):
-            var parameters: [String: Any] = ["category": category, "size": 10]
-            if let lastPostId = lastPostId {
-                parameters["lastPostId"] = lastPostId
+        case .getCommunityPosts(let category, let cursor):
+            var parameters: [String: Any] = ["size": 10, "cursor": 0]
+            if !category.isEmpty {
+                parameters["category"] = category
             }
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
 
-        case .getCommunityComments(let postId, let lastCommentId):
-            var parameters: [String: Any] = ["postId": postId, "size": 10]
-            if let lastCommentId = lastCommentId {
-                parameters["lastCommentId"] = lastCommentId
-            }
+        case .getCommunityComments(let postId, let cursor):
+            let parameters: [String: Any] = [
+                "postId": postId,
+                "cursor": cursor,
+                "size": 10
+            ]
             return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
 
         case .getCommunityPost:
@@ -72,23 +73,28 @@ extension CommunityEndpoints: TargetType {
 
         case .postCommunityPost(let data, let imageList):
             var multipartData: [MultipartFormData] = []
-            
-            let compressionQuality: CGFloat = 0.8
-            
-            if let jsonData = try? JSONEncoder().encode(data) {
-                multipartData.append(
-                    MultipartFormData(provider: .data(jsonData), name: "info", fileName: "info.json", mimeType: "application/json")
-                )
-            }
-            
-            for image in imageList where !imageList.isEmpty {
-                if let imageData = image.jpegData(compressionQuality: compressionQuality) {
+
+            do {
+                let jsonData = try JSONEncoder().encode(data)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
                     multipartData.append(
-                        MultipartFormData(provider: .data(imageData), name: "imageList", fileName: "\(UUID().uuidString).jpeg", mimeType: "image/jpeg")
+                        MultipartFormData(provider: .data(jsonData), name: "info", mimeType: "application/json")
+                    )
+                }
+            } catch {
+                print("JSON 인코딩 실패: \(error.localizedDescription)")
+                return .requestPlain
+            }
+
+            for image in imageList.prefix(10) {
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    let fileName = "\(UUID().uuidString).jpg"
+                    multipartData.append(
+                        MultipartFormData(provider: .data(imageData), name: "imageList", fileName: fileName, mimeType: "image/jpeg")
                     )
                 }
             }
-            
+
             return .uploadMultipart(multipartData)
 
         case .postCommunityComment(let data):

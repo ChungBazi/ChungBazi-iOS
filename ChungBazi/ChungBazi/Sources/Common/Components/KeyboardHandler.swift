@@ -54,13 +54,12 @@ final class KeyboardHandler: NSObject, UIScrollViewDelegate {
             self.scrollView?.contentInset.bottom = keyboardHeight
             self.scrollView?.scrollIndicatorInsets.bottom = keyboardHeight
 
-            if let inputView = self.inputView, let superview = inputView.superview {
+            if let inputView = self.inputView {
                 if self.inputViewBottomConstraint == nil {
                     inputView.snp.makeConstraints {
-                        self.inputViewBottomConstraint = $0.bottom.equalTo(superview.safeAreaLayoutGuide.snp.bottom).constraint
+                        self.inputViewBottomConstraint = $0.bottom.equalTo(inputView.superview!.safeAreaLayoutGuide.snp.bottom).constraint
                     }
                 }
-
                 self.inputViewBottomConstraint?.update(offset: -keyboardHeight)
             }
             self.viewController?.view.layoutIfNeeded()
@@ -72,9 +71,7 @@ final class KeyboardHandler: NSObject, UIScrollViewDelegate {
             self.scrollView?.contentInset.bottom = 0
             self.scrollView?.scrollIndicatorInsets.bottom = 0
 
-            if let inputView = self.inputView {
-                self.inputViewBottomConstraint?.update(offset: 0)
-            }
+            self.inputViewBottomConstraint?.update(offset: 0)
             self.viewController?.view.layoutIfNeeded()
         })
     }

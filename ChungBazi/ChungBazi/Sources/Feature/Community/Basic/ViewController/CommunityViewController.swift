@@ -34,7 +34,7 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     private func fetchData(for categoryIndex: Int) {
         guard let category = CommunityCategory.allCases[safe: categoryIndex] else { return }
         
-        communityService.getCommunityPosts(category: category.rawValue, lastPostId: nil) { [weak self] result in
+        communityService.getCommunityPosts(category: category.rawValue, cursor: 0) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let success):

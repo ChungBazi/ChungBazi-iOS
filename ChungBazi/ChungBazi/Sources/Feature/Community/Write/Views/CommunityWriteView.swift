@@ -1,30 +1,32 @@
-//
-//  CommunityWriteView.swift
-//  ChungBazi
-//
-//  Created by 신호연 on 2/2/25.
-//
-
 import UIKit
 import SnapKit
 import Then
 
 protocol CommunityWriteViewDelegate: AnyObject {
     func didTapCameraButton()
+    func didSelectDropdownItem(_ item: String)
+    func checkIfPostCanBeEnabled()
 }
 
-final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDelegate {
+final class CommunityWriteView: UIView, UITextViewDelegate {
+
+    weak var viewDelegate: CommunityWriteViewDelegate?
     
-    weak var delegate: CommunityWriteViewDelegate?
+    var selectedCategory: String?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
-    private let dropdownView = CompactDropdown(
+    private let dropdownView = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "관심",
         hasBorder: false,
         items: Constants.communityCategoryItems.filter { $0 != CommunityCategory.all.displayName }
-    )
+    ).then {
+        $0.isUserInteractionEnabled = true
+    }
+    
     private let cameraButton = UIButton.createWithImage(
         image: .cameraIcon,
         tintColor: .gray500,
@@ -32,25 +34,27 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         action: #selector(handleCameraButtonTap)
     )
     
-    private let titleTextField = UITextField().then {
+    let titleTextField = UITextField().then {
         $0.attributedPlaceholder = NSAttributedString(
             string: "제목을 입력해주세요.",
             attributes: [
                 .font: UIFont.ptdSemiBoldFont(ofSize: 20),
-                NSAttributedString.Key.foregroundColor: UIColor.gray300
+                .foregroundColor: UIColor.gray300
             ]
         )
         $0.defaultTextAttributes = [
             .font: UIFont.ptdSemiBoldFont(ofSize: 20),
             .foregroundColor: UIColor.black
         ]
+        $0.backgroundColor = .clear
+        $0.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
     private let separateLine = UIView().then {
         $0.backgroundColor = .gray300
     }
     
-    private let contentTextView = UITextView().then {
+    let contentTextView = UITextView().then {
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
         $0.textColor = UIColor.gray300
         $0.text = "자유롭게 얘기해보세요."
@@ -79,6 +83,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
             }
             DispatchQueue.main.async {
                 self.photoCollectionView.reloadData()
+                self.viewDelegate?.checkIfPostCanBeEnabled()
             }
         }
     }
@@ -91,10 +96,18 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         $0.tintColor = .gray500
     }
     
+    private let collectionViewHandler = CommunityWriteCollectionViewHandler()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
-        setupDelegates()
+        setupHandlers()
+        dropdownView.delegate = self
+        contentTextView.delegate = self
+
+        DispatchQueue.main.async {
+            self.bringSubviewToFront(self.dropdownView)
+        }
     }
     
     required init?(coder: NSCoder) {
@@ -102,83 +115,73 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
     
     private func setupUI() {
-        addSubviews(scrollView, communityRuleView)
-        
+        addSubviews(scrollView, dropdownView)
         scrollView.addSubview(contentView)
-        contentView.addSubviews(dropdownView, cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView)
+        contentView.addSubviews(cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView, communityRuleView)
+
         scrollView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-            $0.bottom.equalTo(communityRuleView.snp.top).offset(-22)
-        }
-        contentView.snp.makeConstraints {
-            $0.top.leading.trailing.width.equalToSuperview()
-            $0.bottom.equalTo(photoCollectionView).offset(20)
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
         
+        scrollView.delaysContentTouches = false
+
+        contentView.snp.makeConstraints {
+            $0.edges.width.equalToSuperview()
+            $0.bottom.equalTo(photoCollectionView.snp.bottom).offset(20)
+        }
+
         dropdownView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(14)
             $0.leading.equalToSuperview().inset(Constants.gutter)
             $0.width.equalTo(91)
-            $0.height.equalTo(36)
+            $0.height.equalTo(36*Constants.communityCategoryItems.count + 36 + 8)
         }
-        
+
         cameraButton.snp.makeConstraints {
-            $0.centerY.equalTo(dropdownView)
+            $0.top.equalToSuperview().offset(20)
             $0.trailing.equalToSuperview().inset(28)
         }
-        
+
         titleTextField.snp.makeConstraints {
-            $0.top.equalTo(dropdownView.snp.bottom).offset(16)
+            $0.top.equalToSuperview().offset(66)
             $0.leading.trailing.equalToSuperview().inset(24)
         }
-        
+
         separateLine.snp.makeConstraints {
             $0.top.equalTo(titleTextField.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.height.equalTo(1)
         }
-        
+
         contentTextView.snp.makeConstraints {
             $0.top.equalTo(separateLine.snp.bottom).offset(18)
             $0.leading.trailing.equalTo(titleTextField)
             $0.height.greaterThanOrEqualTo(80)
         }
-        
+
         photoCollectionView.snp.makeConstraints {
             $0.top.equalTo(contentTextView.snp.bottom).offset(46)
             $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(98)
         }
         
-        communityRuleView.addSubviews(communityRuleLabel, communityRuleIcon)
-        communityRuleView.snp.makeConstraints {
-            $0.bottom.equalToSuperview().inset(22)
-            $0.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.height.equalTo(20)
-        }
-        
-        communityRuleLabel.snp.makeConstraints {
-            $0.trailing.equalTo(communityRuleIcon.snp.leading).offset(-9.5)
-            $0.centerY.equalToSuperview()
-        }
-        
-        communityRuleIcon.snp.makeConstraints {
-            $0.trailing.centerY.equalToSuperview()
-        }
-        
-        contentView.snp.makeConstraints {
-            $0.bottom.equalTo(communityRuleView.snp.top).inset(22)
-        }
+        scrollView.delaysContentTouches = false
     }
     
-    private func setupDelegates() {
-        contentTextView.delegate = self
-        photoCollectionView.dataSource = self
-        photoCollectionView.delegate = self
+    private func setupHandlers() {
+        photoCollectionView.delegate = collectionViewHandler
+        photoCollectionView.dataSource = collectionViewHandler
+        collectionViewHandler.selectedImages = { [weak self] in
+            self?.selectedImages ?? []
+        }
+        collectionViewHandler.removeImage = { [weak self] index in
+            self?.removeImage(at: index)
+        }
     }
     
     @objc private func handleCameraButtonTap() {
-        delegate?.didTapCameraButton()
+        viewDelegate?.didTapCameraButton()
     }
     
     func removeImage(at index: Int) {
@@ -187,7 +190,17 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
         photoCollectionView.reloadData()
     }
     
-    // MARK: - UITextViewDelegate
+    @objc private func textFieldDidChange() {
+        viewDelegate?.checkIfPostCanBeEnabled()
+    }
+
+    func textViewDidChange(_ textView: UITextView) {
+        viewDelegate?.checkIfPostCanBeEnabled()
+    }
+}
+
+final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
+    weak var contentTextView: UITextView?
     
     func textViewDidBeginEditing(_ textView: UITextView) {
         if textView.text == "자유롭게 얘기해보세요." {
@@ -204,19 +217,31 @@ final class CommunityWriteView: UIView, UITextViewDelegate, UICollectionViewDele
     }
 }
 
-extension CommunityWriteView: UICollectionViewDataSource {
+final class CommunityWriteCollectionViewHandler: NSObject, UICollectionViewDelegate, UICollectionViewDataSource {
+    weak var photoCollectionView: UICollectionView?
+    var selectedImages: (() -> [UIImage])?
+    var removeImage: ((Int) -> Void)?
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return selectedImages.count
+        return selectedImages?().count ?? 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityWritePhotoCell", for: indexPath) as! CommunityWritePhotoCell
-        let image = selectedImages[indexPath.item]
+        let image = selectedImages?()[indexPath.item] ?? UIImage()
         
         cell.configure(with: image, index: indexPath.item, onDelete: { [weak self] index in
-            self?.removeImage(at: index)
-        })
+            self?.removeImage?(index)
+        }, showDeleteButton: true)
         
         return cell
+    }
+}
+
+extension CommunityWriteView: CustomDropdownDelegate {
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        selectedCategory = item
+        viewDelegate?.didSelectDropdownItem(item)
+        viewDelegate?.checkIfPostCanBeEnabled()
     }
 }
