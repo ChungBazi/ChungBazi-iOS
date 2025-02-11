@@ -30,18 +30,24 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         view.addSubview(calendarView)
         calendarView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(Constants.tabBarHeight)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(15)
             $0.leading.trailing.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: false, showRightCartButton: true, showLeftSearchButton: true)
+        addCustomNavigationBar(titleText: "캘린더", showBackButton: false, showCartButton: false, showAlarmButton: false, showRightCartButton: true, showLeftSearchButton: false)
     }
     
     // MARK: - Data
     private func fetchData() {
+        showLoading()
+        
         let currentYearMonth = DateFormatter.yearMonth.string(from: Date())
         
         calendarService.getCalendarPolicies(yearMonth: currentYearMonth) { [weak self] result in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.hideLoading()
+            }
             
             switch result {
             case .success(let response):

@@ -22,6 +22,7 @@ final class CommunityDetailPostView: UIView {
     private let contentLabel = UILabel().then {
         $0.textColor = .gray800
         $0.font = .ptdMediumFont(ofSize: 14)
+        $0.numberOfLines = 0
     }
     
     private let photoCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
@@ -36,7 +37,12 @@ final class CommunityDetailPostView: UIView {
         $0.register(CommunityWritePhotoCell.self, forCellWithReuseIdentifier: "CommunityWritePhotoCell")
     }
     
-    private let likeButton = UIButton.createWithImage(image: .likeIcon, target: self, action: #selector(likeBtnTapped))
+    private var isLiked: Bool = false
+    private let likeButton = UIButton.createWithImage(
+        image: UIImage.likeIcon.withRenderingMode(.alwaysOriginal),
+        target: self,
+        action: #selector(likeBtnTapped)
+    )
     private let likeCountLabel = UILabel().then {
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 14)
@@ -99,7 +105,10 @@ final class CommunityDetailPostView: UIView {
     }
     
     @objc private func likeBtnTapped() {
-        
+        isLiked.toggle()
+        let image = isLiked ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+                            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(image, for: .normal)
     }
     
     func configure(with post: CommunityDetailPostModel) {
@@ -110,13 +119,33 @@ final class CommunityDetailPostView: UIView {
         commentCountLabel.text = "댓글 \(post.commentCount)"
         viewCountLabel.text = "조회 \(post.views)"
         
-        print("✅ 이미지 URLs: \(post.imageUrls ?? [])")
-        
         imageUrls = post.imageUrls ?? []
         
+        let hasImages = !imageUrls.isEmpty
+        photoCollectionView.isHidden = !hasImages
+        
+        if hasImages {
+            photoCollectionView.snp.remakeConstraints {
+                $0.leading.trailing.equalToSuperview()
+                $0.top.equalTo(contentLabel.snp.bottom).offset(23)
+                $0.height.equalTo(131)
+            }
+            
+            likeButton.snp.remakeConstraints {
+                $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
+                $0.bottom.leading.equalToSuperview().inset(Constants.gutter)
+            }
+        } else {
+            likeButton.snp.remakeConstraints {
+                $0.top.equalTo(contentLabel.snp.bottom).offset(26)
+                $0.bottom.leading.equalToSuperview().inset(Constants.gutter)
+            }
+        }
+        
+        layoutIfNeeded()
+
         DispatchQueue.main.async {
             self.photoCollectionView.reloadData()
-            self.photoCollectionView.layoutIfNeeded()
         }
     }
 }
@@ -132,5 +161,11 @@ extension CommunityDetailPostView: UICollectionViewDataSource, UICollectionViewD
             cell.configure(with: url, showDeleteButton: false)
         }
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let photoViewerVC = CommunityPhotoViewController(imageUrls: imageUrls, initialIndex: indexPath.item)
+        photoViewerVC.modalPresentationStyle = .fullScreen
+        UIApplication.shared.windows.first?.rootViewController?.present(photoViewerVC, animated: true, completion: nil)
     }
 }

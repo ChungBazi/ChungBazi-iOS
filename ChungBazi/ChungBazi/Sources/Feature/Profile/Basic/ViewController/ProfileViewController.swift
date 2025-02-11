@@ -45,8 +45,15 @@ class ProfileViewController: UIViewController {
     }
     
     private func fetchProfile() {
+        showLoading()
+        
         service.fetchProfile { [weak self] result in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.hideLoading()
+            }
+            
             switch result {
             case .success(let response):
                 self.profileData = ProfileModel(userId: response.userId, name: response.name, email: response.email, characterImg: response.characterImg)
@@ -64,8 +71,15 @@ class ProfileViewController: UIViewController {
     }
     
     private func fetchReward() {
+        showLoading()
+        
         service.fetchReward { [weak self] result in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.hideLoading()
+            }
+            
             switch result {
             case .success(let response):
                 self.rewardData = RewardModel(currentReward: response.rewardLevel, myPosts: response.postCount, myComments: response.commentCount)

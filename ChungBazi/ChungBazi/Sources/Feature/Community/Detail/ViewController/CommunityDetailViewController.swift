@@ -81,7 +81,6 @@ final class CommunityDetailViewController: UIViewController {
     private func setupUI() {
         view.backgroundColor = .gray50
         
-        // FIXME: - 카테고리에 따라 타이틀텍스트 변경
         addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
         fillSafeArea(position: .top, color: .white)
         fillSafeArea(position: .bottom, color: .white)
@@ -132,7 +131,7 @@ final class CommunityDetailViewController: UIViewController {
                     postId: success.postId,
                     title: success.title,
                     content: success.content,
-                    category: success.category,
+                    category: CommunityCategory(rawValue: success.category) ?? .all,
                     formattedCreatedAt: success.formattedCreatedAt,
                     views: success.views,
                     commentCount: success.commentCount,
@@ -143,7 +142,12 @@ final class CommunityDetailViewController: UIViewController {
                     characterImg: success.characterImg,
                     imageUrls: success.imageUrls
                 )
-                self.communityDetailView.updatePost(self.postData!)
+
+                DispatchQueue.main.async {
+                    self.updateNavigationBarTitle(with: self.postData?.categoryDisplayName ?? "커뮤니티")
+                    self.communityDetailView.updatePost(self.postData!)
+                }
+
             case .failure(let error):
                 print("❌ 게시글 불러오기 실패: \(error.localizedDescription)")
             }
@@ -152,13 +156,16 @@ final class CommunityDetailViewController: UIViewController {
     
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
-        guard hasNext else {
-            print("✅ 모든 댓글을 불러왔습니다.")
-            return
-        }
+        showLoading()
+        
+        guard hasNext else { return }
 
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.hideLoading()
+            }
 
             switch result {
             case .success(let response):
@@ -273,5 +280,9 @@ final class CommunityDetailViewController: UIViewController {
             self.commentInputBottomConstraint?.update(offset: 0)
             self.view.layoutIfNeeded()
         }
+    }
+    
+    private func updateNavigationBarTitle(with title: String) {
+        addCustomNavigationBar(titleText: title, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
     }
 }

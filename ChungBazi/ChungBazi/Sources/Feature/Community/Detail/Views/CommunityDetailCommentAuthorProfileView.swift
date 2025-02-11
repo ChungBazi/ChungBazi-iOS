@@ -68,8 +68,12 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
     }
     
     func formatUserLevel(_ level: String?) -> String {
-        guard let level = level, level.starts(with: "LEVEL_") else { return "" }
-        let levelNumber = level.replacingOccurrences(of: "LEVEL_", with: "")
-        return "Lv.\(levelNumber)"
+        guard let level = level else { return "" }
+        if level.starts(with: "LEVEL_") {
+            let levelNumber = level.replacingOccurrences(of: "LEVEL_", with: "")
+            return "Lv.\(levelNumber)"
+        }
+        
+        return level
     }
 }
