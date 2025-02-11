@@ -12,17 +12,9 @@ struct UserInfoRequestDto: Codable {
     let education: String
     let interests: [String]
     let additionInfo: [String]
-    
-    init(region: String, employment: String, income: String, education: String, interests: [String], additionInfo: [String]) {
-        self.region = region
-        self.employment = employment
-        self.income = income
-        self.education = education
-        self.interests = interests
-        self.additionInfo = additionInfo
-    }
 }
 
 struct ProfileUpdateRequestDto: Codable {
     let name: String
+    let characterImg: String
 }

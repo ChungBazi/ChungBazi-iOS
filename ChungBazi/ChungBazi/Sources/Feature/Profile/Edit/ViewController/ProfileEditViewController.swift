@@ -6,19 +6,23 @@
 //
 
 import UIKit
+import SwiftyToaster
 
-final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate {
+final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate, CharacterEditDelegate {
     
     private let scrollView = UIScrollView()
     private let profileEditView = ProfileEditView()
     var profileData: ProfileModel
     var onProfileUpdated: ((ProfileModel) -> Void)?
     
+    let networkService = UserService()
+    let userInfoData = UserProfileDataManager.shared
+    
     init(profileData: ProfileModel) {
         self.profileData = profileData
         super.init(nibName: nil, bundle: nil)
     }
-
+    
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
@@ -28,7 +32,9 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         setupUI()
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
+        profileEditView.nickNameTextField.delegate = self
         profileEditView.configure(with: profileData)
+        fillSafeArea(position: .top, color: .white)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -43,7 +49,10 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+        scrollView.showsVerticalScrollIndicator = false
+        
+        profileEditView.settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)
         
         view.addSubview(scrollView)
         scrollView.addSubview(profileEditView)
@@ -57,25 +66,46 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
             $0.edges.width.equalToSuperview()
         }
     }
-
+    
+    @objc private func settingCharacterBtnTapped() {
+        let vc = CharacterEditViewController()
+        vc.delegate = self
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
     func didCompleteEditing(nickname: String, selectedImage: String) {
-        let userService = UserService()
-        let requestBody = ProfileUpdateRequestDto(name: nickname, profileImg: selectedImage)
-
-        userService.updateProfile(body: requestBody) { [weak self] result in
+        let updateProfileDto = networkService.makeUserProfileDTO(name: nickname, characterImg: selectedImage)
+        networkService.updateProfile(body: updateProfileDto) { [weak self] result in
             guard let self = self else { return }
             switch result {
-            case .success(let response):
+            case .success(_):
+                userInfoData.setNickname(nickname)
+                userInfoData.setCharacter(selectedImage)
+                
                 self.profileData.name = nickname
                 self.profileData.characterImg = selectedImage
                 self.onProfileUpdated?(self.profileData)
+                
                 DispatchQueue.main.async {
                     self.navigationController?.popViewController(animated: true)
                 }
             case .failure(let error):
-                print("❌ 프로필 수정 실패: \(error.localizedDescription)")
+                let errorMessage: String
+                switch error {
+                case .serverError(_, let message):
+                    errorMessage = "\(message)"
+                default:
+                    errorMessage = error.localizedDescription
+                }
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast(errorMessage)
+                }
             }
         }
+    }
+    
+    func didSelectCharacter(characterImage: String) {
+        profileEditView.updateProfileImage(characterImage: characterImage)
     }
 }
 
@@ -83,5 +113,38 @@ extension ProfileEditViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         textField.resignFirstResponder()
         return true
+    }
+    
+    func textFieldDidBeginEditing(_ textField: UITextField) {
+        if textField.text?.isEmpty ?? true {
+            let placeholderText = "닉네임은 최대 10자까지 입력 가능합니다"
+            textField.attributedPlaceholder = NSAttributedString(
+                string: placeholderText,
+                attributes: [
+                    .foregroundColor: UIColor.gray300,
+                    .font: UIFont.ptdMediumFont(ofSize: 16)
+                ]
+            )
+        }
+    }
+    
+    func textFieldDidEndEditing(_ textField: UITextField) {
+        let defaultPlaceholder = "닉네임을 입력하세요"
+        textField.attributedPlaceholder = NSAttributedString(
+            string: defaultPlaceholder,
+            attributes: [
+                .foregroundColor: UIColor.gray300,
+                .font: UIFont.ptdMediumFont(ofSize: 16)
+            ]
+        )
+    }
+    
+    func textField(_ textField: UITextField, shouldChangeCharactersIn range: NSRange, replacementString string: String) -> Bool {
+        // 최대 10자까지만 입력 가능하도록 제한
+        let maxLength = 10
+        let currentText = textField.text ?? ""
+        let newText = (currentText as NSString).replacingCharacters(in: range, with: string)
+        
+        return newText.count <= maxLength
     }
 }

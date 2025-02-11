@@ -66,7 +66,9 @@ class SelectLoginTypeViewController: UIViewController {
                 print("카카오 로그인 성공")
                 KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
                 KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                KeychainSwift().set(String(response.accessExp), forKey: "serverAccessTokenExp")
+                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
+                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
+                KeychainSwift().set(String(response.isFirst), forKey: "isFirst")
                 self.isFirst = response.isFirst
                 self.goToNextView()
             case .failure(let error):

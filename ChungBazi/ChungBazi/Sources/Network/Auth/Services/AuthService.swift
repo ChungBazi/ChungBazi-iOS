@@ -7,6 +7,7 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 final class AuthService: NetworkManager {
     
@@ -51,6 +52,27 @@ final class AuthService: NetworkManager {
     /// 토큰 재발급 API
     public func reissueToken(data: ReIssueRequestDto, completion: @escaping (Result<ReIssueResponseDto, NetworkError>) -> Void) {
         request(target: .postReIssueToken(data: data), decodingType: ReIssueResponseDto.self, completion: completion)
+    }
+    
+    /// 토큰 재발급 API 함수
+    public func reIssueAccesToken(completion: @escaping (Bool) -> Void) {
+        guard let refreshToken = KeychainSwift().get("serverRefreshToken") else {
+            completion(false)
+            return
+        }
+        
+        let reIssueDto = AuthService().makeReIssueDTO(refreshToken: refreshToken)
+        AuthService().reissueToken(data: reIssueDto) { result in
+            switch result {
+            case .success(let response):
+                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
+                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
+                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
+                completion(true)
+            case .failure:
+                completion(false)
+            }
+        }
     }
     
     /// 회원 탈퇴 API

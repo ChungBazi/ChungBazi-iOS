@@ -64,13 +64,18 @@ final class CommunityView: UIView {
         $0.textColor = .gray800
     }
     
-    private lazy var collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
-        $0.dataSource = self
-        $0.delegate = self
-        $0.register(CommunityPostListCell.self, forCellWithReuseIdentifier: "CommunityPostListCell")
-        $0.isScrollEnabled = false
-        $0.backgroundColor = .clear
-    }
+    private lazy var collectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumLineSpacing = 0
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.dataSource = self
+        collectionView.delegate = self
+        collectionView.register(CommunityPostListCell.self, forCellWithReuseIdentifier: "CommunityPostListCell")
+        collectionView.isScrollEnabled = false
+        collectionView.backgroundColor = .clear
+        return collectionView
+    }()
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -82,7 +87,7 @@ final class CommunityView: UIView {
     }
     
     private func setupUI() {
-        addSubviews(segmentedControl, underlineBaseView, underlineView, writeButton)
+        addSubviews(writeButton, segmentedControl, underlineBaseView, underlineView)
         segmentedControl.snp.makeConstraints {
             $0.top.equalToSuperview()
             $0.leading.trailing.equalToSuperview()
@@ -126,6 +131,8 @@ final class CommunityView: UIView {
             $0.bottom.equalToSuperview().inset(Constants.gutter)
             collectionViewHeightConstraint = $0.height.equalTo(0).constraint
         }
+        
+        bringSubviewToFront(writeButton)
     }
     
     override func layoutSubviews() {
@@ -180,12 +187,26 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityPostListCell", for: indexPath) as! CommunityPostListCell
         let post = posts[indexPath.row]
-        cell.configure(with: post)
+
+        let isLastCell = indexPath.row == posts.count - 1
+        cell.configure(with: post, isLastCell: isLastCell)
+        
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.bounds.width - 16, height: 177)
+        let cell = CommunityPostListCell()
+        let post = posts[indexPath.row]
+
+        cell.configure(with: post, isLastCell: false)
+
+        let targetSize = CGSize(width: collectionView.bounds.width - 16, height: UIView.layoutFittingCompressedSize.height)
+
+        let estimatedSize = cell.systemLayoutSizeFitting(targetSize,
+                                                         withHorizontalFittingPriority: .required,
+                                                         verticalFittingPriority: .fittingSizeLevel)
+
+        return CGSize(width: collectionView.bounds.width - 16, height: estimatedSize.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

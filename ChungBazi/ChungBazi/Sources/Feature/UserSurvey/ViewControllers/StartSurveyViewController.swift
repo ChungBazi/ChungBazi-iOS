@@ -9,7 +9,7 @@ import Then
 
 class StartSurveyViewController: UIViewController {
 
-    private let finishLoginView = LogoWithTitleView(image: "glassBaro", title: "더 정확한 추천을 위해\n몇 가지 정보를 알려주세요!")
+    private let startSurveyView = LogoWithTitleView(image: "glassBaro", title: "더 정확한 추천을 위해\n몇 가지 정보를 알려주세요!")
     
     private lazy var startBtn = UIButton().then {
         $0.setTitle("시작하기", for: .normal)
@@ -24,7 +24,6 @@ class StartSurveyViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.view = finishLoginView
         addComponents()
         setConstraints()
     }
@@ -35,10 +34,15 @@ class StartSurveyViewController: UIViewController {
     }
     
     private func addComponents() {
-        [startBtn].forEach { view.addSubview($0) }
+        view.addSubview(startSurveyView)
+        startSurveyView.addSubview(startBtn)
     }
     
     private func setConstraints() {
+        
+        startSurveyView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
         
         startBtn.snp.makeConstraints {
             $0.horizontalEdges.equalToSuperview().inset(16)

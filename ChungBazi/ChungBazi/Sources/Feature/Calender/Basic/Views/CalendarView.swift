@@ -181,6 +181,11 @@ final class CalendarView: UIView {
         events[policy.endDate, default: []].append("end")
         calendar.reloadData()
     }
+    
+    func clearPolicies() {
+        events.removeAll()
+        calendar.reloadData()
+    }
 }
 
 // MARK: - FSCalendarDelegate

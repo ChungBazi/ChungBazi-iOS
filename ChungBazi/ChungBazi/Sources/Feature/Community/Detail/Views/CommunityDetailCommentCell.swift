@@ -18,6 +18,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
     private let commentLabel = UILabel().then {
         $0.textColor = .gray800
         $0.font = .ptdMediumFont(ofSize: 14)
+        $0.numberOfLines = 0
     }
     private let createdAtLabel = UILabel().then {
         $0.textColor = .gray300
@@ -25,17 +26,20 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     private let likeButton = UIButton.createWithImage(image: .likeIcon, target: self, action: #selector(likeBtnTapped))
     private let likeCountLabel = UILabel().then {
+        $0.text = "0"
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 14)
     }
     private let commentButton = UIButton.createWithImage(image: .commentIcon, target: self, action: #selector(commentBtnTapped))
     private let commentCountLabel = UILabel().then {
+        $0.text = "0"
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 14)
     }
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
+        backgroundColor = .clear
         setupUI()
     }
     
@@ -44,30 +48,34 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     
     private func setupUI() {
+        selectionStyle = .none
+        
         addSubviews(profileView, moreButton, commentLabel, createdAtLabel, likeButton, likeCountLabel, commentButton, commentCountLabel)
         profileView.snp.makeConstraints {
-            $0.top.leading.equalToSuperview()
+            $0.top.equalToSuperview().inset(12)
+            $0.leading.equalToSuperview().inset(Constants.gutter)
         }
         
         moreButton.snp.makeConstraints {
             $0.centerY.equalTo(profileView)
-            $0.trailing.equalToSuperview()
+            $0.trailing.equalToSuperview().inset(Constants.gutter)
         }
         
         commentLabel.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.height.greaterThanOrEqualTo(20)
         }
         
         createdAtLabel.snp.makeConstraints {
             $0.top.equalTo(commentLabel.snp.bottom).offset(3)
-            $0.leading.equalToSuperview()
+            $0.leading.equalToSuperview().inset(Constants.gutter)
         }
         
         likeButton.snp.makeConstraints {
             $0.top.equalTo(createdAtLabel.snp.bottom).offset(8)
-            $0.leading.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(Constants.gutter)
+            $0.leading.equalToSuperview().inset(12)
         }
         
         likeCountLabel.snp.makeConstraints {

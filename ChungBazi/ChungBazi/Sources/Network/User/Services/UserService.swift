@@ -32,6 +32,11 @@ final class UserService: NetworkManager {
     public func makeUserInfoDTO(region: String, employment: String, income: String, education: String, interests: [String], additionInfo: [String]) -> UserInfoRequestDto {
         return UserInfoRequestDto(region: region, employment: employment, income: income, education: education, interests: interests, additionInfo: additionInfo)
     }
+    
+    /// UserProfile데이터 구조 생성
+    public func makeUserProfileDTO(name: String, characterImg: String) -> ProfileUpdateRequestDto {
+        return ProfileUpdateRequestDto(name: name, characterImg: characterImg)
+    }
 
     //MARK: - API funcs
     /// 유저 프로필 조회 API
@@ -50,9 +55,12 @@ final class UserService: NetworkManager {
     }
     
     /// 프로필 수정 API
-    public func updateProfile(body: ProfileUpdateRequestDto, profileImg: UIImage, completion: @escaping (Result<ProfileUpdateResponseDto, NetworkError>) -> Void) {
-        request(target: .updateProfile(data: body, profileImg: profileImg), decodingType: ProfileUpdateResponseDto.self, completion: completion)
+    public func updateProfile(body: ProfileUpdateRequestDto, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .updateProfile(data: body), decodingType: String.self, completion: completion)
     }
     
-    /// more...
+    /// 리워드 조회 API
+    public func fetchReward(completion: @escaping (Result<RewardResponseDto, NetworkError>) -> Void) {
+        request(target: .fetchReward, decodingType: RewardResponseDto.self, completion: completion)
+    }
 }

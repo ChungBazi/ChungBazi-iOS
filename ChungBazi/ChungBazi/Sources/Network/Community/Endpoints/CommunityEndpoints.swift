@@ -11,9 +11,9 @@ import Moya
 import KeychainSwift
 
 enum CommunityEndpoints {
-    case getCommunityPosts(category: String, lastPostId: Int)
+    case getCommunityPosts(category: String, cursor: Int)
     case getCommunityPost(postId: Int)
-    case getCommunityComments(postId: Int, lastCommentId: Int)
+    case getCommunityComments(postId: Int, cursor: Int)
     case postCommunityPost(data: CommunityPostRequestDto, imageList: [UIImage])
     case postCommunityComment(data: CommunityCommentRequestDto)
 }
@@ -53,48 +53,61 @@ extension CommunityEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .getCommunityPosts(let category, let lastPostId):
-            return .requestParameters(parameters: ["category": category, "lastPostId": lastPostId, "size": 10], encoding: URLEncoding.default)
+        case .getCommunityPosts(let category, let cursor):
+            var parameters: [String: Any] = ["size": 10, "cursor": 0]
+            if !category.isEmpty {
+                parameters["category"] = category
+            }
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
+
+        case .getCommunityComments(let postId, let cursor):
+            let parameters: [String: Any] = [
+                "postId": postId,
+                "cursor": cursor,
+                "size": 10
+            ]
+            return .requestParameters(parameters: parameters, encoding: URLEncoding.default)
+
         case .getCommunityPost:
             return .requestPlain
-        case .getCommunityComments(let postId, let lastCommentId):
-            return .requestParameters(parameters: ["postId": postId, "lastCommentId": lastCommentId, "size": 10], encoding: URLEncoding.default)
+
         case .postCommunityPost(let data, let imageList):
             var multipartData: [MultipartFormData] = []
-            
-            if let jsonData = try? JSONEncoder().encode(data) {
-                let jsonFormData = MultipartFormData(
-                    provider: .data(jsonData),
-                    name: "info",
-                    fileName: "info.json",
-                    mimeType: "application/json"
-                )
-                multipartData.append(jsonFormData)
-            }
-            
-            for image in imageList {
-                let fileName = "\(UUID().uuidString).jpeg"
-                if let imageData = image.jpegData(compressionQuality: 0.8) {
-                    let imageFormData = MultipartFormData(
-                        provider: .data(imageData),
-                        name: "imageList", // 같은 key로 여러 개의 파일을 보냄
-                        fileName: fileName,
-                        mimeType: "image/jpeg"
+
+            do {
+                let jsonData = try JSONEncoder().encode(data)
+                if let jsonString = String(data: jsonData, encoding: .utf8) {
+                    multipartData.append(
+                        MultipartFormData(provider: .data(jsonData), name: "info", mimeType: "application/json")
                     )
-                    multipartData.append(imageFormData)
+                }
+            } catch {
+                print("JSON 인코딩 실패: \(error.localizedDescription)")
+                return .requestPlain
+            }
+
+            for image in imageList.prefix(10) {
+                if let imageData = image.jpegData(compressionQuality: 0.8) {
+                    let fileName = "\(UUID().uuidString).jpg"
+                    multipartData.append(
+                        MultipartFormData(provider: .data(imageData), name: "imageList", fileName: fileName, mimeType: "image/jpeg")
+                    )
                 }
             }
-            
+
             return .uploadMultipart(multipartData)
+
         case .postCommunityComment(let data):
             return .requestJSONEncodable(data)
         }
     }
     
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
+        guard let accessToken = KeychainSwift().get("serverAccessToken") else {
+            return ["Content-type": "application/json"]
+        }
         return [
-            "Authorization": "Bearer \(accessToken!)",
+            "Authorization": "Bearer \(accessToken)",
             "Content-type": "application/json"
         ]
     }

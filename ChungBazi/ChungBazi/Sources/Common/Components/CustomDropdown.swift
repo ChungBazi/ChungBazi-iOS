@@ -20,7 +20,7 @@ class CustomDropdown: UIView {
     private var cellHeight: CGFloat = 0 // 각 셀의 높이
     private var fontSize: CGFloat = 0 // 폰트 크기
     
-    private let dropdownView: CustomDropdownView
+    let dropdownView: CustomDropdownView
     
     private lazy var dropdownTableView: UITableView = {
         let tableView = UITableView()

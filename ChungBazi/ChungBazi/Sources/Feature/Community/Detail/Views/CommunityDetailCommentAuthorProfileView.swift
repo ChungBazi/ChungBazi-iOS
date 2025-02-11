@@ -14,7 +14,7 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
     
     private let characterImgView = UIImageView().then {
         $0.backgroundColor = .green300
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
         $0.layer.cornerRadius = 16.5
         $0.clipsToBounds = true
     }
@@ -24,7 +24,7 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
     }
     
     private let userLevelLabel = UILabel().then {
-        $0.font = .ptdBoldFont(ofSize: 16)
+        $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray300
     }
     
@@ -58,13 +58,18 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
     
     func configure(userName: String, userLevel: String?, characterImageUrl: String?) {
         userNameLabel.text = userName
-        userLevelLabel.text = userLevel ?? ""
+        userLevelLabel.text = formatUserLevel(userLevel)
         
-        let defaultProfileImage = UIImage(named: "basicBaro")
-        if let imageUrl = characterImageUrl, !imageUrl.isEmpty {
-            characterImgView.kf.setImage(with: URL(string: imageUrl), placeholder: defaultProfileImage)
-        } else {
-            characterImgView.image = defaultProfileImage
-        }
+        if let assetName = characterImageUrl, !assetName.isEmpty {
+            characterImgView.image = UIImage(named: assetName) ?? UIImage(named: "basicBaro")
+        } else { return }
+        
+        layoutIfNeeded()
+    }
+    
+    func formatUserLevel(_ level: String?) -> String {
+        guard let level = level, level.starts(with: "LEVEL_") else { return "" }
+        let levelNumber = level.replacingOccurrences(of: "LEVEL_", with: "")
+        return "Lv.\(levelNumber)"
     }
 }

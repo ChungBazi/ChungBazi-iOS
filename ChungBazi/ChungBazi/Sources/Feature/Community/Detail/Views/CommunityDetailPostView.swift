@@ -8,10 +8,12 @@
 import UIKit
 import SnapKit
 import Then
+import Kingfisher
 
 final class CommunityDetailPostView: UIView {
     
     private let profileView = CommunityDetailPostAuthoreProfileView()
+    private var imageUrls: [String] = []
     
     private let titleLabel = UILabel().then {
         $0.textColor = .black
@@ -22,16 +24,17 @@ final class CommunityDetailPostView: UIView {
         $0.font = .ptdMediumFont(ofSize: 14)
     }
     
-    private let photoCollectionView: UICollectionView = {
+    private let photoCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout()).then {
         let layout = UICollectionViewFlowLayout()
         layout.scrollDirection = .horizontal
         layout.itemSize = CGSize(width: 131, height: 131)
         layout.minimumInteritemSpacing = 7
-        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
-        collectionView.backgroundColor = .clear
-        collectionView.contentInset = UIEdgeInsets(top: 0, left: Constants.gutter, bottom: 0, right: Constants.gutter)
-        return collectionView
-    }()
+        $0.collectionViewLayout = layout
+        $0.backgroundColor = .clear
+        $0.contentInset = UIEdgeInsets(top: 0, left: Constants.gutter, bottom: 0, right: Constants.gutter)
+        $0.showsHorizontalScrollIndicator = false
+        $0.register(CommunityWritePhotoCell.self, forCellWithReuseIdentifier: "CommunityWritePhotoCell")
+    }
     
     private let likeButton = UIButton.createWithImage(image: .likeIcon, target: self, action: #selector(likeBtnTapped))
     private let likeCountLabel = UILabel().then {
@@ -50,6 +53,8 @@ final class CommunityDetailPostView: UIView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
+        photoCollectionView.dataSource = self
+        photoCollectionView.delegate = self
     }
     
     required init?(coder: NSCoder) {
@@ -73,10 +78,11 @@ final class CommunityDetailPostView: UIView {
         photoCollectionView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.top.equalTo(contentLabel.snp.bottom).offset(23)
+            $0.height.equalTo(131)
         }
         likeButton.snp.makeConstraints {
             $0.top.equalTo(photoCollectionView.snp.bottom).offset(26)
-            $0.leading.equalToSuperview().offset(Constants.gutter)
+            $0.bottom.leading.equalToSuperview().inset(Constants.gutter)
         }
         likeCountLabel.snp.makeConstraints {
             $0.centerY.equalTo(likeButton)
@@ -84,11 +90,11 @@ final class CommunityDetailPostView: UIView {
         }
         commentCountLabel.snp.makeConstraints {
             $0.centerY.equalTo(likeButton)
-            $0.trailing.equalTo(viewCountLabel.snp.trailing).offset(16)
+            $0.trailing.equalTo(viewCountLabel.snp.leading).offset(-16)
         }
         viewCountLabel.snp.makeConstraints {
             $0.centerY.equalTo(likeButton)
-            $0.trailing.equalToSuperview().offset(Constants.gutter)
+            $0.trailing.equalToSuperview().inset(Constants.gutter)
         }
     }
     
@@ -100,8 +106,31 @@ final class CommunityDetailPostView: UIView {
         profileView.configure(userName: post.userName, userLevel: post.reward, characterImageUrl: post.characterImg, createdAt: post.formattedCreatedAt)
         titleLabel.text = post.title
         contentLabel.text = post.content
-        likeCountLabel.text = "\(post.postLikes)"
-        commentCountLabel.text = "\(post.commentCount)"
-        viewCountLabel.text = "\(post.views)"
+        likeCountLabel.text = "좋아요 \(post.postLikes)"
+        commentCountLabel.text = "댓글 \(post.commentCount)"
+        viewCountLabel.text = "조회 \(post.views)"
+        
+        print("✅ 이미지 URLs: \(post.imageUrls ?? [])")
+        
+        imageUrls = post.imageUrls ?? []
+        
+        DispatchQueue.main.async {
+            self.photoCollectionView.reloadData()
+            self.photoCollectionView.layoutIfNeeded()
+        }
+    }
+}
+
+extension CommunityDetailPostView: UICollectionViewDataSource, UICollectionViewDelegate {
+    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+        return imageUrls.count
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "CommunityWritePhotoCell", for: indexPath) as! CommunityWritePhotoCell
+        if let url = URL(string: imageUrls[indexPath.item]) {
+            cell.configure(with: url, showDeleteButton: false)
+        }
+        return cell
     }
 }

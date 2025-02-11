@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-class RecommendViewController: UIViewController, CompactDropdownDelegate {
+final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     private let titleLabel: UILabel = {
         let label = UILabel()
         label.text = "바로님께 딱 맞는 주거 정책\n추천 리스트를 준비했어요!"
@@ -32,23 +32,27 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
         return tableView
     }()
     
-    private lazy var interestDropdown = CompactDropdown(
+    private lazy var interestDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "관심",
         hasBorder: false,
         items: Constants.interestItems
     )
-
-    private lazy var sortDropdown = CompactDropdown(
+    
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
         title: "최신순",
         hasBorder: false,
         items: Constants.sortItems
     )
 
     private var policies: [PolicyItem] = [
-        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3"),
-        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11"),
-        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2"),
-        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감")
+        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3", policyId: 10),
+        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 11),
+        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2", policyId: 12),
+        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 13)
     ]
 
     override func viewDidLoad() {
@@ -72,13 +76,13 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
     }
 
     private func setupLayout() {
-        view.addSubview(titleLabel)
+        view.addSubviews(titleLabel, interestDropdown, sortDropdown, tableView)
+        
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
             make.leading.trailing.equalToSuperview().inset(20)
         }
         
-        view.addSubview(interestDropdown)
         interestDropdown.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.leading.equalToSuperview().offset(160)
@@ -86,7 +90,6 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
             make.height.equalTo(36 * Constants.interestItems.count + 36 + 8)
         }
 
-        view.addSubview(sortDropdown)
         sortDropdown.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(16)
             make.trailing.equalToSuperview().offset(-16)
@@ -94,7 +97,6 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
             make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
         
-        view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.top.equalTo(sortDropdown.snp.bottom).offset(-80)
             make.leading.trailing.bottom.equalToSuperview()
@@ -113,7 +115,7 @@ class RecommendViewController: UIViewController, CompactDropdownDelegate {
     }
 
     // MARK: - CustomDropdownDelegate
-    func dropdown(_ dropdown: CompactDropdown, didSelectItem item: String) {
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         if dropdown == interestDropdown {
             print("관심 분야 선택: \(item)")
             

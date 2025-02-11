@@ -9,22 +9,23 @@ import UIKit
 
 class FinishSurveyViewController: UIViewController {
 
-    private let finishLoginView = LogoWithTitleView(image: "lightBaro", title: "알려주신 정보를 바탕으로\n정책을 추천해 드리겠습니다!")
+    private let finishSurveyView = LogoWithTitleView(image: "lightBaro", title: "알려주신 정보를 바탕으로\n정책을 추천해 드리겠습니다!")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
-        self.view = finishLoginView
+        self.view = finishSurveyView
         goToNextView()
     }
     
     private func goToNextView() {
-        guard let sceneDelegate = UIApplication.shared.connectedScenes.first?.delegate as? SceneDelegate else { return }
-        
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            let vc = MainTabBarController()
-            sceneDelegate.window?.rootViewController = vc
-            sceneDelegate.window?.makeKeyAndVisible()
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+            let termsOfServiceVC = MainTabBarController()
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = termsOfServiceVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
         }
     }
 }
