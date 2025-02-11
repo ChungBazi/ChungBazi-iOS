@@ -13,7 +13,7 @@ class SetInterestViewController: UIViewController {
     
     private var checkStatus: [Bool] // 체크 상태를 저장
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "관심 있는 분야를\n선택해주세요", logo: "sixthPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "관심 있는 분야를\n선택해주세요", logo: "fifthPageLogo").then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToFinish), for: .touchUpInside)
     }
