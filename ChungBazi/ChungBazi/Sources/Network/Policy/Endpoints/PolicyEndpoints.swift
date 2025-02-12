@@ -7,10 +7,14 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 enum PolicyEndpoints {
     case searchPolicy(name: String, cursor: String, order: String)
     case fetchPopularSearchText
+    case fetchCategoryPolicy(category: String, cursor: Int, order: String)
+    case fetchPolicyDetail(policyId: Int)
+    case fetchCalendarPolicyList(yearMonth: String)
 }
 
 extension PolicyEndpoints: TargetType {
@@ -28,12 +32,18 @@ extension PolicyEndpoints: TargetType {
             return "/search"
         case .fetchPopularSearchText:
             return "/search/popular"
+        case .fetchCategoryPolicy:
+            return ""
+        case .fetchPolicyDetail(let policyId):
+            return "/\(policyId)"
+        case .fetchCalendarPolicyList:
+            return "/calendar"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .searchPolicy, .fetchPopularSearchText:
+        default :
             return .get
         }
     }
@@ -41,14 +51,22 @@ extension PolicyEndpoints: TargetType {
     var task: Task {
         switch self {
         case .searchPolicy(let name, let cursor, let order):
-            return .requestParameters(parameters: ["name": name, "cursor": cursor, "size": 15, "order": order], encoding: URLEncoding.default)
+            return .requestParameters(parameters: ["name": name, "cursor": cursor, "size": 15, "order": order], encoding: URLEncoding.queryString)
         case .fetchPopularSearchText:
             return .requestPlain
+        case .fetchCategoryPolicy(let category, let cursor, let order):
+            return .requestParameters(parameters: ["category": category, "cursor": cursor, "size": 15, "order": order], encoding: URLEncoding.queryString)
+        case .fetchPolicyDetail(_):
+            return .requestPlain
+        case .fetchCalendarPolicyList(let yearMonth):
+            return .requestParameters(parameters: ["yearMonth": yearMonth], encoding: URLEncoding.queryString)
         }
     }
     
     var headers: [String : String]? {
+        let accessToken = KeychainSwift().get("serverAccessToken")
         return [
+            "Authorization": "Bearer \(accessToken!)",
             "Content-type": "application/json"
         ]
     }
