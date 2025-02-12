@@ -145,7 +145,6 @@ final class SearchResultViewController: UIViewController {
         searchPolicy(name: searchTextField.text ?? "", cursor: "")
     }
 
-    // 🔹 정책 검색 API 호출
     private func searchPolicy(name: String, cursor: String) {
         networkService.searchPolicy(name: name, cursor: cursor, order: "latest") { [weak self] result in
             guard let self = self else { return }
@@ -184,7 +183,6 @@ final class SearchResultViewController: UIViewController {
         }
     }
 
-    // 🔹 인기 검색어 API 호출
     private func fetchPopularSearchText() {
         networkService.fetchPopularSearchText { [weak self] result in
             guard let self = self else { return }
@@ -206,7 +204,6 @@ final class SearchResultViewController: UIViewController {
         tableView.reloadData()
     }
 
-    // 🔹 스크롤 하단 도착 시 다음 페이지 불러오기
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let position = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
@@ -222,21 +219,6 @@ final class SearchResultViewController: UIViewController {
         tableView.delegate = self
     }
 }
-
-//// MARK: - Collection View Delegate & Data Source
-//extension SearchResultViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-//    func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-//        return popularKeywords.count
-//    }
-//
-//    func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-//        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PopularKeywordCell.identifier, for: indexPath) as? PopularKeywordCell else {
-//            return UICollectionViewCell()
-//        }
-//        cell.configure(with: popularKeywords[indexPath.item])
-//        return cell
-//    }
-//}
 
 // MARK: - UITextFieldDelegate
 extension SearchResultViewController: UITextFieldDelegate {
