@@ -28,7 +28,7 @@ final class PolicyService: NetworkManager {
 
     //MARK: - API funcs
     /// 정책 검색 API
-    public func searchPolicy(name: String, cursor: Int, order: String, completion: @escaping (Result<PolicyListResponseDto?, NetworkError>) -> Void) {
+    public func searchPolicy(name: String, cursor: String, order: String, completion: @escaping (Result<PolicyListResponseDto?, NetworkError>) -> Void) {
         requestOptional(target: .searchPolicy(name: name, cursor: cursor, order: order), decodingType: PolicyListResponseDto.self, completion: completion)
     }
     

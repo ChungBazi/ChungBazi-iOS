@@ -10,7 +10,7 @@ import Moya
 import KeychainSwift
 
 enum PolicyEndpoints {
-    case searchPolicy(name: String, cursor: Int, order: String)
+    case searchPolicy(name: String, cursor: String, order: String)
     case fetchPopularSearchText
     case fetchCategoryPolicy(category: String, cursor: Int, order: String)
     case fetchPolicyDetail(policyId: Int)

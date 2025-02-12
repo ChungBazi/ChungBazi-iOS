@@ -7,7 +7,7 @@
 
 struct PolicyListResponseDto: Decodable {
     let policies: [PolicyInfo]?
-    let nextCursor: Int?
+    let nextCursor: String?
     let hasNext: Bool
 }
 
