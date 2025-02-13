@@ -20,6 +20,7 @@ final class CalendarView: UIView {
     weak var delegate: CalendarViewDelegate?
     private var events: [Date: [String]] = [:]
     
+    
     private let customHeader = createCustomHeader()
     private let customMonth = UILabel().then {
         $0.textAlignment = .center
@@ -48,7 +49,7 @@ final class CalendarView: UIView {
         $0.tintColor = .gray500
     }
     
-    private var currentPage: Date?
+    var currentPage: Date?
     private let today = Date()
     private let dateFormatter = DateFormatter().then {
         $0.locale = Locale(identifier: "ko_KR")
@@ -189,6 +190,7 @@ final class CalendarView: UIView {
 extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
+        currentPage = calendar.currentPage
         updateHeader(for: calendar.currentPage)
     }
     
@@ -289,8 +291,13 @@ final class CustomCalendarCell: FSCalendarCell {
     
     func updateCellAppearance() {
         guard let date = date else { return }
-
         let calendar = Calendar.current
+
+        guard let calendarView = self.superview?.superview as? CalendarView, let currentPage = calendarView.currentPage else {
+            return
+        }
+        let currentComponents = calendar.dateComponents([.year, .month], from: currentPage)
+        let dateComponents = calendar.dateComponents([.year, .month], from: date)
 
         if calendar.isDate(date, inSameDayAs: today) {
             customShapeLayer.backgroundColor = isSelected ? UIColor.blue700.cgColor : UIColor.green300.cgColor
@@ -300,7 +307,12 @@ final class CustomCalendarCell: FSCalendarCell {
             titleLabel.textColor = UIColor.white
         } else {
             customShapeLayer.backgroundColor = UIColor.clear.cgColor
-            titleLabel.textColor = UIColor.gray800
+
+            if dateComponents.year != currentComponents.year || dateComponents.month != currentComponents.month {
+                titleLabel.textColor = UIColor.gray300
+            } else {
+                titleLabel.textColor = UIColor.gray800
+            }
         }
     }
     
