@@ -30,12 +30,13 @@ final class CommunityPostListCell: UICollectionViewCell {
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .black
         $0.textAlignment = .left
-        $0.lineBreakMode = .byCharWrapping
+        $0.lineBreakMode = .byTruncatingTail
+        $0.numberOfLines = 1
     }
     private let contentLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray500
-        $0.numberOfLines = 0
+        $0.numberOfLines = 2
     }
     private let thumbnailImgView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
@@ -89,7 +90,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         postTitleLabel.snp.makeConstraints {
             $0.centerY.equalTo(categoryLabel)
             $0.leading.equalTo(categoryLabel.snp.trailing).offset(5)
-            $0.trailing.equalTo(thumbnailImgView.snp.leading).inset(8)
+            $0.trailing.equalTo(thumbnailImgView.snp.leading).offset(-8)
         }
         contentLabel.snp.makeConstraints {
             $0.top.equalTo(categoryLabel.snp.bottom).offset(4)

@@ -28,18 +28,27 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
         }
-        addCustomNavigationBar(titleText: "커뮤니티", showBackButton: false, showCartButton: false, showAlarmButton: true, showLeftSearchButton: true)
+        addCustomNavigationBar(titleText: "커뮤니티", showBackButton: false, showCartButton: false, showAlarmButton: false, showLeftSearchButton: true)
     }
     
     private func fetchData(for categoryIndex: Int) {
+        showLoading()
+        
         guard let category = CommunityCategory.allCases[safe: categoryIndex] else { return }
         
         communityService.getCommunityPosts(category: category.rawValue, cursor: 0) { [weak self] result in
             guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                self.hideLoading()
+            }
+            
             switch result {
             case .success(let success):
-                self.communityPosts = self.mapCommunityPosts(from: success?.postList ?? [])
-                self.communityView.updatePosts(self.communityPosts, totalPostCount: success?.totalPostCount ?? 0)
+                DispatchQueue.main.async {
+                    self.communityPosts = self.mapCommunityPosts(from: success?.postList ?? [])
+                    self.communityView.updatePosts(self.communityPosts, totalPostCount: success?.totalPostCount ?? 0)
+                }
             case .failure(let error):
                 print("❌ 네트워크 요청 실패: \(error.localizedDescription)")
             }
@@ -67,7 +76,7 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     }
     
     func didSelectCategory(index: Int) {
-        //fetchData(for: index)
+        fetchData(for: index)
     }
     
     func didTapWriteButton() {

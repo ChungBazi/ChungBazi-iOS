@@ -21,10 +21,12 @@ final class CommunityView: UIView {
     private var posts: [CommunityPost] = []
     
     private var collectionViewHeightConstraint: Constraint?
+    private var underlineWidthConstraint: Constraint?
     
     private lazy var segmentedControl = UISegmentedControl(items: Constants.communityCategoryItems).then {
         $0.selectedSegmentIndex = 0
         $0.addTarget(self, action: #selector(segmentChanged(_:)), for: .valueChanged)
+        $0.apportionsSegmentWidthsByContent = true
         
         let image = UIImage()
         $0.setBackgroundImage(image, for: .normal, barMetrics: .default)
@@ -51,15 +53,22 @@ final class CommunityView: UIView {
     }
     private let writeButton = UIButton.createWithImage(
         image: UIImage(named: "writeIcon")?.withRenderingMode(.alwaysOriginal),
+        tintColor: nil,
         target: self,
         action: #selector(handleWriteButtonTap)
-    )
+    ).then {
+        $0.layer.shadowColor = UIColor.black.cgColor
+        $0.layer.shadowOpacity = 0.25
+        $0.layer.shadowOffset = CGSize(width: 0, height: 4)
+        $0.layer.shadowRadius = 10
+        $0.layer.masksToBounds = false
+    }
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let totalPostCountLabel = UILabel().then {
-        $0.text = "총 0개의 글"
+        $0.text = ""
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray800
     }
@@ -100,7 +109,7 @@ final class CommunityView: UIView {
         underlineView.snp.makeConstraints {
             $0.top.equalTo(segmentedControl.snp.bottom)
             $0.height.equalTo(2)
-            $0.width.equalTo(segmentedControl).dividedBy(Constants.communityCategoryItems.count)
+            self.underlineWidthConstraint = $0.width.equalTo(segmentedControl).dividedBy(Constants.communityCategoryItems.count).constraint
             $0.leading.equalTo(segmentedControl)
         }
         writeButton.snp.makeConstraints {
@@ -146,18 +155,30 @@ final class CommunityView: UIView {
     }
     
     private func updateUnderlinePosition(animated: Bool) {
-        let segmentWidth = segmentedControl.bounds.width / CGFloat(Constants.communityCategoryItems.count)
-        let targetX = segmentWidth * CGFloat(segmentedControl.selectedSegmentIndex)
+        let selectedSegment = segmentedControl.selectedSegmentIndex
+        var targetX: CGFloat = 0
         
+        for index in 0..<selectedSegment {
+            targetX += segmentedControl.subviews[index].frame.width
+        }
+        
+        let segmentWidth = segmentedControl.subviews[selectedSegment].frame.width
+
         if animated {
             UIView.animate(withDuration: 0.2) {
-                self.underlineView.snp.updateConstraints {
+                self.underlineView.snp.remakeConstraints {
+                    $0.top.equalTo(self.segmentedControl.snp.bottom)
+                    $0.height.equalTo(2)
+                    $0.width.equalTo(segmentWidth)
                     $0.leading.equalTo(self.segmentedControl).offset(targetX)
                 }
                 self.layoutIfNeeded()
             }
         } else {
-            underlineView.snp.updateConstraints {
+            underlineView.snp.remakeConstraints {
+                $0.top.equalTo(segmentedControl.snp.bottom)
+                $0.height.equalTo(2)
+                $0.width.equalTo(segmentWidth)
                 $0.leading.equalTo(segmentedControl).offset(targetX)
             }
         }

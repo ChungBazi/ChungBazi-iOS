@@ -59,7 +59,6 @@ final class CalendarView: UIView {
     private let calendar = FSCalendar().then {
         $0.backgroundColor = .white
         $0.clipsToBounds = true
-        $0.layer.cornerRadius = 10
         $0.layer.maskedCorners = [.layerMinXMaxYCorner, .layerMaxXMaxYCorner]
         $0.scope = .month
     }
@@ -68,8 +67,6 @@ final class CalendarView: UIView {
         return UIView().then {
             $0.backgroundColor = .white
             $0.clipsToBounds = true
-            $0.layer.cornerRadius = 10
-            $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         }
     }
     
@@ -132,7 +129,7 @@ final class CalendarView: UIView {
         calendar.snp.makeConstraints {
             $0.top.equalTo(linkedView.snp.bottom)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.bottom.equalToSuperview()
+            $0.bottom.equalToSuperview().inset(34)
         }
     }
     

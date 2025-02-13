@@ -92,7 +92,7 @@ extension UIViewController {
             navigationBarView.addSubview(searchButton)
             searchButton.snp.makeConstraints { make in
                 make.centerY.equalTo(titleLabel)
-                make.trailing.equalToSuperview().inset(78)
+                make.trailing.equalToSuperview().inset(28)
             }
         }
         
