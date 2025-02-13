@@ -9,6 +9,12 @@ import Then
 
 final class CategoryPolicyViewController: UIViewController {
     
+    private let networkService = PolicyService()
+    private var policyList: [PolicyItem] = []
+    private var categoryTitle: String?
+    private var nextCursor: String?
+    private var hasNext: Bool = false
+    
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
         fontSize: 14,
@@ -24,9 +30,6 @@ final class CategoryPolicyViewController: UIViewController {
         tableView.backgroundColor = .clear
         return tableView
     }()
-
-    private var policies: [PolicyItem] = []
-    private var categoryTitle: String = ""
 
     private let safeAreaBackgroundView: UIView = {
         let view = UIView()
@@ -86,33 +89,70 @@ final class CategoryPolicyViewController: UIViewController {
         tableView.delegate = self
     }
 
-    func configure(categoryTitle: String, policies: [PolicyItem] = []) {
+    func configure(categoryTitle: String) {
         self.categoryTitle = categoryTitle
-        self.policies = policies
-            tableView.reloadData()
+    }
+
+    func fetchCategoryPolicy(category: String, cursor: Int) {
+        networkService.fetchCategoryPolicy(category: category, cursor: cursor, order: "latest") { [weak self] result in
+        guard let self = self else { return }
+        switch result {
+        case .success(let response):
+            guard let response = response,
+                    let policyContent = response.policies else { return }
+                    
+            let newPolicies: [PolicyItem] = policyContent.compactMap { data in
+                guard let policyId = data.policyId,
+                        let policyName = data.policyName,
+                        let startDate = data.startDate,
+                        let endDate = data.endDate,
+                        let dday = data.dday else {
+                    print("정책이 없습니다.")
+                    return nil
+                }
+                return PolicyItem(policyId: policyId, policyName: policyName, startDate: startDate, endDate: endDate, dday: dday)
+            }
+                    
+            if cursor != 0 {
+                self.policyList.append(contentsOf: newPolicies)
+            } else {
+                self.policyList = newPolicies
+            }
+
+            self.nextCursor = response.nextCursor ?? ""
+            self.hasNext = response.hasNext
+                    
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+
+            case .failure(let error):
+                print("❌ 카테고리별 정책 조회 실패: \(error.localizedDescription)")
+            }
+        }
     }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return policies.count
+        return policyList.count
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: PolicyCardViewCell.identifier, for: indexPath) as? PolicyCardViewCell else {
             return UITableViewCell()
         }
-        let policy = policies[indexPath.row]
+        let policy = policyList[indexPath.row]
         cell.configure(with: policy, keyword: nil)
         return cell
     }
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        let selectedPolicy = policies[indexPath.row]
+        let selectedPolicy = policyList[indexPath.row]
         
-        print("Selected policy: \(selectedPolicy.title)")
+        print("Selected policy: \(selectedPolicy.policyName)")
 
         let detailVC = PolicyDetailViewController()
         detailVC.policyId = selectedPolicy.policyId

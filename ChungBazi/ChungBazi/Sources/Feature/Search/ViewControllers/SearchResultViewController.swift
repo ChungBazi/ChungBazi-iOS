@@ -9,6 +9,12 @@ import Then
 
 final class SearchResultViewController: UIViewController {
     
+    private let networkService = PolicyService()
+    private var policyList: [PolicyItem] = []
+    private var popularKeywords: [String] = []
+    private var nextCursor: String = ""
+    private var hasNext: Bool = false
+    
     private let searchView = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 10
@@ -45,14 +51,6 @@ final class SearchResultViewController: UIViewController {
         $0.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
     }
     
-    private lazy var sortDropdown = CustomDropdown(
-        height: 36,
-        fontSize: 14,
-        title: "최신순",
-        hasBorder: false,
-        items: Constants.sortItems
-    )
-
     private let tableView = UITableView().then {
         $0.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
         $0.separatorStyle = .none
@@ -67,15 +65,14 @@ final class SearchResultViewController: UIViewController {
         $0.isHidden = true
     }
     
-    private let popularKeywords = ["일자리", "주거", "교육", "진로", "창업", "금융"]
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
+        title: "최신순",
+        hasBorder: false,
+        items: Constants.sortItems
+    )
 
-    private var policies: [PolicyItem] = []
-    private let allPolicies: [PolicyItem] = [
-        PolicyItem(title: "<청년 신체 건강 챌린지! 운동 비용 지원>", region: "서초구", period: "2024.12.11 - 2025.01.31", badge: "D-21", policyId: 20),
-        PolicyItem(title: "<청년 신체 건강 회복을 위한 피트니스 수강 지원>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "D-17", policyId: 21),
-        PolicyItem(title: "<청년 신체 건강 증진을 위한 피트니스 지원 프로그램>", region: "강남구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 22)
-    ]
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .gray50
@@ -90,8 +87,9 @@ final class SearchResultViewController: UIViewController {
         setupLayout()
         setupActions()
         configureTableView()
+        fetchPopularSearchText()
     }
-        
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
@@ -137,15 +135,15 @@ final class SearchResultViewController: UIViewController {
             make.height.equalTo(36)
         }
 
-        sortDropdown.snp.makeConstraints { make in
-            make.top.equalTo(searchView.snp.bottom).offset(16)
-            make.trailing.equalToSuperview().offset(-16)
-            make.width.equalTo(91)
-            make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+        sortDropdown.snp.makeConstraints {
+            $0.top.equalTo(searchView.snp.top).offset(60)
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.width.equalTo(91)
+            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
-
+        
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).offset(-70)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(-65)
             make.leading.trailing.bottom.equalToSuperview()
         }
 
@@ -153,50 +151,142 @@ final class SearchResultViewController: UIViewController {
             make.center.equalToSuperview()
         }
     }
-        
+
     private func setupActions() {
         searchButton.addTarget(self, action: #selector(didTapSearch), for: .touchUpInside)
         searchTextField.delegate = self
     }
 
-    @objc private func didTapSearch() {
-        searchForKeyword(searchTextField.text)
-    }
-
-    private func searchForKeyword(_ keyword: String?) {
-        guard let keyword = keyword?.trimmingCharacters(in: .whitespacesAndNewlines), !keyword.isEmpty else {
-            policies = []
-            updateUI()
-            return
-        }
-        
-        policies = allPolicies.filter { $0.title.contains(keyword) }
-        popularSearchLabel.isHidden = true
-        popularKeywordsCollectionView.isHidden = true
-        tabBarController?.tabBar.isHidden = false
-        sortDropdown.isHidden = policies.isEmpty
-        updateUI()
-    }
-    
-    private func updateUI() {
-        emptyStateLabel.isHidden = !policies.isEmpty
-        tableView.isHidden = policies.isEmpty
-        tableView.reloadData()
-    }
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         view.bringSubviewToFront(sortDropdown)
     }
     
+    @objc private func didTapSearch() {
+        searchPolicy(name: searchTextField.text ?? "", cursor: "")
+    }
+
+    private func searchPolicy(name: String, cursor: String) {
+        networkService.searchPolicy(name: name, cursor: cursor, order: "latest") { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let response = response,
+                      let policyContent = response.policies else { return }
+                
+                let newPolicies: [PolicyItem] = policyContent.compactMap { data in
+                    guard let policyId = data.policyId,
+                          let policyName = data.policyName,
+                          let startDate = data.startDate,
+                          let endDate = data.endDate,
+                          let dday = data.dday else {
+                        print("정책이 없습니다.")
+                        return nil
+                    }
+                    return PolicyItem(policyId: policyId, policyName: policyName, startDate: startDate, endDate: endDate, dday: dday)
+                }
+
+                if cursor.isEmpty {
+                    self.policyList = newPolicies
+                } else {
+                    self.policyList.append(contentsOf: newPolicies)
+                }
+
+                self.nextCursor = response.nextCursor ?? ""
+                self.hasNext = response.hasNext
+
+                DispatchQueue.main.async {
+                    self.updateUI()
+                }
+            case .failure(let error):
+                print("❌ 정책 검색 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func fetchPopularSearchText() {
+        networkService.fetchPopularSearchText { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                self.popularKeywords = response?.keywords ?? []
+                DispatchQueue.main.async {
+                    self.popularKeywordsCollectionView.reloadData()
+                }
+            case .failure(let error):
+                print("❌ 인기 검색어 불러오기 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func updateUI() {
+        let hasResults = !policyList.isEmpty
+        emptyStateLabel.isHidden = hasResults
+        tableView.isHidden = !hasResults
+        popularSearchLabel.isHidden = hasResults
+        popularKeywordsCollectionView.isHidden = hasResults
+        sortDropdown.isHidden = !hasResults
+        tableView.reloadData()
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let position = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+
+        if position > contentHeight - scrollViewHeight, hasNext {
+            searchPolicy(name: searchTextField.text ?? "", cursor: nextCursor)
+        }
+    }
+
     private func configureTableView() {
         tableView.dataSource = self
         tableView.delegate = self
     }
+    
+    private func showCharacterLimitAlert() {
+        let alert = UIAlertController(title: "", message: "검색어를 2자 이상 입력해 주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
-// MARK: - Collection View Delegate & Data Source
-extension SearchResultViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+// MARK: - UITextFieldDelegate
+extension SearchResultViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if let query = searchTextField.text, query.count >= 2 {
+            searchPolicy(name: query, cursor: "")
+            textField.resignFirstResponder()
+        } else {
+            showCharacterLimitAlert()
+            textField.resignFirstResponder()
+        }
+        return true
+    }
+}
+
+// MARK: - UITableViewDataSource, UITableViewDelegate
+extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return policyList.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: PolicyCardViewCell.identifier, for: indexPath) as? PolicyCardViewCell else {
+            return UITableViewCell()
+        }
+        let policy = policyList[indexPath.row]
+        cell.configure(with: policy, keyword: searchTextField.text)
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+}
+
+// MARK: - UICollectionViewDataSource, UICollectionViewDelegate
+extension SearchResultViewController: UICollectionViewDataSource, UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return popularKeywords.count
     }
@@ -207,34 +297,5 @@ extension SearchResultViewController: UICollectionViewDelegate, UICollectionView
         }
         cell.configure(with: popularKeywords[indexPath.item])
         return cell
-    }
-}
-
-// MARK: - UITableViewDataSource, UITableViewDelegate
-extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return policies.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: PolicyCardViewCell.identifier, for: indexPath) as? PolicyCardViewCell else {
-            return UITableViewCell()
-        }
-        let policy = policies[indexPath.row]
-        cell.configure(with: policy, keyword: searchTextField.text)
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-    }
-}
-
-// MARK: - UITextFieldDelegate
-extension SearchResultViewController: UITextFieldDelegate {
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        searchForKeyword(textField.text)
-        textField.resignFirstResponder()
-        return true
     }
 }
