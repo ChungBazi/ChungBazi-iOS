@@ -218,13 +218,24 @@ final class SearchResultViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
     }
+    
+    private func showCharacterLimitAlert() {
+        let alert = UIAlertController(title: "", message: "검색어를 2자 이상 입력해 주세요.", preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
+        present(alert, animated: true, completion: nil)
+    }
 }
 
 // MARK: - UITextFieldDelegate
 extension SearchResultViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        searchPolicy(name: textField.text ?? "", cursor: "")
-        textField.resignFirstResponder()
+        if let query = searchTextField.text, query.count >= 2 { 
+            searchPolicy(name: query, cursor: "")
+            textField.resignFirstResponder()
+        } else {
+            showCharacterLimitAlert()
+            textField.resignFirstResponder()
+        }
         return true
     }
 }
