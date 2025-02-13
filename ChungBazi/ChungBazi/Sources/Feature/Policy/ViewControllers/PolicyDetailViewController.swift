@@ -11,6 +11,7 @@ final class PolicyDetailViewController: UIViewController {
 
     var policyId: Int?
     private var policy: PolicyModel?
+    private let networkService = PolicyService()
 
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
@@ -58,10 +59,9 @@ final class PolicyDetailViewController: UIViewController {
         borderColor: .gray400
     )
 
-    private lazy var registerButton = CustomActiveButton(
-        title: "담당기관 바로가기",
-        isEnabled: true
-    )
+    private let registerButton = CustomActiveButton(title: "담당기관 바로가기", isEnabled: false).then {
+        $0.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -75,8 +75,9 @@ final class PolicyDetailViewController: UIViewController {
             backgroundColor: .white
         )
         setupLayout()
-        loadPolicyData()
+        fetchPolicyDetail()
         setupActions()
+//        checkIfButtonCanBeEnabled()
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -146,32 +147,97 @@ final class PolicyDetailViewController: UIViewController {
         }
     }
 
-    private func loadPolicyData() {
-        let examplePolicy = PolicyModel(
-            policyId: 1,
-            policyName: "노원구 1인가구 안심홈 3종 세트",
-            category: "주거",
-            startDate: "2024년 12월 11일",
-            endDate: "2025년 1월 31일",
-            intro: "소득 근로자가 일·생활 균형을 위해 유연근무제를 활용하게 하는 중소, 중견기업에게 장려금 지원",
-            content: "재택 근무자 원격근무 비용 지원",
-            target: PolicyTarget(
-                age: "연령: 20세 이상 40세 미만",
-                major: nil,
-                employment: nil,
-                residenceIncome: "소득: 9분위",
-                education: "추가신청자격: 없음"
-            ),
-            document: "서류내용\n1. 주민등록 등본\n2. 건강보험증 사본",
-            applyProcedure: "접수처: 신청서 본인 주민등록지 주소 주민센터(방문접수)",
-            result: "합격자 발표 : 2024. 12. 12.(목)한 ☞ 선발 및 연수기관(부서) 매칭결과 개별안내",
-            referenceUrls: ["url1", "url2"],
-            registerUrl: "https://example.com"
-        )
+    private func fetchPolicyDetail() {
+        guard let policyId = policyId else {
+            print("⚠️ 정책 ID가 없습니다.")
+            return
+        }
 
-        self.policy = examplePolicy
-        posterView.configure(with: UIImage(named: "poster_example"))
-        policyView.configure(with: examplePolicy)
+        networkService.fetchPolicyDetail(policyId: policyId) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let data = response else { return }
+
+                self.policy = PolicyModel(
+                    policyId: policyId,
+                    policyName: data.name,
+                    category: data.categoryName,
+                    startDate: data.startDate ?? "기간 정보 없음",
+                    endDate: data.endDate ?? "기간 정보 없음",
+                    intro: data.intro,
+                    content: data.content,
+                    target: PolicyTarget(
+                        age: data.minAge ?? "연령 정보 없음",
+                        major: nil,
+                        employment: nil,
+                        residenceIncome: data.minIncome ?? "소득 정보 없음",
+                        education: data.additionCondition ?? "추가 조건 없음"
+                    ),
+                    document: data.document ?? "제출 서류 정보 없음",
+                    applyProcedure: data.applyProcedure ?? "신청 절차 정보 없음",
+                    result: data.result ?? "심사 발표 정보 없음",
+                    referenceUrls: [data.referenceUrl1, data.referenceUrl2].compactMap { $0 },
+                    registerUrl: data.registerUrl ?? ""
+                )
+
+                DispatchQueue.main.async {
+                    self.updateUI()
+                }
+
+            case .failure(let error):
+                print("❌ 정책 상세 조회 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+
+//    private func updateUI() {
+//        guard let policy = policy else { return }
+//
+//        policyView.configure(with: policy)
+//
+//        if let posterUrl = policy.referenceUrls.compactMap({ $0 }).first, let url = URL(string: posterUrl) {
+//            downloadImage(from: url) { image in
+//                DispatchQueue.main.async {
+//                    self.posterView.configure(with: image)
+//                }
+//            }
+//        }
+//        let hasRegisterUrl = !(policy.registerUrl.isEmpty)
+//        registerButton.isEnabled = hasRegisterUrl
+//
+//        print("✅ registerUrl: \(policy.registerUrl)")
+//        print("✅ registerButton.isEnabled: \(registerButton.isEnabled)")
+//    }
+    
+    private func updateUI() {
+            guard let policy = policy else { return }
+
+            policyView.configure(with: policy)
+
+            if let posterUrl = policy.referenceUrls.compactMap({ $0 }).first, let url = URL(string: posterUrl) {
+                downloadImage(from: url) { image in
+                    DispatchQueue.main.async {
+                        self.posterView.configure(with: image)
+                    }
+                }
+            }
+
+            let hasValidUrl = !(policy.registerUrl.isEmpty)
+            registerButton.isEnabled = true
+
+            print("✅ registerUrl: \(policy.registerUrl)")
+            print("✅ registerButton.isEnabled: \(registerButton.isEnabled)")
+        }
+
+    private func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let data = data, let image = UIImage(data: data) {
+                completion(image)
+            } else {
+                completion(nil)
+            }
+        }.resume()
     }
 
     private func setupActions() {
@@ -182,7 +248,13 @@ final class PolicyDetailViewController: UIViewController {
 
     @objc private func handleExpandButtonTap() {
         let expandImageVC = ExpandImageViewController()
-        expandImageVC.image = UIImage(named: "poster_example")
+        
+        if let image = posterView.posterImageView.image {
+            expandImageVC.image = image
+        } else {
+            expandImageVC.image = UIImage(named: "poster_example")
+        }
+        
         expandImageVC.modalPresentationStyle = .overFullScreen
         present(expandImageVC, animated: true, completion: nil)
     }
@@ -192,19 +264,46 @@ final class PolicyDetailViewController: UIViewController {
         navigationController?.pushViewController(cartVC, animated: true)
     }
 
+//    @objc private func handleRegisterButtonTap() {
+//        guard let urls = policy?.referenceUrls.compactMap({ $0 }), !urls.isEmpty else {
+//            print("Error: URL 정보가 없습니다.")
+//            return
+//        }
+//
+//        if urls.count > 1 {
+//            showMultipleUrlsAlert(urls: urls)
+//        } else if let urlString = urls.first, let url = URL(string: urlString) {
+//            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+//        }
+//    }
+
+    
+
+//    private func checkIfButtonCanBeEnabled() {
+//        let isUrlAvailable = !urls.isEmpty
+//        
+//        DispatchQueue.main.async {
+//            self.actionButton.isEnabled = isUrlAvailable
+//        }
+//    }
+    
     @objc private func handleRegisterButtonTap() {
-        guard let urls = policy?.referenceUrls.compactMap({ $0 }), !urls.isEmpty else {
-            print("Error: URL 정보가 없습니다.")
+        guard let urlString = policy?.registerUrl, !urlString.isEmpty, let url = URL(string: urlString) else {
+            print("⚠️ Error: URL 정보가 없습니다.")
             return
         }
 
-        if urls.count > 1 {
-            showMultipleUrlsAlert(urls: urls)
-        } else if let urlString = urls.first, let url = URL(string: urlString) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
-        }
+        UIApplication.shared.open(url, options: [:], completionHandler: nil)
     }
-
+//    @objc private func handleRegisterButtonTap() {
+//        guard let urlString = policy?.registerUrl, !urlString.isEmpty, let url = URL(string: urlString) else {
+//            print("⚠️ Error: URL 정보가 없습니다.")
+//            return
+//        }
+//
+//        UIApplication.shared.open(url, options: [:], completionHandler: nil)
+//    }
+    
     private func showMultipleUrlsAlert(urls: [String]) {
         let customAlert = CustomAlertView()
         customAlert.configure(message: "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개 이상입니다.", urls: urls)
