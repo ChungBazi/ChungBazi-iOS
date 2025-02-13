@@ -48,11 +48,14 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         items: Constants.sortItems
     )
 
+//    private var policies: [PolicyItem] = [
+//        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3", policyId: 10),
+//        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 11),
+//        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2", policyId: 12),
+//        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 13)
+//    ]
     private var policies: [PolicyItem] = [
-        PolicyItem(title: "<청년 주거 안정화 지원 사업>", region: "동작구", period: "2024.12.11 - 2025.01.31", badge: "D-3", policyId: 10),
-        PolicyItem(title: "<청년 행복주택 입주 지원 프로그램>", region: "마포구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 11),
-        PolicyItem(title: "<서울 청년 주거 안전망 지원>", region: "성북구", period: "2024.12.11 - 2025.01.31", badge: "D-2", policyId: 12),
-        PolicyItem(title: "<청년 주거 문제 해결을 위한 지원 정책>", region: "양천구", period: "2024.12.11 - 2025.01.31", badge: "마감", policyId: 13)
+       PolicyItem(policyId: 30, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 1)
     ]
 
     override func viewDidLoad() {
@@ -119,11 +122,11 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         if dropdown == interestDropdown {
             print("관심 분야 선택: \(item)")
             
-            guard let categoryPolicy = PolicyData.getPolicies(for: item) else { return }
-            
-            let categoryVC = CategoryPolicyViewController()
-            categoryVC.configure(categoryTitle: categoryPolicy.title, policies: categoryPolicy.policies)
-            navigationController?.pushViewController(categoryVC, animated: true)
+//            guard let categoryPolicy = PolicyData.getPolicies(for: item) else { return }
+//
+//            let categoryVC = CategoryPolicyViewController()
+//            categoryVC.configure(categoryTitle: categoryPolicy.title, policies: categoryPolicy.policies)
+//            navigationController?.pushViewController(categoryVC, animated: true)
         } else if dropdown == sortDropdown {
             print("Selected item: \(item)")
         }
@@ -147,6 +150,6 @@ extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
-        print("Selected policy: \(policies[indexPath.row].title)")
+        print("Selected policy: \(policies[indexPath.row].policyName)")
     }
 }

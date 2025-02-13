@@ -16,7 +16,7 @@ final class PosterView: UIView {
         $0.clipsToBounds = true
     }
     
-    private let posterImageView = UIImageView().then {
+    let posterImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
     }
