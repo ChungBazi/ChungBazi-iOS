@@ -55,8 +55,8 @@ class MainTabBarController: UITabBarController {
     }
 
     private func configureTabBarItemFonts() {
-        let selectedFont = UIFont.ptdMediumFont(ofSize: 14)
-        let unselectedFont = UIFont.ptdMediumFont(ofSize: 14)
+        let selectedFont = UIFont.ptdMediumFont(ofSize: 12)
+        let unselectedFont = UIFont.ptdMediumFont(ofSize: 12)
 
         let selectedAttributes: [NSAttributedString.Key: Any] = [
             .font: selectedFont,
@@ -80,7 +80,7 @@ class MainTabBarController: UITabBarController {
         let tabBarItem = UITabBarItem(title: title, image: resizedImage?.withRenderingMode(.alwaysTemplate), tag: tag)
         tabBarItem.selectedImage = resizedImage?.withTintColor(.blue700, renderingMode: .alwaysOriginal)
         
-        tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 3)
+        tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 0)
         
         return tabBarItem
     }
