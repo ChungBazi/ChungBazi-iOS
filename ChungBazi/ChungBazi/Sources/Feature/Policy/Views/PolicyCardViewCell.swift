@@ -101,8 +101,8 @@ final class PolicyCardViewCell: UITableViewCell {
         }
         
         badgeImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(16)
-            make.top.equalToSuperview().offset(16)
+            make.leading.equalToSuperview().offset(17)
+            make.top.equalToSuperview().offset(18)
             make.width.equalTo(52)
             make.height.equalTo(60)
         }
@@ -112,14 +112,14 @@ final class PolicyCardViewCell: UITableViewCell {
         }
 
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(badgeImageView.snp.trailing).offset(16)
-            make.trailing.equalToSuperview().offset(-16)
+            make.leading.equalTo(badgeImageView.snp.trailing).offset(17)
+            make.trailing.equalToSuperview().inset(17)
             make.top.equalTo(badgeImageView.snp.top)
         }
 
         periodLabel.snp.makeConstraints { make in
             make.leading.equalTo(titleLabel)
-            make.top.equalTo(titleLabel.snp.bottom).offset(4)
+            make.top.equalTo(titleLabel.snp.bottom).offset(6)
         }
     }
     
