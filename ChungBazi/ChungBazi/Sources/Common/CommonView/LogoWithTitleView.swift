@@ -13,7 +13,6 @@ class LogoWithTitleView: UIView {
         $0.font = UIFont.ptdMediumFont(ofSize: 20)
         $0.textColor = .white
         $0.numberOfLines = 2
-        $0.textAlignment = .center
     }
     
     private lazy var logo = UIImageView().then {
@@ -25,6 +24,7 @@ class LogoWithTitleView: UIView {
         super.init(frame: .zero)
         self.title.text = title
         self.title.setLineSpacing()
+        self.title.textAlignment = .center
         self.logo.image = UIImage(named: image)
         self.backgroundColor = .blue700
         addComponents()
