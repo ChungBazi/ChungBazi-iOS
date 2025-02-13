@@ -64,6 +64,14 @@ final class SearchResultViewController: UIViewController {
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.isHidden = true
     }
+    
+    private lazy var sortDropdown = CustomDropdown(
+        height: 36,
+        fontSize: 14,
+        title: "최신순",
+        hasBorder: false,
+        items: Constants.sortItems
+    )
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -85,6 +93,7 @@ final class SearchResultViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
+        sortDropdown.isHidden = true
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -93,7 +102,7 @@ final class SearchResultViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, tableView, emptyStateLabel)
+        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyStateLabel)
 
         searchView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
@@ -126,8 +135,15 @@ final class SearchResultViewController: UIViewController {
             make.height.equalTo(36)
         }
 
+        sortDropdown.snp.makeConstraints {
+            $0.top.equalTo(searchView.snp.top).offset(60)
+            $0.trailing.equalToSuperview().offset(-16)
+            $0.width.equalTo(91)
+            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+        }
+        
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(popularKeywordsCollectionView.snp.bottom).offset(16)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(-65)
             make.leading.trailing.bottom.equalToSuperview()
         }
 
@@ -141,6 +157,11 @@ final class SearchResultViewController: UIViewController {
         searchTextField.delegate = self
     }
 
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        view.bringSubviewToFront(sortDropdown)
+    }
+    
     @objc private func didTapSearch() {
         searchPolicy(name: searchTextField.text ?? "", cursor: "")
     }
@@ -199,8 +220,12 @@ final class SearchResultViewController: UIViewController {
     }
 
     private func updateUI() {
-        emptyStateLabel.isHidden = !policyList.isEmpty
-        tableView.isHidden = policyList.isEmpty
+        let hasResults = !policyList.isEmpty
+        emptyStateLabel.isHidden = hasResults
+        tableView.isHidden = !hasResults
+        popularSearchLabel.isHidden = hasResults
+        popularKeywordsCollectionView.isHidden = hasResults
+        sortDropdown.isHidden = !hasResults
         tableView.reloadData()
     }
 
@@ -229,7 +254,7 @@ final class SearchResultViewController: UIViewController {
 // MARK: - UITextFieldDelegate
 extension SearchResultViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let query = searchTextField.text, query.count >= 2 { 
+        if let query = searchTextField.text, query.count >= 2 {
             searchPolicy(name: query, cursor: "")
             textField.resignFirstResponder()
         } else {
