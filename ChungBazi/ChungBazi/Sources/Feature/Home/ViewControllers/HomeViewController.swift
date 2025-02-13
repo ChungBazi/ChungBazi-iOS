@@ -177,8 +177,8 @@ final class HomeViewController: UIViewController {
         chatbotButtonContainer.addSubview(chatbotButton)
         
         chatbotButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-4)
-            make.trailing.equalToSuperview().offset(-8)
+            make.bottom.equalToSuperview().offset(-1)
+            make.trailing.equalToSuperview().offset(-3)
             make.width.height.equalTo(78)
         }
 
@@ -188,7 +188,8 @@ final class HomeViewController: UIViewController {
         chatbotButton.addSubview(chatbotIcon)
 
         chatbotIcon.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-4)
+            make.trailing.equalToSuperview().offset(-1)
             make.width.height.equalTo(73)
         }
         secondRowStackView.addArrangedSubview(chatbotButtonContainer)
@@ -208,8 +209,8 @@ final class HomeViewController: UIViewController {
         "일자리": "JOBS",
         "주거": "HOUSING",
         "교육": "EDUCATION",
-        "복지·문화": "WELFARE_CULTURE",
-        "참여·권리": "PARTICIPATION_RIGHTS"
+        "복지,문화": "WELFARE_CULTURE",
+        "참여,권리": "PARTICIPATION_RIGHTS"
     ]
     
     @objc private func categoryButtonTapped(_ sender: UIButton) {
