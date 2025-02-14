@@ -64,7 +64,7 @@ final class CommunityView: UIView {
         $0.layer.masksToBounds = false
     }
     
-    private let scrollView = UIScrollView()
+    let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let totalPostCountLabel = UILabel().then {

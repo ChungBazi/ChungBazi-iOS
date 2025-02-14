@@ -23,6 +23,8 @@ final class CommunityDetailViewController: UIViewController {
     private var nextCursor: Int = 0
     private var hasNext: Bool = true
     
+    private let refreshControl = UIRefreshControl()
+    
     private var commentInputBottomConstraint: Constraint?
     
     private let commentInputView = UIView().then {
@@ -165,6 +167,7 @@ final class CommunityDetailViewController: UIViewController {
             
             DispatchQueue.main.async {
                 self.hideLoading()
+                self.refreshControl.endRefreshing()
             }
 
             switch result {
@@ -216,7 +219,7 @@ final class CommunityDetailViewController: UIViewController {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.size.height
+        let frameHeight = scrollView.frame.height
         
         if offsetY > contentHeight - frameHeight - 50 {
             fetchCommentData()
@@ -284,5 +287,18 @@ final class CommunityDetailViewController: UIViewController {
     
     private func updateNavigationBarTitle(with title: String) {
         addCustomNavigationBar(titleText: title, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+    }
+    
+    private func setupRefreshControl() {
+        scrollView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+
+    @objc private func handleRefresh() {
+        self.nextCursor = 0
+        self.hasNext = true
+        self.comments.removeAll()
+        fetchPostData()
+        fetchCommentData()
     }
 }
