@@ -20,6 +20,7 @@ final class CommunityDetailViewController: UIViewController {
     private var postData: CommunityDetailPostModel?
     private var comments: [CommunityDetailCommentModel] = []
     
+    private var isFetching: Bool = false
     private var nextCursor: Int = 0
     private var hasNext: Bool = true
     
@@ -158,26 +159,26 @@ final class CommunityDetailViewController: UIViewController {
     
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
-        showLoading()
+        guard hasNext, !isFetching else { return }
         
-        guard hasNext else { return }
+        isFetching = true
+        showLoading()
 
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 self.hideLoading()
+                self.isFetching = false
                 self.refreshControl.endRefreshing()
             }
 
             switch result {
             case .success(let response):
                 guard let response = response else { return }
+                let commentList = response.commentsList
 
-                let newComments = response.commentsList
-                if newComments.isEmpty { return }
-
-                self.comments.append(contentsOf: newComments.compactMap { comment in
+                let newComments = commentList.compactMap { comment -> CommunityDetailCommentModel? in
                     guard let postId = comment.postId,
                           let content = comment.content,
                           let formattedCreatedAt = comment.formattedCreatedAt,
@@ -189,7 +190,7 @@ final class CommunityDetailViewController: UIViewController {
                         print("⚠️ 일부 댓글 데이터가 nil입니다. 스킵합니다.")
                         return nil
                     }
-
+                    
                     return CommunityDetailCommentModel(
                         postId: postId,
                         content: content,
@@ -200,10 +201,20 @@ final class CommunityDetailViewController: UIViewController {
                         reward: reward,
                         characterImg: characterImg
                     )
-                })
+                }
 
-                self.nextCursor = response.nextCursor
-                self.hasNext = response.hasNext
+                if nextCursor == 0 {
+                    self.comments = newComments
+                } else {
+                    self.comments.append(contentsOf: newComments)
+                }
+
+                if response.nextCursor != nextCursor {
+                    self.nextCursor = response.nextCursor
+                    self.hasNext = response.hasNext
+                } else {
+                    self.hasNext = false
+                }
 
                 DispatchQueue.main.async {
                     self.communityDetailView.updateComments(self.comments)
@@ -215,13 +226,12 @@ final class CommunityDetailViewController: UIViewController {
         }
     }
     
-    // MARK: - 페이징을 위한 스크롤 감지
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
         let offsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let frameHeight = scrollView.frame.height
         
-        if offsetY > contentHeight - frameHeight - 50 {
+        if offsetY > contentHeight - frameHeight - 50 && hasNext && !isFetching {
             fetchCommentData()
         }
     }
@@ -298,6 +308,8 @@ final class CommunityDetailViewController: UIViewController {
         self.nextCursor = 0
         self.hasNext = true
         self.comments.removeAll()
+        self.communityDetailView.updateComments(self.comments)
+
         fetchPostData()
         fetchCommentData()
     }

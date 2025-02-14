@@ -41,7 +41,8 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
         addSubviews(characterImgView, userNameLabel, userLevelLabel)
         
         characterImgView.snp.makeConstraints {
-            $0.top.leading.bottom.equalToSuperview()
+            $0.top.leading.equalToSuperview()
+            $0.bottom.lessThanOrEqualToSuperview()
             $0.size.equalTo(33)
         }
         
