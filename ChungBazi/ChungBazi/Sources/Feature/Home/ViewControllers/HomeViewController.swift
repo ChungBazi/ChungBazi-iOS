@@ -29,8 +29,12 @@ final class HomeViewController: UIViewController {
         let firstPartRange = (text as NSString).range(of: "정책도 쉽고 간편하게")
         let secondPartRange = (text as NSString).range(of: "청바지")
 
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineSpacing = 5
+        
         attributedText.addAttribute(.font, value: UIFont.ptdSemiBoldFont(ofSize: 20), range: firstPartRange)
         attributedText.addAttribute(.foregroundColor, value: UIColor.black, range: firstPartRange)
+        attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: firstPartRange)
 
         attributedText.addAttribute(.font, value: UIFont.afgRegularFont(ofSize: 20), range: secondPartRange)
         attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: secondPartRange)
@@ -106,9 +110,8 @@ final class HomeViewController: UIViewController {
         
         policyTextLabel.snp.makeConstraints { make in
             make.centerY.equalTo(policyIconImageView)
-            make.trailing.equalToSuperview().offset(-30)
+            make.trailing.equalToSuperview().inset(25)
             make.width.equalTo(166)
-            make.height.equalTo(56)
         }
 
         banner.snp.makeConstraints { make in
