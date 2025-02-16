@@ -146,6 +146,15 @@ final class PolicyCardViewCell: UITableViewCell {
         badgeTextLabel.text = badgeText
         badgeTextLabel.textColor = badgeTextColor(for: badgeText)
         badgeImageView.image = badgeImage(for: badgeText)
+        
+        if let keyword = keyword, !keyword.isEmpty {
+            let attributedText = NSMutableAttributedString(string: item.policyName)
+            if let range = item.policyName.range(of: keyword) {
+                let nsRange = NSRange(range, in: item.policyName)
+                attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: nsRange)
+            }
+            titleLabel.attributedText = attributedText
+        }
     }
 
     private func formatPeriod(startDate: String, endDate: String) -> String {
