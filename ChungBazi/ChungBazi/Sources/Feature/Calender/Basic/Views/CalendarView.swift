@@ -19,7 +19,7 @@ final class CalendarView: UIView {
     // MARK: - Properties
     weak var delegate: CalendarViewDelegate?
     private var events: [Date: [String]] = [:]
-    
+    var selectedDate: Date?
     
     private let customHeader = createCustomHeader()
     private let customMonth = UILabel().then {
@@ -77,6 +77,7 @@ final class CalendarView: UIView {
         setupUI()
         calendar.dataSource = self
         calendar.delegate = self
+        self.currentPage = calendar.currentPage
         updateHeader(for: calendar.currentPage)
     }
     
@@ -138,7 +139,7 @@ final class CalendarView: UIView {
         calendar.appearance.titleDefaultColor = .gray800
         calendar.appearance.titleSelectionColor = .gray800
         calendar.appearance.selectionColor = .clear
-        calendar.appearance.todayColor = .green300
+        calendar.appearance.todayColor = .clear
         calendar.appearance.titlePlaceholderColor = .gray300
         calendar.appearance.borderRadius = 1.0
         calendar.appearance.weekdayTextColor = .gray800
@@ -190,34 +191,42 @@ final class CalendarView: UIView {
 extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDelegateAppearance {
     
     func calendarCurrentPageDidChange(_ calendar: FSCalendar) {
-        currentPage = calendar.currentPage
+        self.currentPage = calendar.currentPage
+        print("✅ currentPage 업데이트됨: \(String(describing: currentPage))")
         updateHeader(for: calendar.currentPage)
+        calendar.reloadData()
     }
     
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        guard let cell = calendar.cell(for: date, at: monthPosition) as? CustomCalendarCell else { return }
-        cell.isSelected = true
-        cell.updateCellAppearance()
+        let normalizedDate = Calendar.current.startOfDay(for: date)
         
-        let startOfSelectedDate = Calendar.current.startOfDay(for: date)
+        if let previousDate = selectedDate {
+            if previousDate == normalizedDate { return }
+            calendar.deselect(previousDate)
+        }
+        
+        selectedDate = normalizedDate
+        calendar.reloadData()
+        
         if let eventsForDate = events[date], !eventsForDate.isEmpty {
             delegate?.presentPolicyListViewController(for: date)
         }
     }
     
     func calendar(_ calendar: FSCalendar, didDeselect date: Date, at monthPosition: FSCalendarMonthPosition) {
-        guard let cell = calendar.cell(for: date, at: monthPosition) as? CustomCalendarCell else { return }
-        cell.isSelected = false
-        cell.updateCellAppearance()
+        selectedDate = nil
+        calendar.reloadData()
     }
     
     func calendar(_ calendar: FSCalendar, cellFor date: Date, at position: FSCalendarMonthPosition) -> FSCalendarCell {
         guard let cell = calendar.dequeueReusableCell(withIdentifier: "CustomCalendarCell", for: date, at: position) as? CustomCalendarCell else {
             return FSCalendarCell()
         }
+        cell.calendarView = self
         cell.date = date
         cell.isSelected = calendar.selectedDates.contains(date)
         cell.events = events
+        cell.updateCellAppearance()
         return cell
     }
     
@@ -228,6 +237,8 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
 
 // MARK: - Custom Calendar Cell
 final class CustomCalendarCell: FSCalendarCell {
+    weak var calendarView: CalendarView?
+    
     var date: Date? {
         didSet {
             updateCellAppearance()
@@ -290,56 +301,72 @@ final class CustomCalendarCell: FSCalendarCell {
     }
     
     func updateCellAppearance() {
-        guard let date = date else { return }
-        let calendar = Calendar.current
-
-        guard let calendarView = self.superview?.superview as? CalendarView, let currentPage = calendarView.currentPage else {
+        guard let calendarView = self.calendarView else {
+            print("❌ updateCellAppearance: calendarView가 nil입니다.")
+            customShapeLayer.backgroundColor = UIColor.clear.cgColor
+            titleLabel.textColor = UIColor.gray500
             return
         }
-        let currentComponents = calendar.dateComponents([.year, .month], from: currentPage)
-        let dateComponents = calendar.dateComponents([.year, .month], from: date)
-
-        if calendar.isDate(date, inSameDayAs: today) {
-            customShapeLayer.backgroundColor = isSelected ? UIColor.blue700.cgColor : UIColor.green300.cgColor
-            titleLabel.textColor = isSelected ? UIColor.white : UIColor.gray800
-        } else if isSelected {
+        
+        guard let currentPage = calendarView.currentPage else {
+            print("❌ updateCellAppearance: currentPage가 nil입니다.")
+            return
+        }
+        
+        let calendar = Calendar.current
+        let today = calendar.startOfDay(for: Date())
+        let cellDate = calendar.startOfDay(for: date ?? Date())
+        
+        let isSelectedDate = calendarView.selectedDate == cellDate
+        
+        if calendar.isDate(cellDate, inSameDayAs: today) {
+            customShapeLayer.backgroundColor = isSelectedDate ? UIColor.blue700.cgColor : UIColor.green300.cgColor
+            titleLabel.textColor = isSelectedDate ? UIColor.white : UIColor.gray800
+            return
+        }
+        
+        if isSelectedDate {
             customShapeLayer.backgroundColor = UIColor.blue700.cgColor
             titleLabel.textColor = UIColor.white
+            return
+        }
+        
+        let currentComponents = calendar.dateComponents([.year, .month], from: currentPage)
+        let dateComponents = calendar.dateComponents([.year, .month], from: date ?? Date())
+        
+        if dateComponents.year == currentComponents.year && dateComponents.month == currentComponents.month {
+            customShapeLayer.backgroundColor = UIColor.clear.cgColor
+            titleLabel.textColor = UIColor.gray800
         } else {
             customShapeLayer.backgroundColor = UIColor.clear.cgColor
-
-            if dateComponents.year != currentComponents.year || dateComponents.month != currentComponents.month {
-                titleLabel.textColor = UIColor.gray300
-            } else {
-                titleLabel.textColor = UIColor.gray800
-            }
+            titleLabel.textColor = UIColor.gray300
         }
     }
     
     private func layoutEventMarkers() {
         let titleFrame = titleLabel.frame
-
+        
         eventLayers.forEach { $0.removeFromSuperlayer() }
         eventLayers.removeAll()
-
+        
         guard let date = date, var eventTypes = events[date] else { return }
-
+        
         eventTypes.sort { $0 < $1 }
-
+        
         let markerSize: CGFloat = 5
         let spacing: CGFloat = 3
         let maxVisibleMarkers = 3
         let visibleEventCount = min(eventTypes.count, maxVisibleMarkers)
         let totalWidth = CGFloat(visibleEventCount) * markerSize + CGFloat(visibleEventCount - 1) * spacing
         var offsetX: CGFloat = titleFrame.midX - totalWidth / 2
-
+        
         for (index, eventType) in eventTypes.enumerated() {
             guard index < maxVisibleMarkers else { break }
-
+            
             let markerLayer = CAShapeLayer()
             let markerRect = CGRect(x: offsetX, y: titleFrame.maxY + 5, width: markerSize, height: markerSize)
             markerLayer.frame = markerRect
-
+            
             if eventType == "start" {
                 markerLayer.path = UIBezierPath(ovalIn: CGRect(origin: .zero, size: markerRect.size)).cgPath
                 markerLayer.strokeColor = UIColor.blue700.cgColor
@@ -349,12 +376,12 @@ final class CustomCalendarCell: FSCalendarCell {
                 markerLayer.path = UIBezierPath(ovalIn: CGRect(origin: .zero, size: markerRect.size)).cgPath
                 markerLayer.fillColor = UIColor.blue700.cgColor
             }
-
+            
             contentView.layer.addSublayer(markerLayer)
             eventLayers.append(markerLayer)
             offsetX += markerSize + spacing
         }
-
+        
         if eventTypes.count > maxVisibleMarkers {
             let remainingCount = eventTypes.count - maxVisibleMarkers
             let label = UILabel()
