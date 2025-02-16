@@ -236,8 +236,21 @@ final class PolicyDetailViewController: UIViewController {
     }
 
     @objc private func handleCartButtonTap() {
-        let cartVC = CartViewController()
-        navigationController?.pushViewController(cartVC, animated: true)
+        guard let policyId = policy?.policyId else {
+            print("❌ 정책 ID가 없습니다.")
+            return
+        }
+
+        let cartService = CartService()
+        cartService.postCart(policyId: policyId) { result in
+            switch result {
+            case .success:
+                DispatchQueue.main.async {
+                }
+            case .failure(let error):
+                print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
+            }
+        }
     }
 
     @objc private func handleRegisterButtonTap() {
