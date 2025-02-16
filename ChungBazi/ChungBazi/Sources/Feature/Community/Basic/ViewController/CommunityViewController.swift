@@ -24,6 +24,10 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
         super.viewDidLoad()
         setupUI()
         setupRefreshControl()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
         fetchData(for: 0, cursor: 0)
     }
     

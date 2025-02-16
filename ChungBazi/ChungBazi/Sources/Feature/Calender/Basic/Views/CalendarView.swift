@@ -138,7 +138,7 @@ final class CalendarView: UIView {
         calendar.appearance.titleDefaultColor = .gray800
         calendar.appearance.titleSelectionColor = .gray800
         calendar.appearance.selectionColor = .clear
-        calendar.appearance.todayColor = .clear
+        calendar.appearance.todayColor = .green300
         calendar.appearance.titlePlaceholderColor = .gray300
         calendar.appearance.borderRadius = 1.0
         calendar.appearance.weekdayTextColor = .gray800

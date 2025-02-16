@@ -20,8 +20,12 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        fetchData()
         configureCalendarViewDelegate()
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(true)
+        fetchData()
     }
     
     // MARK: - Setup

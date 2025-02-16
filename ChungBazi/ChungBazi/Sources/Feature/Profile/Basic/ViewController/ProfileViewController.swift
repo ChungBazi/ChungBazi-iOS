@@ -146,6 +146,17 @@ extension ProfileViewController: ProfileViewDelegate {
             rightButtonText: "확인",
             rightButtonAction: {
                 self.deleteUser()
+//                self.kakaoAuthVM.unlinkKakaoAccount { success in
+//                    if success {
+//                        Toaster.shared.makeToast("회원탈퇴 성공")
+//                        self.clearForQuit()
+//                        DispatchQueue.main.async {
+//                            self.showSplashScreen()
+//                        }
+//                    } else {
+//                        Toaster.shared.makeToast("회원탈퇴 실패")
+//                    }
+//                }
             }
         )
     }
