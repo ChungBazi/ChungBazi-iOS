@@ -37,9 +37,7 @@ extension CalendarEndpoints: TargetType {
         switch self {
         case .getCalendarPolicies:
             return "/policies/calendar"
-        case .updateCalendarDocumentsDetail(let cartId, _):
-            return "/\(cartId)/documents"
-        case .postCalendarDocuments(let cartId, _):
+        case .updateCalendarDocumentsDetail(let cartId, _), .postCalendarDocuments(let cartId, _):
             return "/\(cartId)/documents"
         case .updateCalendarDocumentsCheck(let cartId, _):
             return "/\(cartId)/documents/check"
