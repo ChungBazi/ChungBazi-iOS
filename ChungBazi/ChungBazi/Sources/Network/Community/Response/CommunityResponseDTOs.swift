@@ -10,6 +10,8 @@ import Foundation
 struct CommunityResponseDTO: Decodable {
     let totalPostCount: Int
     let postList: [Post]?
+    let nextCursor: Int?
+    let hasNext: Bool
 }
 
 struct Post: Decodable {
@@ -26,6 +28,10 @@ struct Post: Decodable {
     let reward: String?
     let characterImg: String?
     let thumbnailUrl: String?
+}
+
+struct SearchCommunityPopularWordsResponseDTO: Decodable {
+    let keywords: [String]?
 }
 
 struct CommunityDetailResponseDTO: Decodable {
@@ -45,8 +51,8 @@ struct CommunityDetailResponseDTO: Decodable {
 }
 
 struct CommunityCommentResponseDTO: Decodable {
-    let commentsList: [Comment]
-    let nextCursor: Int
+    let commentsList: [Comment]?
+    let nextCursor: Int?
     let hasNext: Bool
 }
 
