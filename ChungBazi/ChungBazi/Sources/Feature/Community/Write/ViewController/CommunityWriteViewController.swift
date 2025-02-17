@@ -142,7 +142,7 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
             switch result {
             case .success(let response):
                 DispatchQueue.main.async {
-                    let detailVC = CommunityDetailViewController(postId: response.postId)
+                    let detailVC = CommunityViewController()
                     self.navigationController?.pushViewController(detailVC, animated: true)
                 }
             case .failure(let error):

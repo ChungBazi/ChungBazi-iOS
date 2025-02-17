@@ -21,12 +21,9 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     weak var delegate: ProfileEditViewDelegate?
     private lazy var selectedCharacter = userInfoData.getCharacter()
     
-    private let profileImageView = UIImageView().then {
+    private let profileImageView = CustomImageView().then {
         $0.backgroundColor = .green300
-        $0.image = .basicBaro
-        $0.contentMode = .scaleAspectFit
-        $0.clipsToBounds = true
-        $0.createRoundedView(radius: 78)
+        $0.createRoundedView(radius: 70.5)
     }
     
     public let settingCharacterBtn = CustomButton(backgroundColor: .white, titleText: "캐릭터 설정", titleColor: .black, borderWidth: 1, borderColor: .gray400)
@@ -61,13 +58,24 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         fatalError("init(coder:) has not been implemented")
     }
     
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        profileImageView.setImageMargins(
+            top: -7.93,
+            left: -12.23,
+            right: -10.87,
+            bottom: -15.18
+        )
+    }
+    
     private func setupUI() {
         addSubviews(profileImageView, settingCharacterBtn, nickNameTitle, nickNameTextField, nickNameUnderLine, emailTitle, emailLabel, emailUnderLine, completeBtn)
         
         profileImageView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(26)
             $0.centerX.equalToSuperview()
-            $0.size.equalTo(156)
+            $0.size.equalTo(141)
         }
         settingCharacterBtn.snp.makeConstraints {
             $0.top.equalTo(profileImageView.snp.bottom).offset(33)

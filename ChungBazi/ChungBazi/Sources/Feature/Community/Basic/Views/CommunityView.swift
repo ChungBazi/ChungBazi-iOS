@@ -188,10 +188,17 @@ final class CommunityView: UIView {
         DispatchQueue.main.async {
             self.posts = posts
             self.totalPostCountLabel.text = "총 \(totalPostCount)개의 글"
+
             self.collectionView.reloadData()
             self.collectionView.layoutIfNeeded()
-            let contentHeight = self.collectionView.contentSize.height
-            self.collectionViewHeightConstraint?.update(offset: contentHeight)
+
+            let contentHeight = self.collectionView.collectionViewLayout.collectionViewContentSize.height
+
+            if contentHeight > 0 {
+                self.collectionViewHeightConstraint?.update(offset: contentHeight)
+            }
+
+            self.layoutIfNeeded()
         }
     }
     

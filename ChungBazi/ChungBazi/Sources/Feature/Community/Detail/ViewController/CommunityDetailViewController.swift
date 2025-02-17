@@ -95,6 +95,7 @@ final class CommunityDetailViewController: UIViewController {
             $0.leading.trailing.equalToSuperview()
         }
         scrollView.isScrollEnabled = false
+        scrollView.delegate = self
         
         scrollView.addSubviews(communityDetailView)
         communityDetailView.snp.makeConstraints {
@@ -164,6 +165,8 @@ final class CommunityDetailViewController: UIViewController {
         isFetching = true
         showLoading()
 
+        print("📌 댓글 요청: postId=\(postId), cursor=\(nextCursor)")
+
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
             guard let self = self else { return }
             
@@ -203,15 +206,16 @@ final class CommunityDetailViewController: UIViewController {
                     )
                 }
 
-                if nextCursor == 0 {
+                if self.nextCursor == 0 {
                     self.comments = newComments
                 } else {
                     self.comments.append(contentsOf: newComments)
                 }
 
-                if response.nextCursor != nextCursor {
+                print("📌 받은 nextCursor: \(response.nextCursor), hasNext: \(response.hasNext)")
+
+                if response.nextCursor > 0 {
                     self.nextCursor = response.nextCursor
-                    self.hasNext = response.hasNext
                 } else {
                     self.hasNext = false
                 }
@@ -226,49 +230,32 @@ final class CommunityDetailViewController: UIViewController {
         }
     }
     
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.height
-        
-        if offsetY > contentHeight - frameHeight - 50 && hasNext && !isFetching {
-            fetchCommentData()
-        }
-    }
-    
     @objc private func sendButtonTapped() {
         guard let commentText = commentTextField.text, !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("⚠️ 댓글이 비어있습니다.")
             return
         }
-        
+
         let commentRequest = CommunityCommentRequestDto(postId: postId, content: commentText)
-        
+
         communityService.postCommunityComment(body: commentRequest) { [weak self] result in
             guard let self = self else { return }
-            
+
             switch result {
-            case .success(let response):
-                let newComment = CommunityDetailCommentModel(
-                    postId: response.postId,
-                    content: response.content,
-                    formattedCreatedAt: response.formattedCreatedAt,
-                    commentId: response.commentId,
-                    userId: response.userId,
-                    userName: response.userName,
-                    reward: response.reward,
-                    characterImg: response.characterImg
-                )
-                
+            case .success:
                 DispatchQueue.main.async {
-                    self.comments.insert(newComment, at: 0)
-                    self.communityDetailView.updateComments(self.comments)
                     self.commentTextField.text = ""
                     self.view.endEditing(true)
-                    self.fetchPostData()
+
+                    self.nextCursor = 0
+                    self.hasNext = true
+                    self.comments.removeAll()
+                    self.communityDetailView.updateComments(self.comments)
+
                     self.fetchCommentData()
+                    self.fetchPostData()
                 }
-                
+
             case .failure(let error):
                 print("❌ 댓글 작성 실패: \(error.localizedDescription)")
             }
@@ -312,5 +299,20 @@ final class CommunityDetailViewController: UIViewController {
 
         fetchPostData()
         fetchCommentData()
+    }
+}
+
+extension CommunityDetailViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.height
+
+        print("📌 스크롤 감지: offsetY: \(offsetY), contentHeight: \(contentHeight), frameHeight: \(frameHeight)")
+
+        if offsetY > contentHeight - frameHeight - 50 && hasNext && !isFetching {
+            print("📌 추가 댓글 요청 시작")
+            fetchCommentData()
+        }
     }
 }

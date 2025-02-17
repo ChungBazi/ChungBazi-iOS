@@ -20,6 +20,8 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     
     private let refreshControl = UIRefreshControl()
     
+    private var postIdSet: Set<Int> = []
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -28,7 +30,30 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        fetchData(for: 0, cursor: 0)
+
+        self.postIdSet.removeAll()
+        self.communityPosts.removeAll()
+        self.communityView.updatePosts([], totalPostCount: 0)
+
+        self.nextCursor = 0
+        self.hasNext = true
+        self.isFetching = false
+
+        fetchData(for: currentCategoryIndex, cursor: 0)
+    }
+    
+    override func viewDidDisappear(_ animated: Bool) {
+        super.viewDidDisappear(animated)
+
+        NotificationCenter.default.removeObserver(self)
+
+        if let communityVC = navigationController?.viewControllers.first(where: { $0 is CommunityViewController }) as? CommunityViewController {
+            communityVC.postIdSet.removeAll()
+            communityVC.communityPosts.removeAll()
+            communityVC.hasNext = true
+            communityVC.nextCursor = 0
+            communityVC.isFetching = false
+        }
     }
     
     private func setupUI() {
@@ -52,16 +77,25 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     @objc private func handleRefresh() {
         self.nextCursor = 0
         self.hasNext = true
-        self.communityPosts.removeAll()
+        self.postIdSet.removeAll()
         fetchData(for: currentCategoryIndex, cursor: 0)
     }
-    
+
     private func fetchData(for categoryIndex: Int, cursor: Int) {
-        guard !isFetching, hasNext else { return }
+        guard !isFetching, hasNext else {
+            print("❌ 데이터를 가져오지 않음: isFetching: \(isFetching), hasNext: \(hasNext)")
+            return
+        }
+
         isFetching = true
         showLoading()
 
-        guard let category = CommunityCategory.allCases[safe: categoryIndex] else { return }
+        guard let category = CommunityCategory.allCases[safe: categoryIndex] else {
+            print("❌ 유효하지 않은 카테고리 인덱스: \(categoryIndex)")
+            return
+        }
+
+        print("📡 데이터 요청 시작 - 카테고리: \(category.rawValue), 커서: \(cursor)")
 
         communityService.getCommunityPosts(category: category.rawValue, cursor: cursor) { [weak self] result in
             guard let self = self else { return }
@@ -75,27 +109,81 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
             switch result {
             case .success(let success):
                 DispatchQueue.main.async {
-                    let newPosts = self.mapCommunityPosts(from: success?.postList ?? [])
+                    let rawPosts = success?.postList ?? []
+                    print("📌 서버에서 받은 원본 게시글 개수: \(rawPosts.count)")
+
+                    let newPosts = self.mapCommunityPosts(from: rawPosts)
+                    print("📌 변환 후 게시글 개수: \(newPosts.count)")
+
+                    let filteredPosts = newPosts.filter { !self.postIdSet.contains($0.postId) }
+                    print("📌 필터링 후 중복 제거된 게시글 개수: \(filteredPosts.count)")
+
+                    self.postIdSet.formUnion(filteredPosts.map { $0.postId })
 
                     if cursor == 0 {
-                        self.communityPosts = newPosts
+                        self.communityPosts = filteredPosts
                     } else {
-                        self.communityPosts.append(contentsOf: newPosts)
+                        if !filteredPosts.isEmpty {
+                            self.communityPosts.append(contentsOf: filteredPosts)
+                        }
                     }
 
                     self.communityView.updatePosts(self.communityPosts, totalPostCount: success?.totalPostCount ?? 0)
-
-                    print("📌 현재 커서: \(cursor), 받은 nextCursor: \(success?.nextCursor ?? -1), hasNext: \(success?.hasNext ?? false)")
 
                     if let next = success?.nextCursor, next > cursor {
                         self.nextCursor = next
                     }
 
                     self.hasNext = success?.hasNext ?? false
+
+                    self.communityView.layoutIfNeeded()
                 }
+
             case .failure(let error):
                 print("❌ 네트워크 요청 실패: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    self.showRetryButton()
+                }
             }
+        }
+    }
+    
+    private func showRetryButton() {
+        let retryButton = UIButton(type: .system)
+        retryButton.setTitle("다시 시도", for: .normal)
+        retryButton.addTarget(self, action: #selector(retryFetchData), for: .touchUpInside)
+        
+        retryButton.frame = CGRect(x: 50, y: 100, width: 200, height: 50)
+        retryButton.center = view.center
+        retryButton.backgroundColor = .systemRed
+        retryButton.setTitleColor(.white, for: .normal)
+        retryButton.layer.cornerRadius = 10
+        
+        view.addSubview(retryButton)
+    }
+    
+    @objc private func retryFetchData() {
+        view.subviews.forEach { subview in
+            if let button = subview as? UIButton, button.title(for: .normal) == "다시 시도" {
+                button.removeFromSuperview()
+            }
+        }
+        fetchData(for: currentCategoryIndex, cursor: nextCursor)
+    }
+    
+    private func fetchMoreDataIfNeeded() {
+        guard hasNext, !isFetching else { return }
+
+        let contentHeight = communityView.scrollView.contentSize.height
+        let frameHeight = communityView.scrollView.frame.height
+
+        if contentHeight == 0 {
+            print("❌ contentHeight가 0이므로 추가 데이터 요청을 중단합니다.")
+            return
+        }
+
+        if contentHeight < frameHeight {
+            fetchMoreData()
         }
     }
     
@@ -105,9 +193,14 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     }
     
     private func mapCommunityPosts(from posts: [Post]) -> [CommunityPost] {
-        return posts.map { post in
-            CommunityPost(
-                postId: post.postId ?? 0,
+        let mappedPosts = posts.compactMap { post -> CommunityPost? in
+            guard let postId = post.postId else {
+                print("⚠️ 변환 중 postId가 nil인 게시글 발견, 제외")
+                return nil
+            }
+
+            let communityPost = CommunityPost(
+                postId: postId,
                 title: post.title ?? "제목 없음",
                 content: post.content ?? "내용 없음",
                 category: CommunityCategory(rawValue: post.category ?? "") ?? .all,
@@ -121,7 +214,11 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
                 characterImg: post.characterImg ?? "",
                 thumbnailUrl: post.thumbnailUrl ?? ""
             )
+
+            return communityPost
         }
+    
+        return mappedPosts
     }
     
     func didSelectCategory(index: Int) {
@@ -129,6 +226,9 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
         self.nextCursor = 0
         self.hasNext = true
         self.communityPosts.removeAll()
+        self.postIdSet.removeAll()
+
+
         fetchData(for: index, cursor: 0)
     }
     
