@@ -172,9 +172,9 @@ final class CommunityDetailViewController: UIViewController {
                 guard let response = response else { return }
 
                 let newComments = response.commentsList
-                if newComments.isEmpty { return }
+                if newComments!.isEmpty { return }
 
-                self.comments.append(contentsOf: newComments.compactMap { comment in
+                self.comments.append(contentsOf: newComments!.compactMap { comment in
                     guard let postId = comment.postId,
                           let content = comment.content,
                           let formattedCreatedAt = comment.formattedCreatedAt,
@@ -199,7 +199,7 @@ final class CommunityDetailViewController: UIViewController {
                     )
                 })
 
-                self.nextCursor = response.nextCursor
+                self.nextCursor = response.nextCursor!
                 self.hasNext = response.hasNext
 
                 DispatchQueue.main.async {
