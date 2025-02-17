@@ -20,7 +20,7 @@ struct CommunityDetailPostModel {
     let postId: Int
     let title: String
     let content: String
-    let category: String
+    let category: CommunityCategory
     let formattedCreatedAt: String
     let views: Int
     let commentCount: Int
@@ -30,4 +30,8 @@ struct CommunityDetailPostModel {
     let reward: String
     let characterImg: String?
     let imageUrls: [String]?
+
+    var categoryDisplayName: String {
+        return category.displayName
+    }
 }

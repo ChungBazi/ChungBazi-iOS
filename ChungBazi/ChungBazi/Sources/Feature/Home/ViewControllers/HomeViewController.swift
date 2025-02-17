@@ -177,8 +177,8 @@ final class HomeViewController: UIViewController {
         chatbotButtonContainer.addSubview(chatbotButton)
         
         chatbotButton.snp.makeConstraints { make in
-            make.bottom.equalToSuperview().offset(-4)
-            make.trailing.equalToSuperview().offset(-8)
+            make.bottom.equalToSuperview().offset(-1)
+            make.trailing.equalToSuperview().offset(-3)
             make.width.height.equalTo(78)
         }
 
@@ -188,7 +188,8 @@ final class HomeViewController: UIViewController {
         chatbotButton.addSubview(chatbotIcon)
 
         chatbotIcon.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.bottom.equalToSuperview().offset(-4)
+            make.trailing.equalToSuperview().offset(-1)
             make.width.height.equalTo(73)
         }
         secondRowStackView.addArrangedSubview(chatbotButtonContainer)
@@ -204,11 +205,23 @@ final class HomeViewController: UIViewController {
         navigationController?.pushViewController(searchResultVC, animated: true)
     }
     
+    private let categoryMapping: [String: String] = [
+        "일자리": "JOBS",
+        "주거": "HOUSING",
+        "교육": "EDUCATION",
+        "복지,문화": "WELFARE_CULTURE",
+        "참여,권리": "PARTICIPATION_RIGHTS"
+    ]
+    
     @objc private func categoryButtonTapped(_ sender: UIButton) {
-        guard let categoryPolicy = PolicyData.getPolicies(for: categories[sender.tag].title) else { return }
-        
+        let categoryTitle = categories[sender.tag].title
+        guard let categoryKey = categoryMapping[categoryTitle] else {
+            print("⚠️ 지원되지 않는 카테고리: \(categoryTitle)")
+            return
+        }
         let categoryVC = CategoryPolicyViewController()
-        categoryVC.configure(categoryTitle: categoryPolicy.title, policies: categoryPolicy.policies)
+        categoryVC.configure(categoryTitle: categoryTitle)
+        categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
         navigationController?.pushViewController(categoryVC, animated: true)
     }
 }

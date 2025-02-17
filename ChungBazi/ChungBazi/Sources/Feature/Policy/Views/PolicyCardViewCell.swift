@@ -17,7 +17,6 @@ final class PolicyCardViewCell: UITableViewCell {
     var showControls: Bool = false {
         didSet {
             checkBoxButton.isHidden = !showControls
-            deleteButton.isHidden = !showControls
 
             containerView.snp.updateConstraints { make in
                 make.height.equalTo(showControls ? 131 : 94)
@@ -36,14 +35,7 @@ final class PolicyCardViewCell: UITableViewCell {
         button.isHidden = true
         return button
     }()
-
-    private let deleteButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "x_icon"), for: .normal)
-        button.isHidden = true 
-        return button
-    }()
-
+    
     private let badgeImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
@@ -94,8 +86,8 @@ final class PolicyCardViewCell: UITableViewCell {
 
     private func setupLayout() {
         contentView.addSubview(containerView)
-        containerView.addSubviews(checkBoxButton, deleteButton, badgeImageView, badgeTextLabel, titleLabel, periodLabel)
-
+        containerView.addSubviews(checkBoxButton, badgeImageView, badgeTextLabel, titleLabel, periodLabel)
+        
         containerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
             make.top.bottom.equalToSuperview().inset(8)
@@ -107,16 +99,10 @@ final class PolicyCardViewCell: UITableViewCell {
             make.top.equalToSuperview().offset(8)
             make.width.height.equalTo(24)
         }
-
-        deleteButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-16)
-            make.top.equalToSuperview().offset(8)
-            make.width.height.equalTo(24)
-        }
-
+        
         badgeImageView.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(16)
-            make.top.equalToSuperview().offset(16)
+            make.leading.equalToSuperview().offset(17)
+            make.top.equalToSuperview().offset(18)
             make.width.equalTo(52)
             make.height.equalTo(60)
         }
@@ -126,20 +112,19 @@ final class PolicyCardViewCell: UITableViewCell {
         }
 
         titleLabel.snp.makeConstraints { make in
-            make.leading.equalTo(badgeImageView.snp.trailing).offset(16)
-            make.trailing.equalTo(deleteButton.snp.leading).offset(32)
+            make.leading.equalTo(badgeImageView.snp.trailing).offset(17)
+            make.trailing.equalToSuperview().inset(17)
             make.top.equalTo(badgeImageView.snp.top)
         }
 
         periodLabel.snp.makeConstraints { make in
             make.leading.equalTo(titleLabel)
-            make.top.equalTo(titleLabel.snp.bottom).offset(4)
+            make.top.equalTo(titleLabel.snp.bottom).offset(6)
         }
     }
-
+    
     private func configureActions() {
         checkBoxButton.addTarget(self, action: #selector(handleCheckBoxTap), for: .touchUpInside)
-        deleteButton.addTarget(self, action: #selector(handleDeleteButtonTap), for: .touchUpInside)
     }
 
     @objc private func handleCheckBoxTap() {
@@ -147,22 +132,39 @@ final class PolicyCardViewCell: UITableViewCell {
         selectionHandler?(checkBoxButton.isSelected)
     }
 
-    @objc private func handleDeleteButtonTap() {
-        deleteHandler?()
-    }
-
     func setCheckBoxState(isSelected: Bool) {
         checkBoxButton.isSelected = isSelected
     }
 
     func configure(with item: PolicyItem, keyword: String?) {
-        badgeImageView.image = badgeImage(for: item.badge)
-        badgeTextLabel.text = item.badge
-        badgeTextLabel.textColor = badgeTextColor(for: item.badge)
-        titleLabel.text = "\(item.region) \(item.title)"
-        periodLabel.text = item.period
+        titleLabel.text = item.policyName
+        
+        let formattedPeriod = formatPeriod(startDate: item.startDate, endDate: item.endDate)
+        periodLabel.text = formattedPeriod
+
+        let badgeText = item.dday == 0 ? "D-0" : (item.dday < 0 ? "D\(item.dday)" : "마감")
+        badgeTextLabel.text = badgeText
+        badgeTextLabel.textColor = badgeTextColor(for: badgeText)
+        badgeImageView.image = badgeImage(for: badgeText)
     }
 
+    private func formatPeriod(startDate: String, endDate: String) -> String {
+        let inputFormatter = DateFormatter()
+        inputFormatter.dateFormat = "yyyy-MM-dd"
+
+        let outputFormatter = DateFormatter()
+        outputFormatter.dateFormat = "yyyy.MM.dd"
+
+        if let start = inputFormatter.date(from: startDate),
+           let end = inputFormatter.date(from: endDate) {
+            let startFormatted = outputFormatter.string(from: start)
+            let endFormatted = outputFormatter.string(from: end)
+            return "\(startFormatted) - \(endFormatted)"
+        }
+
+        return "\(startDate) - \(endDate)"
+    }
+    
     private func badgeImage(for badge: String) -> UIImage? {
         switch badge {
         case "마감":

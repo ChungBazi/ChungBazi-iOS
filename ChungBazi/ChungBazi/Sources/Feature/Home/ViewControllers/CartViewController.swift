@@ -89,11 +89,11 @@ final class CartViewController: UIViewController {
     private func loadCartData() {
         cartItems = [
             "일자리": [
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-1", policyId: 30)
+                PolicyItem(policyId: 30, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 1)
             ],
             "주거": [
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-5", policyId: 31),
-                PolicyItem(title: "<노원구 1인가구 안심홈 3종 세트>", region: "노원구", period: "2024.12.11 - 2025.01.31", badge: "D-11", policyId: 32)
+                PolicyItem(policyId: 31, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 5),
+                PolicyItem(policyId: 32, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 11)
             ]
         ]
         tableView.reloadData()
@@ -198,12 +198,8 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
                     self.selectedItems.remove(indexPath)
                 }
             }
-
-            cell.deleteHandler = { [weak self] in
-                guard let self = self else { return }
-                self.deleteItem(at: indexPath)
-                self.tableView.reloadData()
-            }
+            self.tableView.reloadData()
+            
             cell.showControls = true 
         }
         return cell

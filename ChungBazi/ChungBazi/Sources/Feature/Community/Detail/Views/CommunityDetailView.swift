@@ -25,6 +25,8 @@ final class CommunityDetailView: UIView {
         $0.rowHeight = UITableView.automaticDimension
         $0.estimatedRowHeight = 136
         $0.isScrollEnabled = false
+        $0.backgroundColor = .clear
+        $0.isUserInteractionEnabled = false
     }
     
     private var comments: [CommunityDetailCommentModel] = []

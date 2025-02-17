@@ -24,7 +24,13 @@ final class CommunityDetailCommentCell: UITableViewCell {
         $0.textColor = .gray300
         $0.font = .ptdMediumFont(ofSize: 14)
     }
-    private let likeButton = UIButton.createWithImage(image: .likeIcon, target: self, action: #selector(likeBtnTapped))
+    
+    private var isLiked: Bool = false
+    private let likeButton = UIButton.createWithImage(
+        image: UIImage.likeIcon.withRenderingMode(.alwaysOriginal),
+        target: self,
+        action: #selector(likeBtnTapped)
+    )
     private let likeCountLabel = UILabel().then {
         $0.text = "0"
         $0.textColor = .gray500
@@ -99,7 +105,10 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     
     @objc private func likeBtnTapped() {
-        
+        isLiked.toggle()
+        let image = isLiked ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+                            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(image, for: .normal)
     }
     
     @objc private func commentBtnTapped() {
