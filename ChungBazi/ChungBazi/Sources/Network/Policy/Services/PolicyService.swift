@@ -42,6 +42,11 @@ final class PolicyService: NetworkManager {
         requestOptional(target: .fetchCategoryPolicy(category: category, cursor: cursor, order: order), decodingType: PolicyListResponseDto.self, completion: completion)
     }
     
+    /// 정책 추천 조회 API
+    public func fetchRecommendPolicy(category: String, cursor: Int, order: String, completion: @escaping (Result<RecommendPolicyListResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .fetchRecommendPolicy(category: category, cursor: cursor, order: order), decodingType: RecommendPolicyListResponseDto.self, completion: completion)
+    }
+    
     /// 정책 상세 조회 API
     public func fetchPolicyDetail(policyId: Int, completion: @escaping (Result<PolicyDetailResponseDto?, NetworkError>) -> Void) {
         requestOptional(target: .fetchPolicyDetail(policyId: policyId), decodingType: PolicyDetailResponseDto.self, completion: completion)
@@ -52,5 +57,8 @@ final class PolicyService: NetworkManager {
         requestOptional(target: .fetchCalendarPolicyList(yearMonth: yearMonth), decodingType: CalendarPolicyListResponseDto.self, completion: completion)
     }
     
-    /// 정책 추천 조회
+    /// 캘린더 정책 상세 조회 API
+    public func fetchCalendarPolicyDetail(cartId: Int, completion: @escaping (Result<CalendarPolicyDetailResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .fetchCalendarPolicyDetail(cartId: cartId), decodingType: CalendarPolicyDetailResponseDto.self, completion: completion)
+    }
 }
