@@ -28,6 +28,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
     private var isLiked: Bool = false
     private let likeButton = UIButton.createWithImage(
         image: UIImage.likeIcon.withRenderingMode(.alwaysOriginal),
+        tintColor: .gray500,
         target: self,
         action: #selector(likeBtnTapped)
     )
@@ -36,7 +37,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
         $0.textColor = .gray500
         $0.font = .ptdMediumFont(ofSize: 14)
     }
-    private let commentButton = UIButton.createWithImage(image: .commentIcon, target: self, action: #selector(commentBtnTapped))
+    private let commentButton = UIButton.createWithImage(image: .commentIcon, tintColor: .gray500, target: self, action: #selector(commentBtnTapped))
     private let commentCountLabel = UILabel().then {
         $0.text = "0"
         $0.textColor = .gray500
@@ -70,7 +71,6 @@ final class CommunityDetailCommentCell: UITableViewCell {
         commentLabel.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.height.greaterThanOrEqualTo(20)
         }
         
         createdAtLabel.snp.makeConstraints {
@@ -80,8 +80,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
         
         likeButton.snp.makeConstraints {
             $0.top.equalTo(createdAtLabel.snp.bottom).offset(8)
-            $0.bottom.equalToSuperview().inset(Constants.gutter)
-            $0.leading.equalToSuperview().inset(12)
+            $0.leading.equalToSuperview().inset(Constants.gutter)
+            $0.bottom.equalToSuperview().inset(12)
         }
         
         likeCountLabel.snp.makeConstraints {

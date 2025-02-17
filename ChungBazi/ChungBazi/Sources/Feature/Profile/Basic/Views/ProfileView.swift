@@ -26,11 +26,9 @@ final class ProfileView: UIView {
     private let scrollView = UIScrollView()
     private let contentView = UIView()
     
-    private let profileImageView = UIImageView().then {
+    private let profileImageView = CustomImageView().then {
         $0.backgroundColor = .green300
-        $0.contentMode = .scaleAspectFit
-        $0.clipsToBounds = true
-        $0.createRoundedView(radius: 57)
+        $0.createRoundedView(radius: 56)
     }
     private let nameLabel = T20_M(text: "")
     private let editProfileBtn = UIButton.createWithImage(
@@ -83,6 +81,13 @@ final class ProfileView: UIView {
         tableView.snp.updateConstraints {
             $0.height.equalTo(totalHeight)
         }
+        
+        profileImageView.setImageMargins(
+            top: -6.28,
+            left: -9.69,
+            right: -8.62,
+            bottom: -12.03
+        )
     }
     
     private func setupUI() {
@@ -98,12 +103,12 @@ final class ProfileView: UIView {
         
         contentView.addSubviews(profileImageView, nameLabel, editProfileBtn, emailLabel, myRewardView, myCharacterView, gray100View, tableView)
         profileImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(23)
+            $0.top.equalToSuperview().inset(15)
             $0.centerX.equalToSuperview()
-            $0.size.equalTo(114)
+            $0.size.equalTo(112)
         }
         nameLabel.snp.makeConstraints {
-            $0.top.equalTo(profileImageView.snp.bottom).offset(40)
+            $0.top.equalTo(profileImageView.snp.bottom).offset(17)
             $0.centerX.equalToSuperview()
         }
         editProfileBtn.snp.makeConstraints {

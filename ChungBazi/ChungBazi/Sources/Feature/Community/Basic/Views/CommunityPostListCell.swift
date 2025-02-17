@@ -80,7 +80,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         postContentView.addSubviews(categoryLabel, postTitleLabel, contentLabel, thumbnailImgView)
         postContentView.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(10)
-            $0.leading.trailing.equalToSuperview()
+            $0.leading.trailing.width.equalToSuperview().priority(.high)
             $0.bottom.equalTo(contentLabel.snp.bottom)
         }
         
@@ -109,7 +109,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         
         addSubviews(separatorView)
         separatorView.snp.makeConstraints {
-            $0.top.equalTo(socialInfoStackView.snp.bottom).offset(17)
+            $0.top.equalTo(socialInfoStackView.snp.bottom).offset(17).priority(.high)
             $0.leading.trailing.bottom.equalToSuperview()
             $0.height.equalTo(1)
         }
