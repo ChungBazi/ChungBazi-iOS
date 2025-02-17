@@ -66,6 +66,14 @@ final class PolicyCardViewCell: UITableViewCell {
         return label
     }()
 
+    private let textStackView: UIStackView = {
+        let stackView = UIStackView()
+        stackView.axis = .vertical
+        stackView.spacing = 8
+        stackView.alignment = .leading
+        return stackView
+    }()
+
     private let containerView: UIView = {
         let view = UIView()
         view.backgroundColor = .white
@@ -86,7 +94,10 @@ final class PolicyCardViewCell: UITableViewCell {
 
     private func setupLayout() {
         contentView.addSubview(containerView)
-        containerView.addSubviews(checkBoxButton, badgeImageView, badgeTextLabel, titleLabel, periodLabel)
+        containerView.addSubviews(checkBoxButton, badgeImageView, badgeTextLabel, textStackView)
+
+        textStackView.addArrangedSubview(titleLabel)
+        textStackView.addArrangedSubview(periodLabel)
         
         containerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
@@ -111,15 +122,10 @@ final class PolicyCardViewCell: UITableViewCell {
             make.center.equalTo(badgeImageView)
         }
 
-        titleLabel.snp.makeConstraints { make in
+        textStackView.snp.makeConstraints { make in
             make.leading.equalTo(badgeImageView.snp.trailing).offset(17)
             make.trailing.equalToSuperview().inset(17)
-            make.top.equalTo(badgeImageView.snp.top)
-        }
-
-        periodLabel.snp.makeConstraints { make in
-            make.leading.equalTo(titleLabel)
-            make.top.equalTo(titleLabel.snp.bottom).offset(6)
+            make.centerY.equalTo(badgeImageView)
         }
     }
     
