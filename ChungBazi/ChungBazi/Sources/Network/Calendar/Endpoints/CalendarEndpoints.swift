@@ -11,21 +11,38 @@ import KeychainSwift
 
 enum CalendarEndpoints {
     case getCalendarPolicies(yearMonth: String)
+    case updateCalendarDocumentsDetail(cartId: Int, data: [UpdateDocuments])
+    case postCalendarDocuments(cartId: Int, data: PostDocumentsRequestDto)
+    case updateCalendarDocumentsCheck(cartId: Int, data: [UpdateCheck])
 }
 
 extension CalendarEndpoints: TargetType {
     
     public var baseURL: URL {
-        guard let url = URL(string: API.baseURL) else {
-            fatalError("잘못된 URL")
+        switch self {
+        case .getCalendarPolicies:
+            guard let url = URL(string: API.baseURL) else {
+                fatalError("잘못된 URL")
+            }
+            return url
+        default :
+            guard let url = URL(string: API.calendarURL) else {
+                fatalError("잘못된 URL")
+            }
+            return url
         }
-        return url
     }
     
     var path: String {
         switch self {
         case .getCalendarPolicies:
             return "/policies/calendar"
+        case .updateCalendarDocumentsDetail(let cartId, _):
+            return "/\(cartId)/documents"
+        case .postCalendarDocuments(let cartId, _):
+            return "/\(cartId)/documents"
+        case .updateCalendarDocumentsCheck(let cartId, _):
+            return "/\(cartId)/documents/check"
         }
     }
     
@@ -33,6 +50,12 @@ extension CalendarEndpoints: TargetType {
         switch self {
         case .getCalendarPolicies:
             return .get
+        case .updateCalendarDocumentsDetail:
+            return .patch
+        case .postCalendarDocuments:
+            return .post
+        case .updateCalendarDocumentsCheck:
+            return .put
         }
     }
     
@@ -41,6 +64,12 @@ extension CalendarEndpoints: TargetType {
         case .getCalendarPolicies(let yearMonth):
             let parameters: [String: Any] = ["yearMonth": yearMonth]
             return .requestParameters(parameters: parameters, encoding: URLEncoding.queryString)
+        case .updateCalendarDocumentsDetail(_, let data):
+            return .requestJSONEncodable(data)
+        case .postCalendarDocuments(_, let data):
+            return .requestJSONEncodable(data)
+        case .updateCalendarDocumentsCheck(_, let data):
+            return .requestJSONEncodable(data)
         }
     }
     
