@@ -27,7 +27,7 @@ struct CommunityRequestDTO: Codable {
     let cursor: Int
     let size: Int
     
-    init(category: CommunityCategory, cursor: Int = 0, size: Int = 10) {
+    init(category: CommunityCategory, cursor: Int, size: Int = 10) {
         self.category = category
         self.cursor = cursor
         self.size = size

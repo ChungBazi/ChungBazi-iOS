@@ -23,7 +23,7 @@ final class CommunityDetailView: UIView {
     private let commentTableView = UITableView().then {
         $0.register(CommunityDetailCommentCell.self, forCellReuseIdentifier: CommunityDetailCommentCell.identifier)
         $0.rowHeight = UITableView.automaticDimension
-        $0.estimatedRowHeight = 136
+        $0.estimatedRowHeight = 200
         $0.isScrollEnabled = false
         $0.backgroundColor = .clear
         $0.isUserInteractionEnabled = false

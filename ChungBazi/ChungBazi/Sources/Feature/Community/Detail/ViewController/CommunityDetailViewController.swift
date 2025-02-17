@@ -20,8 +20,11 @@ final class CommunityDetailViewController: UIViewController {
     private var postData: CommunityDetailPostModel?
     private var comments: [CommunityDetailCommentModel] = []
     
+    private var isFetching: Bool = false
     private var nextCursor: Int = 0
     private var hasNext: Bool = true
+    
+    private let refreshControl = UIRefreshControl()
     
     private var commentInputBottomConstraint: Constraint?
     
@@ -44,6 +47,9 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     private let sendButton = UIButton.createWithImage(image: .sendIcon, tintColor: .blue700, target: self, action: #selector(sendButtonTapped))
+    private let backgroundView = UIView().then {
+        $0.backgroundColor = .white
+    }
     
     init(postId: Int) {
         self.postId = postId
@@ -92,6 +98,7 @@ final class CommunityDetailViewController: UIViewController {
             $0.leading.trailing.equalToSuperview()
         }
         scrollView.isScrollEnabled = false
+        scrollView.delegate = self
         
         scrollView.addSubviews(communityDetailView)
         communityDetailView.snp.makeConstraints {
@@ -100,17 +107,23 @@ final class CommunityDetailViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(58)
         }
         
+        view.addSubview(backgroundView)
+        backgroundView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            commentInputBottomConstraint = $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(10).constraint
+            $0.height.equalTo(68)
+        }
+        
         view.addSubview(commentInputView)
         commentInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            commentInputBottomConstraint = $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).constraint
-            $0.height.equalTo(58)
+            commentInputBottomConstraint = $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(10).constraint
+            $0.height.equalTo(68)
         }
         commentInputView.addSubview(commentTextField)
         commentTextField.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.top.equalToSuperview().inset(10)
-            $0.bottom.equalToSuperview()
+            $0.top.bottom.equalToSuperview().inset(10)
         }
         commentTextField.addSubview(sendButton)
         sendButton.snp.makeConstraints {
@@ -142,12 +155,12 @@ final class CommunityDetailViewController: UIViewController {
                     characterImg: success.characterImg,
                     imageUrls: success.imageUrls
                 )
-
+                
                 DispatchQueue.main.async {
                     self.updateNavigationBarTitle(with: self.postData?.categoryDisplayName ?? "커뮤니티")
                     self.communityDetailView.updatePost(self.postData!)
                 }
-
+                
             case .failure(let error):
                 print("❌ 게시글 불러오기 실패: \(error.localizedDescription)")
             }
@@ -156,25 +169,28 @@ final class CommunityDetailViewController: UIViewController {
     
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
+        guard hasNext, !isFetching else { return }
+        
+        isFetching = true
         showLoading()
         
-        guard hasNext else { return }
-
+        print("📌 댓글 요청: postId=\(postId), cursor=\(nextCursor)")
+        
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 self.hideLoading()
+                self.isFetching = false
+                self.refreshControl.endRefreshing()
             }
-
+            
             switch result {
             case .success(let response):
                 guard let response = response else { return }
-
-                let newComments = response.commentsList
-                if newComments!.isEmpty { return }
-
-                self.comments.append(contentsOf: newComments!.compactMap { comment in
+                let commentList = response.commentsList
+                
+                let newComments = commentList.compactMap { comment -> CommunityDetailCommentModel? in
                     guard let postId = comment.postId,
                           let content = comment.content,
                           let formattedCreatedAt = comment.formattedCreatedAt,
@@ -186,7 +202,7 @@ final class CommunityDetailViewController: UIViewController {
                         print("⚠️ 일부 댓글 데이터가 nil입니다. 스킵합니다.")
                         return nil
                     }
-
+                    
                     return CommunityDetailCommentModel(
                         postId: postId,
                         content: content,
@@ -197,29 +213,28 @@ final class CommunityDetailViewController: UIViewController {
                         reward: reward,
                         characterImg: characterImg
                     )
-                })
-
-                self.nextCursor = response.nextCursor!
-                self.hasNext = response.hasNext
-
+                }
+                
+                if self.nextCursor == 0 {
+                    self.comments = newComments
+                } else {
+                    self.comments.append(contentsOf: newComments)
+                }
+                
+                print("📌 받은 nextCursor: \(response.nextCursor), hasNext: \(response.hasNext)")
+                
+                if response.nextCursor > 0 {
+                    self.nextCursor = response.nextCursor
+                } else {
+                    self.hasNext = false
+                }
                 DispatchQueue.main.async {
                     self.communityDetailView.updateComments(self.comments)
                 }
-
+                
             case .failure(let error):
                 print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
             }
-        }
-    }
-    
-    // MARK: - 페이징을 위한 스크롤 감지
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let offsetY = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let frameHeight = scrollView.frame.size.height
-        
-        if offsetY > contentHeight - frameHeight - 50 {
-            fetchCommentData()
         }
     }
     
@@ -235,25 +250,18 @@ final class CommunityDetailViewController: UIViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success(let response):
-                let newComment = CommunityDetailCommentModel(
-                    postId: response.postId,
-                    content: response.content,
-                    formattedCreatedAt: response.formattedCreatedAt,
-                    commentId: response.commentId,
-                    userId: response.userId,
-                    userName: response.userName,
-                    reward: response.reward,
-                    characterImg: response.characterImg
-                )
-                
+            case .success:
                 DispatchQueue.main.async {
-                    self.comments.insert(newComment, at: 0)
-                    self.communityDetailView.updateComments(self.comments)
                     self.commentTextField.text = ""
                     self.view.endEditing(true)
-                    self.fetchPostData()
+                    
+                    self.nextCursor = 0
+                    self.hasNext = true
+                    self.comments.removeAll()
+                    self.communityDetailView.updateComments(self.comments)
+                    
                     self.fetchCommentData()
+                    self.fetchPostData()
                 }
                 
             case .failure(let error):
@@ -263,26 +271,80 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     @objc private func keyboardWillShow(_ notification: Notification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect else { return }
-        let keyboardHeight = keyboardFrame.height
+        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+              let window = view.window else { return }
         
-        let bottomInset = view.window?.safeAreaInsets.bottom ?? 0
-        let adjustedHeight = keyboardHeight - bottomInset
+        let keyboardHeight = window.frame.height - keyboardFrame.origin.y
         
         UIView.animate(withDuration: 0.3) {
-            self.commentInputBottomConstraint?.update(offset: -adjustedHeight)
+            self.commentInputBottomConstraint?.deactivate()
+            self.commentInputBottomConstraint = nil
+            
+            self.commentInputView.snp.remakeConstraints { make in
+                make.leading.trailing.equalToSuperview()
+                make.bottom.equalToSuperview().offset(-keyboardHeight)
+                make.height.equalTo(68)
+            }
+            
             self.view.layoutIfNeeded()
         }
     }
     
     @objc private func keyboardWillHide(_ notification: Notification) {
-        UIView.animate(withDuration: 0.3) {
-            self.commentInputBottomConstraint?.update(offset: 0)
+        
+        UIView.animate(withDuration: 0.3, animations: {
+            self.commentInputBottomConstraint?.deactivate()
+            self.commentInputBottomConstraint = nil
+            
+            self.commentInputView.snp.remakeConstraints { make in
+                make.leading.trailing.equalToSuperview()
+                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+                make.height.equalTo(68)
+            }
+            
             self.view.layoutIfNeeded()
-        }
+        }, completion: { _ in
+            self.commentInputView.snp.remakeConstraints { make in
+                make.leading.trailing.equalToSuperview()
+                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
+                make.height.equalTo(68)
+            }
+            
+            self.view.layoutIfNeeded()
+        })
     }
     
     private func updateNavigationBarTitle(with title: String) {
         addCustomNavigationBar(titleText: title, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+    }
+    
+    private func setupRefreshControl() {
+        scrollView.refreshControl = refreshControl
+        refreshControl.addTarget(self, action: #selector(handleRefresh), for: .valueChanged)
+    }
+    
+    @objc private func handleRefresh() {
+        self.nextCursor = 0
+        self.hasNext = true
+        self.comments.removeAll()
+        self.communityDetailView.updateComments(self.comments)
+        
+        fetchPostData()
+        fetchCommentData()
+    }
+}
+
+extension CommunityDetailViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.height
+        
+        print("📌 스크롤 감지: offsetY: \(offsetY), contentHeight: \(contentHeight), frameHeight: \(frameHeight)")
+        
+        if offsetY > contentHeight - frameHeight - 50 && hasNext && !isFetching {
+            print("📌 추가 댓글 요청 시작")
+            fetchCommentData()
+        }
     }
 }
