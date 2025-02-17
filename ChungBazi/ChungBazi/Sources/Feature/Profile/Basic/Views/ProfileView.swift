@@ -103,12 +103,12 @@ final class ProfileView: UIView {
         
         contentView.addSubviews(profileImageView, nameLabel, editProfileBtn, emailLabel, myRewardView, myCharacterView, gray100View, tableView)
         profileImageView.snp.makeConstraints {
-            $0.top.equalToSuperview().inset(23)
+            $0.top.equalToSuperview().inset(15)
             $0.centerX.equalToSuperview()
             $0.size.equalTo(112)
         }
         nameLabel.snp.makeConstraints {
-            $0.top.equalTo(profileImageView.snp.bottom).offset(40)
+            $0.top.equalTo(profileImageView.snp.bottom).offset(17)
             $0.centerX.equalToSuperview()
         }
         editProfileBtn.snp.makeConstraints {
