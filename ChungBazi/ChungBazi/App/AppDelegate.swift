@@ -56,7 +56,18 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if (AuthApi.isKakaoTalkLoginUrl(url)) {
             return AuthController.handleOpenUrl(url: url)
         }
-        
+//        if url.scheme == "chungbazi", let host = url.host, host == "policy",
+//           let policyIdString = url.pathComponents.last, let policyId = Int(policyIdString) {
+//            
+//            let policyDetailVC = PolicyDetailViewController()
+//            policyDetailVC.policyId = policyId
+//            
+//            if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }),
+//               let rootVC = keyWindow.rootViewController as? UINavigationController {
+//                rootVC.pushViewController(policyDetailVC, animated: true)
+//            }
+//            return true
+//        }
         return false
     }
 
