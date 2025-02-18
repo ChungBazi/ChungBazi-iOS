@@ -54,7 +54,7 @@ extension CommunityEndpoints: TargetType {
     var task: Task {
         switch self {
         case .getCommunityPosts(let category, let cursor):
-            var parameters: [String: Any] = ["size": 10, "cursor": 0]
+            var parameters: [String: Any] = ["size": 10, "cursor": cursor]
             if !category.isEmpty {
                 parameters["category"] = category
             }

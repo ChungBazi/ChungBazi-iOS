@@ -12,29 +12,14 @@ import Moya
 
 final class CommunityWriteViewController: UIViewController, CommunityWriteViewDelegate, PHPickerViewControllerDelegate {
 
-    private let scrollView = UIScrollView()
     private let communityWriteView = CommunityWriteView()
     private let communityService = CommunityService()
-
-    private let buttonContainerView = UIView().then {
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 10
-        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        $0.layer.shadowColor = UIColor.black.cgColor
-        $0.layer.shadowOffset = CGSize(width: 0, height: 3)
-        $0.layer.shadowOpacity = 0.18
-        $0.layer.shadowRadius = 10
-    }
-
-    private let postButton = CustomActiveButton(title: "완료", isEnabled: false).then {
-        $0.addTarget(self, action: #selector(didTapPostButton), for: .touchUpInside)
-    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         communityWriteView.viewDelegate = self
-        enableKeyboardHandling(for: scrollView, inputView: buttonContainerView)
+        enableKeyboardHandling(for: communityWriteView.scrollView)
     }
 
     override func viewWillAppear(_ animated: Bool) {
@@ -49,38 +34,20 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
 
     private func setupUI() {
         view.backgroundColor = .gray50
-        fillSafeArea(position: .top, color: .white)
-        fillSafeArea(position: .bottom, color: .white)
         
         addCustomNavigationBar(titleText: "글쓰기", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
 
-        view.addSubview(scrollView)
-        scrollView.addSubview(communityWriteView)
+        view.addSubview(communityWriteView)
         
-        scrollView.snp.makeConstraints {
+        communityWriteView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.width.equalToSuperview()
         }
-
-        communityWriteView.snp.makeConstraints {
-            $0.edges.width.equalToSuperview()
-            $0.height.greaterThanOrEqualTo(view.safeAreaLayoutGuide.snp.height)
-        }
-
-        view.addSubview(buttonContainerView)
-        buttonContainerView.addSubview(postButton)
-
-        buttonContainerView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(58)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-        }
-
-        postButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(10)
-            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-        }
+        
+        
+        fillSafeArea(position: .top, color: .white)
+        fillSafeArea(position: .bottom, color: .white)
     }
 
     func didTapCameraButton() {
@@ -124,12 +91,16 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
         let isCategorySelected = communityWriteView.selectedCategory != nil
         let isContentFilled = !(communityWriteView.contentTextView.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
 
+        let isEnabled = isTitleFilled && isCategorySelected && isContentFilled
+
+        communityWriteView.updatePostButtonState(isEnabled: isEnabled)
+
         DispatchQueue.main.async {
-            self.postButton.isEnabled = isTitleFilled && isCategorySelected && isContentFilled
+            self.communityWriteView.postButton.backgroundColor = isEnabled ? .blue700 : .gray200
         }
     }
-
-    @objc private func didTapPostButton() {
+    
+    func didTapPostButton() {
         guard let title = communityWriteView.titleTextField.text,
               let categoryString = communityWriteView.selectedCategory,
               let communityCategory = CommunityCategory.fromString(categoryString),
@@ -140,9 +111,9 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
 
         communityService.postCommunityPost(body: requestBody, imageList: images) { result in
             switch result {
-            case .success(let response):
+            case .success:
                 DispatchQueue.main.async {
-                    let detailVC = CommunityDetailViewController(postId: response.postId)
+                    let detailVC = CommunityViewController()
                     self.navigationController?.pushViewController(detailVC, animated: true)
                 }
             case .failure(let error):
