@@ -19,11 +19,20 @@ final class CalendarDetailViewController: UIViewController {
         control.translatesAutoresizingMaskIntoConstraints = false
         return control
     }()
-    private let firstView = CalendarDetailDocumentListView()
+    
     private let secondView = CalendarDetailDocumentReferenceView()
     private let underLineView = UIView().then {
         $0.backgroundColor = .blue700
     }
+    
+    private var emptyView = EmptyView()
+    private var notEmptyView = NotEmptyView()
+    private var addingView = AddingView()
+    private var editingView = EditingView()
+    
+    private var currentState: ViewState = .empty {
+            didSet { updateFirstView() }
+        }
     
     // MARK: - Lifecycle
     init(policy: Policy) {
@@ -38,14 +47,13 @@ final class CalendarDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        setupActions()
         if let policy = policy {
             bindPolicyData(policy)
         }
         
-        self.segmentedControl.addTarget(self, action: #selector(didChangeValue(segment:)), for: .valueChanged)
-        
         self.segmentedControl.selectedSegmentIndex = 0
-        self.didChangeValue(segment: self.segmentedControl)
+        self.didChangeValue(self.segmentedControl)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -57,10 +65,7 @@ final class CalendarDetailViewController: UIViewController {
     // MARK: - Setup
     private func setupUI() {
         view.backgroundColor = .white
-        
         setupCalendarDetailView()
-        segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
-        segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
     }
     
     private func setupCalendarDetailView() {
@@ -73,10 +78,16 @@ final class CalendarDetailViewController: UIViewController {
         
         let contentView = calendarDetailView.accessibleContentView
         
-        contentView.addSubviews(segmentedControl, underLineView, firstView, secondView)
-        firstView.snp.makeConstraints {
-            $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
-            $0.leading.trailing.equalToSuperview()
+        contentView.addSubviews(segmentedControl, underLineView, emptyView, notEmptyView, addingView, editingView, secondView)
+//        firstView.snp.makeConstraints {
+//            $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
+//            $0.leading.trailing.equalToSuperview()
+//        }
+        [emptyView, notEmptyView, addingView, editingView, secondView].forEach {
+            $0.snp.makeConstraints {
+                $0.top.equalTo(underLineView.snp.bottom).offset(1)
+                $0.leading.trailing.bottom.equalToSuperview()
+            }
         }
         secondView.snp.makeConstraints {
             $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
@@ -95,21 +106,61 @@ final class CalendarDetailViewController: UIViewController {
             $0.leading.equalToSuperview()
         }
         configureSegmentControlAppearance()
+        updateFirstView()
         
-        firstView.isHidden = false
+//        firstView.isHidden = false
         secondView.isHidden = true
     }
     
-    private var shouldHideFirstView: Bool? {
-        didSet {
-            guard let shouldHideFirstView = self.shouldHideFirstView else { return }
-            self.firstView.isHidden = shouldHideFirstView
-            self.secondView.isHidden = !self.firstView.isHidden
-        }
+    private func updateFirstView() {
+        let isReferenceView = segmentedControl.selectedSegmentIndex == 1
+        
+        secondView.isHidden = !isReferenceView
+        emptyView.isHidden = isReferenceView || currentState != .empty
+        notEmptyView.isHidden = isReferenceView || currentState != .viewing
+        addingView.isHidden = isReferenceView || currentState != .adding
+        editingView.isHidden = isReferenceView || currentState != .editing
     }
     
-    @objc private func didChangeValue(segment: UISegmentedControl) {
-        self.shouldHideFirstView = segment.selectedSegmentIndex != 0
+    private func setupActions() {
+        segmentedControl.addTarget(self, action: #selector(changeSegmentedControlLinePosition(_:)), for: .valueChanged)
+        segmentedControl.addTarget(self, action: #selector(didChangeValue(_:)), for: .valueChanged)
+        
+        emptyView.addButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
+        notEmptyView.addButton.addTarget(self, action: #selector(didTapAddButton), for: .touchUpInside)
+        notEmptyView.editButton.addTarget(self, action: #selector(didTapEditButton), for: .touchUpInside)
+        addingView.saveButton.addTarget(self, action: #selector(didTapSaveButton), for: .touchUpInside)
+        editingView.saveButton.addTarget(self, action: #selector(didTapSaveButton), for: .touchUpInside)
+    }
+    
+//    private var shouldHideFirstView: Bool? {
+//        didSet {
+//            guard let shouldHideFirstView = self.shouldHideFirstView else { return }
+//            self.emptyView.isHidden = shouldHideFirstView
+//            self.notEmptyView.isHidden = shouldHideFirstView
+//            self.addingView.isHidden = shouldHideFirstView
+//            self.editingView.isHidden = shouldHideFirstView
+//            self.secondView.isHidden = !self.emptyView.isHidden
+//        }
+//    }
+    
+    @objc private func didTapAddButton() {
+        currentState = .adding
+        updateFirstView()
+    }
+    
+    @objc private func didTapSaveButton() {
+        currentState = .viewing
+        updateFirstView()
+    }
+    
+    @objc private func didTapEditButton() {
+        currentState = .editing
+        updateFirstView()
+    }
+    
+    @objc private func didChangeValue(_ segment: UISegmentedControl) {
+        updateFirstView()
     }
     
     private func configureSegmentControlAppearance() {
@@ -118,7 +169,7 @@ final class CalendarDetailViewController: UIViewController {
             NSAttributedString.Key.font: UIFont.ptdMediumFont(ofSize: 16)
         ], for: .normal)
         segmentedControl.setTitleTextAttributes([
-            NSAttributedString.Key.foregroundColor: UIColor.black,
+            NSAttributedString.Key.foregroundColor: UIColor.blue700,
             NSAttributedString.Key.font: UIFont.ptdSemiBoldFont(ofSize: 16)
         ], for: .selected)
         segmentedControl.selectedSegmentTintColor = .clear
@@ -137,19 +188,6 @@ final class CalendarDetailViewController: UIViewController {
         })
     }
     
-    @objc private func didChangeValue(_ segment: UISegmentedControl) {
-        switch segment.selectedSegmentIndex {
-        case 0:
-            firstView.isHidden = false
-            secondView.isHidden = true
-        case 1:
-            firstView.isHidden = true
-            secondView.isHidden = false
-        default:
-            break
-        }
-    }
-    
     // MARK: - Data
     private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
@@ -157,7 +195,10 @@ final class CalendarDetailViewController: UIViewController {
         secondView.update(policy: policy)
         
         if let userDocuments = policy.userDocuments, !userDocuments.isEmpty {
-            firstView.updateDocuments(documents: userDocuments)
-        } else { return }
+            notEmptyView.updateDocuments(documents: userDocuments)
+            currentState = .viewing
+        } else {
+            currentState = .empty
+        }
     }
 }

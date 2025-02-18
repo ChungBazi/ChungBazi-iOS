@@ -190,7 +190,7 @@ final class CommunityDetailViewController: UIViewController {
                 guard let response = response else { return }
                 let commentList = response.commentsList
                 
-                let newComments = commentList.compactMap { comment -> CommunityDetailCommentModel? in
+                let newComments = commentList?.compactMap { comment -> CommunityDetailCommentModel? in
                     guard let postId = comment.postId,
                           let content = comment.content,
                           let formattedCreatedAt = comment.formattedCreatedAt,
@@ -216,15 +216,15 @@ final class CommunityDetailViewController: UIViewController {
                 }
                 
                 if self.nextCursor == 0 {
-                    self.comments = newComments
+                    self.comments = newComments!
                 } else {
-                    self.comments.append(contentsOf: newComments)
+                    self.comments.append(contentsOf: newComments!)
                 }
                 
                 print("📌 받은 nextCursor: \(response.nextCursor), hasNext: \(response.hasNext)")
                 
-                if response.nextCursor > 0 {
-                    self.nextCursor = response.nextCursor
+                if response.nextCursor! > 0 {
+                    self.nextCursor = response.nextCursor!
                 } else {
                     self.hasNext = false
                 }
