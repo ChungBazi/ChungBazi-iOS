@@ -13,7 +13,7 @@ final class PolicyView: UIView {
 
     private let contentView = UIView()
 
-    private let categoryLabel = UILabel().then {
+    private let categoryLabel = PaddedLabel().then {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textAlignment = .center
         $0.backgroundColor = .blue100
@@ -63,7 +63,6 @@ final class PolicyView: UIView {
 
         categoryLabel.snp.makeConstraints { make in
             make.top.leading.equalToSuperview().inset(20)
-            make.width.equalTo(45)
             make.height.equalTo(31)
         }
 
@@ -90,33 +89,76 @@ final class PolicyView: UIView {
             make.bottom.equalToSuperview().offset(-16)
         }
     }
-
-    func configure(with policy: PolicyModel) {
-        categoryLabel.text = policy.category
-        let firstWord = policy.policyName.components(separatedBy: " ").first ?? ""
-        titleLabel.text = "\(firstWord) <\(policy.policyName)>"
-            
+    
+    func configure(with policy: PolicyModel, target: PolicyTarget) {
+        categoryLabel.text = policy.categoryName
+        titleLabel.text = policy.name
+        
         addPolicyInfo(title: "정책소개", value: policy.intro)
-        addPolicyInfo(title: "신청기간", value: "\(policy.startDate) ~ \(policy.endDate)")
-        addPolicyInfo(title: "신청대상", value: """
-        - \(policy.target.age)
-        - \(policy.target.residenceIncome)
-        - \(policy.target.education)
-        """)
-        addPolicyInfo(title: "심사결과", value: policy.result)
-        addPolicyInfo(title: "참고링크", value: policy.referenceUrls.compactMap { $0 }.joined(separator: "\n"))
-
+        addPolicyInfo(title: "신청기간", value: formatDateRange(start: policy.startDate, end: policy.endDate))
+        addPolicyInfo(title: "신청대상", value: formatTargetInfo(target))
+        addPolicyInfo(title: "심사결과", value: policy.result ?? "정보 없음")
+        addPolicyInfo(title: "참고링크", value: formatReferenceUrls(policy))
+        
         addDetailInfo(title: "지원내용", value: policy.content)
-        addDetailInfo(title: "신청절차", value: policy.applyProcedure)
-        addDetailInfo(title: "구비서류", value: policy.document)
+        addDetailInfo(title: "신청절차", value: policy.applyProcedure ?? "정보 없음")
+        addDetailInfo(title: "구비서류", value: policy.document ?? "정보 없음")
     }
-
+    
+    private func formatDateRange(start: String?, end: String?) -> String {
+        let formattedStart = formatDate(start)
+        let formattedEnd = formatDate(end)
+        return "\(formattedStart) ~ \(formattedEnd)"
+    }
+    
+    private func formatDate(_ dateString: String?) -> String {
+        guard let dateString = dateString else { return "기간 정보 없음" }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        if let date = formatter.date(from: dateString) {
+            formatter.dateFormat = "yyyy년 M월 d일"
+            return formatter.string(from: date)
+        }
+        return "기간 정보 없음"
+    }
+    
+    private func formatTargetInfo(_ target: PolicyTarget) -> String {
+        let ageInfo = formatAge(min: target.minAge, max: target.maxAge)
+        let incomeInfo = target.minIncome != nil ? "소득 기준: \(target.minIncome!) 이상" : "소득 정보 없음"
+        let additionCondition = target.additionCondition ?? "추가 신청 자격 없음"
+        let restrictionCondition = target.restrictionCondition ?? "참여 제한 대상 없음"
+        
+        return """
+        - \(ageInfo)
+        - \(incomeInfo)
+        - 추가 자격: \(additionCondition)
+        - 제한 대상: \(restrictionCondition)
+        """
+    }
+    
+    private func formatAge(min: String?, max: String?) -> String {
+        if let min = min, let max = max {
+            return "연령: \(min)세 이상 \(max)세 미만"
+        } else if let min = min {
+            return "연령: \(min)세 이상"
+        } else if let max = max {
+            return "연령: \(max)세 미만"
+        } else {
+            return "연령 정보 없음"
+        }
+    }
+    
+    private func formatReferenceUrls(_ policy: PolicyModel) -> String {
+        let urls = [policy.referenceUrl1, policy.referenceUrl2].compactMap { $0 }
+        return urls.isEmpty ? "참고링크 없음" : (urls.count == 1 ? "url1" : "url1 url2")
+    }
+    
     private func addPolicyInfo(title: String, value: String) {
         let titleLabel = UILabel().then {
             $0.text = title
             $0.font = .ptdMediumFont(ofSize: 14)
             $0.textColor = .gray500
-            $0.setContentHuggingPriority(.defaultHigh, for: .horizontal) 
+            $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
             $0.widthAnchor.constraint(equalToConstant: 80).isActive = true
         }
 
@@ -126,15 +168,17 @@ final class PolicyView: UIView {
             $0.textColor = .gray800
             $0.numberOfLines = 0
             $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            $0.attributedText = setParagraphSpacing(value)
         }
 
         let stack = UIStackView(arrangedSubviews: [titleLabel, valueLabel]).then {
             $0.axis = .horizontal
-            $0.alignment = .top
+            $0.alignment = .firstBaseline
             $0.spacing = 8
         }
         policyInfoStack.addArrangedSubview(stack)
     }
+    
     private func addDetailInfo(title: String, value: String) {
         let titleLabel = UILabel().then {
             $0.text = title
@@ -159,6 +203,12 @@ final class PolicyView: UIView {
             $0.spacing = 8
         }
         detailInfoStack.addArrangedSubview(stack)
+    }
+
+    private func setParagraphSpacing(_ text: String) -> NSAttributedString {
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.lineHeightMultiple = 1.4
+        return NSAttributedString(string: text, attributes: [.paragraphStyle: paragraphStyle])
     }
 
     private func addDivider() {

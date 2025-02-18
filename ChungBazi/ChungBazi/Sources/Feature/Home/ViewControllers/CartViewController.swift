@@ -5,14 +5,16 @@
 
 import UIKit
 import SnapKit
+import Then
 
 final class CartViewController: UIViewController {
-    private let tableView = UITableView(frame: .zero, style: .grouped)
+    
+    private let networkService = CartService()
     private var cartItems: [String: [PolicyItem]] = [:]
     private var selectedItems: Set<IndexPath> = []
 
     private let headerView = UIView()
-    
+
     private let allSelectButton: UIButton = {
         let button = UIButton(type: .custom)
         button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
@@ -25,10 +27,21 @@ final class CartViewController: UIViewController {
     }()
 
     private let deleteButton: UIButton = {
-        let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "trash_icon"), for: .normal)
+        let button = UIButton(type: .system)
+        button.setTitle("선택삭제", for: .normal)
+        button.setTitleColor(.gray300, for: .normal)
+        button.titleLabel?.font = UIFont(name: AppFontName.pMedium, size: 16)
+        button.isEnabled = false
         button.addTarget(self, action: #selector(handleDeleteSelectedItems), for: .touchUpInside)
         return button
+    }()
+
+    private let tableView: UITableView = {
+        let tableView = UITableView()
+        tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
+        tableView.separatorStyle = .none
+        tableView.backgroundColor = .clear
+        return tableView
     }()
 
     override func viewDidLoad() {
@@ -36,8 +49,9 @@ final class CartViewController: UIViewController {
         view.backgroundColor = .gray50
         setupNavigationBar()
         setupHeaderView()
-        setupTableView()
-        loadCartData()
+        setupLayout()
+        configureTableView()
+        fetchCartList()
     }
 
     private func setupNavigationBar() {
@@ -62,72 +76,114 @@ final class CartViewController: UIViewController {
         }
 
         allSelectButton.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(16)
+            make.leading.equalToSuperview().offset(20)
             make.centerY.equalToSuperview()
         }
 
         deleteButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-16)
+            make.trailing.equalToSuperview().inset(20)
             make.centerY.equalToSuperview()
         }
     }
 
-    private func setupTableView() {
+    private func setupLayout() {
         view.addSubview(tableView)
-        tableView.delegate = self
-        tableView.dataSource = self
-        tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
-        tableView.backgroundColor = .clear
-        tableView.separatorStyle = .none
-
+        
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(headerView.snp.bottom)
-            make.leading.trailing.bottom.equalTo(view.safeAreaLayoutGuide)
+            make.top.equalTo(headerView.snp.bottom).offset(16)
+            make.leading.trailing.bottom.equalToSuperview()
         }
     }
 
-    private func loadCartData() {
-        cartItems = [
-            "일자리": [
-                PolicyItem(policyId: 30, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 1)
-            ],
-            "주거": [
-                PolicyItem(policyId: 31, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 5),
-                PolicyItem(policyId: 32, policyName: "<노원구 1인가구 안심홈 3종 세트>", startDate: "2024.12.11", endDate: "2025.01.31", dday: 11)
-            ]
-        ]
-        tableView.reloadData()
+    private func configureTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
     }
 
-    @objc private func handleAllSelect() {
-        allSelectButton.isSelected.toggle()
-        selectedItems.removeAll()
-
-        if allSelectButton.isSelected {
-            for section in 0..<cartItems.keys.count {
-                for row in 0..<tableView.numberOfRows(inSection: section) {
-                    selectedItems.insert(IndexPath(row: row, section: section))
+    private func updateDeleteButtonState() {
+        deleteButton.isEnabled = !selectedItems.isEmpty
+        deleteButton.setTitleColor(selectedItems.isEmpty ? .gray300 : .blue700, for: .normal)
+    }
+    
+    public func postCart(policyId: Int) {
+        networkService.postCart(policyId: policyId) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.fetchCartList()
+                case .failure(let error):
+                    print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
                 }
             }
         }
+    }
+
+    public func deleteCart() {
+        guard !selectedItems.isEmpty else {
+            print("❌ 삭제할 항목이 없습니다.")
+            return
+        }
+
+        let sortedIndexes = selectedItems.sorted { $0.section < $1.section || ($0.section == $1.section && $0.row < $1.row) }
+        for index in sortedIndexes.reversed() {
+            let category = Array(cartItems.keys)[index.section]
+            cartItems[category]?.remove(at: index.row)
+            if cartItems[category]?.isEmpty == true {
+                cartItems.removeValue(forKey: category)
+            }
+        }
+
+        selectedItems.removeAll()
+        updateDeleteButtonState()
         tableView.reloadData()
+    }
+    
+    private func fetchCartList() {
+        networkService.fetchCartList { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let categoryList = response?.categoryPolicyList else {
+                    print("❌ 장바구니 조회 실패: 응답이 없습니다.")
+                    return
+                }
+
+                self.cartItems = self.convertCartResponse(categoryList)
+                DispatchQueue.main.async {
+                    self.tableView.reloadData()
+                }
+                
+            case .failure(let error):
+                print("❌ 장바구니 조회 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+
+    private func convertCartResponse(_ response: [CategoryPolicyList]) -> [String: [PolicyItem]] {
+        var categorizedItems: [String: [PolicyItem]] = [:]
+        
+        response.forEach { categoryData in
+            let categoryName = categoryData.categoryName ?? "기타"
+            let policies: [PolicyItem] = categoryData.cartPolicies?.compactMap { policy in
+                guard let name = policy.name, let startDate = policy.startDate, let endDate = policy.endDate else { return nil }
+                return PolicyItem(policyId: 0, policyName: name, startDate: startDate, endDate: endDate, dday: policy.dday ?? 0)
+            } ?? []
+            
+            categorizedItems[categoryName] = policies
+        }
+        
+        return categorizedItems
+    }
+    
+    @objc private func handleAllSelect() {
+        allSelectButton.isSelected.toggle()
+        selectedItems.removeAll()
+        updateDeleteButtonState()
     }
 
     @objc private func handleDeleteSelectedItems() {
-        for indexPath in selectedItems.sorted(by: { $0.section > $1.section || ($0.section == $1.section && $0.row > $1.row) }) {
-            deleteItem(at: indexPath)
-        }
-        selectedItems.removeAll()
-        allSelectButton.isSelected = false
-        tableView.reloadData()
-    }
-
-    private func deleteItem(at indexPath: IndexPath) {
-        let category = Array(cartItems.keys)[indexPath.section]
-        cartItems[category]?.remove(at: indexPath.row)
-        if cartItems[category]?.isEmpty == true {
-            cartItems.removeValue(forKey: category)
-        }
+        deleteCart()
     }
 }
 
@@ -139,45 +195,6 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         let category = Array(cartItems.keys)[section]
         return cartItems[category]?.count ?? 0
-    }
-
-    func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let category = Array(cartItems.keys)[section]
-
-        let headerView = UIView().then {
-            $0.backgroundColor = .clear
-        }
-
-        let separatorLine = DottedLineView().then {
-            $0.backgroundColor = .clear
-        }
-
-        let titleLabel = UILabel().then {
-            $0.text = category
-            $0.font = UIFont(name: AppFontName.pSemiBold, size: 20)
-            $0.textColor = .black
-        }
-
-        headerView.addSubview(separatorLine)
-        separatorLine.snp.makeConstraints { make in
-            make.leading.trailing.equalToSuperview()
-            make.top.equalToSuperview().offset(8)
-            make.height.equalTo(1)
-        }
-
-        headerView.addSubview(titleLabel)
-        titleLabel.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(32)
-            make.trailing.equalToSuperview().offset(-16)
-            make.top.equalTo(separatorLine.snp.bottom).offset(16)
-            make.bottom.equalToSuperview().offset(-8)
-        }
-
-        return headerView
-    }
-
-    func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
-        return 80
     }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -203,9 +220,5 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
             cell.showControls = true 
         }
         return cell
-    }
-
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 134
     }
 }

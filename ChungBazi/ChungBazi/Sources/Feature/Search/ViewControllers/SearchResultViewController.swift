@@ -14,6 +14,7 @@ final class SearchResultViewController: UIViewController {
     private var popularKeywords: [String] = []
     private var nextCursor: String = ""
     private var hasNext: Bool = false
+    private var sortOrder: String = "latest"
     
     private let searchView = UIView().then {
         $0.backgroundColor = .white
@@ -29,7 +30,8 @@ final class SearchResultViewController: UIViewController {
     
     private let searchButton = UIButton(type: .system).then {
         $0.setImage(UIImage(named: "search_icon"), for: .normal)
-        $0.tintColor = .gray800
+        $0.contentMode = .scaleAspectFit
+        $0.tintColor = .gray500
     }
     
     private let popularSearchLabel = UILabel().then {
@@ -41,14 +43,15 @@ final class SearchResultViewController: UIViewController {
     private lazy var popularKeywordsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
         $0.scrollDirection = .horizontal
         $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        $0.itemSize = CGSize(width: UICollectionViewFlowLayout.automaticSize.width, height: 36)
         $0.minimumLineSpacing = 10
     }).then {
         $0.showsHorizontalScrollIndicator = false
         $0.backgroundColor = .clear
         $0.delegate = self
         $0.dataSource = self
-        $0.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
+        $0.isUserInteractionEnabled = true
+        $0.delaysContentTouches = false
+        $0.canCancelContentTouches = false
     }
     
     private let tableView = UITableView().then {
@@ -71,7 +74,9 @@ final class SearchResultViewController: UIViewController {
         title: "최신순",
         hasBorder: false,
         items: Constants.sortItems
-    )
+    ).then {
+        $0.delegate = self
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -88,11 +93,15 @@ final class SearchResultViewController: UIViewController {
         setupActions()
         configureTableView()
         fetchPopularSearchText()
+        popularKeywordsCollectionView.delegate = self
+        popularKeywordsCollectionView.dataSource = self
+        popularKeywordsCollectionView.isUserInteractionEnabled = true
+        popularKeywordsCollectionView.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        tabBarController?.tabBar.isHidden = true
+        tabBarController?.tabBar.isHidden = policyList.isEmpty
         sortDropdown.isHidden = true
     }
 
@@ -113,13 +122,13 @@ final class SearchResultViewController: UIViewController {
         searchView.addSubviews(searchTextField, searchButton)
 
         searchTextField.snp.makeConstraints { make in
-            make.leading.equalToSuperview().offset(10)
+            make.leading.equalToSuperview().offset(16)
             make.centerY.equalToSuperview()
-            make.trailing.equalToSuperview().offset(-40)
+            make.trailing.equalToSuperview().inset(40)
         }
 
         searchButton.snp.makeConstraints { make in
-            make.trailing.equalToSuperview().offset(-10)
+            make.trailing.equalToSuperview().inset(16)
             make.centerY.equalToSuperview()
             make.width.height.equalTo(24)
         }
@@ -137,13 +146,13 @@ final class SearchResultViewController: UIViewController {
 
         sortDropdown.snp.makeConstraints {
             $0.top.equalTo(searchView.snp.top).offset(60)
-            $0.trailing.equalToSuperview().offset(-16)
+            $0.trailing.equalToSuperview().inset(16)
             $0.width.equalTo(91)
             $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).offset(-65)
+            make.top.equalTo(sortDropdown.snp.bottom).inset(65)
             make.leading.trailing.bottom.equalToSuperview()
         }
 
@@ -156,14 +165,20 @@ final class SearchResultViewController: UIViewController {
         searchButton.addTarget(self, action: #selector(didTapSearch), for: .touchUpInside)
         searchTextField.delegate = self
     }
-
+    
+    private func configureTableView() {
+        tableView.dataSource = self
+        tableView.delegate = self
+    }
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         view.bringSubviewToFront(sortDropdown)
+        view.bringSubviewToFront(popularKeywordsCollectionView)
     }
     
     @objc private func didTapSearch() {
-        searchPolicy(name: searchTextField.text ?? "", cursor: "")
+        executeSearch()
     }
 
     private func searchPolicy(name: String, cursor: String) {
@@ -197,6 +212,8 @@ final class SearchResultViewController: UIViewController {
 
                 DispatchQueue.main.async {
                     self.updateUI()
+                    self.tableView.reloadData()
+                    self.tableView.setContentOffset(.zero, animated: true)
                 }
             case .failure(let error):
                 print("❌ 정책 검색 실패: \(error.localizedDescription)")
@@ -212,6 +229,7 @@ final class SearchResultViewController: UIViewController {
                 self.popularKeywords = response?.keywords ?? []
                 DispatchQueue.main.async {
                     self.popularKeywordsCollectionView.reloadData()
+                    self.popularKeywordsCollectionView.setContentOffset(.zero, animated: true)
                 }
             case .failure(let error):
                 print("❌ 인기 검색어 불러오기 실패: \(error.localizedDescription)")
@@ -223,25 +241,21 @@ final class SearchResultViewController: UIViewController {
         let hasResults = !policyList.isEmpty
         emptyStateLabel.isHidden = hasResults
         tableView.isHidden = !hasResults
-        popularSearchLabel.isHidden = hasResults
-        popularKeywordsCollectionView.isHidden = hasResults
+        popularSearchLabel.isHidden = true
+        popularKeywordsCollectionView.isHidden = true
+        popularKeywordsCollectionView.isUserInteractionEnabled = true
         sortDropdown.isHidden = !hasResults
         tableView.reloadData()
+        tabBarController?.tabBar.isHidden = !hasResults
     }
-
-    func scrollViewDidScroll(_ scrollView: UIScrollView) {
-        let position = scrollView.contentOffset.y
-        let contentHeight = scrollView.contentSize.height
-        let scrollViewHeight = scrollView.frame.size.height
-
-        if position > contentHeight - scrollViewHeight, hasNext {
-            searchPolicy(name: searchTextField.text ?? "", cursor: nextCursor)
+    
+    private func executeSearch() {
+        guard let query = searchTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), query.count >= 2 else {
+            showCharacterLimitAlert()
+            return
         }
-    }
-
-    private func configureTableView() {
-        tableView.dataSource = self
-        tableView.delegate = self
+        searchTextField.resignFirstResponder()
+        searchPolicy(name: query, cursor: "")
     }
     
     private func showCharacterLimitAlert() {
@@ -254,13 +268,7 @@ final class SearchResultViewController: UIViewController {
 // MARK: - UITextFieldDelegate
 extension SearchResultViewController: UITextFieldDelegate {
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if let query = searchTextField.text, query.count >= 2 {
-            searchPolicy(name: query, cursor: "")
-            textField.resignFirstResponder()
-        } else {
-            showCharacterLimitAlert()
-            textField.resignFirstResponder()
-        }
+        executeSearch()
         return true
     }
 }
@@ -282,6 +290,13 @@ extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
+        
+        let selectedPolicy = policyList[indexPath.row]
+        
+        let detailVC = PolicyDetailViewController()
+        detailVC.policyId = selectedPolicy.policyId
+        
+        navigationController?.pushViewController(detailVC, animated: true)
     }
 }
 
@@ -292,10 +307,25 @@ extension SearchResultViewController: UICollectionViewDataSource, UICollectionVi
     }
 
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
-        guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PopularKeywordCell.identifier, for: indexPath) as? PopularKeywordCell else {
-            return UICollectionViewCell()
-        }
+        let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PopularKeywordCell.identifier, for: indexPath) as! PopularKeywordCell
         cell.configure(with: popularKeywords[indexPath.item])
         return cell
+    }
+
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let keyword = popularKeywords[indexPath.item]
+        searchTextField.text = keyword
+        tableView.isHidden = false
+        DispatchQueue.main.async {
+            self.executeSearch()
+        }
+    }
+}
+
+// MARK: - CustomDropdownDelegate
+extension SearchResultViewController: CustomDropdownDelegate {
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        sortOrder = (item == "마감순") ? "deadline" : "latest"
+        executeSearch()
     }
 }
