@@ -12,7 +12,13 @@ final class CalendarDetailViewController: UIViewController {
     
     // MARK: - Properties
     private let calendarDetailView = CalendarDetailView()
+    private var documentList: [Document] = []
     private var policy: Policy?
+    var cartId: Int
+    var policyId: Int
+    
+    let policyNetwork = PolicyService()
+    let calendarNetwork = CalendarService()
     
     private let segmentedControl: UISegmentedControl = {
         let control = UISegmentedControl(items: ["서류 리스트", "서류 참고 내용"])
@@ -26,9 +32,9 @@ final class CalendarDetailViewController: UIViewController {
     }
     
     private var emptyView = EmptyView()
-    private var notEmptyView = NotEmptyView()
-    private var addingView = AddingView()
-    private var editingView = EditingView()
+    private var notEmptyView: NotEmptyView!
+    private var addingView: AddingView!
+    private var editingView: EditingView!
     
     private var currentState: ViewState = .empty {
             didSet { updateFirstView() }
@@ -37,6 +43,8 @@ final class CalendarDetailViewController: UIViewController {
     // MARK: - Lifecycle
     init(policy: Policy) {
         self.policy = policy
+        self.cartId = policy.cartId
+        self.policyId = policy.policyId
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -46,6 +54,12 @@ final class CalendarDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        fetchCalendarPolicyDetail(cartId: policy!.cartId)
+        
+        notEmptyView = NotEmptyView(documentList: documentList)
+        addingView = AddingView(documentList: documentList)
+        editingView = EditingView(documentList: documentList)
+        
         setupUI()
         setupActions()
         if let policy = policy {
@@ -61,6 +75,17 @@ final class CalendarDetailViewController: UIViewController {
         navigationController?.navigationBar.isHidden = true
         addCustomGrabber(to: view)
     }
+    
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        
+        let updatedChecks = documentList.map {
+            calendarNetwork.makeUpdateCheck(documentId: $0.documentId, checked: $0.isChecked)
+        }
+        
+        updateCalendarDocumentsCheck(cartId: cartId, body: updatedChecks)
+    }
+
     
     // MARK: - Setup
     private func setupUI() {
@@ -105,11 +130,22 @@ final class CalendarDetailViewController: UIViewController {
             $0.width.equalToSuperview().dividedBy(2)
             $0.leading.equalToSuperview()
         }
+        
         configureSegmentControlAppearance()
         updateFirstView()
         
 //        firstView.isHidden = false
         secondView.isHidden = true
+    }
+    
+    // 모든 뷰가 documentList를 업데이트할 때 이 함수 사용
+    private func updateDocumentList(_ newList: [Document]) {
+        DispatchQueue.main.async {
+            self.documentList = newList
+            self.notEmptyView.updateDocuments(documents: newList)
+            self.addingView.updateDocuments(documents: newList)
+            self.editingView.updateDocuments(documents: newList)
+        }
     }
     
     private func updateFirstView() {
@@ -150,6 +186,24 @@ final class CalendarDetailViewController: UIViewController {
     }
     
     @objc private func didTapSaveButton() {
+        switch currentState {
+        case .adding:
+            let newDocuments = addingView.getDocumentContents()
+            guard !newDocuments.isEmpty else { return }
+            
+            postpostCalendarDocuments(cartId: cartId, documents: newDocuments)
+            
+        case .editing:
+            let updatedDocuments = editingView.getUpdatedDocuments()
+            guard !updatedDocuments.isEmpty else { return }
+            
+            updateCalendarDocumentsDetail(cartId: cartId, body: updatedDocuments)
+            
+        default:
+            break
+        }
+        
+        fetchCalendarPolicyDetail(cartId: cartId) // 최신 데이터 다시 가져오기
         currentState = .viewing
         updateFirstView()
     }
@@ -188,17 +242,83 @@ final class CalendarDetailViewController: UIViewController {
         })
     }
     
-    // MARK: - Data
+    // MARK: - Data & API
     private func bindPolicyData(_ policy: Policy?) {
         guard let policy = policy else { return }
         calendarDetailView.update(policy: policy)
         secondView.update(policy: policy)
         
         if let userDocuments = policy.userDocuments, !userDocuments.isEmpty {
-            notEmptyView.updateDocuments(documents: userDocuments)
+            updateDocumentList(userDocuments)
             currentState = .viewing
         } else {
             currentState = .empty
+        }
+    }
+    
+    private func fetchCalendarPolicyDetail(cartId: Int) {
+        self.policyNetwork.fetchCalendarPolicyDetail(cartId: cartId) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                guard let reference = response?.referenceDocuments,
+                      let documents = response?.documents,
+                      let cartId = response?.cartId,
+                      let policyId = response?.policyId else { return }
+                
+                self.cartId = cartId
+                self.policyId = policyId
+                policy?.documentText = reference
+                policy?.userDocuments = documents.map {
+                    Document(documentId: $0.documentId ?? 0,
+                             name: $0.content ?? "이름 없음",
+                             isChecked: $0.checked ?? false)
+                }
+                
+                //문서 데이터 설정 후, 즉시 호출
+                DispatchQueue.main.async {
+                    self.bindPolicyData(self.policy)
+                }
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func updateCalendarDocumentsDetail(cartId: Int, body: [UpdateDocuments]) {
+        self.calendarNetwork.updateCalendarDocumentsDetail(cartId: cartId, body: body) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func postpostCalendarDocuments(cartId: Int, documents: [String]) {
+        let body = self.calendarNetwork.makePostDocumentsRequestDto(documents: documents)
+        self.calendarNetwork.postpostCalendarDocuments(cartId: cartId, body: body) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
+        }
+    }
+    
+    private func updateCalendarDocumentsCheck(cartId: Int, body: [UpdateCheck]) {
+        self.calendarNetwork.updateCalendarDocumentsCheck(cartId: cartId, body: body) { [weak self] result in
+            guard let self = self else { return }
+            switch result {
+            case .success(let response):
+                print(response)
+            case .failure(let error):
+                print(error)
+            }
         }
     }
 }

@@ -13,6 +13,7 @@ class EditingView: UIView {
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
+    let networkService = CalendarService()
     
     private let tableView = UITableView().then {
         $0.register(CalendarDetailDocumentListCell.self, forCellReuseIdentifier: "CalendarDetailDocumentListCell")
@@ -24,8 +25,9 @@ class EditingView: UIView {
 
     let saveButton = CustomButton(backgroundColor: .blue700, titleText: "저장하기", titleColor: .white)
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(documentList: [Document]) {
+        super.init(frame: .zero)
+        self.documentList = documentList
         setupUI()
         setupUITableView()
     }
@@ -69,19 +71,24 @@ class EditingView: UIView {
     }
     
     private func updateTableViewHeight() {
-        let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.5
+        let maxHeight: CGFloat = UIScreen.main.bounds.height
         let newHeight = min(tableView.contentSize.height, maxHeight)
         
         tableView.snp.updateConstraints {
             $0.height.equalTo(newHeight).priority(.required)
         }
         
-        saveButton.snp.remakeConstraints {
+        saveButton.snp.makeConstraints {
             $0.top.equalTo(tableView.snp.bottom).offset(20)
+            $0.horizontalEdges.equalToSuperview().inset(105)
             $0.centerX.equalToSuperview()
-            $0.width.equalTo(118)
-            $0.height.equalTo(40)
-            $0.bottom.equalToSuperview().inset(20)
+            $0.height.equalTo(48)
+        }
+        
+        contentView.snp.remakeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview()
+            $0.bottom.equalTo(saveButton.snp.bottom).offset(20)
         }
         
         self.layoutIfNeeded()
@@ -90,6 +97,13 @@ class EditingView: UIView {
     private func setupUITableView() {
         tableView.dataSource = self
         tableView.delegate = self
+    }
+    
+    //수정된 서류 업데이트 시,
+    func getUpdatedDocuments() -> [UpdateDocuments] {
+        return documentList
+            .filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } // 빈 값 제거
+            .map { networkService.makeUpdateDocuments(documentId: $0.documentId, content: $0.name) }
     }
 }
 
@@ -102,6 +116,7 @@ extension EditingView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CalendarDetailDocumentListCell", for: indexPath) as! CalendarDetailDocumentListCell
         let document = documentList[indexPath.row]
+        cell.textFieldUIEnabled()
         cell.configure(with: document)
         return cell
     }

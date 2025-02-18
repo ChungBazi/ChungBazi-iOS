@@ -7,17 +7,18 @@
 
 import Foundation
 
-struct Policy: Decodable {
+struct Policy {
+    let cartId: Int
     let policyId: Int
     let policyName: String
     let startDate: String
     let endDate: String
-    let documentText: String
-    let userDocuments: [Document]?
+    var documentText: String
+    var userDocuments: [Document]?
 }
 
-struct Document: Decodable {
-    let documentId: Int
-    let name: String
+struct Document {
+    var documentId: Int
+    var name: String
     var isChecked: Bool
 }

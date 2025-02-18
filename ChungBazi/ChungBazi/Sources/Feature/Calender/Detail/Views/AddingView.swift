@@ -24,8 +24,9 @@ class AddingView: UIView {
     }
     private let plusCircleButton = UIButton.createWithImage(image: UIImage(named: "plusCircle")?.withRenderingMode(.alwaysOriginal))
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(documentList: [Document]) {
+        super.init(frame: .zero)
+        self.documentList = documentList
         setupUI()
         setupUITableView()
         setupActions()
@@ -47,6 +48,7 @@ class AddingView: UIView {
         contentView.snp.makeConstraints {
             $0.edges.equalToSuperview()
             $0.width.equalToSuperview()
+            $0.bottom.equalTo(saveButton.snp.bottom).offset(20)
         }
         
         tableView.snp.makeConstraints {
@@ -64,6 +66,7 @@ class AddingView: UIView {
             $0.top.equalTo(plusCircleButton.snp.bottom).offset(14)
             $0.horizontalEdges.equalToSuperview().inset(105)
             $0.centerX.equalToSuperview()
+            $0.bottom.equalToSuperview()
         }
     }
     
@@ -76,8 +79,17 @@ class AddingView: UIView {
         plusCircleButton.addTarget(self, action: #selector(addNewDocumentCell), for: .touchUpInside)
     }
     
+    func updateDocuments(documents: [Document]) {
+        self.documentList = documents
+        tableView.reloadData()
+        
+        DispatchQueue.main.async {
+            self.updateTableViewHeight()
+        }
+    }
+    
     @objc private func addNewDocumentCell() {
-        let newDocument = Document(documentId: -1, name: "", isChecked: false)
+        let newDocument = Document(documentId: 0, name: "", isChecked: false)
         documentList.append(newDocument)
         tableView.reloadData()
         
@@ -87,7 +99,7 @@ class AddingView: UIView {
     }
     
     private func updateTableViewHeight() {
-        let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.5  // 테이블뷰 최대 높이 제한
+        let maxHeight: CGFloat = UIScreen.main.bounds.height
         
         let newHeight = min(tableView.contentSize.height, maxHeight)
         
@@ -105,9 +117,23 @@ class AddingView: UIView {
             $0.top.equalTo(plusCircleButton.snp.bottom).offset(14)
             $0.horizontalEdges.equalToSuperview().inset(105)
             $0.centerX.equalToSuperview()
+            $0.height.equalTo(48)
+        }
+        
+        contentView.snp.remakeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview()
+            $0.bottom.equalTo(saveButton.snp.bottom).offset(20)
         }
         
         self.layoutIfNeeded()
+    }
+    
+    //새로운 서류 추가시,
+    func getDocumentContents() -> [String] {
+        return documentList
+            .map { $0.name.trimmingCharacters(in: .whitespacesAndNewlines) } // 앞뒤 공백 제거
+            .filter { !$0.isEmpty } // 빈 값 제외
     }
 }
 
@@ -120,7 +146,12 @@ extension AddingView: UITableViewDataSource, UITableViewDelegate {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CalendarDetailDocumentListCell", for: indexPath) as! CalendarDetailDocumentListCell
         let document = documentList[indexPath.row]
+        cell.textFieldUIEnabled()
         cell.configure(with: document)
+        cell.onTextChanged = { [weak self] text in
+            self?.documentList[indexPath.row].name = text
+        }
         return cell
     }
 }
+

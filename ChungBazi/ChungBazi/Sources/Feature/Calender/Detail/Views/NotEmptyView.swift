@@ -32,11 +32,13 @@ class NotEmptyView: UIView {
         $0.isScrollEnabled = false
     }
     
-    override init(frame: CGRect) {
-        super.init(frame: frame)
+    init(documentList: [Document]) {
+        super.init(frame: .zero)
+        self.documentList = documentList
         setupUI()
         setupUITableView()
         updateDocuments(documents: documentList)
+        layoutIfNeeded()
     }
     
     required init?(coder: NSCoder) {
@@ -85,11 +87,17 @@ class NotEmptyView: UIView {
     }
     
     private func updateTableViewHeight() {
-        let maxHeight: CGFloat = UIScreen.main.bounds.height * 0.5
+        let maxHeight: CGFloat = UIScreen.main.bounds.height
         let newHeight = min(tableView.contentSize.height, maxHeight)
         
         tableView.snp.updateConstraints {
             $0.height.equalTo(newHeight).priority(.required)
+        }
+        
+        contentView.snp.remakeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalToSuperview()
+            $0.bottom.equalTo(tableView.snp.bottom).offset(20)
         }
         
         self.layoutIfNeeded()
