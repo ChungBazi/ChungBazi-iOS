@@ -16,6 +16,10 @@ enum CommunityEndpoints {
     case getCommunityComments(postId: Int, cursor: Int)
     case postCommunityPost(data: CommunityPostRequestDto, imageList: [UIImage])
     case postCommunityComment(data: CommunityCommentRequestDto)
+    case searchCommunity(query: String, filter: String, period: String, cursor: Int)
+    case getCommunityPopularWords
+    case postCommunityLike(postId: Int)
+    case deleteCommunityLike(postId: Int)
 }
 
 extension CommunityEndpoints: TargetType {
@@ -39,15 +43,23 @@ extension CommunityEndpoints: TargetType {
             return "/posts/upload"
         case .postCommunityComment:
             return "/comments/upload"
+        case .searchCommunity:
+            return "/search"
+        case .getCommunityPopularWords:
+            return "/search/popular"
+        case .deleteCommunityLike, .postCommunityLike:
+            return "/likes"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .getCommunityPosts, .getCommunityPost, .getCommunityComments:
+        case .getCommunityPosts, .getCommunityPost, .getCommunityComments, .searchCommunity, .getCommunityPopularWords:
             return .get
-        case .postCommunityPost, .postCommunityComment:
+        case .postCommunityPost, .postCommunityComment, .postCommunityLike:
             return .post
+        case .deleteCommunityLike:
+            return .delete
         }
     }
     
@@ -99,6 +111,12 @@ extension CommunityEndpoints: TargetType {
 
         case .postCommunityComment(let data):
             return .requestJSONEncodable(data)
+        case .searchCommunity(let query, let filter, let period, let cursor):
+            return .requestParameters(parameters: ["query": query, "filter": filter, "period": period, "cursor": cursor, "size": 10], encoding: URLEncoding.queryString)
+        case .getCommunityPopularWords:
+            return .requestPlain
+        case .postCommunityLike(let postId), .deleteCommunityLike(let postId):
+            return .requestParameters(parameters: ["postId": postId], encoding: URLEncoding.queryString)
         }
     }
     

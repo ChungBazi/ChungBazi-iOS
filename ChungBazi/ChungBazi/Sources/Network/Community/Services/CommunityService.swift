@@ -98,4 +98,24 @@ final class CommunityService: NetworkManager {
     public func postCommunityComment(body: CommunityCommentRequestDto, completion: @escaping (Result<PostCommentResponse, NetworkError>) -> Void) {
         request(target: .postCommunityComment(data: body), decodingType: PostCommentResponse.self, completion: completion)
     }
+    
+    /// 커뮤니티 검색 API
+    public func searchCommunity(query: String, filter: String = "title", period: String = "all", cursor: Int, completion: @escaping (Result<CommunityResponseDTO?, NetworkError>) -> Void) {
+        requestOptional(target: .searchCommunity(query: query, filter: filter, period: period, cursor: cursor), decodingType: CommunityResponseDTO.self, completion: completion)
+    }
+    
+    /// 커뮤니티 인기 검색어 API
+    public func getCommunityPopularWords(completion: @escaping (Result<SearchCommunityPopularWordsResponseDTO?, NetworkError>) -> Void) {
+        requestOptional(target: .getCommunityPopularWords, decodingType: SearchCommunityPopularWordsResponseDTO.self, completion: completion)
+    }
+    
+    /// 커뮤니티 글 좋아요 API
+    public func postCommunityLike(postId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .postCommunityLike(postId: postId), decodingType: String.self, completion: completion)
+    }
+    
+    /// 커뮤니티 글 좋아요 취소 API
+    public func deleteCommunityLike(postId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .deleteCommunityLike(postId: postId), decodingType: String.self, completion: completion)
+    }
 }

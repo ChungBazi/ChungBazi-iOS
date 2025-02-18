@@ -15,6 +15,8 @@ enum PolicyEndpoints {
     case fetchCategoryPolicy(category: String, cursor: Int, order: String)
     case fetchPolicyDetail(policyId: Int)
     case fetchCalendarPolicyList(yearMonth: String)
+    case fetchRecommendPolicy(category: String, cursor: Int, order: String)
+    case fetchCalendarPolicyDetail(cartId: Int)
 }
 
 extension PolicyEndpoints: TargetType {
@@ -38,6 +40,10 @@ extension PolicyEndpoints: TargetType {
             return "/\(policyId)"
         case .fetchCalendarPolicyList:
             return "/calendar"
+        case .fetchRecommendPolicy:
+            return "/recommend"
+        case .fetchCalendarPolicyDetail(let cartId):
+            return  "/calendar/\(cartId)"
         }
     }
     
@@ -60,6 +66,10 @@ extension PolicyEndpoints: TargetType {
             return .requestPlain
         case .fetchCalendarPolicyList(let yearMonth):
             return .requestParameters(parameters: ["yearMonth": yearMonth], encoding: URLEncoding.queryString)
+        case .fetchRecommendPolicy(let category, let cursor, let order):
+            return .requestParameters(parameters: ["category": category, "cursor": cursor, "order": order], encoding: URLEncoding.queryString)
+        case .fetchCalendarPolicyDetail:
+            return .requestPlain
         }
     }
     

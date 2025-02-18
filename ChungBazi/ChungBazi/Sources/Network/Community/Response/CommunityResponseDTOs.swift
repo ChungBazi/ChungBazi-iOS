@@ -30,6 +30,10 @@ struct Post: Decodable {
     let thumbnailUrl: String?
 }
 
+struct SearchCommunityPopularWordsResponseDTO: Decodable {
+    let keywords: [String]?
+}
+
 struct CommunityDetailResponseDTO: Decodable {
     let postId: Int
     let title: String
@@ -47,8 +51,8 @@ struct CommunityDetailResponseDTO: Decodable {
 }
 
 struct CommunityCommentResponseDTO: Decodable {
-    let commentsList: [Comment]
-    let nextCursor: Int
+    let commentsList: [Comment]?
+    let nextCursor: Int?
     let hasNext: Bool
 }
 
