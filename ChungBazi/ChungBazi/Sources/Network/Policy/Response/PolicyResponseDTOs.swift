@@ -11,6 +11,13 @@ struct PolicyListResponseDto: Decodable {
     let hasNext: Bool
 }
 
+struct RecommendPolicyListResponseDto: Decodable {
+    let policies: [PolicyInfo]?
+    let interests: [String]?
+    let nextCursor: String?
+    let hasNext: Bool
+}
+
 struct PolicyInfo: Decodable {
     let policyId: Int?
     let policyName: String?
@@ -54,4 +61,21 @@ struct CalendarPolicy: Decodable {
     let name: String?
     let startDate: String?
     let endDate: String?
+}
+
+struct CalendarPolicyDetailResponseDto: Decodable {
+    let name: String
+    let startDate: String
+    let endDate: String
+    let cartId: Int
+    let policyId: Int
+    let documents: [CalendarPolicyDetailDocument]?
+    let referenceDocuments: String?
+    let dday: Int
+}
+
+struct CalendarPolicyDetailDocument: Decodable {
+    let documentId: Int?
+    let content: String?
+    let checked: Bool?
 }
