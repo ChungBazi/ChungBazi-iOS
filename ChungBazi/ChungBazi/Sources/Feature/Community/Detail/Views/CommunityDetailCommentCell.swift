@@ -44,6 +44,10 @@ final class CommunityDetailCommentCell: UITableViewCell {
         $0.font = .ptdMediumFont(ofSize: 14)
     }
     
+    private let separatorView = UIView().then {
+        $0.backgroundColor = .gray100
+    }
+
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
@@ -57,7 +61,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
     private func setupUI() {
         selectionStyle = .none
         
-        addSubviews(profileView, moreButton, commentLabel, createdAtLabel, likeButton, likeCountLabel, commentButton, commentCountLabel)
+        addSubviews(profileView, moreButton, commentLabel, createdAtLabel, likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView)
+        
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(12)
             $0.leading.equalToSuperview().inset(Constants.gutter)
@@ -81,7 +86,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
         likeButton.snp.makeConstraints {
             $0.top.equalTo(createdAtLabel.snp.bottom).offset(8)
             $0.leading.equalToSuperview().inset(Constants.gutter)
-            $0.bottom.equalToSuperview().inset(12)
+            $0.bottom.equalToSuperview().inset(13)
         }
         
         likeCountLabel.snp.makeConstraints {
@@ -97,6 +102,12 @@ final class CommunityDetailCommentCell: UITableViewCell {
         commentCountLabel.snp.makeConstraints {
             $0.leading.equalTo(commentButton.snp.trailing).offset(5)
             $0.centerY.equalTo(likeButton)
+        }
+        
+        separatorView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.bottom.equalToSuperview()
+            $0.height.equalTo(1)
         }
     }
     

@@ -27,6 +27,7 @@ final class CommunityDetailView: UIView {
         $0.isScrollEnabled = false
         $0.backgroundColor = .clear
         $0.isUserInteractionEnabled = false
+        $0.separatorStyle = .none
     }
     
     private var comments: [CommunityDetailCommentModel] = []
