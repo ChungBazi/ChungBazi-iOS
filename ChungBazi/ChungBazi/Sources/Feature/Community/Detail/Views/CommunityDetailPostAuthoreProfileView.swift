@@ -12,11 +12,9 @@ import Kingfisher
 
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
-    private let characterImgView = UIImageView().then {
+    private let characterImgView = CustomImageView().then {
         $0.backgroundColor = .green300
-        $0.contentMode = .scaleAspectFit
-        $0.layer.cornerRadius = 23.5
-        $0.clipsToBounds = true
+        $0.createRoundedView(radius: 23.5)
     }
     private let textView = UIView()
     private let userNameLabel = UILabel().then {
@@ -39,6 +37,17 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
+    }
+    
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        
+        characterImgView.setImageMargins(
+            top: -2.65,
+            left: -4.09,
+            right: -3.63,
+            bottom: -6.07
+        )
     }
     
     private func setupUI() {

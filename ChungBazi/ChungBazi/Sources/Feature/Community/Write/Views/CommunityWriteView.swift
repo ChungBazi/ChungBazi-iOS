@@ -6,6 +6,7 @@ protocol CommunityWriteViewDelegate: AnyObject {
     func didTapCameraButton()
     func didSelectDropdownItem(_ item: String)
     func checkIfPostCanBeEnabled()
+    func didTapPostButton()
 }
 
 final class CommunityWriteView: UIView, UITextViewDelegate {
@@ -14,7 +15,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
     
     var selectedCategory: String?
     
-    private let scrollView = UIScrollView()
+    let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let dropdownView = CustomDropdown(
@@ -98,6 +99,20 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
     
     private let collectionViewHandler = CommunityWriteCollectionViewHandler()
     
+    private let buttonContainerView = UIView().then {
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 10
+        $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        $0.layer.shadowColor = UIColor.black.cgColor
+        $0.layer.shadowOffset = CGSize(width: 0, height: 3)
+        $0.layer.shadowOpacity = 0.18
+        $0.layer.shadowRadius = 10
+    }
+
+    let postButton = CustomActiveButton(title: "완료", isEnabled: false).then {
+        $0.addTarget(self, action: #selector(didTapPostButton), for: .touchUpInside)
+    }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupUI()
@@ -115,20 +130,23 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
     }
     
     private func setupUI() {
-        addSubviews(scrollView, dropdownView)
+        addSubviews(scrollView, dropdownView, cameraButton, communityRuleView, buttonContainerView)
         scrollView.addSubview(contentView)
-        contentView.addSubviews(cameraButton, titleTextField, separateLine, contentTextView, photoCollectionView, communityRuleView)
+        contentView.addSubviews(titleTextField, separateLine, contentTextView, photoCollectionView, communityRuleView)
 
         scrollView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.bottom.equalToSuperview()
+            $0.top.equalToSuperview().inset(14 + 36 + 14)
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(communityRuleView.snp.top).offset(17)
         }
         
         scrollView.delaysContentTouches = false
 
         contentView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
             $0.edges.width.equalToSuperview()
             $0.bottom.equalTo(photoCollectionView.snp.bottom).offset(20)
+            $0.height.greaterThanOrEqualTo(scrollView.snp.height)
         }
 
         dropdownView.snp.makeConstraints {
@@ -139,7 +157,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
 
         cameraButton.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(20)
+            $0.top.equalToSuperview().inset(20)
             $0.trailing.equalToSuperview().inset(28)
         }
 
@@ -166,6 +184,31 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
             $0.height.equalTo(98)
         }
         
+        communityRuleView.addSubviews(communityRuleLabel, communityRuleIcon)
+        communityRuleView.snp.makeConstraints {
+            $0.bottom.equalTo(buttonContainerView.snp.top).offset(-17)
+            $0.trailing.equalToSuperview().inset(16)
+            $0.height.equalTo(20)
+        }
+        communityRuleIcon.snp.makeConstraints {
+            $0.centerY.trailing.equalToSuperview()
+        }
+        communityRuleLabel.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.trailing.equalTo(communityRuleIcon.snp.leading).offset(-9.5)
+        }
+        
+        buttonContainerView.addSubview(postButton)
+        buttonContainerView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            $0.height.equalTo(58)
+            $0.bottom.equalToSuperview()
+        }
+        postButton.snp.makeConstraints {
+            $0.top.equalToSuperview().offset(10)
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+        }
+        
         scrollView.delaysContentTouches = false
     }
     
@@ -180,9 +223,20 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
     }
     
+    @objc private func didTapPostButton() {
+        viewDelegate?.didTapPostButton()
+    }
+    
+    func updatePostButtonState(isEnabled: Bool) {
+        DispatchQueue.main.async {
+            self.postButton.isEnabled = isEnabled
+        }
+    }
+    
     @objc private func handleCameraButtonTap() {
         viewDelegate?.didTapCameraButton()
     }
+    
     
     func removeImage(at index: Int) {
         guard index < selectedImages.count else { return }
@@ -201,19 +255,49 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
 
 final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
     weak var contentTextView: UITextView?
-    
+    private let placeholderText = "자유롭게 얘기해보세요."
+
+    init(textView: UITextView) {
+        self.contentTextView = textView
+        super.init()
+        setupPlaceholder()
+    }
+
+    private func setupPlaceholder() {
+        guard let textView = contentTextView else { return }
+        textView.text = placeholderText
+        textView.textColor = .gray300
+        textView.delegate = self
+    }
+
     func textViewDidBeginEditing(_ textView: UITextView) {
-        if textView.text == "자유롭게 얘기해보세요." {
+        if textView.text == placeholderText {
             textView.text = ""
             textView.textColor = .gray800
         }
     }
-    
+
     func textViewDidEndEditing(_ textView: UITextView) {
         if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            textView.text = "자유롭게 얘기해보세요."
+            textView.text = placeholderText
             textView.textColor = .gray300
         }
+    }
+
+    func textViewDidChange(_ textView: UITextView) {
+        if textView.textColor == .gray300 {
+            textView.textColor = .gray800
+            textView.text = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
+        }
+
+        if textView.text.isEmpty {
+            setPlaceholder(in: textView)
+        }
+    }
+
+    private func setPlaceholder(in textView: UITextView) {
+        textView.text = placeholderText
+        textView.textColor = .gray300
     }
 }
 
