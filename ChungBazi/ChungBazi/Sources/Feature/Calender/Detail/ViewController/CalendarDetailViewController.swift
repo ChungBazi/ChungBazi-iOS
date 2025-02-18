@@ -112,10 +112,7 @@ final class CalendarDetailViewController: UIViewController {
         let contentView = calendarDetailView.accessibleContentView
         
         contentView.addSubviews(segmentedControl, underLineView, emptyView, notEmptyView, addingView, editingView, secondView)
-//        firstView.snp.makeConstraints {
-//            $0.top.equalTo(segmentedControl.snp.bottom).offset(1)
-//            $0.leading.trailing.equalToSuperview()
-//        }
+
         [emptyView, notEmptyView, addingView, editingView, secondView].forEach {
             $0.snp.makeConstraints {
                 $0.top.equalTo(underLineView.snp.bottom).offset(1)
@@ -142,7 +139,6 @@ final class CalendarDetailViewController: UIViewController {
         configureSegmentControlAppearance()
         updateFirstView()
         
-//        firstView.isHidden = false
         secondView.isHidden = true
     }
     
@@ -175,17 +171,6 @@ final class CalendarDetailViewController: UIViewController {
         editingView.saveButton.addTarget(self, action: #selector(didTapSaveButton), for: .touchUpInside)
     }
     
-//    private var shouldHideFirstView: Bool? {
-//        didSet {
-//            guard let shouldHideFirstView = self.shouldHideFirstView else { return }
-//            self.emptyView.isHidden = shouldHideFirstView
-//            self.notEmptyView.isHidden = shouldHideFirstView
-//            self.addingView.isHidden = shouldHideFirstView
-//            self.editingView.isHidden = shouldHideFirstView
-//            self.secondView.isHidden = !self.emptyView.isHidden
-//        }
-//    }
-    
     private func notifyViews() {
         notEmptyView.updateDocuments(with: documentList)
         editingView.updateDocuments(with: documentList)
@@ -211,11 +196,17 @@ final class CalendarDetailViewController: UIViewController {
             
         case .editing:
             updateCalendarDocumentsDetail(body: editingView.getUpdatedDocuments()) { [weak self] in
-                self?.callCheckUpdate() // 체크 상태 업데이트
-                self?.fetchCalendarPolicyDetail() // 최신 데이터 가져오기
-                DispatchQueue.main.async {
-                    self?.currentState = .viewing
-                    self?.updateFirstView()
+                guard let self = self else { return }
+                
+                // 체크 상태 업데이트 후에만 최신 데이터 가져오기
+                self.callCheckUpdate { success in
+                    guard success else { return } // 체크 업데이트 실패 시 종료
+                    
+                    self.fetchCalendarPolicyDetail() // 최신 데이터 가져오기
+                    DispatchQueue.main.async {
+                        self.currentState = .viewing
+                        self.updateFirstView()
+                    }
                 }
             }
             
@@ -334,11 +325,19 @@ final class CalendarDetailViewController: UIViewController {
         }
     }
     
-    private func callCheckUpdate() {
+    private func callCheckUpdate(completion: ((Bool) -> Void)? = nil) {
         let updatedChecks = documentList.map {
             calendarNetwork.makeUpdateCheck(documentId: $0.documentId, checked: $0.isChecked)
         }
-        updateCalendarDocumentsCheck(body: updatedChecks)
+
+        calendarNetwork.updateCalendarDocumentsCheck(cartId: cartId, body: updatedChecks) { result in
+            switch result {
+            case .success:
+                completion?(true)
+            case .failure(let error):
+                completion?(false)
+            }
+        }
     }
 }
 
