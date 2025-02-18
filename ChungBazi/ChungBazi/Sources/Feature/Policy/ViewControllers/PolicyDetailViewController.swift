@@ -10,7 +10,7 @@ import Then
 final class PolicyDetailViewController: UIViewController {
 
     var policyId: Int?
-    private var policy: PolicyModel?
+    var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
     private let networkService = PolicyService()
 

@@ -7,6 +7,10 @@
 
 import UIKit
 import Then
+import KakaoSDKShare
+import KakaoSDKTemplate
+import KakaoSDKCommon
+import KakaoSDKTalk
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
@@ -194,9 +198,46 @@ extension UIViewController {
     }
     
     @objc private func handleShareButtonTapped() {
-        let shareText = ""
-        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        present(activityViewController, animated: true, completion: nil)
+        guard let viewController = self as? PolicyDetailViewController, let policy = viewController.policy else {
+            return
+        }
+
+        let policyTitle = policy.name
+        let policyDetailLink = "chungbazi://policy/\(policy.policyId)" 
+
+        if let encodedPosterUrl = policy.posterUrl?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let imageUrl = URL(string: encodedPosterUrl) {
+            shareToKakao(policyTitle: policyTitle, policyURL: policyDetailLink, imageUrl: imageUrl)
+        } else {
+        }
+    }
+    
+    private func shareToKakao(policyTitle: String, policyURL: String, imageUrl: URL) {
+        let link = Link(
+            webUrl: URL(string: policyURL),
+            mobileWebUrl: URL(string: policyURL)
+        )
+
+        let content = Content(
+            title: policyTitle,
+            imageUrl: imageUrl,
+            description: "이 정책을 확인해보세요!",
+            link: link
+        )
+
+        let template = FeedTemplate(content: content)
+
+        if ShareApi.isKakaoTalkSharingAvailable() {
+            ShareApi.shared.shareDefault(templatable: template) { linkResult, error in
+                if let error = error {
+                } else if let linkResult = linkResult {
+                    UIApplication.shared.open(linkResult.url, options: [:], completionHandler: nil)
+                }
+            }
+        } else {
+            guard let url = ShareApi.shared.makeDefaultUrl(templatable: template) else { return }
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
     }
     
     // MARK: - Custom TransitionEffects
