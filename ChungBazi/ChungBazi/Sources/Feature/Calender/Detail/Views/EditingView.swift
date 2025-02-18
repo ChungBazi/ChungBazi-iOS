@@ -156,12 +156,18 @@ extension EditingView: UITableViewDataSource, UITableViewDelegate {
         return cell
     }
     
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            documentList.remove(at: indexPath.row)
+    func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let deleteAction = UIContextualAction(style: .destructive, title: nil) { (_, _, completionHandler) in
+            self.documentList.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            delegate?.didDeleteDocument(at: indexPath.row)
+            completionHandler(true)
+            self.delegate?.didDeleteDocument(at: indexPath.row)
         }
+        
+        deleteAction.image = UIImage(named: "trash_icon")?.withRenderingMode(.alwaysTemplate)
+        deleteAction.backgroundColor = .gray500
+        
+        return UISwipeActionsConfiguration(actions: [deleteAction])
     }
 }
 

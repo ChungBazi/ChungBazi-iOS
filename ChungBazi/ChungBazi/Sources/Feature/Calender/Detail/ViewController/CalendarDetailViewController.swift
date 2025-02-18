@@ -202,25 +202,25 @@ final class CalendarDetailViewController: UIViewController {
         switch currentState {
         case .adding:
             postpostCalendarDocuments(documents: addingView.getDocumentContents()) { [weak self] in
-                self?.finalizeSave()
+                self?.fetchCalendarPolicyDetail() // 최신 데이터 가져오기
+                DispatchQueue.main.async {
+                    self?.currentState = .viewing
+                    self?.updateFirstView()
+                }
             }
             
         case .editing:
             updateCalendarDocumentsDetail(body: editingView.getUpdatedDocuments()) { [weak self] in
-                self?.finalizeSave()
+                self?.callCheckUpdate() // 체크 상태 업데이트
+                self?.fetchCalendarPolicyDetail() // 최신 데이터 가져오기
+                DispatchQueue.main.async {
+                    self?.currentState = .viewing
+                    self?.updateFirstView()
+                }
             }
             
         default:
             break
-        }
-    }
-    
-    private func finalizeSave() {
-        fetchCalendarPolicyDetail() // 최신 데이터 가져오기
-        callCheckUpdate() // 체크 상태 업데이트
-        DispatchQueue.main.async {
-            self.currentState = .viewing
-            self.updateFirstView()
         }
     }
     
