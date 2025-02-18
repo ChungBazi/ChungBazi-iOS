@@ -14,8 +14,9 @@ struct PolicyListResponseDto: Decodable {
 struct RecommendPolicyListResponseDto: Decodable {
     let policies: [PolicyInfo]?
     let interests: [String]?
-    let nextCursor: String?
     let hasNext: Bool
+    let nextCursor: Int
+    let readAllNotifications: Bool
 }
 
 struct PolicyInfo: Decodable {
