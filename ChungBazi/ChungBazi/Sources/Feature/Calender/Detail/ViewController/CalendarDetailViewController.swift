@@ -8,11 +8,19 @@
 import UIKit
 import SnapKit
 
+protocol DocumentListUpdatable: AnyObject {
+    func updateDocuments(with documents: [Document])
+}
+
 final class CalendarDetailViewController: UIViewController {
     
     // MARK: - Properties
     private let calendarDetailView = CalendarDetailView()
-    private var documentList: [Document] = []
+    private var documentList: [Document] = [] {
+        didSet {
+            notifyViews()
+        }
+    }
     private var policy: Policy?
     var cartId: Int
     var policyId: Int
@@ -54,11 +62,15 @@ final class CalendarDetailViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        fetchCalendarPolicyDetail(cartId: policy!.cartId)
+        notEmptyView = NotEmptyView()
+        addingView = AddingView()
+        editingView = EditingView()
         
-        notEmptyView = NotEmptyView(documentList: documentList)
-        addingView = AddingView(documentList: documentList)
-        editingView = EditingView(documentList: documentList)
+        addingView.delegate = self
+        editingView.delegate = self
+        notEmptyView.delegate = self
+        
+        fetchCalendarPolicyDetail()
         
         setupUI()
         setupActions()
@@ -79,11 +91,7 @@ final class CalendarDetailViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        let updatedChecks = documentList.map {
-            calendarNetwork.makeUpdateCheck(documentId: $0.documentId, checked: $0.isChecked)
-        }
-        
-        updateCalendarDocumentsCheck(cartId: cartId, body: updatedChecks)
+        callCheckUpdate()
     }
 
     
@@ -138,13 +146,11 @@ final class CalendarDetailViewController: UIViewController {
         secondView.isHidden = true
     }
     
-    // 모든 뷰가 documentList를 업데이트할 때 이 함수 사용
     private func updateDocumentList(_ newList: [Document]) {
         DispatchQueue.main.async {
             self.documentList = newList
-            self.notEmptyView.updateDocuments(documents: newList)
-            self.addingView.updateDocuments(documents: newList)
-            self.editingView.updateDocuments(documents: newList)
+            self.notEmptyView.updateDocuments(with: newList)
+            self.editingView.updateDocuments(with: newList)
         }
     }
     
@@ -180,7 +186,14 @@ final class CalendarDetailViewController: UIViewController {
 //        }
 //    }
     
+    private func notifyViews() {
+        notEmptyView.updateDocuments(with: documentList)
+        editingView.updateDocuments(with: documentList)
+    }
+    
     @objc private func didTapAddButton() {
+        addingView.resetDocuments()
+        callCheckUpdate()
         currentState = .adding
         updateFirstView()
     }
@@ -188,27 +201,32 @@ final class CalendarDetailViewController: UIViewController {
     @objc private func didTapSaveButton() {
         switch currentState {
         case .adding:
-            let newDocuments = addingView.getDocumentContents()
-            guard !newDocuments.isEmpty else { return }
-            
-            postpostCalendarDocuments(cartId: cartId, documents: newDocuments)
+            postpostCalendarDocuments(documents: addingView.getDocumentContents()) { [weak self] in
+                self?.finalizeSave()
+            }
             
         case .editing:
-            let updatedDocuments = editingView.getUpdatedDocuments()
-            guard !updatedDocuments.isEmpty else { return }
-            
-            updateCalendarDocumentsDetail(cartId: cartId, body: updatedDocuments)
+            updateCalendarDocumentsDetail(body: editingView.getUpdatedDocuments()) { [weak self] in
+                self?.finalizeSave()
+            }
             
         default:
             break
         }
-        
-        fetchCalendarPolicyDetail(cartId: cartId) // 최신 데이터 다시 가져오기
-        currentState = .viewing
-        updateFirstView()
+    }
+    
+    private func finalizeSave() {
+        fetchCalendarPolicyDetail() // 최신 데이터 가져오기
+        callCheckUpdate() // 체크 상태 업데이트
+        DispatchQueue.main.async {
+            self.currentState = .viewing
+            self.updateFirstView()
+        }
     }
     
     @objc private func didTapEditButton() {
+        editingView.setDocuments(documentList)
+        callCheckUpdate()
         currentState = .editing
         updateFirstView()
     }
@@ -256,8 +274,8 @@ final class CalendarDetailViewController: UIViewController {
         }
     }
     
-    private func fetchCalendarPolicyDetail(cartId: Int) {
-        self.policyNetwork.fetchCalendarPolicyDetail(cartId: cartId) { [weak self] result in
+    private func fetchCalendarPolicyDetail() {
+        policyNetwork.fetchCalendarPolicyDetail(cartId: cartId) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):
@@ -277,7 +295,9 @@ final class CalendarDetailViewController: UIViewController {
                 
                 //문서 데이터 설정 후, 즉시 호출
                 DispatchQueue.main.async {
+                    self.updateDocumentList(self.policy?.userDocuments ?? [])
                     self.bindPolicyData(self.policy)
+                    self.updateFirstView()
                 }
             case .failure(let error):
                 print(error)
@@ -285,40 +305,53 @@ final class CalendarDetailViewController: UIViewController {
         }
     }
     
-    private func updateCalendarDocumentsDetail(cartId: Int, body: [UpdateDocuments]) {
-        self.calendarNetwork.updateCalendarDocumentsDetail(cartId: cartId, body: body) { [weak self] result in
-            guard let self = self else { return }
+    private func updateCalendarDocumentsDetail(body: [UpdateDocuments], completion: @escaping () -> Void) {
+        calendarNetwork.updateCalendarDocumentsDetail(cartId: cartId, body: body) { result in
             switch result {
-            case .success(let response):
-                print(response)
+            case .success:
+                completion() // 성공하면 최종 업데이트 실행
             case .failure(let error):
                 print(error)
             }
         }
     }
     
-    private func postpostCalendarDocuments(cartId: Int, documents: [String]) {
-        let body = self.calendarNetwork.makePostDocumentsRequestDto(documents: documents)
-        self.calendarNetwork.postpostCalendarDocuments(cartId: cartId, body: body) { [weak self] result in
-            guard let self = self else { return }
+    private func postpostCalendarDocuments(documents: [String], completion: @escaping () -> Void) {
+        let body = calendarNetwork.makePostDocumentsRequestDto(documents: documents)
+        calendarNetwork.postpostCalendarDocuments(cartId: cartId, body: body) { result in
             switch result {
-            case .success(let response):
-                print(response)
+            case .success:
+                completion() // 성공하면 최종 업데이트 실행
             case .failure(let error):
                 print(error)
             }
         }
     }
     
-    private func updateCalendarDocumentsCheck(cartId: Int, body: [UpdateCheck]) {
-        self.calendarNetwork.updateCalendarDocumentsCheck(cartId: cartId, body: body) { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success(let response):
-                print(response)
-            case .failure(let error):
-                print(error)
-            }
+    private func updateCalendarDocumentsCheck(body: [UpdateCheck]) {
+        calendarNetwork.updateCalendarDocumentsCheck(cartId: cartId, body: body) { result in
+            if case .failure(let error) = result { print(error) }
         }
+    }
+    
+    private func callCheckUpdate() {
+        let updatedChecks = documentList.map {
+            calendarNetwork.makeUpdateCheck(documentId: $0.documentId, checked: $0.isChecked)
+        }
+        updateCalendarDocumentsCheck(body: updatedChecks)
+    }
+}
+
+extension CalendarDetailViewController: AddingViewDelegate, EditingViewDelegate, NotEmptyViewDelegate {
+    func didAddNewDocuments(_ documents: [Document]) {
+        documentList.append(contentsOf: documents)
+    }
+    
+    func didUpdateDocuments(_ documents: [Document]) {
+        documentList = documents
+    }
+    
+    func didDeleteDocument(at index: Int) {
+        documentList.remove(at: index)
     }
 }

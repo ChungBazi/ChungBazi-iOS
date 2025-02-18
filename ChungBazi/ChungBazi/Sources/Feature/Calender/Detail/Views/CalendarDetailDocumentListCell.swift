@@ -9,9 +9,16 @@ import UIKit
 import SnapKit
 import Then
 
+protocol CalendarDetailDocumentListCellDelegate: AnyObject {
+    func didUpdateText(for cell: CalendarDetailDocumentListCell, newText: String)
+}
+
 final class CalendarDetailDocumentListCell: UITableViewCell, UITextFieldDelegate {
     
+    weak var textFieldDelegate: CalendarDetailDocumentListCellDelegate?
+    
     var onTextChanged: ((String) -> Void)?
+    var onCheckChanged: ((Bool) -> Void)?
     
     private let checkButton = UIButton().then {
         $0.setImage(UIImage(named: "checkbox_unchecked")?.withRenderingMode(.alwaysTemplate), for: .normal)
@@ -66,10 +73,16 @@ final class CalendarDetailDocumentListCell: UITableViewCell, UITextFieldDelegate
     }
 
     @objc private func didTapCheckButton() {
-        guard var document = document else { return }
-        document.isChecked.toggle()
-        self.document = document
+        guard let document = document else { return }
+        let newCheckedState = !document.isChecked
+        onCheckChanged?(newCheckedState)
+        
+        self.document?.isChecked = newCheckedState
         updateCheckButton()
+    }
+    
+    func unTapCheckButton() {
+        checkButton.isEnabled = false
     }
 
     private func updateCheckButton() {

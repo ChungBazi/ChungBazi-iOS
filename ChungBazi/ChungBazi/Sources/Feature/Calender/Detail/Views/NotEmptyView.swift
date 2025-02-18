@@ -7,9 +7,14 @@
 
 import UIKit
 
-class NotEmptyView: UIView {
+protocol NotEmptyViewDelegate: AnyObject {
+    func didUpdateDocuments(_ documents: [Document]) // 체크 상태 변경 시 호출
+}
+
+class NotEmptyView: UIView, DocumentListUpdatable {
     
     private var documentList: [Document] = []
+    weak var delegate: NotEmptyViewDelegate?
     
     private let scrollView = UIScrollView()
         private let contentView = UIView()
@@ -32,12 +37,10 @@ class NotEmptyView: UIView {
         $0.isScrollEnabled = false
     }
     
-    init(documentList: [Document]) {
-        super.init(frame: .zero)
-        self.documentList = documentList
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
         setupUITableView()
-        updateDocuments(documents: documentList)
         layoutIfNeeded()
     }
     
@@ -77,7 +80,7 @@ class NotEmptyView: UIView {
         tableView.delegate = self
     }
     
-    func updateDocuments(documents: [Document]) {
+    func updateDocuments(with documents: [Document]) {
         self.documentList = documents
         tableView.reloadData()
         
@@ -114,6 +117,13 @@ extension NotEmptyView: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CalendarDetailDocumentListCell", for: indexPath) as! CalendarDetailDocumentListCell
         let document = documentList[indexPath.row]
         cell.configure(with: document)
+        
+        cell.onCheckChanged = { [weak self] isChecked in
+            guard let self = self else { return }
+            self.documentList[indexPath.row].isChecked = isChecked
+            self.delegate?.didUpdateDocuments(self.documentList) // 즉시 업데이트
+        }
+        
         return cell
     }
 }

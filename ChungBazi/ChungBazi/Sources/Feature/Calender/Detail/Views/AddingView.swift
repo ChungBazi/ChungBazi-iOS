@@ -7,9 +7,14 @@
 
 import UIKit
 
+protocol AddingViewDelegate: AnyObject {
+    func didAddNewDocuments(_ documents: [Document])
+}
+
 class AddingView: UIView {
     
     private var documentList: [Document] = []
+    weak var delegate: AddingViewDelegate?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -24,9 +29,8 @@ class AddingView: UIView {
     }
     private let plusCircleButton = UIButton.createWithImage(image: UIImage(named: "plusCircle")?.withRenderingMode(.alwaysOriginal))
     
-    init(documentList: [Document]) {
-        super.init(frame: .zero)
-        self.documentList = documentList
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
         setupUITableView()
         setupActions()
@@ -79,15 +83,6 @@ class AddingView: UIView {
         plusCircleButton.addTarget(self, action: #selector(addNewDocumentCell), for: .touchUpInside)
     }
     
-    func updateDocuments(documents: [Document]) {
-        self.documentList = documents
-        tableView.reloadData()
-        
-        DispatchQueue.main.async {
-            self.updateTableViewHeight()
-        }
-    }
-    
     @objc private func addNewDocumentCell() {
         let newDocument = Document(documentId: 0, name: "", isChecked: false)
         documentList.append(newDocument)
@@ -129,11 +124,19 @@ class AddingView: UIView {
         self.layoutIfNeeded()
     }
     
-    //새로운 서류 추가시,
     func getDocumentContents() -> [String] {
         return documentList
-            .map { $0.name.trimmingCharacters(in: .whitespacesAndNewlines) } // 앞뒤 공백 제거
-            .filter { !$0.isEmpty } // 빈 값 제외
+            .compactMap { $0.name.isEmpty ? nil : $0.name } // 빈 값은 제외
+    }
+    
+    @objc private func saveDocuments() {
+        delegate?.didAddNewDocuments(documentList)
+    }
+    
+    func resetDocuments() {
+        documentList = []
+        tableView.reloadData()
+        updateTableViewHeight()
     }
 }
 
@@ -147,10 +150,14 @@ extension AddingView: UITableViewDataSource, UITableViewDelegate {
         let cell = tableView.dequeueReusableCell(withIdentifier: "CalendarDetailDocumentListCell", for: indexPath) as! CalendarDetailDocumentListCell
         let document = documentList[indexPath.row]
         cell.textFieldUIEnabled()
+        cell.unTapCheckButton()
         cell.configure(with: document)
+        
         cell.onTextChanged = { [weak self] text in
-            self?.documentList[indexPath.row].name = text
+            guard let self = self else { return }
+            self.documentList[indexPath.row].name = text
         }
+        
         return cell
     }
 }

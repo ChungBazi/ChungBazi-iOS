@@ -7,9 +7,15 @@
 
 import UIKit
 
-class EditingView: UIView {
+protocol EditingViewDelegate: AnyObject {
+    func didUpdateDocuments(_ documents: [Document])  // 문서 수정 후 업데이트
+    func didDeleteDocument(at index: Int)             // 문서 삭제
+}
+
+class EditingView: UIView, DocumentListUpdatable {
     
     private var documentList: [Document] = []
+    weak var delegate: EditingViewDelegate?
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -25,11 +31,11 @@ class EditingView: UIView {
 
     let saveButton = CustomButton(backgroundColor: .blue700, titleText: "저장하기", titleColor: .white)
     
-    init(documentList: [Document]) {
-        super.init(frame: .zero)
-        self.documentList = documentList
+    override init(frame: CGRect) {
+        super.init(frame: frame)
         setupUI()
         setupUITableView()
+        setupActions()
     }
     
     required init?(coder: NSCoder) {
@@ -61,12 +67,18 @@ class EditingView: UIView {
         }
     }
     
-    func updateDocuments(documents: [Document]) {
+    func updateDocuments(with documents: [Document]) {
         self.documentList = documents
         tableView.reloadData()
         
         DispatchQueue.main.async {
             self.updateTableViewHeight()
+            // 전체 리로드 대신 변경된 부분만 갱신
+            for (index, document) in documents.enumerated() {
+                if let cell = self.tableView.cellForRow(at: IndexPath(row: index, section: 0)) as? CalendarDetailDocumentListCell {
+                    cell.configure(with: document)
+                }
+            }
         }
     }
     
@@ -99,11 +111,23 @@ class EditingView: UIView {
         tableView.delegate = self
     }
     
-    //수정된 서류 업데이트 시,
     func getUpdatedDocuments() -> [UpdateDocuments] {
         return documentList
-            .filter { !$0.name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty } // 빈 값 제거
-            .map { networkService.makeUpdateDocuments(documentId: $0.documentId, content: $0.name) }
+            .filter { !$0.name.isEmpty } // 빈 값 제거
+            .map { UpdateDocuments(documentId: $0.documentId, content: $0.name) }
+    }
+    
+    private func setupActions() {
+        saveButton.addTarget(self, action: #selector(saveDocuments), for: .touchUpInside)
+    }
+    
+    @objc private func saveDocuments() {
+        delegate?.didUpdateDocuments(documentList)
+    }
+    
+    func setDocuments(_ documents: [Document]) {
+        self.documentList = documents
+        tableView.reloadData()
     }
 }
 
@@ -118,6 +142,32 @@ extension EditingView: UITableViewDataSource, UITableViewDelegate {
         let document = documentList[indexPath.row]
         cell.textFieldUIEnabled()
         cell.configure(with: document)
+        
+        cell.onTextChanged = { [weak self] text in
+            guard let self = self else { return }
+            self.documentList[indexPath.row].name = text
+        }
+        
+        cell.onCheckChanged = { [weak self] isChecked in
+            guard let self = self else { return }
+            self.documentList[indexPath.row].isChecked = isChecked
+        }
+        
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            documentList.remove(at: indexPath.row)
+            tableView.deleteRows(at: [indexPath], with: .fade)
+            delegate?.didDeleteDocument(at: indexPath.row)
+        }
+    }
+}
+
+extension EditingView: CalendarDetailDocumentListCellDelegate {
+    func didUpdateText(for cell: CalendarDetailDocumentListCell, newText: String) {
+        guard let indexPath = tableView.indexPath(for: cell) else { return }
+        documentList[indexPath.row].name = newText
     }
 }
