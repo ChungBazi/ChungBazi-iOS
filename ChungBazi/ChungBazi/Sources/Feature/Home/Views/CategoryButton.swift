@@ -13,6 +13,7 @@ class CategoryButton: UIButton {
 
     let iconImageView = UIImageView().then {
         $0.contentMode = .scaleAspectFit
+        $0.clipsToBounds = true
     }
 
     let customTitleLabel = UILabel().then {
@@ -48,9 +49,33 @@ class CategoryButton: UIButton {
             make.top.equalTo(iconImageView.snp.bottom).offset(5)
             make.centerX.equalToSuperview()
         }
+
+        applyInnerShadow(to: iconImageView)
     }
 
     @objc private func buttonTapped() {
         print("카테고리 버튼 클릭됨: \(customTitleLabel.text ?? "알 수 없음")")
+    }
+
+    private func applyInnerShadow(to view: UIImageView) {
+        let shadowLayer = CALayer()
+        shadowLayer.frame = view.bounds
+        shadowLayer.cornerRadius = view.bounds.width / 2  
+
+        let shadowPath = UIBezierPath(roundedRect: shadowLayer.bounds, cornerRadius: view.layer.cornerRadius)
+        
+        let maskLayer = CAShapeLayer()
+        maskLayer.frame = view.bounds
+        maskLayer.fillColor = UIColor.black.cgColor
+        maskLayer.backgroundColor = UIColor.clear.cgColor
+        maskLayer.path = shadowPath.cgPath
+
+        shadowLayer.shadowColor = UIColor.black.cgColor
+        shadowLayer.shadowOpacity = 0.08
+        shadowLayer.shadowOffset = CGSize(width: 0, height: 4)
+        shadowLayer.shadowRadius = 4
+        shadowLayer.mask = maskLayer
+
+        view.layer.insertSublayer(shadowLayer, at: 0)
     }
 }

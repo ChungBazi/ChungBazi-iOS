@@ -12,10 +12,11 @@ import Kingfisher
 
 final class CommunityDetailCommentAuthorProfileView: UIView {
     
-    private let characterImgView = CustomImageView().then {
+    private let characterView = UIView().then {
         $0.backgroundColor = .green300
-        $0.createRoundedView(radius: 16.5)
+        $0.createRoundedView(radius: 16.27)
     }
+    private let characterImgView = UIImageView()
     
     private let userNameLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 16)
@@ -35,24 +36,19 @@ final class CommunityDetailCommentAuthorProfileView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        characterImgView.setImageMargins(
-            top: -1.85,
-            left: -2.85,
-            right: -2.54,
-            bottom: -3.54
-        )
-    }
-    
     private func setupUI() {
-        addSubviews(characterImgView, userNameLabel, userLevelLabel)
+        addSubviews(characterView, userNameLabel, userLevelLabel)
         
-        characterImgView.snp.makeConstraints {
+        characterView.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
-            $0.size.equalTo(33)
+            $0.size.equalTo(32.54)
             $0.bottom.lessThanOrEqualToSuperview().priority(.low)
+        }
+        characterView.addSubview(characterImgView)
+        characterImgView.snp.makeConstraints {
+            $0.top.equalToSuperview().inset(-0.46)
+            $0.leading.trailing.equalToSuperview().inset(0.23)
+            $0.bottom.equalToSuperview().inset(1.16)
         }
         
         userNameLabel.snp.makeConstraints {

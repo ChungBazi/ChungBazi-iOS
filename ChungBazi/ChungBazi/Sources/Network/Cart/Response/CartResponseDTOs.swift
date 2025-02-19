@@ -15,6 +15,7 @@ struct CategoryPolicyList: Decodable {
 }
 
 struct CartPolicyList: Decodable {
+//    let policyId: Int?
     let name: String?
     let startDate: String?
     let endDate: String?

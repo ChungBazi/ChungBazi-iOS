@@ -228,13 +228,13 @@ extension CommunityView: UICollectionViewDataSource, UICollectionViewDelegateFlo
 
         cell.configure(with: post, isLastCell: false)
 
-        let targetSize = CGSize(width: collectionView.bounds.width - 16, height: UIView.layoutFittingCompressedSize.height)
+        let targetSize = CGSize(width: collectionView.bounds.width, height: UIView.layoutFittingCompressedSize.height)
 
         let estimatedSize = cell.systemLayoutSizeFitting(targetSize,
                                                          withHorizontalFittingPriority: .required,
                                                          verticalFittingPriority: .fittingSizeLevel)
 
-        return CGSize(width: collectionView.bounds.width - 16, height: estimatedSize.height)
+        return CGSize(width: collectionView.bounds.width, height: estimatedSize.height)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

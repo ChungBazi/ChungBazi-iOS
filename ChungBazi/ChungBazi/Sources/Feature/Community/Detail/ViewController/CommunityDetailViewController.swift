@@ -110,14 +110,14 @@ final class CommunityDetailViewController: UIViewController {
         view.addSubview(backgroundView)
         backgroundView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            commentInputBottomConstraint = $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(10).constraint
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-        
+
         view.addSubview(commentInputView)
         commentInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            commentInputBottomConstraint = $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).offset(10).constraint
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
         commentInputView.addSubview(commentTextField)
@@ -239,33 +239,65 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     @objc private func sendButtonTapped() {
-        guard let commentText = commentTextField.text, !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
-            print("⚠️ 댓글이 비어있습니다.")
+        guard let commentText = commentTextField.text,
+              !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              sendButton.isEnabled else {
+            print("⚠️ 댓글이 비어있거나 버튼이 비활성화됨.")
             return
         }
-        
+
+        sendButton.isEnabled = false
+        NotificationCenter.default.addObserver(self, selector: #selector(handleSendAfterKeyboardHide), name: UIResponder.keyboardDidHideNotification, object: nil)
+
+        view.endEditing(true)
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.forceSendCommentIfNeeded()
+        }
+    }
+
+    @objc private func handleSendAfterKeyboardHide() {
+        // `sendComment()` 실행 후 Notification 해제
+        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidHideNotification, object: nil)
+        sendComment()
+    }
+
+    private func forceSendCommentIfNeeded() {
+        if commentTextField.isFirstResponder == false {
+            print("📌 강제 댓글 전송 실행")
+            sendComment()
+        }
+    }
+
+    private func sendComment() {
+        guard let commentText = commentTextField.text, !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            print("⚠️ 댓글이 비어있습니다.")
+            sendButton.isEnabled = true
+            return
+        }
+
         let commentRequest = CommunityCommentRequestDto(postId: postId, content: commentText)
-        
+
         communityService.postCommunityComment(body: commentRequest) { [weak self] result in
             guard let self = self else { return }
-            
-            switch result {
-            case .success:
-                DispatchQueue.main.async {
+
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
                     self.commentTextField.text = ""
                     self.view.endEditing(true)
-                    
+
                     self.nextCursor = 0
                     self.hasNext = true
                     self.comments.removeAll()
                     self.communityDetailView.updateComments(self.comments)
-                    
+
                     self.fetchCommentData()
                     self.fetchPostData()
+                case .failure(let error):
+                    print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
-                
-            case .failure(let error):
-                print("❌ 댓글 작성 실패: \(error.localizedDescription)")
+                self.sendButton.isEnabled = true
             }
         }
     }

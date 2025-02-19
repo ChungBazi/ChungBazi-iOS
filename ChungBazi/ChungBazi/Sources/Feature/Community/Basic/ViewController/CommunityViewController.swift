@@ -95,8 +95,6 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
             return
         }
 
-        print("📡 데이터 요청 시작 - 카테고리: \(category.rawValue), 커서: \(cursor)")
-
         communityService.getCommunityPosts(category: category.rawValue, cursor: cursor) { [weak self] result in
             guard let self = self else { return }
 
@@ -110,13 +108,10 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
             case .success(let success):
                 DispatchQueue.main.async {
                     let rawPosts = success?.postList ?? []
-                    print("📌 서버에서 받은 원본 게시글 개수: \(rawPosts.count)")
 
                     let newPosts = self.mapCommunityPosts(from: rawPosts)
-                    print("📌 변환 후 게시글 개수: \(newPosts.count)")
 
                     let filteredPosts = newPosts.filter { !self.postIdSet.contains($0.postId) }
-                    print("📌 필터링 후 중복 제거된 게시글 개수: \(filteredPosts.count)")
 
                     self.postIdSet.formUnion(filteredPosts.map { $0.postId })
 
@@ -130,11 +125,23 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
 
                     self.communityView.updatePosts(self.communityPosts, totalPostCount: success?.totalPostCount ?? 0)
 
-                    if let next = success?.nextCursor, next > cursor {
+                    if let next = success?.nextCursor {
+                        if next == 0 && self.hasNext {
+                            self.hasNext = true
+                        }
                         self.nextCursor = next
                     }
 
-                    self.hasNext = success?.hasNext ?? false
+                    if let hasNext = success?.hasNext {
+                        print("📌 hasNext: \(hasNext)")
+                        if self.nextCursor == 0 && hasNext {
+                            self.hasNext = true
+                        } else {
+                            self.hasNext = hasNext
+                        }
+                    } else {
+                        self.hasNext = false
+                    }
 
                     self.communityView.layoutIfNeeded()
                 }
@@ -182,13 +189,17 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
             return
         }
 
-        if contentHeight < frameHeight {
+        if contentHeight < frameHeight + 100 {
+            print("🚀 남은 데이터가 적으므로 추가 데이터 요청")
             fetchMoreData()
         }
     }
     
     private func fetchMoreData() {
         guard hasNext, !isFetching else { return }
+
+        print("📡 추가 데이터 요청 - nextCursor: \(nextCursor)")
+        
         fetchData(for: currentCategoryIndex, cursor: nextCursor)
     }
     

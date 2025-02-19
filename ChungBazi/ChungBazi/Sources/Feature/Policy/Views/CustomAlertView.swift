@@ -91,9 +91,12 @@ final class CustomAlertView: UIView {
     func configure(message: String, urls: [String]) {
         messageLabel.text = message
 
-        urls.forEach { url in
+        buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
+
+        for (index, url) in urls.enumerated() {
             let button = UIButton(type: .system).then {
-                $0.setTitle(url, for: .normal)
+                let buttonTitle = "url\(index + 1)"
+                $0.setTitle(buttonTitle, for: .normal)
                 $0.titleLabel?.font = .ptdMediumFont(ofSize: 14)
                 $0.setTitleColor(.blue700, for: .normal)
                 $0.layer.cornerRadius = 10
@@ -106,12 +109,15 @@ final class CustomAlertView: UIView {
                 }
                 $0.addTarget(self, action: #selector(urlButtonTapped(_:)), for: .touchUpInside)
             }
+
+            button.tag = index
+            button.accessibilityLabel = url 
             buttonStackView.addArrangedSubview(button)
         }
     }
 
     @objc private func urlButtonTapped(_ sender: UIButton) {
-        if let urlString = sender.title(for: .normal), let url = URL(string: urlString) {
+        if let urlString = sender.accessibilityLabel, let url = URL(string: urlString) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             dismissAlert()
         }
