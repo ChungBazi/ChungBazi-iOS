@@ -11,12 +11,13 @@ import Then
 
 final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     
-    var userName = UserProfileDataManager.shared.getNickname()
-    var interest = UserInfoDataManager.shared.getInterests().first ?? "정책"
+    var userName: String = ""
+    var interest: String = " "
     private let networkService = PolicyService()
     private var policyList: [PolicyItem] = []
     private var nextCursor: Int?
     private var hasNext: Bool = false
+    private var sortOrder: String = "latest"
     
     private let categoryMapping: [String: String] = [
         "JOBS": "일자리",
@@ -41,7 +42,6 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
-        tableView.allowsSelection = false
         return tableView
     }()
     
@@ -81,8 +81,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         configureDropdowns()
         updateTitleLabel()
         updateUserInfo()
-        fetchRecommendPolicies(category: interest, cursor: 0)
-
+        fetchRecommendPolicies(category: interest, cursor: 0, order: sortOrder)
     }
 
     private func setupLayout() {
@@ -97,7 +96,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
             make.top.equalTo(titleLabel.snp.bottom).offset(25)
             make.leading.equalToSuperview().offset(160)
             make.width.equalTo(91)
-            make.height.equalTo(36 * Constants.interestItems.count + 36 + 8)
+            make.height.equalTo(36 * Constants.interestItems.count + 36 + 20)
         }
 
         sortDropdown.snp.makeConstraints { make in
@@ -108,7 +107,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).inset(48)
+            make.top.equalTo(sortDropdown.snp.bottom).inset(70)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
@@ -134,17 +133,36 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         }
     }
     
-    // MARK: - CustomDropdownDelegate
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         if dropdown == interestDropdown {
-            print("관심 분야 선택: \(item)")
+            moveToCategoryPolicyViewController(selectedCategory: item)
         } else if dropdown == sortDropdown {
-            print("Selected item: \(item)")
+            let order = (item == "마감순") ? "deadline" : "latest"
+            sortOrder = order
+            
+            sortDropdown.dropdownView.titleLabel.text = item
+            sortDropdown.dropdownView.titleLabel.textColor = .black
+            
+            fetchRecommendPolicies(category: interest, cursor: 0, order: order)
         }
     }
     
+    private func moveToCategoryPolicyViewController(selectedCategory: String) {
+        guard let categoryKey = categoryMapping.first(where: { $0.value == selectedCategory })?.key else {
+            print("⚠️ 지원되지 않는 카테고리: \(selectedCategory)")
+            return
+        }
+        
+        let categoryVC = CategoryPolicyViewController()
+        categoryVC.configure(categoryTitle: selectedCategory)
+        categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
+        navigationController?.pushViewController(categoryVC, animated: true)
+    }
+    
     private func updateTitleLabel() {
-        let text = "\(userName)님께 딱 맞는 \(interest) 정책\n추천 리스트를 준비했어요!"
+        let localizedInterest = categoryMapping[interest] ?? interest
+        let text = "\(userName)님께 딱 맞는 \(localizedInterest) 정책\n추천 리스트를 준비했어요!"
+        
         
         let attributedText = NSMutableAttributedString(string: text)
         let paragraphStyle = NSMutableParagraphStyle()
@@ -153,7 +171,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         
         attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: NSRange(location: 0, length: text.count))
         
-        if let range = text.range(of: interest) {
+        if let range = text.range(of: localizedInterest) {
             let nsRange = NSRange(range, in: text)
             attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: nsRange)
         }
@@ -177,7 +195,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         print("✅ 선택된 관심 카테고리: \(interest)")
     }
     
-    private func fetchRecommendPolicies(category: String, cursor: Int) {
+    private func fetchRecommendPolicies(category: String, cursor: Int, order: String) {
         print("📡 API 요청: category = \(category), cursor = \(cursor)")
         
         networkService.fetchRecommendPolicy(category: interest, cursor: cursor, order: "latest") { [weak self] result in
@@ -188,6 +206,15 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                     print("❌ 추천 정책 데이터 없음")
                     return
                 }
+                
+                if let receivedUserName = response.username {
+                    self.userName = receivedUserName
+                }
+                if let receivedInterests = response.interests, let firstInterest = receivedInterests.first {
+                    self.interest = firstInterest
+                }
+                
+                self.updateTitleLabel()
                 
                 let recommendPolicies: [PolicyItem] = recommendContent.compactMap { data in
                     guard let policyId = data.policyId, let policyName = data.policyName else {
@@ -202,6 +229,9 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                     )
                 }
                 
+                self.policyList.sort {
+                    return order == "latest" ? $0.dday > $1.dday : $0.dday < $1.dday
+                }
                 self.policyList = (cursor == 0) ? recommendPolicies : self.policyList + recommendPolicies
                 self.nextCursor = response.nextCursor
                 self.hasNext = response.hasNext
@@ -229,6 +259,8 @@ extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
         }
         let policy = policyList[indexPath.row]
         cell.configure(with: policy, keyword: nil)
+        cell.selectedBackgroundView = UIView()
+        cell.selectedBackgroundView?.backgroundColor = .clear
         return cell
     }
     
