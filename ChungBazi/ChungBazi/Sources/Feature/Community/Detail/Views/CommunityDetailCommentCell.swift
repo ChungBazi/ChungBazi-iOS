@@ -74,12 +74,12 @@ final class CommunityDetailCommentCell: UITableViewCell {
         }
         
         commentLabel.snp.makeConstraints {
-            $0.top.equalTo(profileView.snp.bottom).offset(8)
+            $0.top.equalTo(profileView.snp.bottom).offset(4)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
         
         createdAtLabel.snp.makeConstraints {
-            $0.top.equalTo(commentLabel.snp.bottom).offset(3)
+            $0.top.equalTo(commentLabel.snp.bottom).offset(5)
             $0.leading.equalToSuperview().inset(Constants.gutter)
         }
         
@@ -127,8 +127,27 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     
     func configure(with comment: CommunityDetailCommentModel) {
-        profileView.configure(userName: comment.userName, userLevel: comment.reward, characterImageUrl: comment.characterImg)
-        commentLabel.text = comment.content
+        profileView.configure(
+            userName: comment.userName,
+            userLevel: comment.reward,
+            characterImageUrl: comment.characterImg
+        )
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 19.6
+        paragraphStyle.maximumLineHeight = 19.6
+        paragraphStyle.lineBreakMode = .byWordWrapping
+
+        let attributedString = NSAttributedString(
+            string: comment.content,
+            attributes: [
+                .paragraphStyle: paragraphStyle,
+                .font: commentLabel.font ?? UIFont.systemFont(ofSize: 14),
+                .foregroundColor: commentLabel.textColor ?? UIColor.gray800
+            ]
+        )
+
+        commentLabel.attributedText = attributedString
         createdAtLabel.text = comment.formattedCreatedAt
     }
 }

@@ -112,9 +112,31 @@ final class CommunityDetailPostView: UIView {
     }
     
     func configure(with post: CommunityDetailPostModel) {
-        profileView.configure(userName: post.userName, userLevel: post.reward, characterImageUrl: post.characterImg, createdAt: post.formattedCreatedAt)
+        profileView.configure(
+            userName: post.userName,
+            userLevel: post.reward,
+            characterImageUrl: post.characterImg,
+            createdAt: post.formattedCreatedAt
+        )
+        
         titleLabel.text = post.title
-        contentLabel.text = post.content
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 19.6
+        paragraphStyle.maximumLineHeight = 19.6
+        paragraphStyle.lineBreakMode = .byWordWrapping
+
+        let attributedString = NSAttributedString(
+            string: post.content,
+            attributes: [
+                .paragraphStyle: paragraphStyle,
+                .font: contentLabel.font ?? UIFont.systemFont(ofSize: 14),
+                .foregroundColor: contentLabel.textColor ?? UIColor.gray800
+            ]
+        )
+
+        contentLabel.attributedText = attributedString
+
         likeCountLabel.text = "좋아요 \(post.postLikes)"
         commentCountLabel.text = "댓글 \(post.commentCount)"
         viewCountLabel.text = "조회 \(post.views)"

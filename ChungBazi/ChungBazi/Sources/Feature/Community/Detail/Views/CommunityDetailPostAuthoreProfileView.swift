@@ -12,10 +12,11 @@ import Kingfisher
 
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
-    private let characterImgView = CustomImageView().then {
+    private let characterView = UIView().then {
         $0.backgroundColor = .green300
-        $0.createRoundedView(radius: 23.5)
+        $0.createRoundedView(radius: 23.29)
     }
+    private let characterImgView = UIImageView()
     private let textView = UIView()
     private let userNameLabel = UILabel().then {
         $0.font = .ptdMediumFont(ofSize: 16)
@@ -39,33 +40,29 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
         fatalError("init(coder:) has not been implemented")
     }
     
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        
-        characterImgView.setImageMargins(
-            top: -2.65,
-            left: -4.09,
-            right: -3.63,
-            bottom: -6.07
-        )
-    }
-    
     private func setupUI() {
-        addSubviews(characterImgView, textView, moreButton)
+        addSubviews(characterView, textView, moreButton)
         
-        characterImgView.snp.makeConstraints {
+        characterView.snp.makeConstraints {
             $0.top.leading.bottom.equalToSuperview()
-            $0.size.equalTo(47)
+            $0.size.equalTo(46.58)
+        }
+        characterView.addSubview(characterImgView)
+        characterImgView.snp.makeConstraints {
+            $0.top.equalToSuperview().inset(-0.67)
+            $0.leading.trailing.equalToSuperview().inset(0.33)
+            $0.bottom.equalToSuperview().inset(1.66)
         }
         
         textView.addSubviews(userNameLabel, userLevelLabel, createdAtLabel)
         textView.snp.makeConstraints {
-            $0.leading.equalTo(characterImgView.snp.trailing).offset(10)
-            $0.centerY.equalTo(characterImgView)
+            $0.leading.equalTo(characterView.snp.trailing).offset(10)
+            $0.centerY.equalTo(characterView)
             $0.height.equalTo(42)
         }
         userNameLabel.snp.makeConstraints {
             $0.top.leading.equalToSuperview()
+            $0.height.equalTo(22)
         }
         userLevelLabel.snp.makeConstraints {
             $0.leading.equalTo(userNameLabel.snp.trailing).offset(7)
@@ -73,6 +70,7 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
         }
         createdAtLabel.snp.makeConstraints {
             $0.leading.bottom.equalToSuperview()
+            $0.top.equalTo(userNameLabel.snp.bottom)
             $0.height.equalTo(20)
         }
         moreButton.snp.makeConstraints {
