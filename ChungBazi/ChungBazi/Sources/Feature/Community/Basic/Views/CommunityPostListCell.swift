@@ -37,6 +37,16 @@ final class CommunityPostListCell: UICollectionViewCell {
         $0.font = .ptdMediumFont(ofSize: 14)
         $0.textColor = .gray500
         $0.numberOfLines = 2
+        
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 19.6
+        paragraphStyle.maximumLineHeight = 19.6
+        paragraphStyle.lineBreakMode = .byTruncatingTail
+
+        $0.attributedText = NSAttributedString(
+            string: $0.text ?? "",
+            attributes: [.paragraphStyle: paragraphStyle]
+        )
     }
     private let thumbnailImgView = UIImageView().then {
         $0.contentMode = .scaleAspectFill
@@ -79,7 +89,7 @@ final class CommunityPostListCell: UICollectionViewCell {
         
         postContentView.addSubviews(categoryLabel, postTitleLabel, contentLabel, thumbnailImgView)
         postContentView.snp.makeConstraints {
-            $0.top.equalTo(profileView.snp.bottom).offset(10)
+            $0.top.equalTo(profileView.snp.bottom).offset(8)
             $0.leading.trailing.width.equalToSuperview().priority(.high)
             $0.bottom.equalTo(contentLabel.snp.bottom)
         }
@@ -91,6 +101,7 @@ final class CommunityPostListCell: UICollectionViewCell {
             $0.centerY.equalTo(categoryLabel)
             $0.leading.equalTo(categoryLabel.snp.trailing).offset(5)
             $0.trailing.equalTo(thumbnailImgView.snp.leading).offset(-8)
+            $0.height.equalTo(22)
         }
         contentLabel.snp.makeConstraints {
             $0.top.equalTo(categoryLabel.snp.bottom).offset(4)
@@ -146,10 +157,24 @@ final class CommunityPostListCell: UICollectionViewCell {
         
         createdAtLabel.text = post.formattedCreatedAt
         categoryLabel.text = post.category.displayName
-        
         postTitleLabel.text = post.title
-        contentLabel.text = post.content
-        
+
+        let paragraphStyle = NSMutableParagraphStyle()
+        paragraphStyle.minimumLineHeight = 19.6
+        paragraphStyle.maximumLineHeight = 19.6
+        paragraphStyle.lineBreakMode = .byTruncatingTail
+
+        let attributedString = NSAttributedString(
+            string: post.content,
+            attributes: [
+                .paragraphStyle: paragraphStyle,
+                .font: contentLabel.font ?? UIFont.systemFont(ofSize: 14),
+                .foregroundColor: contentLabel.textColor ?? UIColor.gray500
+            ]
+        )
+
+        contentLabel.attributedText = attributedString
+
         let likeText = "좋아요 \(post.postLikes)"
         let commentText = "댓글 \(post.commentCount)"
         let viewText = "조회 \(post.views)"

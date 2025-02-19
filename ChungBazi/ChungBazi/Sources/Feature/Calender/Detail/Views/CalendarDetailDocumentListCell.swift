@@ -9,7 +9,16 @@ import UIKit
 import SnapKit
 import Then
 
-final class CalendarDetailDocumentListCell: UITableViewCell {
+protocol CalendarDetailDocumentListCellDelegate: AnyObject {
+    func didUpdateText(for cell: CalendarDetailDocumentListCell, newText: String)
+}
+
+final class CalendarDetailDocumentListCell: UITableViewCell, UITextFieldDelegate {
+    
+    weak var textFieldDelegate: CalendarDetailDocumentListCellDelegate?
+    
+    var onTextChanged: ((String) -> Void)?
+    var onCheckChanged: ((Bool) -> Void)?
     
     private let checkButton = UIButton().then {
         $0.setImage(UIImage(named: "checkbox_unchecked")?.withRenderingMode(.alwaysTemplate), for: .normal)
@@ -48,6 +57,7 @@ final class CalendarDetailDocumentListCell: UITableViewCell {
             $0.leading.equalToSuperview().inset(25)
             $0.size.equalTo(24)
         }
+        textField.delegate = self
         textField.snp.makeConstraints {
             $0.top.equalTo(checkButton)
             $0.leading.equalTo(checkButton.snp.trailing).offset(14)
@@ -63,15 +73,34 @@ final class CalendarDetailDocumentListCell: UITableViewCell {
     }
 
     @objc private func didTapCheckButton() {
-        guard var document = document else { return }
-        document.isChecked.toggle()
-        self.document = document
+        guard let document = document else { return }
+        let newCheckedState = !document.isChecked
+        onCheckChanged?(newCheckedState)
+        
+        self.document?.isChecked = newCheckedState
         updateCheckButton()
+    }
+    
+    func unTapCheckButton() {
+        checkButton.isEnabled = false
     }
 
     private func updateCheckButton() {
         let imageName = document?.isChecked == true ? "checkbox_checked" : "checkbox_unchecked"
         checkButton.setImage(UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate), for: .normal)
         checkButton.tintColor = document?.isChecked == true ? .blue700 : .gray500
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 해제
+        return true
+    }
+    
+    func textFieldUIEnabled() {
+        textField.isUserInteractionEnabled = true
+    }
+    
+    func textFieldDidChangeSelection(_ textField: UITextField) {
+        onTextChanged?(textField.text ?? "")
     }
 }

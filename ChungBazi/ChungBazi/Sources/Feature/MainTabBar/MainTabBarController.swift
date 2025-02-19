@@ -80,7 +80,7 @@ class MainTabBarController: UITabBarController {
         let tabBarItem = UITabBarItem(title: title, image: resizedImage?.withRenderingMode(.alwaysTemplate), tag: tag)
         tabBarItem.selectedImage = resizedImage?.withTintColor(.blue700, renderingMode: .alwaysOriginal)
         
-        tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: 0)
+        tabBarItem.titlePositionAdjustment = UIOffset(horizontal: 0, vertical: -2)
         
         return tabBarItem
     }

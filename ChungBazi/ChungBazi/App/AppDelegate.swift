@@ -48,6 +48,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         }
         // 파이어베이스 Meesaging 설정
         Messaging.messaging().delegate = self
+        UNUserNotificationCenter.current().delegate = self
 
         return true
     }
@@ -154,6 +155,12 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
         Toaster.shared.makeToast("APNs 등록 및 디바이스 토큰 받기 실패 : 어플을 재실행 해주세요")
+    }
+    
+    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
+        let userInfo = response.notification.request.content.userInfo
+        NotificationCenter.default.post(name: NSNotification.Name("NotificationReceived"), object: nil, userInfo: userInfo)
+        completionHandler()
     }
 }
 

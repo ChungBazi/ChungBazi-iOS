@@ -1,3 +1,10 @@
+//
+//  CommunityWritePhotoCell.swift
+//  ChungBazi
+//
+//  Created by 신호연 on 2/4/25.
+//
+
 import UIKit
 import SnapKit
 import Then
@@ -12,7 +19,8 @@ protocol CommunityWriteViewDelegate: AnyObject {
 final class CommunityWriteView: UIView, UITextViewDelegate {
 
     weak var viewDelegate: CommunityWriteViewDelegate?
-    
+    private lazy var textViewHandler = CommunityWriteTextViewHandler(textView: contentTextView)
+
     var selectedCategory: String?
     
     let scrollView = UIScrollView()
@@ -118,7 +126,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         setupUI()
         setupHandlers()
         dropdownView.delegate = self
-        contentTextView.delegate = self
+        contentTextView.delegate = textViewHandler
 
         DispatchQueue.main.async {
             self.bringSubviewToFront(self.dropdownView)
@@ -132,28 +140,24 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
     private func setupUI() {
         addSubviews(scrollView, dropdownView, cameraButton, communityRuleView, buttonContainerView)
         scrollView.addSubview(contentView)
-        contentView.addSubviews(titleTextField, separateLine, contentTextView, photoCollectionView, communityRuleView)
+        contentView.addSubviews(titleTextField, separateLine, contentTextView, photoCollectionView)
 
         scrollView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(14 + 36 + 14)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(communityRuleView.snp.top).offset(17)
+            $0.bottom.equalTo(communityRuleView.snp.top)
         }
-        
-        scrollView.delaysContentTouches = false
 
         contentView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
-            $0.edges.width.equalToSuperview()
-            $0.bottom.equalTo(photoCollectionView.snp.bottom).offset(20)
-            $0.height.greaterThanOrEqualTo(scrollView.snp.height)
+            $0.edges.equalToSuperview()
+            $0.width.equalTo(scrollView)
         }
 
         dropdownView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(14)
             $0.leading.equalToSuperview().inset(Constants.gutter)
             $0.width.equalTo(91)
-            $0.height.equalTo(36*Constants.communityCategoryItems.count + 36 + 8)
+            $0.height.equalTo(36 * Constants.communityCategoryItems.count + 36 + 8)
         }
 
         cameraButton.snp.makeConstraints {
@@ -162,7 +166,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
 
         titleTextField.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(66)
+            $0.top.equalToSuperview().offset(2)
             $0.leading.trailing.equalToSuperview().inset(24)
         }
 
@@ -182,8 +186,9 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
             $0.top.equalTo(contentTextView.snp.bottom).offset(46)
             $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(98)
+            $0.bottom.equalToSuperview().inset(20)
         }
-        
+
         communityRuleView.addSubviews(communityRuleLabel, communityRuleIcon)
         communityRuleView.snp.makeConstraints {
             $0.bottom.equalTo(buttonContainerView.snp.top).offset(-17)
@@ -197,7 +202,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
             $0.centerY.equalToSuperview()
             $0.trailing.equalTo(communityRuleIcon.snp.leading).offset(-9.5)
         }
-        
+
         buttonContainerView.addSubview(postButton)
         buttonContainerView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
@@ -208,7 +213,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
             $0.top.equalToSuperview().offset(10)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
-        
+
         scrollView.delaysContentTouches = false
     }
     
@@ -254,17 +259,17 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
 }
 
 final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
-    weak var contentTextView: UITextView?
+    weak var textView: UITextView?
     private let placeholderText = "자유롭게 얘기해보세요."
 
     init(textView: UITextView) {
-        self.contentTextView = textView
+        self.textView = textView
         super.init()
         setupPlaceholder()
     }
 
     private func setupPlaceholder() {
-        guard let textView = contentTextView else { return }
+        guard let textView = textView else { return }
         textView.text = placeholderText
         textView.textColor = .gray300
         textView.delegate = self
@@ -277,27 +282,22 @@ final class CommunityWriteTextViewHandler: NSObject, UITextViewDelegate {
         }
     }
 
-    func textViewDidEndEditing(_ textView: UITextView) {
-        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            textView.text = placeholderText
-            textView.textColor = .gray300
-        }
-    }
-
     func textViewDidChange(_ textView: UITextView) {
         if textView.textColor == .gray300 {
             textView.textColor = .gray800
-            textView.text = textView.text.trimmingCharacters(in: .whitespacesAndNewlines)
-        }
-
-        if textView.text.isEmpty {
-            setPlaceholder(in: textView)
+            textView.text = ""
         }
     }
 
-    private func setPlaceholder(in textView: UITextView) {
-        textView.text = placeholderText
-        textView.textColor = .gray300
+    func textViewDidEndEditing(_ textView: UITextView) {
+        if textView.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            setPlaceholder()
+        }
+    }
+
+    private func setPlaceholder() {
+        textView?.text = placeholderText
+        textView?.textColor = .gray300
     }
 }
 
