@@ -10,7 +10,7 @@ import Foundation
 struct CommunityResponseDTO: Decodable {
     let totalPostCount: Int
     let postList: [Post]?
-    let nextCursor: Int?
+    let nextCursor: Int
     let hasNext: Bool?
 }
 
@@ -51,8 +51,8 @@ struct CommunityDetailResponseDTO: Decodable {
 }
 
 struct CommunityCommentResponseDTO: Decodable {
-    let commentsList: [Comment]?
-    let nextCursor: Int?
+    let commentsList: [Comment]
+    let nextCursor: Int
     let hasNext: Bool
 }
 
