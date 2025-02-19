@@ -316,6 +316,8 @@ extension SearchResultViewController: UICollectionViewDataSource, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PopularKeywordCell.identifier, for: indexPath) as! PopularKeywordCell
         cell.configure(with: popularKeywords[indexPath.item])
+        cell.selectedBackgroundView = UIView()
+        cell.selectedBackgroundView?.backgroundColor = .clear
         return cell
     }
 

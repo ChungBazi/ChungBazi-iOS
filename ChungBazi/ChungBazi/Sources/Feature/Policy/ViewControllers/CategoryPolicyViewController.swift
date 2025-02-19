@@ -145,6 +145,8 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
         }
         let policy = policyList[indexPath.row]
         cell.configure(with: policy, keyword: nil)
+        cell.selectedBackgroundView = UIView()
+        cell.selectedBackgroundView?.backgroundColor = .clear
         return cell
     }
 

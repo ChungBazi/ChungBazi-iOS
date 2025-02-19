@@ -246,6 +246,8 @@ extension CartViewController: UITableViewDataSource, UITableViewDelegate {
         let category = Array(cartItems.keys)[indexPath.section]
         if let item = cartItems[category]?[indexPath.row] {
             cell.configure(with: item, keyword: nil)
+            cell.selectedBackgroundView = UIView()
+            cell.selectedBackgroundView?.backgroundColor = .clear
             cell.setCheckBoxState(isSelected: selectedItems.contains(item.policyId))
 
             cell.selectionHandler = { [weak self] isSelected in
