@@ -14,7 +14,7 @@ class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegat
         $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
     }
     
-    private lazy var dropdown = CustomDropdown(height: 48, fontSize: 16, title: "취업상태를 선택하세요", hasBorder: true, items: Constants.employmentDropDownItems)
+    private lazy var dropdown = CustomDropdown(height: 48, fontSize: 16, title: "취업상태를 선택하세요", hasBorder: true, items: Constants.employmentDropDownItems, hasShadow: false)
 
     override func viewDidLoad() {
         super.viewDidLoad()

@@ -19,6 +19,7 @@ class CustomDropdown: UIView {
     private var viewHeight: CGFloat = 0
     private var cellHeight: CGFloat = 0 // 각 셀의 높이
     private var fontSize: CGFloat = 0 // 폰트 크기
+    private var hasShadow: Bool
     
     let dropdownView: CustomDropdownView
     
@@ -33,18 +34,28 @@ class CustomDropdown: UIView {
         return tableView
     }()
     
+    private lazy var dropdownContainerView: UIView = {
+        let view = UIView()
+        view.backgroundColor = .clear
+        if hasShadow { // 쉐도우 옵션에 따라 적용 여부 결정
+            applyShadow(to: view)
+        }
+        return view
+    }()
+    
     private var dropdownItems: [String] = []
     private var isDropdownOpen = false
     private var selectedItem: String?
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initializer
-    init(height: CGFloat, fontSize: CGFloat, title: String, hasBorder: Bool, items: [String]) {
+    init(height: CGFloat, fontSize: CGFloat, title: String, hasBorder: Bool, items: [String], hasShadow: Bool = true) {
         self.viewHeight = height
         self.cellHeight = height
         self.fontSize = fontSize
         self.dropdownItems = items
         self.dropdownView = CustomDropdownView(title: title, fontSize: fontSize, hasBorder: hasBorder)
+        self.hasShadow = hasShadow
         super.init(frame: .zero)
         setupUI()
         setupGesture()
@@ -59,6 +70,7 @@ class CustomDropdown: UIView {
     private func setupUI() {
         addSubview(dropdownView)
         addSubview(dropdownTableView)
+        dropdownTableView.addSubview(dropdownContainerView)
         
         // 드롭다운 뷰 레이아웃
         dropdownView.snp.makeConstraints { make in
@@ -72,6 +84,20 @@ class CustomDropdown: UIView {
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(0) // 초기 높이 0
         }
+        
+        dropdownContainerView.snp.makeConstraints {
+            $0.edges.equalToSuperview().inset(4)
+            $0.height.equalTo(0)
+        }
+    }
+    
+    private func applyShadow(to view: UIView) {
+        view.layer.shadowColor = UIColor.black.cgColor // 블랙 색상 (#000000)
+        view.layer.shadowOpacity = 0.2 // 투명도 20%
+        view.layer.shadowOffset = CGSize(width: 0, height: 4) // X: 0, Y: 4
+        view.layer.shadowRadius = 10 // Blur 값 (흐림 정도)
+        view.layer.masksToBounds = false
+        view.layer.shadowRadius = 10
     }
     
     private func setupGesture() {
@@ -130,6 +156,9 @@ class CustomDropdown: UIView {
         let tableHeight = dropdownTableView.contentSize.height
         dropdownTableView.snp.updateConstraints { make in
             make.height.equalTo(isDropdownOpen ? tableHeight : 0)
+        }
+        dropdownContainerView.snp.updateConstraints { make in
+            make.edges.equalTo(dropdownTableView).inset(-4)
         }
     }
     

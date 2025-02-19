@@ -9,6 +9,6 @@ public struct API {
     public static let communityURL = "\(baseURL)/community"
     public static let policyURL = "\(baseURL)/policies"
     public static let cartURL = "\(baseURL)/cart/policies"
-    public static let calendarURL = "\(baseURL)/calendar/policies"
+    public static let calendarURL = "\(baseURL)/calendar"
     public static let notificationURL = "\(baseURL)/notifications"
 }
