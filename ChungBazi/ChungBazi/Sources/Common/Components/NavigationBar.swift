@@ -7,10 +7,22 @@
 
 import UIKit
 import Then
+import KakaoSDKShare
+import KakaoSDKTemplate
+import KakaoSDKCommon
+import KakaoSDKTalk
 
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
+    private var navigationBarView: UIView? {
+        return self.view.subviews.first(where: { $0 is UIView }) 
+    }
+    
+    private var titleLabel: UILabel? {
+        return navigationBarView?.subviews.first(where: { $0 is UILabel }) as? UILabel
+    }
+    
     func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
@@ -194,9 +206,63 @@ extension UIViewController {
     }
     
     @objc private func handleShareButtonTapped() {
-        let shareText = ""
-        let activityViewController = UIActivityViewController(activityItems: [shareText], applicationActivities: nil)
-        present(activityViewController, animated: true, completion: nil)
+        guard let viewController = self as? PolicyDetailViewController, let policy = viewController.policy else {
+            return
+        }
+
+        let policyTitle = policy.name
+        let policyDetailLink = "chungbazi://policy/\(policy.policyId)" 
+
+        if let encodedPosterUrl = policy.posterUrl?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let imageUrl = URL(string: encodedPosterUrl) {
+            shareToKakao(policyTitle: policyTitle, policyURL: policyDetailLink, imageUrl: imageUrl)
+        } else {
+        }
+    }
+    
+    private func shareToKakao(policyTitle: String, policyURL: String, imageUrl: URL) {
+        let link = Link(
+            webUrl: URL(string: policyURL),
+            mobileWebUrl: URL(string: policyURL)
+        )
+
+        let content = Content(
+            title: policyTitle,
+            imageUrl: imageUrl,
+            description: "이 정책을 확인해보세요!",
+            link: link
+        )
+
+        let template = FeedTemplate(content: content)
+
+        if ShareApi.isKakaoTalkSharingAvailable() {
+            ShareApi.shared.shareDefault(templatable: template) { linkResult, error in
+                if let error = error {
+                } else if let linkResult = linkResult {
+                    UIApplication.shared.open(linkResult.url, options: [:], completionHandler: nil)
+                }
+            }
+        } else {
+            guard let url = ShareApi.shared.makeDefaultUrl(templatable: template) else { return }
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+    
+    private func updateAlarmButtonIcon(isUnread: Bool) {
+        guard let navBarView = navigationBarView else { return }
+
+        let alarmButton = UIButton().then {
+            let alarmIcon = isUnread ? UIImage(named: "alarm_unread") : UIImage(named: "alarmIcon")
+            $0.setImage(alarmIcon, for: .normal)
+            $0.tintColor = .red
+            $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
+        }
+        
+        navBarView.addSubview(alarmButton)
+        alarmButton.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.trailing.equalToSuperview().inset(28)
+        }
     }
     
     // MARK: - Custom TransitionEffects

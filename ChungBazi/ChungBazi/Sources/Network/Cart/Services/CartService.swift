@@ -45,7 +45,7 @@ final class CartService: NetworkManager {
     }
     
     /// 장바구니 정책 전체 조회 API
-    public func fetchCartList(completion: @escaping (Result<CartListResponseDto?, NetworkError>) -> Void) {
-        requestOptional(target: .fetchCartList, decodingType: CartListResponseDto.self, completion: completion)
+    public func fetchCartList(completion: @escaping (Result<[CategoryPolicyList]?, NetworkError>) -> Void) {
+        requestOptional(target: .fetchCartList, decodingType: [CategoryPolicyList].self, completion: completion)
     }
 }
