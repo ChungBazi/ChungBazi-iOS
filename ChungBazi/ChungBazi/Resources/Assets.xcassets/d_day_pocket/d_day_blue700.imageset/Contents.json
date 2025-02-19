@@ -1,15 +1,23 @@
 {
   "images" : [
     {
-      "filename" : "d_day_blue700.svg",
-      "idiom" : "universal"
+      "filename" : "d_day_blue700_1.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "d_day_blue700_2.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "d_day_blue700_3.png",
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }

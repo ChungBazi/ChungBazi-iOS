@@ -1,8 +1,19 @@
 {
   "images" : [
     {
-      "filename" : "d_day_blue900.svg",
-      "idiom" : "universal"
+      "filename" : "d_day_blue900_1.png",
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "filename" : "d_day_blue900_2.png",
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "filename" : "d_day_blue900_3.png",
+      "idiom" : "universal",
+      "scale" : "3x"
     }
   ],
   "info" : {
