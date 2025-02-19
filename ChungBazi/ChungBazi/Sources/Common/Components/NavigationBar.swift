@@ -15,6 +15,14 @@ import KakaoSDKTalk
 extension UIViewController {
     // MARK: - Custom NavigationBar
 
+    private var navigationBarView: UIView? {
+        return self.view.subviews.first(where: { $0 is UIView }) 
+    }
+    
+    private var titleLabel: UILabel? {
+        return navigationBarView?.subviews.first(where: { $0 is UILabel }) as? UILabel
+    }
+    
     func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
@@ -237,6 +245,23 @@ extension UIViewController {
         } else {
             guard let url = ShareApi.shared.makeDefaultUrl(templatable: template) else { return }
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+    
+    private func updateAlarmButtonIcon(isUnread: Bool) {
+        guard let navBarView = navigationBarView else { return }
+
+        let alarmButton = UIButton().then {
+            let alarmIcon = isUnread ? UIImage(named: "alarm_unread") : UIImage(named: "alarmIcon")
+            $0.setImage(alarmIcon, for: .normal)
+            $0.tintColor = .red
+            $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
+        }
+        
+        navBarView.addSubview(alarmButton)
+        alarmButton.snp.makeConstraints { make in
+            make.centerY.equalToSuperview()
+            make.trailing.equalToSuperview().inset(28)
         }
     }
     

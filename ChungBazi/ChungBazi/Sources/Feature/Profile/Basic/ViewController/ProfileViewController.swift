@@ -35,7 +35,7 @@ class ProfileViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "프로필", showBackButton: false, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "프로필", showBackButton: false, showCartButton: false, showAlarmButton: false)
         view.addSubview(profileView)
         profileView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
