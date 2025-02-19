@@ -15,7 +15,7 @@ class SetEducationViewController: UIViewController, CustomDropdownDelegate {
         $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
     }
     
-    private lazy var dropdown = CustomDropdown(height: 48, fontSize: 16, title: "학력을 선택하세요", hasBorder: true, items: Constants.eduDropDownItems)
+    private lazy var dropdown = CustomDropdown(height: 48, fontSize: 16, title: "학력을 선택하세요", hasBorder: true, items: Constants.eduDropDownItems, hasShadow: false)
 
     override func viewDidLoad() {
         super.viewDidLoad()

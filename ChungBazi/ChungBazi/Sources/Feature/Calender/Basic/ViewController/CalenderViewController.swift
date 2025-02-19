@@ -73,11 +73,14 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
                     guard let startDateStr = policy.startDate,
                           let endDateStr = policy.endDate,
                           let startDate = DateFormatter.yearMonthDay.date(from: startDateStr),
-                          let endDate = DateFormatter.yearMonthDay.date(from: endDateStr) else {
+                          let endDate = DateFormatter.yearMonthDay.date(from: endDateStr),
+                          let cartId = policy.cartId,
+                          let policyId = policy.policyId else {
                         return nil
                     }
                     return SortedPolicy(
-                        policyId: UUID().uuidString.hashValue,
+                        cartId: cartId,
+                        policyId: policyId,
                         startDate: startDate,
                         endDate: endDate,
                         policyName: policy.name ?? "이름 없음"
@@ -147,7 +150,7 @@ extension CalenderViewController: CalendarViewDelegate {
             let endDateString = DateFormatter.yearMonthDay.string(from: sortedPolicy.endDate)
             
             return Policy(
-                policyId: sortedPolicy.policyId,
+                cartId: sortedPolicy.cartId, policyId: sortedPolicy.policyId,
                 policyName: sortedPolicy.policyName,
                 startDate: startDateString,
                 endDate: endDateString,

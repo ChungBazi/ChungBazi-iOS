@@ -60,6 +60,7 @@ final class CalendarDetailView: UIView {
         scrollView.addSubview(contentView)
         contentView.snp.makeConstraints {
             $0.edges.width.equalToSuperview()
+            $0.bottom.equalTo(safeAreaLayoutGuide)
         }
         setupPolicyInfoView()
     }

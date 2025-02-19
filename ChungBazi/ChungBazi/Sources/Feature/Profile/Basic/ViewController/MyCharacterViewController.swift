@@ -58,7 +58,7 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
     }
     
     private func setNavBar() {
-        addCustomNavigationBar(titleText: "캐릭터 설정", tintColor: .white, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .blue700)
+        addCustomNavigationBar(titleText: "마이 캐릭터", tintColor: .white, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .blue700)
         fillSafeArea(position: .top, color: .blue700)
     }
     
