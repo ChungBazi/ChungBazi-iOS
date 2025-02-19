@@ -6,7 +6,7 @@
 //
 
 struct CartListResponseDto: Decodable {
-    let categoryPolicyList: [CategoryPolicyList]?
+    let result: [CategoryPolicyList]?
 }
 
 struct CategoryPolicyList: Decodable {
@@ -15,7 +15,6 @@ struct CategoryPolicyList: Decodable {
 }
 
 struct CartPolicyList: Decodable {
-//    let policyId: Int?
     let name: String?
     let startDate: String?
     let endDate: String?

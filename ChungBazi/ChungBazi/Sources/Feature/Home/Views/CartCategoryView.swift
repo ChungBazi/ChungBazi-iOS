@@ -16,17 +16,16 @@ final class CartCategoryView: UIView {
         label.textColor = .black
         return label
     }()
-
-    private let policyStackView = UIStackView().then {
-        $0.axis = .vertical
-        $0.spacing = 10
-        $0.distribution = .fill
-    }
-
+    
+    private let dottedLineView: DottedLineView = {
+        let view = DottedLineView()
+        view.backgroundColor = .clear
+        return view
+    }()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupLayout()
-        isHidden = true
     }
 
     required init?(coder: NSCoder) {
@@ -34,15 +33,20 @@ final class CartCategoryView: UIView {
     }
 
     private func setupLayout() {
-        addSubviews(titleLabel, policyStackView)
-
+        addSubviews(dottedLineView, titleLabel)
+        
+        dottedLineView.snp.makeConstraints { make in
+            make.top.leading.trailing.equalToSuperview().inset(12)
+            make.height.equalTo(1)
+        }
+        
         titleLabel.snp.makeConstraints { make in
-            make.top.leading.equalToSuperview().offset(16)
+            make.top.equalTo(dottedLineView.snp.bottom).offset(24)
+            make.leading.equalToSuperview().offset(32)
         }
+    }
 
-        policyStackView.snp.makeConstraints { make in
-            make.top.equalTo(titleLabel.snp.bottom).offset(12)
-            make.leading.trailing.bottom.equalToSuperview().inset(16)
-        }
+    func configure(with category: String) {
+        titleLabel.text = category
     }
 }

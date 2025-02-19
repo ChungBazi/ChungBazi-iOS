@@ -23,7 +23,7 @@ final class PolicyCardViewCell: UITableViewCell {
             }
 
             badgeImageView.snp.updateConstraints { make in
-                make.top.equalToSuperview().offset(showControls ? 42 : 16)
+                make.top.equalToSuperview().offset(showControls ? 48 : 16)
             }
         }
     }
