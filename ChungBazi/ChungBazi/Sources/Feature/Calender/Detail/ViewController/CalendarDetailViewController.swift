@@ -39,6 +39,10 @@ final class CalendarDetailViewController: UIViewController {
         $0.backgroundColor = .blue700
     }
     
+    private let staticUnderLineView = UIView().then {
+        $0.backgroundColor = .gray100
+    }
+    
     private var emptyView = EmptyView()
     private var notEmptyView: NotEmptyView!
     private var addingView: AddingView!
@@ -111,7 +115,7 @@ final class CalendarDetailViewController: UIViewController {
         
         let contentView = calendarDetailView.accessibleContentView
         
-        contentView.addSubviews(segmentedControl, underLineView, emptyView, notEmptyView, addingView, editingView, secondView)
+        contentView.addSubviews(segmentedControl, staticUnderLineView, underLineView, emptyView, notEmptyView, addingView, editingView, secondView)
 
         [emptyView, notEmptyView, addingView, editingView, secondView].forEach {
             $0.snp.makeConstraints {
@@ -129,8 +133,13 @@ final class CalendarDetailViewController: UIViewController {
             $0.leading.trailing.equalTo(calendarDetailView)
             $0.height.equalTo(48)
         }
-        underLineView.snp.makeConstraints {
+        staticUnderLineView.snp.makeConstraints {
             $0.top.equalTo(segmentedControl.snp.bottom)
+            $0.height.equalTo(1)
+            $0.horizontalEdges.equalToSuperview()
+        }
+        underLineView.snp.makeConstraints {
+            $0.top.equalTo(staticUnderLineView.snp.top)
             $0.height.equalTo(1)
             $0.width.equalToSuperview().dividedBy(2)
             $0.leading.equalToSuperview()
