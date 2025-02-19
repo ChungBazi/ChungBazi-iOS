@@ -38,11 +38,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let navController = UINavigationController(rootViewController: mainTBC)
                 window?.rootViewController = navController
                 window?.makeKeyAndVisible()
-                
-                // ✅ 0.5초 후 알림 타입에 맞는 화면으로 이동
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.handleNotification(userInfo: userInfo)
-                }
             } else {
                 // ❌ 로그인 안 되어 있을 경우 → 로그인 화면으로 이동
                 let loginVC = SelectLoginTypeViewController()
