@@ -40,19 +40,24 @@ final class SearchResultViewController: UIViewController {
         $0.font = .ptdSemiBoldFont(ofSize: 20)
     }
 
-    private lazy var popularKeywordsCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
-        $0.scrollDirection = .horizontal
-        $0.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
-        $0.minimumLineSpacing = 10
-    }).then {
-        $0.showsHorizontalScrollIndicator = false
-        $0.backgroundColor = .clear
-        $0.delegate = self
-        $0.dataSource = self
-        $0.isUserInteractionEnabled = true
-        $0.delaysContentTouches = false
-        $0.canCancelContentTouches = false
-    }
+    private lazy var popularKeywordsCollectionView: UICollectionView = {
+        let layout = UICollectionViewFlowLayout()
+        layout.minimumInteritemSpacing = 9
+        layout.minimumLineSpacing = 9
+        layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
+        layout.estimatedItemSize = UICollectionViewFlowLayout.automaticSize
+
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: layout)
+        collectionView.showsHorizontalScrollIndicator = false
+        collectionView.backgroundColor = .clear
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        collectionView.isUserInteractionEnabled = true
+        collectionView.delaysContentTouches = false
+        collectionView.canCancelContentTouches = false
+        collectionView.register(PopularKeywordCell.self, forCellWithReuseIdentifier: PopularKeywordCell.identifier)
+        return collectionView
+    }()
     
     private let tableView = UITableView().then {
         $0.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
@@ -140,8 +145,8 @@ final class SearchResultViewController: UIViewController {
 
         popularKeywordsCollectionView.snp.makeConstraints { make in
             make.top.equalTo(popularSearchLabel.snp.bottom).offset(18)
-            make.leading.trailing.equalToSuperview().inset(16)
-            make.height.equalTo(36)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(100)
         }
 
         sortDropdown.snp.makeConstraints {
@@ -285,6 +290,8 @@ extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate
         }
         let policy = policyList[indexPath.row]
         cell.configure(with: policy, keyword: searchTextField.text)
+        cell.selectedBackgroundView = UIView()
+        cell.selectedBackgroundView?.backgroundColor = .clear
         return cell
     }
     
@@ -309,6 +316,8 @@ extension SearchResultViewController: UICollectionViewDataSource, UICollectionVi
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: PopularKeywordCell.identifier, for: indexPath) as! PopularKeywordCell
         cell.configure(with: popularKeywords[indexPath.item])
+        cell.selectedBackgroundView = UIView()
+        cell.selectedBackgroundView?.backgroundColor = .clear
         return cell
     }
 
@@ -327,5 +336,22 @@ extension SearchResultViewController: CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         sortOrder = (item == "마감순") ? "deadline" : "latest"
         executeSearch()
+    }
+}
+
+extension SearchResultViewController: UICollectionViewDelegateFlowLayout {
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        let keyword = popularKeywords[indexPath.item]
+        
+        let label = UILabel()
+        label.text = keyword
+        label.font = .systemFont(ofSize: 14)
+        label.sizeToFit()
+        
+        let maxWidth = collectionView.frame.width - 32
+        let itemWidth = min(label.frame.width + 24, maxWidth) 
+        let itemHeight: CGFloat = 36
+
+        return CGSize(width: itemWidth, height: itemHeight)
     }
 }
