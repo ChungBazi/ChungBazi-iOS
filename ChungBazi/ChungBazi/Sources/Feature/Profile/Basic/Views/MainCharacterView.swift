@@ -55,6 +55,11 @@ class MainCharacterView: UIView {
         $0.contentMode = .scaleAspectFit
     }
     
+    private lazy var glowingView = UIImageView().then {
+        $0.image = .glowing
+        $0.contentMode = .scaleAspectFit
+    }
+    
     private lazy var stage = UIImageView().then {
         $0.image = .stage
         $0.contentMode = .scaleAspectFit
@@ -99,7 +104,7 @@ class MainCharacterView: UIView {
     }
     
     private func addComponents() {
-        [starBackground, myInfoStackView, remainInfoStackView, stage, character, confetti].forEach { self.addSubview($0) }
+        [starBackground, glowingView, myInfoStackView, remainInfoStackView, stage, character, confetti].forEach { self.addSubview($0) }
         stage.addSubview(stageInfoStackView)
     }
     
@@ -143,6 +148,12 @@ class MainCharacterView: UIView {
         stageInfoStackView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.bottom.equalToSuperview().offset(-7)
+        }
+        
+        glowingView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.horizontalEdges.equalToSuperview().inset(76)
+            $0.bottom.equalTo(stage.snp.top).offset(9)
         }
         
         character.snp.makeConstraints {

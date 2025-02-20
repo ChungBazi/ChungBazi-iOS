@@ -12,7 +12,7 @@ import Then
 class SelectLoginView: UIView {
     
     private let subTitle = UILabel().then {
-        $0.text = "청년 정책 지원 플랫폼"
+        $0.text = "청년 지원 정책 맞춤 알라미"
         $0.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.textColor = .gray100
     }

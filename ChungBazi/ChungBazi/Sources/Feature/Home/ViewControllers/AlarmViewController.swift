@@ -186,7 +186,7 @@ class AlarmViewController: UIViewController {
                         return nil
                     }
                     let type = AlarmType.from(typeString)
-                    return AlarmModel(notificationId: notificationId, message: message, type: type, sentTime: sentTime)
+                    return AlarmModel(notificationId: notificationId, message: message, type: type, policyId: data.policyId, postId: data.postId, sentTime: sentTime)
                 }
                 
                 if cursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
@@ -228,6 +228,33 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
         return CGSize(width: collectionView.frame.width, height: 106)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        let alarm = alarmList[indexPath.item]
+        let destinationVC: UIViewController?
+        
+        switch alarm.type {
+        case .policy:
+            guard let policyId = alarm.policyId else { return }
+            let vc = PolicyDetailViewController()
+            vc.policyId = policyId
+            destinationVC = vc
+            
+        case .community:
+            guard let postId = alarm.postId else { return }
+            destinationVC = CommunityDetailViewController(postId: postId)
+            
+        case .reward:
+            destinationVC = MyCharacterViewController()
+            
+        default:
+            return
+        }
+        
+        if let destinationVC = destinationVC {
+            navigationController?.pushViewController(destinationVC, animated: true)
+        }
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {

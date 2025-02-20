@@ -10,12 +10,16 @@ struct AlarmModel {
     let notificationId: Int
     let message: String
     let type: AlarmType
+    let policyId: Int?
+    let postId: Int?
     let sentTime: String
     
-    init(notificationId: Int, message: String, type: AlarmType, sentTime: String) {
+    init(notificationId: Int, message: String, type: AlarmType, policyId: Int?, postId: Int?, sentTime: String) {
         self.notificationId = notificationId
         self.message = message
         self.type = type
+        self.policyId = policyId
+        self.postId = postId
         self.sentTime = sentTime
     }
 }
