@@ -56,7 +56,7 @@ class MainCharacterView: UIView {
     }
     
     private lazy var glowingView = UIImageView().then {
-        $0.image = .glowing
+        //$0.image = .glowing
         $0.contentMode = .scaleAspectFit
     }
     
@@ -153,7 +153,7 @@ class MainCharacterView: UIView {
         glowingView.snp.makeConstraints {
             $0.centerX.equalToSuperview()
             $0.horizontalEdges.equalToSuperview().inset(76)
-            $0.bottom.equalTo(stage.snp.top).offset(9)
+            $0.bottom.equalTo(stage.snp.top).offset(-9)
         }
         
         character.snp.makeConstraints {
