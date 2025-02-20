@@ -51,8 +51,8 @@ struct CommunityDetailResponseDTO: Decodable {
 }
 
 struct CommunityCommentResponseDTO: Decodable {
-    let commentsList: [Comment]?
-    let nextCursor: Int?
+    let commentsList: [Comment]
+    let nextCursor: Int
     let hasNext: Bool
 }
 
