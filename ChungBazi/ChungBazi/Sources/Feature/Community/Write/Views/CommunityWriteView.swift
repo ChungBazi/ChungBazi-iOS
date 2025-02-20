@@ -194,12 +194,14 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         communityRuleView.isUserInteractionEnabled = true
 
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCommunityRuleView))
+        tapGesture.cancelsTouchesInView = false
         communityRuleView.addGestureRecognizer(tapGesture)
 
         communityRuleView.snp.makeConstraints {
             $0.bottom.equalTo(buttonContainerView.snp.top).offset(-17)
             $0.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(20)
+            $0.width.greaterThanOrEqualTo(168)
         }
 
         communityRuleIcon.snp.makeConstraints {
@@ -223,9 +225,14 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
 
         scrollView.delaysContentTouches = false
+
+        bringSubviewToFront(communityRuleView)
     }
     
     @objc private func didTapCommunityRuleView() {
+        print("✅ didTapCommunityRuleView 호출됨!")
+        print("Frame: \(communityRuleView.frame), Bounds: \(communityRuleView.bounds)")
+        print("Alpha: \(communityRuleView.alpha), isHidden: \(communityRuleView.isHidden)")
         viewDelegate?.didTapCommunityRule()
     }
     
