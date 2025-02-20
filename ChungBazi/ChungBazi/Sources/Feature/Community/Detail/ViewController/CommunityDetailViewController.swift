@@ -67,6 +67,7 @@ final class CommunityDetailViewController: UIViewController {
         setupUI()
         fetchPostData()
         fetchCommentData()
+        communityDetailView.scrollView.delegate = self
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -372,10 +373,8 @@ extension CommunityDetailViewController: UIScrollViewDelegate {
         
         if offsetY > contentHeight - frameHeight - 100 && hasNext && !isFetching && !isLoadingMore {
             isLoadingMore = true
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-                self.fetchCommentData()
-                self.isLoadingMore = false
-            }
+            self.fetchCommentData()
+            self.isLoadingMore = false
         }
     }
 }

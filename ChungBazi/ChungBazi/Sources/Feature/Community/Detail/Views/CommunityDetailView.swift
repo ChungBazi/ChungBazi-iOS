@@ -11,7 +11,7 @@ import Then
 
 final class CommunityDetailView: UIView {
 
-    private let scrollView = UIScrollView()
+    public let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let postView = CommunityDetailPostView()
