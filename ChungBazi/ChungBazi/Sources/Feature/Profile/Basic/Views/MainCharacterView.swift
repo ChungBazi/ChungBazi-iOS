@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Then
 
 class MainCharacterView: UIView {
     var remainPost: Int = 0 {
@@ -79,6 +80,10 @@ class MainCharacterView: UIView {
         $0.contentMode = .scaleAspectFit
     }
     
+    private lazy var radialGradientView = UIImageView().then {
+        $0.image = .glowing
+    }
+    
     private lazy var confetti = UIImageView().then {
         $0.image = .confetti
         $0.contentMode = .scaleAspectFit
@@ -104,7 +109,9 @@ class MainCharacterView: UIView {
     }
     
     private func addComponents() {
-        [starBackground, glowingView, myInfoStackView, remainInfoStackView, stage, character, confetti].forEach { self.addSubview($0) }
+        [starBackground, glowingView, radialGradientView, myInfoStackView, remainInfoStackView, stage, character, confetti].forEach {
+            self.addSubview($0)
+        }
         stage.addSubview(stageInfoStackView)
     }
     
@@ -160,6 +167,12 @@ class MainCharacterView: UIView {
             $0.centerX.equalToSuperview()
             $0.bottom.equalTo(stage.snp.bottom).offset(-16)
             $0.width.equalTo(Constants.superViewWidth * 0.67)
+        }
+        
+        radialGradientView.snp.makeConstraints {
+            $0.centerX.equalToSuperview()
+            $0.size.equalTo(CGSize(width: 223, height: 223))
+            $0.top.equalTo(character.snp.top).offset(-31)
         }
         
         confetti.snp.makeConstraints {
