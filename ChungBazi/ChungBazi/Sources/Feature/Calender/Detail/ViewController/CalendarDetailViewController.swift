@@ -279,14 +279,13 @@ final class CalendarDetailViewController: UIViewController {
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                guard let reference = response?.referenceDocuments,
-                      let documents = response?.documents,
+                guard let documents = response?.documents,
                       let cartId = response?.cartId,
                       let policyId = response?.policyId else { return }
                 
                 self.cartId = cartId
                 self.policyId = policyId
-                policy?.documentText = reference
+                policy?.documentText = response?.referenceDocuments ?? "서류 참고 내용 없음"
                 policy?.userDocuments = documents.map {
                     Document(documentId: $0.documentId ?? 0,
                              name: $0.content ?? "이름 없음",
