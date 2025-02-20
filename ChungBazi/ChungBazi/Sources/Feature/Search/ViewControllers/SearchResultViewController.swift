@@ -107,7 +107,7 @@ final class SearchResultViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = policyList.isEmpty
-        sortDropdown.isHidden = true
+        sortDropdown.isHidden = policyList.isEmpty
     }
 
     override func viewWillDisappear(_ animated: Bool) {
@@ -159,6 +159,7 @@ final class SearchResultViewController: UIViewController {
         tableView.snp.makeConstraints { make in
             make.top.equalTo(sortDropdown.snp.bottom).inset(65)
             make.leading.trailing.bottom.equalToSuperview()
+            make.bottom.equalToSuperview().inset(tabBarController?.tabBar.frame.height ?? 0)
         }
 
         emptyStateLabel.snp.makeConstraints { make in
@@ -187,7 +188,7 @@ final class SearchResultViewController: UIViewController {
     }
 
     private func searchPolicy(name: String, cursor: String) {
-        networkService.searchPolicy(name: name, cursor: cursor, order: "latest") { [weak self] result in
+        networkService.searchPolicy(name: name, cursor: cursor, order: sortOrder) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):
@@ -260,6 +261,8 @@ final class SearchResultViewController: UIViewController {
             return
         }
         searchTextField.resignFirstResponder()
+        policyList.removeAll()
+        tableView.reloadData()
         searchPolicy(name: query, cursor: "")
     }
     
@@ -268,6 +271,12 @@ final class SearchResultViewController: UIViewController {
         alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
         present(alert, animated: true, completion: nil)
     }
+    
+    private func fetchMorePolicies() {
+        guard !nextCursor.isEmpty else { return }
+        searchPolicy(name: searchTextField.text ?? "", cursor: nextCursor)
+    }
+
 }
 
 // MARK: - UITextFieldDelegate
@@ -334,8 +343,11 @@ extension SearchResultViewController: UICollectionViewDataSource, UICollectionVi
 // MARK: - CustomDropdownDelegate
 extension SearchResultViewController: CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
-        sortOrder = (item == "마감순") ? "deadline" : "latest"
-        executeSearch()
+        let newSortOrder = (item == "마감순") ? "deadline" : "latest"
+        if sortOrder != newSortOrder {
+            sortOrder = newSortOrder
+            executeSearch()
+        }
     }
 }
 
@@ -353,5 +365,19 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout {
         let itemHeight: CGFloat = 36
 
         return CGSize(width: itemWidth, height: itemHeight)
+    }
+}
+
+// MARK: - UIScrollViewDelegate (페이징)
+extension SearchResultViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+
+        if contentOffsetY > contentHeight - scrollViewHeight - 100 {
+            guard hasNext else { return }
+            fetchMorePolicies()
+        }
     }
 }

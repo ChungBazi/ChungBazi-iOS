@@ -12,12 +12,13 @@ import Then
 final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     
     var userName: String = ""
-    var interest: String = " "
+    var interest: String = ""
     private let networkService = PolicyService()
     private var policyList: [PolicyItem] = []
     private var nextCursor: Int?
     private var hasNext: Bool = false
     private var sortOrder: String = "latest"
+    private var interestList: [String] = []
     
     private let categoryMapping: [String: String] = [
         "JOBS": "일자리",
@@ -29,7 +30,6 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
-        label.text = "님께 딱 맞는 정책\n추천 리스트를 준비했어요!"
         label.numberOfLines = 2
         label.font = UIFont(name: AppFontName.pSemiBold, size: 20)
         label.textAlignment = .left
@@ -50,7 +50,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         fontSize: 14,
         title: "관심",
         hasBorder: false,
-        items: Constants.interestItems
+        items: interestList.map { categoryMapping[$0] ?? $0 }
     )
     
     private lazy var sortDropdown = CustomDropdown(
@@ -81,7 +81,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         configureDropdowns()
         updateTitleLabel()
         updateUserInfo()
-        fetchRecommendPolicies(category: interest, cursor: 0, order: sortOrder)
+        fetchRecommendPolicies(cursor: 0, order: sortOrder)
     }
 
     private func setupLayout() {
@@ -94,7 +94,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         
         interestDropdown.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(25)
-            make.leading.equalToSuperview().offset(160)
+            make.trailing.equalTo(sortDropdown.snp.leading).offset(-8)
             make.width.equalTo(91)
             make.height.equalTo(36 * Constants.interestItems.count + 36 + 20)
         }
@@ -133,20 +133,6 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         }
     }
     
-    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
-        if dropdown == interestDropdown {
-            moveToCategoryPolicyViewController(selectedCategory: item)
-        } else if dropdown == sortDropdown {
-            let order = (item == "마감순") ? "deadline" : "latest"
-            sortOrder = order
-            
-            sortDropdown.dropdownView.titleLabel.text = item
-            sortDropdown.dropdownView.titleLabel.textColor = .black
-            
-            fetchRecommendPolicies(category: interest, cursor: 0, order: order)
-        }
-    }
-    
     private func moveToCategoryPolicyViewController(selectedCategory: String) {
         guard let categoryKey = categoryMapping.first(where: { $0.value == selectedCategory })?.key else {
             print("⚠️ 지원되지 않는 카테고리: \(selectedCategory)")
@@ -154,7 +140,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         }
         
         let categoryVC = CategoryPolicyViewController()
-        categoryVC.configure(categoryTitle: selectedCategory)
+        categoryVC.configure(categoryTitle: selectedCategory, categoryKey: categoryKey)
         categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
         navigationController?.pushViewController(categoryVC, animated: true)
     }
@@ -191,47 +177,41 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         } else {
             interest = "JOBS"
         }
-        
         print("✅ 선택된 관심 카테고리: \(interest)")
     }
     
-    private func fetchRecommendPolicies(category: String, cursor: Int, order: String) {
-        print("📡 API 요청: category = \(category), cursor = \(cursor)")
-        
-        networkService.fetchRecommendPolicy(category: interest, cursor: cursor, order: "latest") { [weak self] result in
+    private func fetchRecommendPolicies(cursor: Int, order: String) {
+        networkService.fetchRecommendPolicy(category: interest, cursor: cursor, order: order) { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                guard let response = response, let recommendContent = response.policies else {
+                guard let response = response else {
                     print("❌ 추천 정책 데이터 없음")
                     return
                 }
                 
-                if let receivedUserName = response.username {
-                    self.userName = receivedUserName
-                }
-                if let receivedInterests = response.interests, let firstInterest = receivedInterests.first {
+                self.userName = response.username ?? "사용자"
+                self.interestList = response.interests ?? ["JOBS"]
+                
+                let localizedInterests = self.interestList.compactMap { self.categoryMapping[$0] ?? $0 }
+                self.interestDropdown.setItems(localizedInterests)
+                
+                if let firstInterest = self.interestList.first {
                     self.interest = firstInterest
                 }
                 
                 self.updateTitleLabel()
                 
-                let recommendPolicies: [PolicyItem] = recommendContent.compactMap { data in
-                    guard let policyId = data.policyId, let policyName = data.policyName else {
-                        return nil
-                    }
-                    return PolicyItem(
-                        policyId: policyId,
-                        policyName: policyName,
-                        startDate: data.startDate ?? "미정",
-                        endDate: data.endDate ?? "미정",
+                let recommendPolicies = response.policies?.compactMap { data in
+                    PolicyItem(
+                        policyId: data.policyId ?? 0,
+                        policyName: data.policyName ?? "이름 없음",
+                        startDate: data.startDate ?? "상시",
+                        endDate: data.endDate ?? "상시",
                         dday: data.dday ?? 0
                     )
-                }
+                } ?? []
                 
-                self.policyList.sort {
-                    return order == "latest" ? $0.dday > $1.dday : $0.dday < $1.dday
-                }
                 self.policyList = (cursor == 0) ? recommendPolicies : self.policyList + recommendPolicies
                 self.nextCursor = response.nextCursor
                 self.hasNext = response.hasNext
@@ -242,6 +222,22 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                 
             case .failure(let error):
                 print("❌ 정책 추천 API 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        if dropdown == interestDropdown {
+            if let selectedKey = categoryMapping.first(where: { $0.value == item })?.key {
+                interest = selectedKey
+                updateTitleLabel()
+                fetchRecommendPolicies(cursor: 0, order: sortOrder)
+            }
+        } else if dropdown == sortDropdown {
+            let order = (item == "마감순") ? "deadline" : "latest"
+            if sortOrder != order {
+                sortOrder = order
+                fetchRecommendPolicies(cursor: 0, order: order)
             }
         }
     }
@@ -273,5 +269,16 @@ extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
         detailVC.policyId = selectedPolicy.policyId
         
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+        
+        if contentOffsetY > contentHeight - scrollViewHeight - 100 {
+            guard hasNext else { return }
+            fetchRecommendPolicies(cursor: nextCursor ?? 0, order: sortOrder)
+        }
     }
 }

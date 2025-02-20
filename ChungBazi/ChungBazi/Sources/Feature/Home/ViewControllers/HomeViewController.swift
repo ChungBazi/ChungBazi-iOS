@@ -9,6 +9,11 @@ import Then
 
 final class HomeViewController: UIViewController {
 
+    private let networkService = PolicyService()
+    private let userService = UserService()
+    private var readAllNotifications: Bool = false
+    private var sortOrder: String = "latest"
+
     private let searchView = UIView().then {
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 10
@@ -76,6 +81,8 @@ final class HomeViewController: UIViewController {
         setupLayout()
         configureCategoriesWithChatbot()
         configureSearchViewTap()
+        fetchNotificationStatus()
+        fetchProfileImg()
     }
 
     private func setupLayout() {
@@ -122,13 +129,31 @@ final class HomeViewController: UIViewController {
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(110)
         }
-
+        
         categoriesGridStackView.snp.makeConstraints { make in
             make.top.equalTo(banner.snp.bottom).offset(dynamicSpacing)
             make.leading.trailing.equalToSuperview().inset(16)
         }
     }
-
+    
+    private func fetchProfileImg() {
+        userService.fetchProfileImg { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                let characterImgName = response.characterImg
+                
+                DispatchQueue.main.async {
+                    self.policyIconImageView.image = UIImage(named: characterImgName) ?? UIImage(named: "homeicon")
+                }
+                
+            case .failure(let error):
+                print("❌ 캐릭터 이미지 조회 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+    
     private func configureCategoriesWithChatbot() {
         let buttonSize = UIScreen.main.bounds.width * 0.28
         let chatbotSize = buttonSize * 0.8
@@ -215,6 +240,12 @@ final class HomeViewController: UIViewController {
         navigationController?.pushViewController(searchResultVC, animated: true)
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchProfileImg()
+        fetchNotificationStatus()
+    }
+    
     private let categoryMapping: [String: String] = [
         "일자리": "JOBS",
         "주거": "HOUSING",
@@ -230,8 +261,29 @@ final class HomeViewController: UIViewController {
             return
         }
         let categoryVC = CategoryPolicyViewController()
-        categoryVC.configure(categoryTitle: categoryTitle)
+        categoryVC.configure(categoryTitle: categoryTitle, categoryKey: categoryKey)
         categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
         navigationController?.pushViewController(categoryVC, animated: true)
+    }
+    
+    private func fetchNotificationStatus() {
+        networkService.fetchRecommendPolicy(category: "JOBS", cursor: 0, order: sortOrder) { [weak self] result in
+            guard let self = self else { return }
+            
+            switch result {
+            case .success(let response):
+                guard let response = response else { return }
+                let previousState = self.readAllNotifications
+                self.readAllNotifications = response.readAllNotifications
+                
+                if previousState != self.readAllNotifications {
+                    DispatchQueue.main.async {
+                        self.updateAlarmButtonIcon(isUnread: !self.readAllNotifications)
+                    }
+                }
+            case .failure(let error):
+                print("❌ 알림 상태 조회 실패: \(error.localizedDescription)")
+            }
+        }
     }
 }
