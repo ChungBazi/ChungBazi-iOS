@@ -27,6 +27,7 @@ class CustomDropdown: UIView {
         let tableView = UITableView()
         tableView.isHidden = true // 초기에는 숨김
         tableView.layer.cornerRadius = 10
+        tableView.layer.masksToBounds = true
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
@@ -69,25 +70,25 @@ class CustomDropdown: UIView {
     // MARK: - Setup UI
     private func setupUI() {
         addSubview(dropdownView)
-        addSubview(dropdownTableView)
-        dropdownTableView.addSubview(dropdownContainerView)
+        addSubview(dropdownContainerView)
+        dropdownContainerView.addSubview(dropdownTableView)
         
         // 드롭다운 뷰 레이아웃
-        dropdownView.snp.makeConstraints { make in
-            make.top.leading.trailing.equalToSuperview()
-            make.height.equalTo(viewHeight)
-        }
-        
-        // 테이블 뷰 레이아웃
-        dropdownTableView.snp.makeConstraints { make in
-            make.top.equalTo(dropdownView.snp.bottom).offset(8)
-            make.leading.trailing.equalToSuperview()
-            make.height.equalTo(0) // 초기 높이 0
+        dropdownView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.height.equalTo(viewHeight)
         }
         
         dropdownContainerView.snp.makeConstraints {
-            $0.edges.equalToSuperview().inset(4)
+            $0.top.equalTo(dropdownView.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview()
             $0.height.equalTo(0)
+        }
+        
+        // 테이블 뷰 레이아웃
+        dropdownTableView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.height.equalTo(0) // 초기 높이 0
         }
     }
     
@@ -96,8 +97,8 @@ class CustomDropdown: UIView {
         view.layer.shadowOpacity = 0.2 // 투명도 20%
         view.layer.shadowOffset = CGSize(width: 0, height: 4) // X: 0, Y: 4
         view.layer.shadowRadius = 10 // Blur 값 (흐림 정도)
-        view.layer.masksToBounds = false
         view.layer.shadowRadius = 10
+        view.layer.masksToBounds = false
     }
     
     private func setupGesture() {
@@ -150,6 +151,7 @@ class CustomDropdown: UIView {
         isDropdownOpen.toggle()
         let iconName = isDropdownOpen ? "dropup_icon" : "dropdown_icon"
         dropdownView.dropdownImageView.image = UIImage(named: iconName)?.withRenderingMode(.alwaysOriginal)
+        dropdownContainerView.isHidden = !isDropdownOpen
         dropdownTableView.isHidden = !isDropdownOpen
         
         // 테이블 높이를 동적으로 계산
@@ -158,7 +160,7 @@ class CustomDropdown: UIView {
             make.height.equalTo(isDropdownOpen ? tableHeight : 0)
         }
         dropdownContainerView.snp.updateConstraints { make in
-            make.edges.equalTo(dropdownTableView).inset(-4)
+            make.height.equalTo(isDropdownOpen ? tableHeight : 0)
         }
     }
     

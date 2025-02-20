@@ -8,7 +8,13 @@
 import UIKit
 import SnapKit
 
+protocol ProfileAppInfoViewDelegate: AnyObject {
+    func didSelectMenuItem(title: String, content: String)
+}
+
 final class ProfileAppInfoView: UIView {
+    
+    weak var delegate: ProfileAppInfoViewDelegate?
     
     private let tableView = UITableView()
     private let menuItems = ["서비스 이용약관", "개인정보 처리방침"]
@@ -50,5 +56,27 @@ extension ProfileAppInfoView: UITableViewDelegate, UITableViewDataSource {
     
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 70
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        let selectedItem = menuItems[indexPath.row]
+        let title: String
+        let content: String
+        
+        switch selectedItem {
+        case "서비스 이용약관":
+            title = "서비스 이용약관"
+            content = Constants.Policy.service
+            
+        case "개인정보 처리방침":
+            title = "개인정보 처리방침"
+            content = Constants.Policy.privacy
+            
+        default:
+            return
+        }
+        
+        delegate?.didSelectMenuItem(title: title, content: content)
+        tableView.deselectRow(at: indexPath, animated: true)
     }
 }

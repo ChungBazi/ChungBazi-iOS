@@ -7,13 +7,14 @@
 
 import UIKit
 
-final class ProfileAppInfoViewController: UIViewController {
+final class ProfileAppInfoViewController: UIViewController, ProfileAppInfoViewDelegate {
     
     private let profileAppInfoView = ProfileAppInfoView()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        profileAppInfoView.delegate = self
         setupUI()
     }
     
@@ -38,4 +39,10 @@ final class ProfileAppInfoViewController: UIViewController {
         }
     }
     
+    func didSelectMenuItem(title: String, content: String) {
+        let termsVC = TermsNConditionsViewController()
+        termsVC.titleName = title
+        termsVC.changeContents(content)
+        navigationController?.pushViewController(termsVC, animated: true)
+    }
 }

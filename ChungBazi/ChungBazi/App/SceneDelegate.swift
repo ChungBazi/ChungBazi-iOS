@@ -12,14 +12,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
     
-    var pendingNotificationInfo: [AnyHashable: Any]? // 🔔 알림 정보 저장
+    var pendingNotificationInfo: [AnyHashable: Any]? // 알림 정보 저장
     
     func scene(_ scene: UIScene, willConnectTo session: UISceneSession, options connectionOptions: UIScene.ConnectionOptions) {
         guard let windowScene = (scene as? UIWindowScene) else { return }
         window = UIWindow(frame: windowScene.coordinateSpace.bounds)
         window?.windowScene = windowScene
         
-        // 🔥 앱이 알림을 통해 실행되었는지 체크
+        // 앱이 알림을 통해 실행되었는지 체크
         if let notificationResponse = connectionOptions.notificationResponse {
             pendingNotificationInfo = notificationResponse.notification.request.content.userInfo
         }
@@ -32,25 +32,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         let isLoggedIn = AuthManager.shared.isUserLoggedIn()
         
         if let userInfo = pendingNotificationInfo {
-            // 🔔 알림을 통해 실행되었을 경우
+            // 알림을 통해 실행되었을 경우
             if isLoggedIn {
                 let mainTBC = MainTabBarController()
                 let navController = UINavigationController(rootViewController: mainTBC)
                 window?.rootViewController = navController
                 window?.makeKeyAndVisible()
-                
-                // ✅ 0.5초 후 알림 타입에 맞는 화면으로 이동
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                    self.handleNotification(userInfo: userInfo)
-                }
             } else {
-                // ❌ 로그인 안 되어 있을 경우 → 로그인 화면으로 이동
+                // 로그인 안 되어 있을 경우 → 로그인 화면으로 이동
                 let loginVC = SelectLoginTypeViewController()
                 window?.rootViewController = loginVC
                 window?.makeKeyAndVisible()
             }
         } else {
-            // 🏠 일반 실행일 경우 → Splash 화면을 통해 네비게이션 진행
+            // 일반 실행일 경우 → Splash 화면을 통해 네비게이션 진행
             let splashVC = SplashViewController()
             let navController = UINavigationController(rootViewController: splashVC)
             navController.isNavigationBarHidden = true
