@@ -55,7 +55,7 @@ final class ProfileNotificationSettingsViewController: UIViewController {
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "알림 설정", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "알림 설정", showBackButton: true, showCartButton: false, showAlarmButton: false)
         view.addSubview(profileNotificationSettingsView)
         profileNotificationSettingsView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)

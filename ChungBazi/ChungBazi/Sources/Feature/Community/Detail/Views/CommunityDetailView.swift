@@ -98,6 +98,11 @@ final class CommunityDetailView: UIView {
             self.scrollView.layoutIfNeeded()
         }
     }
+    
+    func updateTableViewInsets(_ bottomInset: CGFloat) {
+        commentTableView.contentInset.bottom = bottomInset
+        commentTableView.scrollIndicatorInsets.bottom = bottomInset
+    }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate

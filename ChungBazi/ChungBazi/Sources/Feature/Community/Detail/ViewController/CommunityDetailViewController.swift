@@ -99,6 +99,7 @@ final class CommunityDetailViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.leading.trailing.equalToSuperview()
+            $0.height.equalToSuperview()
         }
         scrollView.isScrollEnabled = false
         scrollView.delegate = self
@@ -298,6 +299,8 @@ final class CommunityDetailViewController: UIViewController {
               let window = view.window else { return }
 
         let keyboardHeight = window.frame.height - keyboardFrame.origin.y
+        let safeAreaBottomInset = view.safeAreaInsets.bottom
+        let adjustedKeyboardHeight = keyboardHeight - safeAreaBottomInset
 
         UIView.animate(withDuration: 0.3) {
             self.commentInputBottomConstraint?.deactivate()
@@ -314,6 +317,15 @@ final class CommunityDetailViewController: UIViewController {
                 make.bottom.equalTo(self.commentInputView.snp.top)
                 make.leading.trailing.equalToSuperview()
             }
+
+            self.communityDetailView.snp.remakeConstraints { make in
+                make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
+                make.width.equalTo(self.scrollView.frameLayoutGuide)
+                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58 + adjustedKeyboardHeight)
+            }
+
+            self.scrollView.contentInset.bottom = adjustedKeyboardHeight
+            self.scrollView.scrollIndicatorInsets.bottom = adjustedKeyboardHeight
 
             self.view.layoutIfNeeded()
         }
@@ -335,6 +347,15 @@ final class CommunityDetailViewController: UIViewController {
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.leading.trailing.equalToSuperview()
             }
+
+            self.communityDetailView.snp.remakeConstraints { make in
+                make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
+                make.width.equalTo(self.scrollView.frameLayoutGuide)
+                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58)
+            }
+
+            self.scrollView.contentInset.bottom = 0
+            self.scrollView.scrollIndicatorInsets.bottom = 0
 
             self.view.layoutIfNeeded()
         }
