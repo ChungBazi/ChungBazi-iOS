@@ -63,4 +63,10 @@ final class UserService: NetworkManager {
     public func fetchReward(completion: @escaping (Result<RewardResponseDto, NetworkError>) -> Void) {
         request(target: .fetchReward, decodingType: RewardResponseDto.self, completion: completion)
     }
+    
+    /// 유저 캐릭터 이미지 조회 API
+    public func fetchProfileImg(completion: @escaping (Result<ProfileImgResponseDto, NetworkError>) -> Void) {
+        request(target: .fetchProfileImg, decodingType: ProfileImgResponseDto.self, completion: completion)
+    }
+    
 }
