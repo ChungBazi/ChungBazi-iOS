@@ -86,7 +86,6 @@ final class CommunityDetailCommentCell: UITableViewCell {
         likeButton.snp.makeConstraints {
             $0.top.equalTo(createdAtLabel.snp.bottom).offset(8)
             $0.leading.equalToSuperview().inset(Constants.gutter)
-            $0.bottom.equalToSuperview().inset(13)
         }
         
         likeCountLabel.snp.makeConstraints {
@@ -105,9 +104,10 @@ final class CommunityDetailCommentCell: UITableViewCell {
         }
         
         separatorView.snp.makeConstraints {
+            $0.top.equalTo(likeButton.snp.bottom).offset(12)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
-            $0.bottom.equalToSuperview()
             $0.height.equalTo(1)
+            $0.bottom.equalToSuperview()
         }
     }
     

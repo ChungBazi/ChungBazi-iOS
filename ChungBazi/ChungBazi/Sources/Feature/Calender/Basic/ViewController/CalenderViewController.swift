@@ -44,8 +44,11 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     private func fetchData() {
         showLoading()
         
+        self.policies = []
+        self.calendarView.clearPolicies()
+
         let currentYearMonth = DateFormatter.yearMonth.string(from: Date())
-        
+
         calendarService.getCalendarPolicies(yearMonth: currentYearMonth) { [weak self] result in
             guard let self = self else { return }
             
@@ -57,18 +60,9 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
             case .success(let response):
                 guard let policies = response, !policies.isEmpty else {
                     print("데이터가 없습니다. API 응답 확인 필요")
-                    self.policies = []
-                    self.calendarView.clearPolicies()
                     return
                 }
-                
-                if policies.isEmpty {
-                    print("데이터가 없습니다. API 응답 확인 필요")
-                    self.policies = []
-                    self.calendarView.clearPolicies()
-                    return
-                }
-                
+
                 self.policies = policies.compactMap { policy in
                     guard let startDateStr = policy.startDate,
                           let endDateStr = policy.endDate,

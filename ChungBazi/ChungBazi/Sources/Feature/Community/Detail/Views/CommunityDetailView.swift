@@ -11,7 +11,7 @@ import Then
 
 final class CommunityDetailView: UIView {
 
-    private let scrollView = UIScrollView()
+    public let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let postView = CommunityDetailPostView()
@@ -23,8 +23,8 @@ final class CommunityDetailView: UIView {
     private let commentTableView = UITableView().then {
         $0.register(CommunityDetailCommentCell.self, forCellReuseIdentifier: CommunityDetailCommentCell.identifier)
         $0.rowHeight = UITableView.automaticDimension
-        $0.estimatedRowHeight = 200
-        $0.isScrollEnabled = false
+        $0.estimatedRowHeight = 136
+        $0.isScrollEnabled = true
         $0.backgroundColor = .clear
         $0.isUserInteractionEnabled = false
         $0.separatorStyle = .none
@@ -88,10 +88,14 @@ final class CommunityDetailView: UIView {
                 $0.top.equalTo(self.gray100View.snp.bottom)
                 $0.leading.trailing.equalToSuperview()
                 $0.height.equalTo(tableHeight)
-                $0.bottom.equalToSuperview()
             }
-            
-            self.layoutIfNeeded()
+
+            self.contentView.snp.remakeConstraints {
+                $0.edges.width.equalToSuperview()
+                $0.bottom.equalTo(self.commentTableView.snp.bottom)
+            }
+
+            self.scrollView.layoutIfNeeded()
         }
     }
 }

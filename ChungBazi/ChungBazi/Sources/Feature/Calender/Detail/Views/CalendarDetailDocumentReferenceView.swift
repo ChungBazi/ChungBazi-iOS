@@ -11,7 +11,11 @@ import Then
 
 final class CalendarDetailDocumentReferenceView: UIView {
     
-    private let documentText = B16_M(text: "")
+    private let documentText = B16_M(text: "").then {
+        $0.lineBreakMode = .byCharWrapping
+        $0.numberOfLines = 0
+        $0.textAlignment = .left
+    }
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -28,7 +32,6 @@ final class CalendarDetailDocumentReferenceView: UIView {
         documentText.snp.makeConstraints {
             $0.top.equalToSuperview().inset(30)
             $0.leading.trailing.equalToSuperview().inset(45)
-            $0.bottom.equalToSuperview()
         }
     }
     

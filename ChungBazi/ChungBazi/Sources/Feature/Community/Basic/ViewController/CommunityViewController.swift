@@ -22,6 +22,8 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     
     private var postIdSet: Set<Int> = []
     
+    private var scrollOffsetY: CGFloat = 0.0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -31,29 +33,27 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        self.postIdSet.removeAll()
-        self.communityPosts.removeAll()
-        self.communityView.updatePosts([], totalPostCount: 0)
+        if communityPosts.isEmpty {
+            self.postIdSet.removeAll()
+            self.communityPosts.removeAll()
+            self.communityView.updatePosts([], totalPostCount: 0)
 
-        self.nextCursor = 0
-        self.hasNext = true
-        self.isFetching = false
+            self.nextCursor = 0
+            self.hasNext = true
+            self.isFetching = false
 
-        fetchData(for: currentCategoryIndex, cursor: 0)
+            fetchData(for: currentCategoryIndex, cursor: 0)
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                self.communityView.scrollView.setContentOffset(CGPoint(x: 0, y: self.scrollOffsetY), animated: false)
+            }
+        }
     }
     
     override func viewDidDisappear(_ animated: Bool) {
         super.viewDidDisappear(animated)
 
-        NotificationCenter.default.removeObserver(self)
-
-        if let communityVC = navigationController?.viewControllers.first(where: { $0 is CommunityViewController }) as? CommunityViewController {
-            communityVC.postIdSet.removeAll()
-            communityVC.communityPosts.removeAll()
-            communityVC.hasNext = true
-            communityVC.nextCursor = 0
-            communityVC.isFetching = false
-        }
+        scrollOffsetY = communityView.scrollView.contentOffset.y
     }
     
     private func setupUI() {
@@ -239,6 +239,11 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
         self.communityPosts.removeAll()
         self.postIdSet.removeAll()
 
+        self.communityView.layoutIfNeeded()
+
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+            self.communityView.scrollView.setContentOffset(CGPoint(x: 0, y: -self.communityView.scrollView.contentInset.top), animated: true)
+        }
 
         fetchData(for: index, cursor: 0)
     }
