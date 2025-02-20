@@ -199,15 +199,21 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
     
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         let normalizedDate = Calendar.current.startOfDay(for: date)
-        
+
+        if selectedDate == normalizedDate {
+            if let eventsForDate = events[date], !eventsForDate.isEmpty {
+                delegate?.presentPolicyListViewController(for: date)
+            }
+            return
+        }
+
         if let previousDate = selectedDate {
-            if previousDate == normalizedDate { return }
             calendar.deselect(previousDate)
         }
-        
+
         selectedDate = normalizedDate
         calendar.reloadData()
-        
+
         if let eventsForDate = events[date], !eventsForDate.isEmpty {
             delegate?.presentPolicyListViewController(for: date)
         }
