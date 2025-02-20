@@ -48,7 +48,7 @@ final class HomeViewController: UIViewController {
 
     private let categoriesGridStackView = UIStackView().then {
         $0.axis = .vertical
-        $0.spacing = 16
+        $0.spacing = 14
         $0.alignment = .fill
     }
 
@@ -79,10 +79,13 @@ final class HomeViewController: UIViewController {
     }
 
     private func setupLayout() {
+        let screenHeight = UIScreen.main.bounds.height
+        let dynamicSpacing = screenHeight * 0.02
+        
         view.addSubviews(searchView, policyIconImageView, policyTextLabel, banner, categoriesGridStackView)
         
         searchView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
+            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(dynamicSpacing * 5)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(40)
         }
@@ -95,7 +98,7 @@ final class HomeViewController: UIViewController {
         }
 
         policyIconImageView.snp.makeConstraints { make in
-            make.top.equalTo(searchView.snp.bottom).offset(14)
+            make.top.equalTo(searchView.snp.bottom).offset(dynamicSpacing)
             make.leading.equalToSuperview().offset(25)
             make.width.height.equalTo(159)
         }
@@ -115,18 +118,22 @@ final class HomeViewController: UIViewController {
         }
 
         banner.snp.makeConstraints { make in
-            make.top.equalTo(policyIconImageView.snp.bottom).offset(4)
+            make.top.equalTo(policyIconImageView.snp.bottom).offset(dynamicSpacing * 0.6)
             make.leading.trailing.equalToSuperview().inset(16)
             make.height.equalTo(110)
         }
 
         categoriesGridStackView.snp.makeConstraints { make in
-            make.top.equalTo(banner.snp.bottom).offset(14)
+            make.top.equalTo(banner.snp.bottom).offset(dynamicSpacing)
             make.leading.trailing.equalToSuperview().inset(16)
         }
     }
 
     private func configureCategoriesWithChatbot() {
+        let buttonSize = UIScreen.main.bounds.width * 0.28
+        let chatbotSize = buttonSize * 0.8
+        let chatbotIconSize = chatbotSize * 0.93
+        
         let firstRowStackView = UIStackView().then {
             $0.axis = .horizontal
             $0.spacing = 14
@@ -150,41 +157,41 @@ final class HomeViewController: UIViewController {
                 $0.tag = index
                 $0.addTarget(self, action: #selector(categoryButtonTapped(_:)), for: .touchUpInside)
             }
-                
+            button.snp.makeConstraints { make in
+                make.width.height.equalTo(buttonSize)
+            }
+            button.iconImageView.snp.makeConstraints { make in
+                make.width.height.equalTo(buttonSize * 0.5)
+            }
             if index < 3 {
                 firstRowStackView.addArrangedSubview(button)
             } else {
                 secondRowStackView.addArrangedSubview(button)
             }
-
-            button.snp.makeConstraints { make in
-                make.width.height.equalTo(105)
-            }
         }
         categoriesGridStackView.setCustomSpacing(14, after: firstRowStackView)
-
+        
         let chatbotButtonContainer = UIView().then {
             $0.snp.makeConstraints { make in
-                make.width.height.equalTo(105)
+                make.width.height.equalTo(buttonSize)
             }
         }
-
+        
         let chatbotButton = UIView().then {
             $0.backgroundColor = AppColor.green300
-            $0.layer.cornerRadius = 39
+            $0.layer.cornerRadius = chatbotSize / 2
             $0.layer.shadowColor = UIColor.black.cgColor
             $0.layer.shadowOpacity = 0.15
-            $0.layer.shadowOffset = CGSize(width: 0, height: 4)
-            $0.layer.shadowRadius = 10
+            $0.layer.shadowOffset = CGSize(width: 0, height: chatbotSize * 0.05)
+            $0.layer.shadowRadius = chatbotSize * 0.15
         }
         chatbotButtonContainer.addSubview(chatbotButton)
         
         chatbotButton.snp.makeConstraints { make in
             make.bottom.equalToSuperview().offset(-1)
             make.trailing.equalToSuperview().offset(-3)
-            make.width.height.equalTo(78)
+            make.width.height.equalTo(chatbotSize)
         }
-
         let chatbotIcon = UIImageView(image: UIImage(named: "chatbot")).then {
             $0.contentMode = .scaleAspectFit
         }
@@ -193,7 +200,7 @@ final class HomeViewController: UIViewController {
         chatbotIcon.snp.makeConstraints { make in
             make.bottom.equalToSuperview().offset(-4)
             make.trailing.equalToSuperview().offset(-1)
-            make.width.height.equalTo(73)
+            make.width.height.equalTo(chatbotIconSize)
         }
         secondRowStackView.addArrangedSubview(chatbotButtonContainer)
     }
