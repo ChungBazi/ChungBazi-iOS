@@ -89,8 +89,8 @@ final class SearchResultViewController: UIViewController {
         addCustomNavigationBar(
             titleText: "",
             showBackButton: true,
-            showCartButton: true,
-            showAlarmButton: true,
+            showCartButton: false,
+            showAlarmButton: false,
             showHomeRecommendTabs: false,
             backgroundColor: .gray50
         )

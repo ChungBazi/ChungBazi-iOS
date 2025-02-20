@@ -30,7 +30,7 @@ final class ProfileAppInfoViewController: UIViewController, ProfileAppInfoViewDe
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "앱 정보", showBackButton: true, showCartButton: false, showAlarmButton: true)
+        addCustomNavigationBar(titleText: "앱 정보", showBackButton: true, showCartButton: false, showAlarmButton: false)
         view.addSubview(profileAppInfoView)
         profileAppInfoView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)

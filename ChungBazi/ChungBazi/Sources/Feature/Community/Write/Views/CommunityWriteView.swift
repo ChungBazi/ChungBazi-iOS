@@ -14,6 +14,7 @@ protocol CommunityWriteViewDelegate: AnyObject {
     func didSelectDropdownItem(_ item: String)
     func checkIfPostCanBeEnabled()
     func didTapPostButton()
+    func didTapCommunityRule()
 }
 
 final class CommunityWriteView: UIView, UITextViewDelegate {
@@ -190,14 +191,21 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
 
         communityRuleView.addSubviews(communityRuleLabel, communityRuleIcon)
+        communityRuleView.isUserInteractionEnabled = true
+
+        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(didTapCommunityRuleView))
+        communityRuleView.addGestureRecognizer(tapGesture)
+
         communityRuleView.snp.makeConstraints {
             $0.bottom.equalTo(buttonContainerView.snp.top).offset(-17)
             $0.trailing.equalToSuperview().inset(16)
             $0.height.equalTo(20)
         }
+
         communityRuleIcon.snp.makeConstraints {
             $0.centerY.trailing.equalToSuperview()
         }
+
         communityRuleLabel.snp.makeConstraints {
             $0.centerY.equalToSuperview()
             $0.trailing.equalTo(communityRuleIcon.snp.leading).offset(-9.5)
@@ -215,6 +223,10 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
         }
 
         scrollView.delaysContentTouches = false
+    }
+    
+    @objc private func didTapCommunityRuleView() {
+        viewDelegate?.didTapCommunityRule()
     }
     
     private func setupHandlers() {

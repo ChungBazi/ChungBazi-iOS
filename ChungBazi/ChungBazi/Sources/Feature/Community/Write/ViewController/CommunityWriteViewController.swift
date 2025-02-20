@@ -133,4 +133,11 @@ final class CommunityWriteViewController: UIViewController, CommunityWriteViewDe
             }
         }
     }
+    
+    func didTapCommunityRule() {
+        let termsVC = TermsNConditionsViewController()
+        termsVC.titleName = "커뮤니티 이용규칙"
+        termsVC.changeContents(Constants.Policy.communityRules)
+        navigationController?.pushViewController(termsVC, animated: true)
+    }
 }
