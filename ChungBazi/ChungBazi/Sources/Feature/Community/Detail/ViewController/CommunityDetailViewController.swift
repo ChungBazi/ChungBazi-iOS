@@ -28,6 +28,8 @@ final class CommunityDetailViewController: UIViewController {
     
     private var commentInputBottomConstraint: Constraint?
     
+    private var isLoadingMore = false
+    
     private let commentInputView = UIView().then {
         $0.backgroundColor = .white
     }
@@ -182,6 +184,7 @@ final class CommunityDetailViewController: UIViewController {
                 switch result {
                 case .success(let response):
                     guard let response = response else { return }
+                    
                     let newComments = response.commentsList.compactMap { comment -> CommunityDetailCommentModel? in
                         guard let postId = comment.postId,
                               let content = comment.content,
@@ -214,13 +217,13 @@ final class CommunityDetailViewController: UIViewController {
                     if response.nextCursor != self.nextCursor {
                         self.nextCursor = response.nextCursor
                     } else {
-                        print("⚠️ nextCursor 변경 없음! 기존: \(self.nextCursor), 응답: \(response.nextCursor)")
+                        print("⚠️ nextCursor 변경 없음! 더 이상 로드할 데이터 없음")
+                        self.hasNext = false
                     }
 
-                    self.hasNext = response.hasNext
+                    self.hasNext = !newComments.isEmpty && response.hasNext
 
                     self.communityDetailView.updateComments(self.comments)
-                    self.scrollView.layoutIfNeeded()
 
                 case .failure(let error):
                     print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
@@ -280,6 +283,7 @@ final class CommunityDetailViewController: UIViewController {
 
                     self.fetchCommentData()
                     self.fetchPostData()
+
                 case .failure(let error):
                     print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
@@ -348,14 +352,15 @@ final class CommunityDetailViewController: UIViewController {
         self.nextCursor = 0
         self.hasNext = true
         self.comments.removeAll()
-        self.communityDetailView.updateComments(self.comments)
         
-        DispatchQueue.main.async {
-            self.communityDetailView.layoutIfNeeded()
-        }
+        self.communityDetailView.updateComments(self.comments)
 
         fetchPostData()
         fetchCommentData()
+        
+        DispatchQueue.main.async {
+            self.refreshControl.endRefreshing()
+        }
     }
 }
 
@@ -365,8 +370,12 @@ extension CommunityDetailViewController: UIScrollViewDelegate {
         let contentHeight = scrollView.contentSize.height
         let frameHeight = scrollView.frame.height
         
-        if offsetY > contentHeight - frameHeight - 100 && hasNext && !isFetching {
-            fetchCommentData()
+        if offsetY > contentHeight - frameHeight - 100 && hasNext && !isFetching && !isLoadingMore {
+            isLoadingMore = true
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+                self.fetchCommentData()
+                self.isLoadingMore = false
+            }
         }
     }
 }
