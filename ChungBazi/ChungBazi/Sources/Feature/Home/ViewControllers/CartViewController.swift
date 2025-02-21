@@ -14,6 +14,10 @@ final class CartViewController: UIViewController {
     private var selectedItems: Set<Int> = []
     private var categoryExpansionState: [String: Bool] = [:]
 
+    private let scrollView = UIScrollView().then {
+        $0.showsVerticalScrollIndicator = false
+    }
+    private let contentView = UIView()
     private let headerView = UIView()
 
     private let allSelectButton: UIButton = {
@@ -44,20 +48,13 @@ final class CartViewController: UIViewController {
         tableView.backgroundColor = .clear
         tableView.estimatedRowHeight = 200
         tableView.allowsSelection = false
+        tableView.isScrollEnabled = false
         return tableView
     }()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .gray50
-        setupNavigationBar()
-        setupHeaderView()
-        setupLayout()
-        configureTableView()
-        fetchCartList()
-    }
-
-    private func setupNavigationBar() {
         addCustomNavigationBar(
             titleText: "장바구니",
             showBackButton: true,
@@ -65,15 +62,37 @@ final class CartViewController: UIViewController {
             showAlarmButton: false,
             backgroundColor: .clear
         )
+        setupScrollView()
+        configureTableView()
+        fetchCartList()
+    }
+    
+    private func setupScrollView() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        contentView.addSubviews(headerView, tableView)
+        
+        guard let navigationBarView = self.view.subviews.first(where: { $0 is UIView }) else { return }
+        
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(navigationBarView.snp.bottom)
+            make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        contentView.snp.makeConstraints { make in
+            make.edges.equalToSuperview()
+            make.width.equalToSuperview()
+        }
+        setupHeaderView()
+        setupTableView()
     }
 
     private func setupHeaderView() {
         headerView.backgroundColor = .clear
-        view.addSubview(headerView)
         headerView.addSubviews(allSelectButton, deleteButton)
 
         headerView.snp.makeConstraints { make in
-            make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(65)
+            make.top.equalToSuperview()
             make.leading.trailing.equalToSuperview()
             make.height.equalTo(48)
         }
@@ -88,13 +107,13 @@ final class CartViewController: UIViewController {
             make.centerY.equalToSuperview()
         }
     }
-
-    private func setupLayout() {
-        view.addSubview(tableView)
-        
+    
+    private func setupTableView() {
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(headerView.snp.bottom).offset(16)
-            make.leading.trailing.bottom.equalToSuperview()
+            make.top.equalTo(headerView.snp.bottom).inset(16)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(1)
+            make.bottom.equalToSuperview()
         }
     }
 
@@ -166,14 +185,14 @@ final class CartViewController: UIViewController {
             switch result {
             case .success(let response):
                 guard let data = response else { return }
-                let response = convertCartResponse(data)
-                self.cartItems = response
+                self.cartItems = self.convertCartResponse(data)
                 self.categoryExpansionState = self.cartItems.keys.reduce(into: [:]) { $0[$1] = false }
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
+                    self.updateTableViewHeight()
                 }
             case .failure(let error):
-                print("❌ 네트워크 요청 자체가 실패함! (상세 정보): \(error.localizedDescription)")
+                print("❌ 네트워크 요청 실패: \(error.localizedDescription)")
             }
         }
     }
@@ -210,27 +229,29 @@ final class CartViewController: UIViewController {
                 categorizedItems[categoryName] = policies
             }
         }
-
         return categorizedItems
+    }
+
+    private func updateTableViewHeight() {
+        let totalRows = cartItems.values.reduce(0) { $0 + $1.count }
+        let rowHeight: CGFloat = 200
+        let headerHeight: CGFloat = CGFloat(cartItems.count) * 70
+        let totalHeight = CGFloat(totalRows) * rowHeight + headerHeight
+
+        tableView.snp.updateConstraints { make in
+            make.height.equalTo(totalHeight)
+        }
     }
 
     @objc private func handleDeleteSelectedItems() {
         deleteCart()
-    }
-    
-    @objc private func handleCategoryTap(_ sender: UITapGestureRecognizer) {
-        guard let section = sender.view?.tag else { return }
-        let category = Array(cartItems.keys)[section]
-        
-        categoryExpansionState[category]?.toggle()
-        tableView.reloadSections(IndexSet(integer: section), with: .automatic)
     }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension CartViewController: UITableViewDataSource, UITableViewDelegate {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return min(cartItems.keys.count, 5)
+        return cartItems.keys.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {

@@ -23,6 +23,10 @@ extension UIViewController {
         return navigationBarView?.subviews.first(where: { $0 is UILabel }) as? UILabel
     }
     
+    private var alarmButton: UIButton? {
+        return navigationBarView?.subviews.first(where: { $0 is UIButton }) as? UIButton
+    }
+    
     func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
@@ -70,9 +74,9 @@ extension UIViewController {
         }
         if showAlarmButton {
             let alarmButton = UIButton().then {
-                let alarmIcon = UIImage(resource: .alarmIcon).withRenderingMode(.alwaysTemplate)
-                $0.setImage(alarmIcon, for: .normal)
+                $0.setImage(UIImage(named: "alarm_icon"), for: .normal)
                 $0.tintColor = tintColor
+                $0.accessibilityIdentifier = "alarmButton"
                 $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
             }
             navigationBarView.addSubview(alarmButton)
@@ -248,20 +252,14 @@ extension UIViewController {
         }
     }
     
-    private func updateAlarmButtonIcon(isUnread: Bool) {
+    func updateAlarmButtonIcon(isUnread: Bool) {
         guard let navBarView = navigationBarView else { return }
 
-        let alarmButton = UIButton().then {
-            let alarmIcon = isUnread ? UIImage(named: "alarm_unread") : UIImage(named: "alarmIcon")
-            $0.setImage(alarmIcon, for: .normal)
-            $0.tintColor = .red
-            $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
-        }
-        
-        navBarView.addSubview(alarmButton)
-        alarmButton.snp.makeConstraints { make in
-            make.centerY.equalToSuperview()
-            make.trailing.equalToSuperview().inset(28)
+        DispatchQueue.main.async {
+            if let alarmButton = navBarView.subviews.first(where: { $0 is UIButton && $0.accessibilityIdentifier == "alarmButton" }) as? UIButton {
+                let alarmIcon = isUnread ? UIImage(named: "alarm_unread_icon") : UIImage(named: "alarm_icon")
+                alarmButton.setImage(alarmIcon, for: .normal)
+            }
         }
     }
     

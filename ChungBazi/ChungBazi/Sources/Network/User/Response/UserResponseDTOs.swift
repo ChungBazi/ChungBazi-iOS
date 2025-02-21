@@ -17,3 +17,7 @@ struct RewardResponseDto: Decodable {
     let postCount: Int
     let commentCount: Int
 }
+
+struct ProfileImgResponseDto: Decodable {
+    let characterImg: String
+}

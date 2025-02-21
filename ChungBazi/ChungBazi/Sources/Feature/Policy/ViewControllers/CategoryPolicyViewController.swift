@@ -14,13 +14,15 @@ final class CategoryPolicyViewController: UIViewController {
     private var categoryTitle: String?
     private var nextCursor: String?
     private var hasNext: Bool = false
-    
+    private var sortOrder: String = "latest"
+    private var categoryKey: String?
+
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
         fontSize: 14,
         title: "최신순",
         hasBorder: false,
-        items: Constants.sortItems
+        items: ["최신순", "마감순"]
     )
 
     private let tableView: UITableView = {
@@ -52,6 +54,11 @@ final class CategoryPolicyViewController: UIViewController {
         setupSafeAreaBackground()
         setupLayout()
         configureTableView()
+        configureDropdown()
+        
+        if let categoryKey = categoryKey {
+            fetchCategoryPolicy(category: categoryKey, cursor: 0)
+        }
     }
 
     private func setupSafeAreaBackground() {
@@ -89,29 +96,32 @@ final class CategoryPolicyViewController: UIViewController {
         tableView.delegate = self
     }
 
-    func configure(categoryTitle: String) {
+    private func configureDropdown() {
+        sortDropdown.delegate = self
+    }
+    
+    func configure(categoryTitle: String, categoryKey: String) {
         self.categoryTitle = categoryTitle
+        self.categoryKey = categoryKey
     }
 
     func fetchCategoryPolicy(category: String, cursor: Int) {
-        networkService.fetchCategoryPolicy(category: category, cursor: cursor, order: "latest") { [weak self] result in
+        networkService.fetchCategoryPolicy(category: category, cursor: cursor, order: sortOrder) { [weak self] result in
         guard let self = self else { return }
         switch result {
         case .success(let response):
             guard let response = response,
                     let policyContent = response.policies else { return }
                     
-            let newPolicies: [PolicyItem] = policyContent.compactMap { data in
-                guard let policyId = data.policyId,
-                        let policyName = data.policyName,
-                        let startDate = data.startDate,
-                        let endDate = data.endDate,
-                        let dday = data.dday else {
-                    print("정책이 없습니다.")
-                    return nil
-                }
-                return PolicyItem(policyId: policyId, policyName: policyName, startDate: startDate, endDate: endDate, dday: dday)
-            }
+            let newPolicies = response.policies?.compactMap { data in
+                PolicyItem(
+                    policyId: data.policyId ?? 0,
+                    policyName: data.policyName ?? "이름 없음",
+                    startDate: data.startDate ?? "상시",
+                    endDate: data.endDate ?? "상시",
+                    dday: data.dday ?? 0
+                )
+            } ?? []
                     
             if cursor != 0 {
                 self.policyList.append(contentsOf: newPolicies)
@@ -160,5 +170,34 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
         detailVC.policyId = selectedPolicy.policyId
 
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let contentOffsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let scrollViewHeight = scrollView.frame.size.height
+
+        if contentOffsetY > contentHeight - scrollViewHeight - 100 {
+            guard hasNext else { return }
+            if let categoryKey = categoryKey {
+                fetchCategoryPolicy(category: categoryKey, cursor: 0)
+            }
+        }
+    }
+}
+
+// MARK: - CustomDropdownDelegate
+extension CategoryPolicyViewController: CustomDropdownDelegate {
+    func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
+        if dropdown == sortDropdown {
+            let order = (item == "마감순") ? "deadline" : "latest"
+            if sortOrder != order {
+                sortOrder = order
+                sortDropdown.dropdownView.titleLabel.text = item
+                if let categoryKey = categoryKey {
+                    fetchCategoryPolicy(category: categoryKey, cursor: 0)
+                }
+            }
+        }
     }
 }

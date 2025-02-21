@@ -229,7 +229,7 @@ final class PolicyDetailViewController: UIViewController {
         if let image = posterView.posterImageView.image {
             expandImageVC.image = image
         } else {
-            expandImageVC.image = UIImage(named: "poster_example")
+            expandImageVC.image = UIImage(named: "")
         }
         
         expandImageVC.modalPresentationStyle = .overFullScreen
