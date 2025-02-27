@@ -74,4 +74,16 @@ cd ChungBazi-iOS
 4. 커밋은 기능 단위로 나눠서 작성하고 이슈 번호를 포함한다.
 ```
 
+![랜딩1](https://github.com/user-attachments/assets/e6ffba4c-b270-431c-b243-e68e09fa3290)
+![랜딩2](https://github.com/user-attachments/assets/dfe0dbf8-ea43-47a8-9942-de6e63883167)
+![랜딩3](https://github.com/user-attachments/assets/3108ca2d-041d-4b35-b4b5-7ca18cf42c45)
+![랜딩4](https://github.com/user-attachments/assets/be6ae401-224c-409a-a4bf-2d4b025cfb2a)
+![랜딩5](https://github.com/user-attachments/assets/70f3a339-82cc-425f-98c0-e91e92ce6346)
+![랜딩6](https://github.com/user-attachments/assets/9cf2c3a2-3dac-48f9-8ad3-61dd773f577e)
+![랜딩7](https://github.com/user-attachments/assets/6720f857-0d68-4cdc-ab9a-55c487b5be11)
+![랜딩8](https://github.com/user-attachments/assets/b02004cb-0962-44c6-91d4-96df2e49a693)
+![랜딩9](https://github.com/user-attachments/assets/faca0dde-2a39-4b72-b9f7-085107aafd98)
+![랜딩10](https://github.com/user-attachments/assets/4c9d6299-e5ee-49aa-b03f-3b47175f8b78)
+![랜딩11](https://github.com/user-attachments/assets/199e5b60-b037-4447-86db-9e785bae49db)
+![랜딩12](https://github.com/user-attachments/assets/047e26d9-0787-40ff-82bc-76a9496dc2df)
 
