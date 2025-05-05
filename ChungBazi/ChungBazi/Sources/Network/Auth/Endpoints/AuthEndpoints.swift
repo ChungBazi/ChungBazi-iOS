@@ -11,6 +11,7 @@ import KeychainSwift
 
 enum AuthEndpoints {
     case postKakaoLogin(data: KakaoLoginRequestDto)
+    case postAppleLogin(data: AppleLoginRequestDto)
     case postLogout
     case deleteUser
     case postReIssueToken(data: ReIssueRequestDto)
@@ -30,6 +31,8 @@ extension AuthEndpoints: TargetType {
             return "/kakao-login"
         case .postLogout:
             return "/kakao-logout"
+        case .postAppleLogin:
+            return "/apple-login"
         case .deleteUser:
             return "/delete-account"
         case .postReIssueToken:
@@ -39,7 +42,7 @@ extension AuthEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postLogout, .postReIssueToken, .postKakaoLogin:
+        case .postLogout, .postReIssueToken, .postKakaoLogin, .postAppleLogin:
             return .post
         case .deleteUser:
             return .delete
@@ -52,6 +55,8 @@ extension AuthEndpoints: TargetType {
             return .requestPlain
         case .postKakaoLogin(let data):
             return .requestJSONEncodable(data)
+        case .postAppleLogin(let data):
+            return .requestJSONEncodable(data)
         case .postReIssueToken(let data):
             return .requestJSONEncodable(data)
         }
@@ -59,7 +64,7 @@ extension AuthEndpoints: TargetType {
     
     var headers: [String : String]? {
         switch self {
-        case .postKakaoLogin, .postReIssueToken:
+        case .postKakaoLogin, .postReIssueToken, .postAppleLogin:
             return ["Content-Type": "application/json"]
         default:
             let accessToken = KeychainSwift().get("serverAccessToken")

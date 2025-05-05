@@ -37,11 +37,21 @@ final class AuthService: NetworkManager {
     public func makeReIssueDTO(refreshToken: String) -> ReIssueRequestDto {
         return ReIssueRequestDto(refreshToken: refreshToken)
     }
+    
+    /// 애플 로그인 DTO 생성
+    public func makeAppleDTO(idToken: String, fcmToken: String) -> AppleLoginRequestDto {
+        return AppleLoginRequestDto(idToken: idToken, fcmToken: fcmToken)
+    }
 
     //MARK: - API funcs
     /// 카카오 로그인 API
     public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
         request(target: .postKakaoLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
+    }
+    
+    /// 애플 로그인 API
+    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postAppleLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
     }
     
     /// 로그아웃 API

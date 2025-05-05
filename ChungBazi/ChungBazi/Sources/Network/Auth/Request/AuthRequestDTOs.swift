@@ -24,3 +24,13 @@ struct ReIssueRequestDto: Codable {
         self.refreshToken = refreshToken
     }
 }
+
+struct AppleLoginRequestDto: Codable {
+    let idToken: String
+    let fcmToken: String
+    
+    init(idToken: String, fcmToken: String) {
+        self.idToken = idToken
+        self.fcmToken = fcmToken
+    }
+}

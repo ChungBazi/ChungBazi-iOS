@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import AuthenticationServices
 
 class SelectLoginView: UIView {
     
@@ -71,6 +72,8 @@ class SelectLoginView: UIView {
         $0.backgroundColor = UIColor(hex: "#FEE500")
     }
 
+    public let appleBtn = ASAuthorizationAppleIDButton()
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         self.backgroundColor = .blue700
@@ -83,7 +86,7 @@ class SelectLoginView: UIView {
     }
     
     private func addComponents() {
-        [labelStackView, logo, kakaoBtn].forEach { self.addSubview($0) }
+        [labelStackView, logo, kakaoBtn, appleBtn].forEach { self.addSubview($0) }
     }
     
     private func setConstraints() {
@@ -103,6 +106,11 @@ class SelectLoginView: UIView {
             $0.horizontalEdges.equalToSuperview().inset(16)
             $0.bottom.equalTo(safeAreaLayoutGuide).offset(-20)
             $0.height.equalTo(48)
+        }
+        
+        appleBtn.snp.makeConstraints {
+            $0.leading.trailing.height.equalTo(kakaoBtn)
+            $0.bottom.equalTo(kakaoBtn.snp.top).offset(-20)
         }
     }
 

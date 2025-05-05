@@ -9,6 +9,7 @@ import KeychainSwift
 import FirebaseAuth
 import Moya
 import SwiftyToaster
+import AuthenticationServices
 
 
 class SelectLoginTypeViewController: UIViewController {
@@ -16,6 +17,24 @@ class SelectLoginTypeViewController: UIViewController {
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     let networkService = AuthService()
     var isFirst: Bool?
+    lazy var appleAuthVM: AppleAuthVM = {
+        let vm = AppleAuthVM()
+        vm.onLoginSuccess = { [weak self] isFirst in
+            self?.isFirst = isFirst
+            self?.goToNextView()
+        }
+        vm.onLoginFailure = { errorMessage in
+            print(errorMessage)
+            DispatchQueue.main.async {
+                Toaster.shared.makeToast("Apple 로그인 실패: \(errorMessage)")
+            }
+        }
+        return vm
+    }()
+
+    @objc private func appleBtnTapped() {
+        appleAuthVM.startLogin()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -24,6 +43,7 @@ class SelectLoginTypeViewController: UIViewController {
     
     private lazy var selectLoginView = SelectLoginView().then {
         $0.kakaoBtn.addTarget(self, action: #selector(kakaoLogin), for: .touchUpInside)
+        $0.appleBtn.addTarget(self, action: #selector(appleBtnTapped), for: .touchUpInside)
     }
     
     @objc private func kakaoLogin() {
