@@ -49,9 +49,9 @@ final class AuthService: NetworkManager {
         request(target: .postKakaoLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
     }
     
-    /// 애플 로그인 API
-    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postAppleLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
+    /// Apple 로그인 API
+    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<AppleLoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postAppleLogin(data: data), decodingType: AppleLoginResponseDto.self, completion: completion)
     }
     
     /// 로그아웃 API

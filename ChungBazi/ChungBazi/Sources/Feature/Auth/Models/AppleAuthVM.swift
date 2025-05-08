@@ -56,13 +56,9 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
                 self?.isFirst = response.isFirst
                 self?.onLoginSuccess?(response.isFirst)
             case .failure(let error):
-                self?.onLoginFailure?("서버 로그인 실패: \(error)")
+                self?.onLoginFailure?("서버 로그인 실패: \(error.localizedDescription)")
             }
         }
-    }
-
-    func authorizationController(controller: ASAuthorizationController, didCompleteWithError error: Error) {
-        self.onLoginFailure?("Apple 로그인 실패: \(error.localizedDescription)")
     }
 }
 

@@ -36,3 +36,12 @@ struct ReIssueResponseDto: Decodable {
         self.accessExp = accessExp
     }
 }
+
+struct AppleLoginResponseDto: Codable {
+    let userId: Int
+    let userName: String
+    let isFirst: Bool
+    let accessToken: String
+    let refreshToken: String
+    let accessExp: Int
+}
