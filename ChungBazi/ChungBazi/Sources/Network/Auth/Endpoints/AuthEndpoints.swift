@@ -30,7 +30,7 @@ extension AuthEndpoints: TargetType {
         case .postKakaoLogin:
             return "/kakao-login"
         case .postLogout:
-            return "/kakao-logout"
+            return "/logout"
         case .postAppleLogin:
             return "/apple-login"
         case .deleteUser:
