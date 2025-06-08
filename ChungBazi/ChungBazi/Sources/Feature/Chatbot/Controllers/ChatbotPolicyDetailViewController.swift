@@ -1,5 +1,5 @@
 //
-//  PolicyDetailViewController.swift
+//  ChatbotPolicyDetailViewController.swift
 //  ChungBazi
 //
 //  Created by 신호연 on 6/8/25.

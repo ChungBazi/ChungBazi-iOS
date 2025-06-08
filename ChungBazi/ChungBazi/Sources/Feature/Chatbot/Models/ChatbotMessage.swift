@@ -10,5 +10,5 @@ import Foundation
 struct ChatbotMessage {
     let text: String
     let isUser: Bool
-    let timestampe: Date
+    let timestamp: Date
 }

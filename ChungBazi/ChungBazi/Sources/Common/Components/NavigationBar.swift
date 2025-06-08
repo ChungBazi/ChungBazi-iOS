@@ -27,7 +27,7 @@ extension UIViewController {
         return navigationBarView?.subviews.first(where: { $0 is UIButton }) as? UIButton
     }
     
-    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool, showAlarmButton: Bool, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
+    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool = false, showAlarmButton: Bool = false, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
   
         let navigationBarView = UIView()
         navigationBarView.backgroundColor = backgroundColor

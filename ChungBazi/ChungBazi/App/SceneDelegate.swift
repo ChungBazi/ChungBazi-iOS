@@ -31,27 +31,33 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     private func setRootViewController() {
         let isLoggedIn = AuthManager.shared.isUserLoggedIn()
         
-        if let userInfo = pendingNotificationInfo {
-            // 알림을 통해 실행되었을 경우
-            if isLoggedIn {
-                let mainTBC = MainTabBarController()
-                let navController = UINavigationController(rootViewController: mainTBC)
-                window?.rootViewController = navController
-                window?.makeKeyAndVisible()
-            } else {
-                // 로그인 안 되어 있을 경우 → 로그인 화면으로 이동
-                let loginVC = SelectLoginTypeViewController()
-                window?.rootViewController = loginVC
-                window?.makeKeyAndVisible()
-            }
-        } else {
-            // 일반 실행일 경우 → Splash 화면을 통해 네비게이션 진행
-            let splashVC = SplashViewController()
-            let navController = UINavigationController(rootViewController: splashVC)
-            navController.isNavigationBarHidden = true
-            window?.rootViewController = navController
-            window?.makeKeyAndVisible()
-        }
+//        if let userInfo = pendingNotificationInfo {
+//            // 알림을 통해 실행되었을 경우
+//            if isLoggedIn {
+//                let mainTBC = MainTabBarController()
+//                let navController = UINavigationController(rootViewController: mainTBC)
+//                window?.rootViewController = navController
+//                window?.makeKeyAndVisible()
+//            } else {
+//                // 로그인 안 되어 있을 경우 → 로그인 화면으로 이동
+//                let loginVC = SelectLoginTypeViewController()
+//                window?.rootViewController = loginVC
+//                window?.makeKeyAndVisible()
+//            }
+//        } else {
+//            // 일반 실행일 경우 → Splash 화면을 통해 네비게이션 진행
+//            let splashVC = SplashViewController()
+//            let navController = UINavigationController(rootViewController: splashVC)
+//            navController.isNavigationBarHidden = true
+//            window?.rootViewController = navController
+//            window?.makeKeyAndVisible()
+//        }
+        
+        let vc = ChatbotViewController()
+        let navController = UINavigationController(rootViewController: vc)
+        navController.isNavigationBarHidden = true
+        window?.rootViewController = navController
+        window?.makeKeyAndVisible()
     }
     
     @objc private func handleNotificationFromForeground(_ notification: Notification) {

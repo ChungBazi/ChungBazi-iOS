@@ -13,5 +13,6 @@ struct ChatbotPolicy {
     let description: String
     let applyPeriod: String
     let policyNumber: String
+    let category: CommunityCategory
 }
 
