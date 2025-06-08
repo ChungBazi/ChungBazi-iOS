@@ -33,4 +33,14 @@ class ChatbotDataManager {
                           category: .participationRights)
         ]
     }
+    
+    func sendMessage(_ text: String, completion: @escaping (Result<ChatbotMessage, Error>) -> Void) {
+        // 실제 API 호출 대신 dummy 데이터로 메시지를 반환
+        let userMessage = ChatbotMessage(text: text, isUser: true, timestamp: Date())
+        let botResponse = ChatbotMessage(text: "아직 API가 연결되지 않았습니다. 빠른 시일 내에 답변드리겠습니다.", isUser: false, timestamp: Date())
+        
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            completion(.success(botResponse))
+        }
+    }
 }
