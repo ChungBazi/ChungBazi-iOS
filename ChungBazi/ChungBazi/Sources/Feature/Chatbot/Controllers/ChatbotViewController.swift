@@ -14,7 +14,6 @@ final class ChatbotViewController: UIViewController {
     
     // MARK: - UI Components
     private let tableView = UITableView().then {
-        $0.register(ChatbotMessageCell.self, forCellReuseIdentifier: "ChatbotMessageCell")
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
     }
@@ -24,7 +23,7 @@ final class ChatbotViewController: UIViewController {
     }
     
     private let chatTextField = UITextField().then {
-        $0.backgroundColor = .blue50
+        $0.backgroundColor = .gray100
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.attributedPlaceholder = NSAttributedString(
@@ -79,14 +78,11 @@ final class ChatbotViewController: UIViewController {
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
-
+        tableView.register(ChatbotMessageCell.self, forCellReuseIdentifier: "ChatbotMessageCell")
+        
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
         tapGesture.cancelsTouchesInView = false
         tableView.addGestureRecognizer(tapGesture)
-    }
-
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     private func setupChatInputView() {
@@ -96,7 +92,7 @@ final class ChatbotViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-
+        
         view.addSubview(chatInputView)
         chatInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
@@ -128,9 +124,9 @@ final class ChatbotViewController: UIViewController {
         guard let messageText = chatTextField.text,
               !messageText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
               sendButton.isEnabled else { return }
-
+        
         sendButton.isEnabled = false
-        let userMessage = ChatbotMessage(text: messageText, isUser: true, timestamp: Date())
+        let userMessage = ChatbotMessage(type: .text(messageText), isUser: true, timestamp: Date())
         messages.append(userMessage)
         tableView.reloadData()
         scrollToBottom()
@@ -156,6 +152,10 @@ final class ChatbotViewController: UIViewController {
         guard !messages.isEmpty else { return }
         let indexPath = IndexPath(row: messages.count - 1, section: 0)
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
     }
     
     // MARK: - Keyboard Handling
@@ -210,10 +210,10 @@ extension ChatbotViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let message = messages[indexPath.row]
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChatbotMessageCell", for: indexPath) as? ChatbotMessageCell else {
             return UITableViewCell()
         }
-        let message = messages[indexPath.row]
         cell.configure(with: message)
         return cell
     }
