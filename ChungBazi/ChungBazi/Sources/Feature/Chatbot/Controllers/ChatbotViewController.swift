@@ -55,8 +55,8 @@ final class ChatbotViewController: UIViewController {
         view.backgroundColor = .blue50
         
         addCustomNavigationBar(titleText: "바로봇", showBackButton: true)
-        setupTableView()
         setupInputView()
+        setupTableView()
         fillSafeArea(position: .bottom, color: .white)
         loadDummyMessages()
         
@@ -74,7 +74,7 @@ final class ChatbotViewController: UIViewController {
         tableView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Constants.navigationHeight)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(68)
+            $0.bottom.equalTo(chatInputView.snp.top)
         }
         tableView.dataSource = self
         tableView.delegate = self

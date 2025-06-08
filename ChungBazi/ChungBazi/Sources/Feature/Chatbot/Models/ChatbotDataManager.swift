@@ -15,7 +15,6 @@ class ChatbotDataManager {
     func getDummyMessages() -> [ChatbotMessage] {
         return [
             ChatbotMessage(text: "안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요.", isUser: false, timestamp: Date()),
-            ChatbotMessage(text: "안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요. 안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요. 안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요. 안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요.", isUser: false, timestamp: Date()),
             ChatbotMessage(text: "일자리 정책이 궁금해요.", isUser: true, timestamp: Date())
         ]
     }
