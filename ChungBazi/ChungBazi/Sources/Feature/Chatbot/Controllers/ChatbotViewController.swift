@@ -177,6 +177,43 @@ final class ChatbotViewController: UIViewController {
         tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
     }
     
+    func sendMessage(text: String) {
+        let trimmedText = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmedText.isEmpty else {
+            print("⚠️ [sendMessage] 빈 문자열입니다. 전송 중단.")
+            return
+        }
+
+        print("📤 [sendMessage] 사용자 메시지 전송: \(trimmedText)")
+
+        // 1. 사용자 메시지 추가
+        let userMessage = ChatbotMessage(
+            type: .text(trimmedText),
+            isUser: true,
+            timestamp: Date()
+        )
+        messages.append(userMessage)
+        tableView.reloadData()
+        scrollToBottom()
+
+        // 2. 더미 응답 요청
+        ChatbotDataManager.shared.sendMessage(trimmedText) { [weak self] result in
+            guard let self = self else { return }
+
+            DispatchQueue.main.async {
+                switch result {
+                case .success(let botMessage):
+                    print("🤖 [응답 수신] \(botMessage)")
+                    self.messages.append(botMessage)
+                    self.tableView.reloadData()
+                    self.scrollToBottom()
+                case .failure(let error):
+                    print("❌ [응답 실패] \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
     @objc private func dismissKeyboard() {
         view.endEditing(true)
     }
@@ -237,10 +274,19 @@ extension ChatbotViewController: UITableViewDataSource {
         guard let cell = tableView.dequeueReusableCell(withIdentifier: "ChatbotMessageCell", for: indexPath) as? ChatbotMessageCell else {
             return UITableViewCell()
         }
-        cell.configure(with: message)
+        cell.delegate = self
+        cell.configure(with: message, delegate: self)
         return cell
     }
 }
 
 // MARK: - UITableViewDelegate
 extension ChatbotViewController: UITableViewDelegate {}
+
+// MARK: - ChatbotButtonCellDelegate
+extension ChatbotViewController: ChatbotButtonCellDelegate {
+    func chatbotButtonCell(_ cell: ChatbotButtonCell, didTapButtonWith title: String) {
+        print("✅ [버튼 클릭됨] title: \(title)")
+        sendMessage(text: title)
+    }
+}

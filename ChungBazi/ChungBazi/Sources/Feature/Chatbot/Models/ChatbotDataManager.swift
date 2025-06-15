@@ -81,14 +81,17 @@ class ChatbotDataManager {
     }
 
     func sendMessage(_ text: String, completion: @escaping (Result<ChatbotMessage, Error>) -> Void) {
-        // 실제 API 호출 대신 dummy 데이터로 메시지를 반환
+        print("📡 [ChatbotDataManager] 입력 수신: \(text)")
+
+        // 모든 텍스트에 대해 응답 생성
         let botResponse = ChatbotMessage(
             type: .text("아직 API가 연결되지 않았습니다. 빠른 시일 내에 답변드리겠습니다."),
             isUser: false,
             timestamp: Date()
         )
-        
+
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            print("📬 [ChatbotDataManager] 응답 전달 완료")
             completion(.success(botResponse))
         }
     }

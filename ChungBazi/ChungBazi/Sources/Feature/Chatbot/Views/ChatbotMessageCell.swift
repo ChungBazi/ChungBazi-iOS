@@ -11,6 +11,9 @@ import Then
 
 final class ChatbotMessageCell: UITableViewCell {
     
+    weak var delegate: ChatbotButtonCellDelegate?
+    weak var messageDelegate: ChatbotMessageCellDelegate?
+    
     private let messageLabel = PaddingLabel().then {
         $0.numberOfLines = 0
         $0.lineBreakMode = .byCharWrapping
@@ -58,7 +61,9 @@ final class ChatbotMessageCell: UITableViewCell {
         contentView.addSubview(buttonContainerView)
     }
     
-    func configure(with message: ChatbotMessage) {
+    func configure(with message: ChatbotMessage, delegate: ChatbotButtonCellDelegate?) {
+        self.delegate = delegate
+        
         messageLabel.isHidden = true
         timestampLabel.isHidden = true
         botIconBackgroundView.isHidden = true
@@ -169,35 +174,53 @@ final class ChatbotMessageCell: UITableViewCell {
             let maxWidth: CGFloat = 262
 
             buttons.forEach { buttonModel in
-                let design: ChatbotButtonView.Design = (buttonModel.style == .blue) ? .blue : .normal
-                let button = ChatbotButtonView(title: buttonModel.title, design: design)
-                
+                let design: ChatbotButtonCell.Design = (buttonModel.style == .blue) ? .blue : .normal
+
+                // UIButton 생성
+                let button = UIButton(type: .system)
+                button.setTitle(buttonModel.title, for: .normal)
+                button.titleLabel?.font = UIFont.systemFont(ofSize: 14)
+                button.layer.cornerRadius = 14
+                button.layer.masksToBounds = true
+                button.contentEdgeInsets = UIEdgeInsets(top: 6, left: 13, bottom: 6, right: 13)
+                button.addTarget(self, action: #selector(buttonTapped(_:)), for: .touchUpInside)
+
+                // 디자인 스타일 적용
+                switch design {
+                case .blue:
+                    button.setTitleColor(UIColor(named: "blue700") ?? .blue, for: .normal)
+                    button.layer.borderWidth = 1
+                    button.layer.borderColor = UIColor(named: "blue700")?.cgColor ?? UIColor.blue.cgColor
+                    button.backgroundColor = .white
+                case .normal:
+                    button.setTitleColor(UIColor(named: "gray800") ?? .darkGray, for: .normal)
+                    button.layer.borderWidth = 0
+                    button.layer.borderColor = UIColor.clear.cgColor
+                    button.backgroundColor = .white
+                }
+
                 // 텍스트 길이를 기준으로 계산
                 let textWidth = button.titleLabel?.intrinsicContentSize.width ?? 0
                 let textHeight = button.titleLabel?.intrinsicContentSize.height ?? 0
-                
+
                 // padding 포함해서 버튼 크기 계산
                 let buttonWidth = textWidth + button.contentEdgeInsets.left + button.contentEdgeInsets.right
                 let buttonHeight = textHeight + button.contentEdgeInsets.top + button.contentEdgeInsets.bottom
-                
-                // cornerRadius와 border 다시 적용
-                button.layer.cornerRadius = 14
-                button.layer.masksToBounds = true
-                
+
                 // 배치
                 if currentX + buttonWidth > maxWidth {
                     currentX = 0
                     currentY += currentRowHeight + verticalSpacing
                     currentRowHeight = 0
                 }
-                
+
                 button.frame = CGRect(x: currentX, y: currentY, width: buttonWidth, height: buttonHeight)
                 buttonContainerView.addSubview(button)
-                
+
                 currentX += buttonWidth + horizontalSpacing
                 currentRowHeight = max(currentRowHeight, buttonHeight)
             }
-
+            
             buttonContainerView.snp.remakeConstraints {
                 $0.top.equalTo(messageLabel.snp.bottom).offset(9.75)
                 $0.leading.equalTo(botIconBackgroundView.snp.leading)
@@ -209,6 +232,12 @@ final class ChatbotMessageCell: UITableViewCell {
         default:
             break
         }
+    }
+    
+    @objc private func buttonTapped(_ sender: UIButton) {
+        guard let title = sender.title(for: .normal) else { return }
+        print("✅ 버튼 클릭됨 - \(title)")
+        delegate?.chatbotButtonCell(ChatbotButtonCell(), didTapButtonWith: title)
     }
     
     override func layoutSubviews() {
