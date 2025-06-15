@@ -23,7 +23,7 @@ final class ChatbotViewController: UIViewController {
     }
     
     private let chatTextField = UITextField().then {
-        $0.backgroundColor = .gray100
+        $0.backgroundColor = .blue50
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.attributedPlaceholder = NSAttributedString(
@@ -86,26 +86,49 @@ final class ChatbotViewController: UIViewController {
     }
     
     private func setupChatInputView() {
-        view.addSubview(backgroundView)
+        // 그림자용 뷰
+        let shadowView = UIView()
+        view.addSubview(shadowView)
+        shadowView.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
+            $0.height.equalTo(68)
+        }
+        
+        // 그림자 설정 (원본 수치 그대로)
+        shadowView.layer.shadowPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 68), cornerRadius: 10).cgPath
+        shadowView.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
+        shadowView.layer.shadowOpacity = 1
+        shadowView.layer.shadowRadius = 10
+        shadowView.layer.shadowOffset = CGSize(width: 0, height: 3)
+        shadowView.layer.masksToBounds = false
+
+        // 배경뷰
+        backgroundView.layer.cornerRadius = 10
+        backgroundView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        backgroundView.clipsToBounds = true
+
+        shadowView.addSubview(backgroundView)
         backgroundView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            $0.height.equalTo(68)
+            $0.edges.equalToSuperview()
         }
-        
-        view.addSubview(chatInputView)
+
+        // 입력창 뷰
+        chatInputView.layer.cornerRadius = 10
+        chatInputView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
+        chatInputView.clipsToBounds = true
+
+        backgroundView.addSubview(chatInputView)
         chatInputView.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
-            $0.height.equalTo(68)
+            $0.edges.equalToSuperview()
         }
-        
+
         chatInputView.addSubview(chatTextField)
         chatTextField.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.top.bottom.equalToSuperview().inset(10)
         }
-        
+
         chatTextField.addSubview(sendButton)
         sendButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
