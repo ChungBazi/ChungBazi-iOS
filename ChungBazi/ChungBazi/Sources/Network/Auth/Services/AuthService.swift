@@ -89,4 +89,24 @@ final class AuthService: NetworkManager {
     public func deleteUser(completion: @escaping (Result<String, NetworkError>) -> Void) {
         request(target: .deleteUser, decodingType: String.self, completion: completion)
     }
+    
+    /// 비밀번호 재설정 API
+    public func resetPassword(data: ResetPasswordRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .postResetPassword(data: data), decodingType: String.self, completion: completion)
+    }
+    
+    /// 일반 사용자 회원가입 API
+    public func register(data: RegisterRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .postRegister(data: data), decodingType: String.self, completion: completion)
+    }
+    
+    /// 일반 사용자 닉네임 등록 API
+    public func registerNickname(data: RegisterNicknameRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(target: .postRegisterNickname(data: data), decodingType: String.self, completion: completion)
+    }
+    
+    /// 일반 사용자 로그인 API
+    public func login(data: LoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
+    }
 }

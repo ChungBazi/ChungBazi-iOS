@@ -45,3 +45,12 @@ struct AppleLoginResponseDto: Codable {
     let refreshToken: String
     let accessExp: Int
 }
+
+struct LoginResponseDto: Decodable {
+    let userId: Int
+    let userName: String
+    let isFirst: Bool
+    let accessToken: String
+    let refreshToken: String
+    let accessExp: Int
+}

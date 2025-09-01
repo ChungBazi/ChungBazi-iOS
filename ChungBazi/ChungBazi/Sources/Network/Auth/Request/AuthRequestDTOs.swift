@@ -34,3 +34,25 @@ struct AppleLoginRequestDto: Codable {
         self.fcmToken = fcmToken
     }
 }
+
+struct ResetPasswordRequestDto: Codable {
+    let newPassword: String
+    let checkNewPassword: String
+}
+
+struct RegisterRequestDto: Codable {
+    let email: String
+    let password: String
+    let checkPassword: String
+}
+
+struct RegisterNicknameRequestDto: Codable {
+    let name: String
+    let email: String
+}
+
+struct LoginRequestDto: Codable {
+    let email: String
+    let password: String
+    let fcmToken: String
+}

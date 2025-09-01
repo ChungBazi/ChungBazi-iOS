@@ -15,6 +15,10 @@ enum AuthEndpoints {
     case postLogout
     case deleteUser
     case postReIssueToken(data: ReIssueRequestDto)
+    case postResetPassword(data: ResetPasswordRequestDto)
+    case postRegister(data: RegisterRequestDto)
+    case postRegisterNickname(data: RegisterNicknameRequestDto)
+    case postLogin(data: LoginRequestDto)
 }
 
 extension AuthEndpoints: TargetType {
@@ -37,12 +41,21 @@ extension AuthEndpoints: TargetType {
             return "/delete-account"
         case .postReIssueToken:
             return "/refresh-token"
+        case .postResetPassword:
+            return "/reset-password"
+        case .postRegister:
+            return "/register"
+        case .postRegisterNickname:
+            return "/register-nickname"
+        case .postLogin:
+            return "/login"
+            
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .postLogout, .postReIssueToken, .postKakaoLogin, .postAppleLogin:
+        case .postLogout, .postReIssueToken, .postKakaoLogin, .postAppleLogin, .postResetPassword, .postRegister, .postRegisterNickname, .postLogin:
             return .post
         case .deleteUser:
             return .delete
@@ -59,12 +72,21 @@ extension AuthEndpoints: TargetType {
             return .requestJSONEncodable(data)
         case .postReIssueToken(let data):
             return .requestJSONEncodable(data)
+        case .postResetPassword(let data):
+            return .requestJSONEncodable(data)
+        case .postRegister(let data):
+            return .requestJSONEncodable(data)
+        case .postRegisterNickname(let data):
+            return .requestJSONEncodable(data)
+        case .postLogin(let data):
+            return .requestJSONEncodable(data)
         }
     }
     
     var headers: [String : String]? {
         switch self {
-        case .postKakaoLogin, .postReIssueToken, .postAppleLogin:
+        case .postKakaoLogin, .postAppleLogin, .postReIssueToken,
+                .postResetPassword, .postRegister, .postRegisterNickname, .postLogin:
             return ["Content-Type": "application/json"]
         default:
             let accessToken = KeychainSwift().get("serverAccessToken")
