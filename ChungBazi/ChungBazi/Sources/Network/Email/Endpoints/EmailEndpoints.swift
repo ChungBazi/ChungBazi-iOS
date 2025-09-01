@@ -25,15 +25,15 @@ extension EmailEndpoints: TargetType {
     var path: String {
         switch self {
         case .postEmailRequest:
-            return "/vertification-requests"
-        case .postEmailVertification:
-            return "/vertification"
+            return "/verification-requests"
+        case .postEmailVerification:
+            return "/verification"
         }
     }
     
     var method: Moya.Method {
         switch self {
-        case .postEmailRequest, .postEmailVertification:
+        case .postEmailRequest, .postEmailVerification:
             return .post
         }
     }
