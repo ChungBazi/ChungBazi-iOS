@@ -96,8 +96,8 @@ final class AuthService: NetworkManager {
     }
     
     /// 일반 사용자 회원가입 API
-    public func register(data: RegisterRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
-        request(target: .postRegister(data: data), decodingType: String.self, completion: completion)
+    public func register(data: RegisterRequestDto, completion: @escaping (Result<ApiResponse<EmptyResponse>, NetworkError>) -> Void) {
+        request(target: .postRegister(data: data), decodingType: ApiResponse<EmptyResponse>.self, completion: completion)
     }
     
     /// 일반 사용자 닉네임 등록 API
