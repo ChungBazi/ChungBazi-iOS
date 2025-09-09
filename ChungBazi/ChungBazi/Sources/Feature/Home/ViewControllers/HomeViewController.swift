@@ -227,7 +227,18 @@ final class HomeViewController: UIViewController {
             make.trailing.equalToSuperview().offset(-1)
             make.width.height.equalTo(chatbotIconSize)
         }
+        
+        // 탭 제스처로 챗봇 화면 전환
+        let chatbotTap = UITapGestureRecognizer(target: self, action: #selector(didTapChatbot))
+        chatbotButtonContainer.isUserInteractionEnabled = true
+        chatbotButtonContainer.addGestureRecognizer(chatbotTap)
+
         secondRowStackView.addArrangedSubview(chatbotButtonContainer)
+    }
+    
+    @objc private func didTapChatbot() {
+        let vc = ChatbotViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func configureSearchViewTap() {
