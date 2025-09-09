@@ -110,10 +110,13 @@ class SplashViewController: UIViewController {
     }
     
     private func navigateToLoginScreen() {
-        let vc = SelectLoginTypeViewController()
+        let loginVC = SelectLoginTypeViewController()
+        let nav = UINavigationController(rootViewController: loginVC)
+        nav.isNavigationBarHidden = true
+
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
-            window.rootViewController = vc
+            window.rootViewController = nav
             UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
         }
     }
