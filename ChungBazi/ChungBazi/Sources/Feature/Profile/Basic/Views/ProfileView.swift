@@ -62,7 +62,12 @@ final class ProfileView: UIView {
         $0.backgroundColor = .gray100
     }
     private let tableView = UITableView()
-    private let menuItems = ["알림 설정", "공지사항", "문의하기", "앱 정보", "로그아웃", "탈퇴"]
+    private let menuItems = ["알림 설정",
+//                             "공지사항",
+//                             "문의하기",
+                             "앱 정보",
+                             "로그아웃",
+                             "탈퇴"]
     
     override init(frame: CGRect) {
         super.init(frame: frame)
