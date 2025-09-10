@@ -98,7 +98,13 @@ final class PolicyView: UIView {
         addPolicyInfo(title: "신청기간", value: formatDateRange(start: policy.startDate, end: policy.endDate))
         addPolicyInfo(title: "신청대상", value: formatTargetInfo(target))
         addPolicyInfo(title: "심사결과", value: policy.result ?? "정보 없음")
-        addPolicyInfo(title: "참고링크", value: formatReferenceUrls(policy))
+        
+        let urls = URLHelper.normalizedUrls(from: policy)
+        if urls.isEmpty {
+            addPolicyInfo(title: "참고링크", value: "참고링크 없음")
+        } else {
+            addPolicyInfoLinks(title: "참고링크", urls: urls)
+        }
         
         addDetailInfo(title: "지원내용", value: policy.content)
         addDetailInfo(title: "신청절차", value: policy.applyProcedure ?? "정보 없음")
@@ -148,11 +154,50 @@ final class PolicyView: UIView {
         }
     }
     
-    private func formatReferenceUrls(_ policy: PolicyModel) -> String {
-        let urls = [policy.referenceUrl1, policy.referenceUrl2]
-            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-        return urls.isEmpty ? "참고링크 없음" : urls.joined(separator: " ")
+    private func addPolicyInfoLinks(title: String, urls: [String]) {
+        let titleLabel = UILabel().then {
+            $0.text = title
+            $0.font = .ptdMediumFont(ofSize: 14)
+            $0.textColor = .gray500
+            $0.setContentHuggingPriority(.defaultHigh, for: .horizontal)
+            $0.widthAnchor.constraint(equalToConstant: 80).isActive = true
+        }
+
+        let valueTextView = UITextView().then {
+            $0.isEditable = false
+            $0.isSelectable = true
+            $0.isScrollEnabled = false
+            $0.backgroundColor = .clear
+            $0.textContainerInset = .zero
+            $0.textContainer.lineFragmentPadding = 0
+            $0.tintColor = .blue700
+            $0.linkTextAttributes = [
+                .foregroundColor: UIColor.blue700,
+                .underlineStyle: NSUnderlineStyle.single.rawValue
+            ]
+            $0.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
+            $0.setContentHuggingPriority(.defaultLow, for: .horizontal)
+        }
+
+        let attributed = NSMutableAttributedString()
+        for (idx, urlString) in urls.enumerated() {
+            let line = NSMutableAttributedString(string: urlString, attributes: [
+                .font: UIFont.ptdMediumFont(ofSize: 14),
+                .foregroundColor: UIColor.blue700,
+                .underlineStyle: NSUnderlineStyle.single.rawValue,
+                .link: urlString
+            ])
+            attributed.append(line)
+            if idx < urls.count - 1 { attributed.append(NSAttributedString(string: "\n")) }
+        }
+        valueTextView.attributedText = attributed
+
+        let stack = UIStackView(arrangedSubviews: [titleLabel, valueTextView]).then {
+            $0.axis = .horizontal
+            $0.alignment = .top
+            $0.spacing = 8
+        }
+        policyInfoStack.addArrangedSubview(stack)
     }
     
     private func addPolicyInfo(title: String, value: String) {
