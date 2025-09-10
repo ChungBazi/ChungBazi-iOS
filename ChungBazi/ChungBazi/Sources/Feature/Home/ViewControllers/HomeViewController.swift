@@ -144,9 +144,9 @@ final class HomeViewController: UIViewController {
             case .success(let response):
                 let characterImgName = response.characterImg
                 
-                DispatchQueue.main.async {
-                    self.policyIconImageView.image = UIImage(named: characterImgName) ?? UIImage(named: "homeicon")
-                }
+//                DispatchQueue.main.async {
+//                    self.policyIconImageView.image = UIImage(named: characterImgName) ?? UIImage(named: "homeicon")
+//                }
                 
             case .failure(let error):
                 print("❌ 캐릭터 이미지 조회 실패: \(error.localizedDescription)")

@@ -149,8 +149,10 @@ final class PolicyView: UIView {
     }
     
     private func formatReferenceUrls(_ policy: PolicyModel) -> String {
-        let urls = [policy.referenceUrl1, policy.referenceUrl2].compactMap { $0 }
-        return urls.isEmpty ? "참고링크 없음" : (urls.count == 1 ? "url1" : "url1 url2")
+        let urls = [policy.referenceUrl1, policy.referenceUrl2]
+            .compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+            .filter { !$0.isEmpty }
+        return urls.isEmpty ? "참고링크 없음" : urls.joined(separator: " ")
     }
     
     private func addPolicyInfo(title: String, value: String) {
