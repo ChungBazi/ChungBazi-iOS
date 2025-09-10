@@ -14,6 +14,8 @@ final class PolicyDetailViewController: UIViewController {
     var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
     let networkService = PolicyService()
+    
+    private var linkUrls: [String] = []   // 유효 링크만 저장
 
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
@@ -210,11 +212,12 @@ final class PolicyDetailViewController: UIViewController {
             }
         }
 
-        DispatchQueue.main.async {
-            let urls = [policy.referenceUrl1, policy.referenceUrl2].compactMap { $0 }
-            let isEnabled = !urls.isEmpty
-            self.registerButton.setEnabled(isEnabled: isEnabled)
-        }
+        // ✅ 유효 링크 계산 & 상태 저장
+        self.linkUrls = normalizedUrls(from: policy)
+
+        // ✅ 버튼 활성/비활성
+        let isEnabled = !self.linkUrls.isEmpty
+        self.registerButton.setEnabled(isEnabled: isEnabled)
     }
 
     private func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
@@ -255,17 +258,28 @@ final class PolicyDetailViewController: UIViewController {
     }
 
     @objc private func handleRegisterButtonTap() {
-        let urls = [policy?.referenceUrl1, policy?.referenceUrl2].compactMap { $0 }
-        
+        let urls = self.linkUrls
+
         guard !urls.isEmpty else {
             return
         }
 
         if urls.count > 1 {
             showMultipleUrlsAlert(urls: urls)
-        } else if let urlString = urls.first, let url = URL(string: urlString) {
+        } else if let url = URL(string: urls[0]) {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
+    }
+    
+    private func filteredReferenceUrls(_ policy: PolicyModel) -> [String] {
+        let raw = [policy.referenceUrl1, policy.referenceUrl2]
+        return raw.compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                  .filter { !$0.isEmpty }
+    }
+
+    private func formatReferenceUrls(_ policy: PolicyModel) -> String {
+        let urls = filteredReferenceUrls(policy)
+        return urls.isEmpty ? "참고링크 없음" : urls.joined(separator: "\n")
     }
 
     private func showMultipleUrlsAlert(urls: [String]) {
@@ -273,4 +287,19 @@ final class PolicyDetailViewController: UIViewController {
         customAlert.configure(message: "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개 이상입니다.", urls: urls)
         customAlert.show(in: self)
     }
+    
+    private func normalizedUrls(from policy: PolicyModel) -> [String] {
+        let raw = [policy.referenceUrl1, policy.referenceUrl2]
+        let trimmed = raw.compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }
+                         .filter { !$0.isEmpty }
+        // http/https 만 허용
+        let valid = trimmed.filter { s in
+            guard let u = URL(string: s), let scheme = u.scheme?.lowercased()
+            else { return false }
+            return scheme == "http" || scheme == "https"
+        }
+        // 중복 제거
+        return Array(NSOrderedSet(array: valid)) as? [String] ?? valid
+    }
+    
 }
