@@ -27,10 +27,20 @@ class TermsNConditionsViewController: UIViewController {
         setupUI()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tabBarController?.tabBar.isHidden = true
+    }
+
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        tabBarController?.tabBar.isHidden = false
+    }
+    
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: titleName, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
-        fillSafeArea(position: .top, color: .white)
+        addCustomNavigationBar(titleText: titleName, showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .gray50)
+        fillSafeArea(position: .top, color: .gray50)
         
         view.addSubview(scrollView)
         scrollView.addSubview(contentView)

@@ -22,7 +22,7 @@ final class ProfileAppInfoViewController: UIViewController, ProfileAppInfoViewDe
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
     }
-    
+
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
