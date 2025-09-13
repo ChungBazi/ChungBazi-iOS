@@ -12,6 +12,8 @@ import Kingfisher
 
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
+    var isMyPost: Bool = false
+    
     private let characterView = UIView().then {
         $0.backgroundColor = .green300
         $0.createRoundedView(radius: 23.29)
@@ -90,7 +92,35 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     }
     
     @objc private func moreBtnTapped() {
-        
+        guard let hostView = self.owningViewController?.view else { return }
+
+        let items: [BottomSheetView.Item] = {
+            if isMyPost {
+                return [.init(title: "삭제하기", textColor: AppColor.buttonAccent)]
+            } else {
+                return [
+                    .init(title: "대댓글 알람 켜기", textColor: AppColor.gray800),
+                    .init(title: "쪽지 보내기",     textColor: AppColor.gray800),
+                    .init(title: "신고하기",        textColor: AppColor.buttonAccent),
+                    .init(title: "차단하기",        textColor: AppColor.buttonAccent)
+                ]
+            }
+        }()
+
+        let sheet = BottomSheetView.present(in: hostView, items: items) { [weak self] index, title in
+            guard let self else { return }
+            if self.isMyPost {
+                // 삭제하기
+            } else {
+                switch index {
+                case 0: /* 대댓글 알람 켜기 */ break
+                case 1: /* 쪽지 보내기 */     break
+                case 2: /* 신고하기 */        break
+                case 3: /* 차단하기 */        break
+                default: break
+                }
+            }
+        }
     }
     
     func formatUserLevel(_ level: String?) -> String {

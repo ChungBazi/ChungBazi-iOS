@@ -39,6 +39,8 @@ struct AppColor {
     static let gray600 = UIColor(hex: "#555555")
     static let gray700 = UIColor(hex: "#434343")
     static let gray800 = UIColor(hex: "#262626")
+    
+    static let buttonAccent = UIColor(hex: "#FF5151")
 }
 
 extension UIColor {

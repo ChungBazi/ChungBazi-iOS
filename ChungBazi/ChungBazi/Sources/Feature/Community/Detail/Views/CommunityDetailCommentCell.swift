@@ -13,6 +13,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     static let identifier = "CommunityDetailCommentCell"
     
+    var isMyComment: Bool = false
+    
     private let profileView = CommunityDetailCommentAuthorProfileView()
     private let moreButton = UIButton.createWithImage(image: .moreIcon, tintColor: .gray300,  target: self, action: #selector(moreBtnTapped))
     private let commentLabel = UILabel().then {
@@ -112,7 +114,37 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     
     @objc private func moreBtnTapped() {
-        
+        guard let hostView = self.owningViewController?.view else { return }
+
+        let items: [BottomSheetView.Item] = {
+            if isMyComment {
+                return [
+                       .init(title: "삭제하기", textColor: AppColor.buttonAccent)
+                ]
+            } else {
+                return [
+                    .init(title: "대댓글 알람 켜기", textColor: AppColor.gray800),
+                    .init(title: "쪽지 보내기",     textColor: AppColor.gray800),
+                    .init(title: "신고하기",        textColor: AppColor.buttonAccent),
+                    .init(title: "차단하기",        textColor: AppColor.buttonAccent)
+                ]
+            }
+        }()
+
+        let sheet = BottomSheetView.present(in: hostView, items: items) { [weak self] index, title in
+            guard let self else { return }
+            if self.isMyComment {
+                // index == 0 → 삭제하기
+            } else {
+                switch index {
+                case 0: /* 대댓글 알람 켜기 */ break
+                case 1: /* 쪽지 보내기 */     break
+                case 2: /* 신고하기 */        break
+                case 3: /* 차단하기 */        break
+                default: break
+                }
+            }
+        }
     }
     
     @objc private func likeBtnTapped() {

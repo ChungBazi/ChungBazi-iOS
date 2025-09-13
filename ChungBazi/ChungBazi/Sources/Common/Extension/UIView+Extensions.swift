@@ -49,4 +49,13 @@ extension UIView {
             self.roundCorners(corners: [.topLeft, .bottomLeft, .bottomRight], radius: radius)
         }
     }
+    
+    var owningViewController: UIViewController? {
+        var r: UIResponder? = self
+        while let next = r?.next {
+            if let vc = next as? UIViewController { return vc }
+            r = next
+        }
+        return nil
+    }
 }
