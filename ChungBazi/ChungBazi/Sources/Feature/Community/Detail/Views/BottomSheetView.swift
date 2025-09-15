@@ -48,19 +48,19 @@ final class BottomSheetView: UIView {
         $0.layer.cornerRadius = 30
         $0.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         $0.clipsToBounds = true
-        $0.accessibilityIdentifier = "bottomSheet.container"
     }
 
     private let topBar = UIView().then {
         $0.backgroundColor = .white
-        $0.accessibilityIdentifier = "bottomSheet.topBar"
     }
 
     private let grabber = UIView().then {
         $0.backgroundColor = .gray300
-        $0.layer.cornerRadius = 100
-        $0.isUserInteractionEnabled = false
-        $0.accessibilityIdentifier = "bottomSheet.grabber"
+        $0.layer.cornerRadius = 2.5         // 피그마 R=5
+        if #available(iOS 13.0, *) {
+            $0.layer.cornerCurve = .continuous   // 모서리 곡선 부드럽게
+        }
+        $0.clipsToBounds = true
     }
 
     private let stackView = UIStackView().then {
@@ -68,7 +68,6 @@ final class BottomSheetView: UIView {
         $0.spacing = 0
         $0.distribution = .fill
         $0.alignment = .fill
-        $0.accessibilityIdentifier = "bottomSheet.stack"
     }
 
     private lazy var panGesture = UIPanGestureRecognizer(target: self, action: #selector(handlePan(_:)))
@@ -124,6 +123,7 @@ final class BottomSheetView: UIView {
             make.left.right.bottom.equalToSuperview()
         }
 
+        containerView.bringSubviewToFront(topBar)
         dimView.addTarget(self, action: #selector(dismissTapped), for: .touchUpInside)
         containerView.addGestureRecognizer(panGesture)
     }
