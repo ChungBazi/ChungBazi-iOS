@@ -204,32 +204,23 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     }
     
     private func mapCommunityPosts(from posts: [Post]) -> [CommunityPost] {
-        let mappedPosts = posts.compactMap { post -> CommunityPost? in
-            guard let postId = post.postId else {
-                print("⚠️ 변환 중 postId가 nil인 게시글 발견, 제외")
-                return nil
-            }
-
-            let communityPost = CommunityPost(
-                postId: postId,
-                title: post.title ?? "제목 없음",
-                content: post.content ?? "내용 없음",
-                category: CommunityCategory(rawValue: post.category ?? "") ?? .all,
-                formattedCreatedAt: post.formattedCreatedAt ?? "",
-                views: post.views ?? 0,
-                commentCount: post.commentCount ?? 0,
-                postLikes: post.postLikes ?? 0,
-                userId: post.userId ?? 0,
-                userName: post.userName ?? "익명",
-                reward: post.reward ?? "",
-                characterImg: post.characterImg ?? "",
+        return posts.map { post in
+            CommunityPost(
+                postId: post.postId,
+                title: post.title,
+                content: post.content,
+                category: CommunityCategory(rawValue: post.category) ?? .all,
+                formattedCreatedAt: post.formattedCreatedAt,
+                views: post.views,
+                commentCount: post.commentCount,
+                postLikes: post.postLikes,
+                userId: post.userId,
+                userName: post.userName,
+                reward: post.reward,
+                characterImg: post.characterImg,
                 thumbnailUrl: post.thumbnailUrl ?? ""
             )
-
-            return communityPost
         }
-    
-        return mappedPosts
     }
     
     func didSelectCategory(index: Int) {

@@ -13,6 +13,10 @@ import Kingfisher
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
     var isMyPost: Bool = false
+    var ownerUserId: Int = 0
+    var postId: Int = 0
+
+    private let actionHandler = MoreActionHandler()
     
     private let characterView = UIView().then {
         $0.backgroundColor = .green300
@@ -93,31 +97,21 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     
     @objc private func moreBtnTapped() {
         guard let hostView = self.owningViewController?.view else { return }
+        let entity: MoreEntity = .post(
+            postId: postId,
+            ownerUserId: ownerUserId,
+            mine: isMyPost
+        )
 
-        let items: [BottomSheetView.Item] = {
-            if isMyPost {
-                return [.init(title: "삭제하기", textColor: AppColor.buttonAccent)]
-            } else {
-                return [
-                    .init(title: "대댓글 알람 켜기", textColor: AppColor.gray800),
-                    .init(title: "쪽지 보내기",     textColor: AppColor.gray800),
-                    .init(title: "신고하기",        textColor: AppColor.buttonAccent),
-                    .init(title: "차단하기",        textColor: AppColor.buttonAccent)
-                ]
-            }
-        }()
-
-        let sheet = BottomSheetView.present(in: hostView, items: items) { [weak self] index, title in
+        MoreActionRouter.present(in: hostView, for: entity) { [weak self] action, entity in
             guard let self else { return }
-            if self.isMyPost {
-                // 삭제하기
-            } else {
-                switch index {
-                case 0: /* 대댓글 알람 켜기 */ break
-                case 1: /* 쪽지 보내기 */     break
-                case 2: /* 신고하기 */        break
-                case 3: /* 차단하기 */        break
-                default: break
+            self.actionHandler.handle(action, entity: entity) { result in
+                switch result {
+                case .success:
+                    // 삭제 성공 시 VC에서 pop/reload 처리 권장
+                    break
+                case .failure(let err):
+                    print("⚠️ action failed: \(err)")
                 }
             }
         }
