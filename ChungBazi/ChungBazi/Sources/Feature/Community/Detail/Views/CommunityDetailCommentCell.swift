@@ -67,8 +67,11 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     private func setupUI() {
         selectionStyle = .none
-        
-        addSubviews(profileView, moreButton, commentLabel, createdAtLabel, likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView)
+
+        contentView.addSubviews(
+            profileView, moreButton, commentLabel, createdAtLabel,
+            likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView
+        )
         
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(12)
