@@ -17,6 +17,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
     var ownerUserId: Int = 0
     var commentId: Int = 0
     var postId: Int = 0
+    
+    var onRequestRefresh: (() -> Void)?
 
     private let actionHandler = MoreActionHandler()
     
@@ -135,7 +137,9 @@ final class CommunityDetailCommentCell: UITableViewCell {
                 self.actionHandler.handle(action, entity: entity) { result in
                     switch result {
                     case .success:
-                        // 삭제 성공 등은 VC로 올려서 반영 권장 (예: self.onRequestRefresh?())
+                        if case .delete = action {
+                            self.onRequestRefresh?()
+                        }
                         break
                     case .failure(let err):
                         print("⚠️ action failed: \(err)")

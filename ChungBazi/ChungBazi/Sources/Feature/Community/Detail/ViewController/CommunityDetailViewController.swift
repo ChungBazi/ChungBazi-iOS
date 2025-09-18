@@ -65,6 +65,26 @@ final class CommunityDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        /// 댓글 삭제 후 리프레시
+        communityDetailView.onRequestRefresh = { [weak self] in
+            guard let self else { return }
+            self.nextCursor = 0
+            self.hasNext = true
+            self.comments.removeAll()
+            self.communityDetailView.updateComments(self.comments)
+            self.fetchCommentData()
+            self.fetchPostData()
+        }
+
+        /// 글 삭제 후 루트로
+        communityDetailView.setPostDeleteHandler { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                self.navigationController?.popToRootViewController(animated: true)
+            }
+        }
+        
         fetchPostData()
         fetchCommentData()
         communityDetailView.scrollView.delegate = self

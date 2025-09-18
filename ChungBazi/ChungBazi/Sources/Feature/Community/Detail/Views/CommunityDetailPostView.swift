@@ -174,6 +174,10 @@ final class CommunityDetailPostView: UIView {
             self.photoCollectionView.reloadData()
         }
     }
+    
+    func setDeleteHandler(_ handler: @escaping () -> Void) {
+        profileView.onRequestPopToRoot = handler
+    }
 }
 
 extension CommunityDetailPostView: UICollectionViewDataSource, UICollectionViewDelegate {

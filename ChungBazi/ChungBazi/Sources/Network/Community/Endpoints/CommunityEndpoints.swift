@@ -20,6 +20,8 @@ enum CommunityEndpoints {
     case getCommunityPopularWords
     case postCommunityLike(postId: Int)
     case deleteCommunityLike(postId: Int)
+    case deleteCommunityPost(postId: Int)
+    case deleteCommunityComment(commentId: Int)
 }
 
 extension CommunityEndpoints: TargetType {
@@ -49,6 +51,10 @@ extension CommunityEndpoints: TargetType {
             return "/search/popular"
         case .deleteCommunityLike, .postCommunityLike:
             return "/likes"
+        case .deleteCommunityPost(let postId):
+            return "/posts/\(postId)"
+        case .deleteCommunityComment(let commentId):
+            return "/comments/\(commentId)"
         }
     }
     
@@ -58,7 +64,9 @@ extension CommunityEndpoints: TargetType {
             return .get
         case .postCommunityPost, .postCommunityComment, .postCommunityLike:
             return .post
-        case .deleteCommunityLike:
+        case .deleteCommunityLike,
+             .deleteCommunityPost,
+             .deleteCommunityComment:
             return .delete
         }
     }
@@ -117,6 +125,8 @@ extension CommunityEndpoints: TargetType {
             return .requestPlain
         case .postCommunityLike(let postId), .deleteCommunityLike(let postId):
             return .requestParameters(parameters: ["postId": postId], encoding: URLEncoding.queryString)
+        case .deleteCommunityPost, .deleteCommunityComment:
+            return .requestPlain
         }
     }
     

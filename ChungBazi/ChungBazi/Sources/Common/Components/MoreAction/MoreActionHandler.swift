@@ -13,16 +13,27 @@ final class MoreActionHandler {
     func handle(_ action: MoreAction, entity: MoreEntity, completion: @escaping (Result<Void, Error>) -> Void) {
         switch (action, entity) {
 
-        // 삭제
+        /// 삭제
         case (.delete, .post(let postId, _, _)):
-            // TODO: 게시글 삭제 API 연결
-            // service.deletePost(postId: postId) { completion($0.map { _ in () }) }
-            completion(.success(()))
+            service.deleteCommunityPost(postId: postId) { result in
+                switch result {
+                case .success:
+                    completion(.success(()))
+                case .failure(let err):
+                    completion(.failure(err))
+                }
+            }
 
+        /// 삭제: 댓글
         case (.delete, .comment(let commentId, _, _, _)):
-            // TODO: 댓글 삭제 API 연결
-            // service.deleteComment(commentId: commentId) { completion($0.map { _ in () }) }
-            completion(.success(()))
+            service.deleteCommunityComment(commentId: commentId) { result in
+                switch result {
+                case .success:
+                    completion(.success(()))
+                case .failure(let err):
+                    completion(.failure(err))
+                }
+            }
 
         // 대댓글 알림
         case (.toggleReplyAlarm, .post(let postId, _, _)):

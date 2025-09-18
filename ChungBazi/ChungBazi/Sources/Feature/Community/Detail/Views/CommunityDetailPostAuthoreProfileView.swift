@@ -12,6 +12,8 @@ import Kingfisher
 
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
+    var onRequestPopToRoot: (() -> Void)?
+    
     var isMyPost: Bool = false
     var ownerUserId: Int = 0
     var postId: Int = 0
@@ -108,7 +110,9 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
             self.actionHandler.handle(action, entity: entity) { result in
                 switch result {
                 case .success:
-                    // 삭제 성공 시 VC에서 pop/reload 처리 권장
+                    if case .delete = action {
+                        self.onRequestPopToRoot?()
+                    }
                     break
                 case .failure(let err):
                     print("⚠️ action failed: \(err)")
