@@ -162,9 +162,10 @@ final class CommunityDetailViewController: UIViewController {
                     mine: success.mine
                 )
                 
-                DispatchQueue.main.async {
-                    self.updateNavigationBarTitle(with: self.postData?.categoryDisplayName ?? "커뮤니티")
-                    self.communityDetailView.updatePost(self.postData!)
+                DispatchQueue.main.async(group: nil, qos: .userInitiated, flags: []) {
+                    guard let post = self.postData else { return }
+                    self.updateNavigationBarTitle(with: post.categoryDisplayName)
+                    self.communityDetailView.updatePost(post)
                 }
                 
             case .failure(let error):

@@ -26,7 +26,7 @@ final class CommunityDetailView: UIView {
         $0.estimatedRowHeight = 136
         $0.isScrollEnabled = true
         $0.backgroundColor = .clear
-        $0.isUserInteractionEnabled = false
+        $0.isUserInteractionEnabled = true
         $0.separatorStyle = .none
     }
     

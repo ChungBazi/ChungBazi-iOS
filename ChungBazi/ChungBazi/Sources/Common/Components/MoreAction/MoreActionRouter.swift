@@ -27,7 +27,7 @@ final class MoreActionRouter {
             return [ MoreActionItem(title: "삭제하기", color: AppColor.buttonAccent, action: .delete) ]
         } else {
             return [
-                MoreActionItem(title: "대댓글 알람 켜기", color: AppColor.gray800,      action: .toggleReplyAlarm),
+//                MoreActionItem(title: "대댓글 알람 켜기", color: AppColor.gray800,      action: .toggleReplyAlarm),
                 MoreActionItem(title: "쪽지 보내기",     color: AppColor.gray800,      action: .sendMessage),
                 MoreActionItem(title: "신고하기",        color: AppColor.buttonAccent, action: .report),
                 MoreActionItem(title: "차단하기",        color: AppColor.buttonAccent, action: .block)
