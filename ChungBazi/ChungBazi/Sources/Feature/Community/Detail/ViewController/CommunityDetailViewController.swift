@@ -157,7 +157,9 @@ final class CommunityDetailViewController: UIViewController {
                     userName: success.userName,
                     reward: success.reward,
                     characterImg: success.characterImg,
-                    imageUrls: success.imageUrls
+                    imageUrls: success.imageUrls,
+                    anonymous: success.anonymous,
+                    mine: success.mine
                 )
                 
                 DispatchQueue.main.async {
@@ -206,7 +208,8 @@ final class CommunityDetailViewController: UIViewController {
                             userId: userId,
                             userName: userName,
                             reward: reward,
-                            characterImg: characterImg
+                            characterImg: characterImg,
+                            mine: comment.mine
                         )
                     }
 

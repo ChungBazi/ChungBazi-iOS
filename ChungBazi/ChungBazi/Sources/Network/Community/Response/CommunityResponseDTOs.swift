@@ -15,19 +15,22 @@ struct CommunityResponseDTO: Decodable {
 }
 
 struct Post: Decodable {
-    let postId: Int?
-    let title: String?
-    let content: String?
-    let category: String?
-    let formattedCreatedAt: String?
-    let views: Int?
-    let commentCount: Int?
-    let postLikes: Int?
-    let userId: Int?
-    let userName: String?
-    let reward: String?
-    let characterImg: String?
+    let postId: Int
+    let title: String
+    let content: String
+    let category: String
+    let formattedCreatedAt: String
+    let anonymous: Bool
+    let views: Int
+    let commentCount: Int
+    let postLikes: Int
+    let userId: Int
+    let userName: String
+    let reward: String
+    let characterImg: String
     let thumbnailUrl: String?
+    let imageUrls: [String]?
+    let mine: Bool
 }
 
 struct SearchCommunityPopularWordsResponseDTO: Decodable {
@@ -40,6 +43,7 @@ struct CommunityDetailResponseDTO: Decodable {
     let content: String
     let category: String
     let formattedCreatedAt: String
+    let anonymous: Bool
     let views: Int
     let commentCount: Int
     let postLikes: Int
@@ -47,7 +51,9 @@ struct CommunityDetailResponseDTO: Decodable {
     let userName: String
     let reward: String
     let characterImg: String
+    let thumbnailUrl: String?
     let imageUrls: [String]?
+    let mine: Bool
 }
 
 struct CommunityCommentResponseDTO: Decodable {
@@ -65,6 +71,7 @@ struct Comment: Decodable {
     let userName: String?
     let reward: String?
     let characterImg: String?
+    let mine: Bool
 }
 
 struct PostPostResponse: Decodable {
