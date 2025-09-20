@@ -110,9 +110,8 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
             self.actionHandler.handle(action, entity: entity) { result in
                 switch result {
                 case .success:
-                    if case .delete = action {
-                        self.onRequestPopToRoot?()
-                    }
+                    if case .delete = action { self.onRequestPopToRoot?() }
+                    if case .block  = action { self.onRequestPopToRoot?() }
                     break
                 case .failure(let err):
                     print("⚠️ action failed: \(err)")

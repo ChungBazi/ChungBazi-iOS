@@ -137,9 +137,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
                 self.actionHandler.handle(action, entity: entity) { result in
                     switch result {
                     case .success:
-                        if case .delete = action {
-                            self.onRequestRefresh?()
-                        }
+                        if case .delete = action { self.onRequestRefresh?() }
+                        if case .block  = action { self.onRequestRefresh?() }
                         break
                     case .failure(let err):
                         print("⚠️ action failed: \(err)")

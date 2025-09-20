@@ -9,6 +9,7 @@ import Foundation
 
 final class MoreActionHandler {
     private let service = CommunityService()
+    private let block = BlockService()
 
     func handle(_ action: MoreAction, entity: MoreEntity, completion: @escaping (Result<Void, Error>) -> Void) {
         switch (action, entity) {
@@ -62,13 +63,14 @@ final class MoreActionHandler {
             completion(.success(()))
 
         // 차단
-        case (.block, .post(_, let ownerUserId, _)):
-            // TODO: 유저 차단 API
-            completion(.success(()))
-
-        case (.block, .comment(_, _, let ownerUserId, _)):
-            // TODO: 유저 차단 API
-            completion(.success(()))
+        case (.block, .post(_, let ownerUserId, _)),
+             (.block, .comment(_, _, let ownerUserId, _)):
+            block.postBlockUser(blockedUserId: ownerUserId) { result in
+                switch result {
+                case .success: completion(.success(()))
+                case .failure(let e): completion(.failure(e))
+                }
+            }
         }
     }
 }
