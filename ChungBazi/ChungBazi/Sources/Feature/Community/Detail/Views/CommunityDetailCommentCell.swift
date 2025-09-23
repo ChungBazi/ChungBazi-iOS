@@ -139,6 +139,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
                     case .success:
                         if case .delete = action { self.onRequestRefresh?() }
                         if case .block  = action { self.onRequestRefresh?() }
+                        if case .report = action { self.onRequestRefresh?() }
                         break
                     case .failure(let err):
                         print("⚠️ action failed: \(err)")

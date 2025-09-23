@@ -17,6 +17,7 @@ final class CommunityDetailView: UIView {
     private let contentView = UIView()
     
     private let postView = CommunityDetailPostView()
+    private let authorProfileView = CommunityDetailPostAuthoreProfileView()
     
     private let gray100View = UIView().then {
         $0.backgroundColor = .gray100

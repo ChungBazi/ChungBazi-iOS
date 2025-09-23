@@ -2,7 +2,7 @@
 import UIKit
 
 public struct API {
-    public static let baseURL = "http://54.82.102.65:8080/api"
+    public static let baseURL = "http://54.167.75.69:8080/api"
     public static let authURL = "\(baseURL)/auth"
     public static let emailURL = "\(baseURL)/email"
     public static let userURL = "\(baseURL)/user"

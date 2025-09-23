@@ -9,6 +9,7 @@ import Foundation
 
 final class MoreActionHandler {
     private let service = CommunityService()
+    private let reportsService = ReportsService()
     private let block = BlockService()
 
     func handle(_ action: MoreAction, entity: MoreEntity, completion: @escaping (Result<Void, Error>) -> Void) {
@@ -55,12 +56,14 @@ final class MoreActionHandler {
 
         // 신고
         case (.report, .post(let postId, _, _)):
-            // TODO: 게시글 신고 API
-            completion(.success(()))
+            reportsService.reportPost(postId: postId, reason: .spam, description: nil) { result in
+                completion(result.mapError { $0 as Error })
+            }
 
         case (.report, .comment(let commentId, _, _, _)):
-            // TODO: 댓글 신고 API
-            completion(.success(()))
+            reportsService.reportComment(commentId: commentId, reason: .spam, description: nil) { result in
+                completion(result.mapError { $0 as Error })
+            }
 
         // 차단
         case (.block, .post(_, let ownerUserId, _)),
