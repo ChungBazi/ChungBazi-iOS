@@ -14,6 +14,7 @@ struct CommunityDetailCommentModel {
     let userName: String
     let reward: String
     let characterImg: String
+    let mine: Bool
 }
 
 struct CommunityDetailPostModel {
@@ -30,7 +31,9 @@ struct CommunityDetailPostModel {
     let reward: String
     let characterImg: String?
     let imageUrls: [String]?
-
+    let anonymous: Bool
+    let mine: Bool
+    
     var categoryDisplayName: String {
         return category.displayName
     }

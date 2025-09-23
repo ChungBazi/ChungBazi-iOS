@@ -19,6 +19,7 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     private var currentCategoryIndex: Int = 0
     
     private let refreshControl = UIRefreshControl()
+    private var pendingRefresh = false
     
     private var postIdSet: Set<Int> = []
     
@@ -28,24 +29,31 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
         super.viewDidLoad()
         setupUI()
         setupRefreshControl()
+
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleCommunityShouldRefresh),
+            name: .communityShouldRefresh,
+            object: nil
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self, name: .communityShouldRefresh, object: nil)
     }
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
 
-        if communityPosts.isEmpty {
-            self.postIdSet.removeAll()
-            self.communityPosts.removeAll()
-            self.communityView.updatePosts([], totalPostCount: 0)
-
-            self.nextCursor = 0
-            self.hasNext = true
-            self.isFetching = false
-
-            fetchData(for: currentCategoryIndex, cursor: 0)
+        if pendingRefresh || communityPosts.isEmpty {
+            performRefresh()
+            pendingRefresh = false
         } else {
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                self.communityView.scrollView.setContentOffset(CGPoint(x: 0, y: self.scrollOffsetY), animated: false)
+                self.communityView.scrollView.setContentOffset(
+                    CGPoint(x: 0, y: self.scrollOffsetY),
+                    animated: false
+                )
             }
         }
     }
@@ -204,32 +212,23 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     }
     
     private func mapCommunityPosts(from posts: [Post]) -> [CommunityPost] {
-        let mappedPosts = posts.compactMap { post -> CommunityPost? in
-            guard let postId = post.postId else {
-                print("⚠️ 변환 중 postId가 nil인 게시글 발견, 제외")
-                return nil
-            }
-
-            let communityPost = CommunityPost(
-                postId: postId,
-                title: post.title ?? "제목 없음",
-                content: post.content ?? "내용 없음",
-                category: CommunityCategory(rawValue: post.category ?? "") ?? .all,
-                formattedCreatedAt: post.formattedCreatedAt ?? "",
-                views: post.views ?? 0,
-                commentCount: post.commentCount ?? 0,
-                postLikes: post.postLikes ?? 0,
-                userId: post.userId ?? 0,
-                userName: post.userName ?? "익명",
-                reward: post.reward ?? "",
-                characterImg: post.characterImg ?? "",
+        return posts.map { post in
+            CommunityPost(
+                postId: post.postId,
+                title: post.title,
+                content: post.content,
+                category: CommunityCategory(rawValue: post.category) ?? .all,
+                formattedCreatedAt: post.formattedCreatedAt,
+                views: post.views,
+                commentCount: post.commentCount,
+                postLikes: post.postLikes,
+                userId: post.userId,
+                userName: post.userName,
+                reward: post.reward,
+                characterImg: post.characterImg,
                 thumbnailUrl: post.thumbnailUrl ?? ""
             )
-
-            return communityPost
         }
-    
-        return mappedPosts
     }
     
     func didSelectCategory(index: Int) {
@@ -256,6 +255,25 @@ final class CommunityViewController: UIViewController, CommunityViewDelegate {
     func didSelectPost(postId: Int) {
         let detailVC = CommunityDetailViewController(postId: postId)
         navigationController?.pushViewController(detailVC, animated: true)
+    }
+    
+    @objc private func handleCommunityShouldRefresh() {
+        pendingRefresh = true
+        
+        if isViewLoaded, view.window != nil {
+            performRefresh()
+            pendingRefresh = false
+        }
+    }
+    
+    private func performRefresh() {
+        nextCursor = 0
+        hasNext = true
+        isFetching = false
+        postIdSet.removeAll()
+        communityPosts.removeAll()
+        communityView.updatePosts([], totalPostCount: 0)
+        fetchData(for: currentCategoryIndex, cursor: 0)
     }
 }
 

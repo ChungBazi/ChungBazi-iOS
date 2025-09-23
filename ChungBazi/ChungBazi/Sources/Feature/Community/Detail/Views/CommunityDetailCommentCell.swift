@@ -13,6 +13,15 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     static let identifier = "CommunityDetailCommentCell"
     
+    var isMyComment: Bool = false
+    var ownerUserId: Int = 0
+    var commentId: Int = 0
+    var postId: Int = 0
+    
+    var onRequestRefresh: (() -> Void)?
+
+    private let actionHandler = MoreActionHandler()
+    
     private let profileView = CommunityDetailCommentAuthorProfileView()
     private let moreButton = UIButton.createWithImage(image: .moreIcon, tintColor: .gray300,  target: self, action: #selector(moreBtnTapped))
     private let commentLabel = UILabel().then {
@@ -60,8 +69,11 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     private func setupUI() {
         selectionStyle = .none
-        
-        addSubviews(profileView, moreButton, commentLabel, createdAtLabel, likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView)
+
+        contentView.addSubviews(
+            profileView, moreButton, commentLabel, createdAtLabel,
+            likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView
+        )
         
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(12)
@@ -112,8 +124,29 @@ final class CommunityDetailCommentCell: UITableViewCell {
     }
     
     @objc private func moreBtnTapped() {
-        
-    }
+            guard let hostView = self.owningViewController?.view else { return }
+            let entity: MoreEntity = .comment(
+                commentId: commentId,
+                postId: postId,
+                ownerUserId: ownerUserId,
+                mine: isMyComment
+            )
+
+            MoreActionRouter.present(in: hostView, for: entity) { [weak self] action, entity in
+                guard let self else { return }
+                self.actionHandler.handle(action, entity: entity) { result in
+                    switch result {
+                    case .success:
+                        if case .delete = action { self.onRequestRefresh?() }
+                        if case .block  = action { self.onRequestRefresh?() }
+                        if case .report = action { self.onRequestRefresh?() }
+                        break
+                    case .failure(let err):
+                        print("⚠️ action failed: \(err)")
+                    }
+                }
+            }
+        }
     
     @objc private func likeBtnTapped() {
         isLiked.toggle()
@@ -149,5 +182,10 @@ final class CommunityDetailCommentCell: UITableViewCell {
 
         commentLabel.attributedText = attributedString
         createdAtLabel.text = comment.formattedCreatedAt
+        
+        self.isMyComment = comment.mine
+        self.ownerUserId = comment.userId
+        self.commentId = comment.commentId
+        self.postId = comment.postId
     }
 }

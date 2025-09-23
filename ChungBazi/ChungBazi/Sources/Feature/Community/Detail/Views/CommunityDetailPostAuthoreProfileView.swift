@@ -12,6 +12,14 @@ import Kingfisher
 
 final class CommunityDetailPostAuthoreProfileView: UIView {
     
+    var onRequestPopToRoot: (() -> Void)?
+    
+    var isMyPost: Bool = false
+    var ownerUserId: Int = 0
+    var postId: Int = 0
+
+    private let actionHandler = MoreActionHandler()
+    
     private let characterView = UIView().then {
         $0.backgroundColor = .green300
         $0.createRoundedView(radius: 23.29)
@@ -90,7 +98,27 @@ final class CommunityDetailPostAuthoreProfileView: UIView {
     }
     
     @objc private func moreBtnTapped() {
-        
+        guard let hostView = self.owningViewController?.view else { return }
+        let entity: MoreEntity = .post(
+            postId: postId,
+            ownerUserId: ownerUserId,
+            mine: isMyPost
+        )
+
+        MoreActionRouter.present(in: hostView, for: entity) { [weak self] action, entity in
+            guard let self else { return }
+            self.actionHandler.handle(action, entity: entity) { result in
+                switch result {
+                case .success:
+                    if case .delete = action { self.onRequestPopToRoot?() }
+                    if case .block  = action { self.onRequestPopToRoot?() }
+                    if case .report  = action { self.onRequestPopToRoot?() }
+                    break
+                case .failure(let err):
+                    print("⚠️ action failed: \(err)")
+                }
+            }
+        }
     }
     
     func formatUserLevel(_ level: String?) -> String {

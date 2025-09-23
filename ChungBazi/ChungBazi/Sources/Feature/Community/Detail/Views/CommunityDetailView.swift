@@ -11,10 +11,13 @@ import Then
 
 final class CommunityDetailView: UIView {
 
+    var onRequestRefresh: (() -> Void)?
+    
     public let scrollView = UIScrollView()
     private let contentView = UIView()
     
     private let postView = CommunityDetailPostView()
+    private let authorProfileView = CommunityDetailPostAuthoreProfileView()
     
     private let gray100View = UIView().then {
         $0.backgroundColor = .gray100
@@ -26,7 +29,7 @@ final class CommunityDetailView: UIView {
         $0.estimatedRowHeight = 136
         $0.isScrollEnabled = true
         $0.backgroundColor = .clear
-        $0.isUserInteractionEnabled = false
+        $0.isUserInteractionEnabled = true
         $0.separatorStyle = .none
     }
     
@@ -103,6 +106,10 @@ final class CommunityDetailView: UIView {
         commentTableView.contentInset.bottom = bottomInset
         commentTableView.scrollIndicatorInsets.bottom = bottomInset
     }
+    
+    func setPostDeleteHandler(_ handler: @escaping () -> Void) {
+            postView.setDeleteHandler(handler)
+        }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
@@ -117,6 +124,11 @@ extension CommunityDetailView: UITableViewDataSource, UITableViewDelegate {
         }
         let comment = comments[indexPath.row]
         cell.configure(with: comment)
+        
+        cell.onRequestRefresh = { [weak self] in
+            self?.onRequestRefresh?()
+        }
+        
         return cell
     }
 }

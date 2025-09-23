@@ -119,6 +119,10 @@ final class CommunityDetailPostView: UIView {
             createdAt: post.formattedCreatedAt
         )
         
+        profileView.isMyPost = post.mine
+        profileView.ownerUserId = post.userId
+        profileView.postId = post.postId
+
         titleLabel.text = post.title
 
         let paragraphStyle = NSMutableParagraphStyle()
@@ -169,6 +173,10 @@ final class CommunityDetailPostView: UIView {
         DispatchQueue.main.async {
             self.photoCollectionView.reloadData()
         }
+    }
+    
+    func setDeleteHandler(_ handler: @escaping () -> Void) {
+        profileView.onRequestPopToRoot = handler
     }
 }
 

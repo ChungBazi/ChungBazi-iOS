@@ -118,4 +118,14 @@ final class CommunityService: NetworkManager {
     public func deleteCommunityLike(postId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
         requestOptional(target: .deleteCommunityLike(postId: postId), decodingType: String.self, completion: completion)
     }
+    
+    /// 게시글 삭제
+    public func deleteCommunityPost(postId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .deleteCommunityPost(postId: postId), decodingType: String.self, completion: completion)
+    }
+
+    /// 댓글 삭제
+    public func deleteCommunityComment(commentId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .deleteCommunityComment(commentId: commentId), decodingType: String.self, completion: completion)
+    }
 }

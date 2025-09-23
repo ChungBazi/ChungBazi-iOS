@@ -65,6 +65,27 @@ final class CommunityDetailViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
+        
+        /// 댓글 삭제 후 리프레시
+        communityDetailView.onRequestRefresh = { [weak self] in
+            guard let self else { return }
+            self.nextCursor = 0
+            self.hasNext = true
+            self.comments.removeAll()
+            self.communityDetailView.updateComments(self.comments)
+            self.fetchCommentData()
+            self.fetchPostData()
+        }
+
+        /// 글 삭제 후 루트로
+        communityDetailView.setPostDeleteHandler { [weak self] in
+            guard let self else { return }
+            DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .communityShouldRefresh, object: nil)
+                self.navigationController?.popToRootViewController(animated: true)
+            }
+        }
+        
         fetchPostData()
         fetchCommentData()
         communityDetailView.scrollView.delegate = self
@@ -157,12 +178,15 @@ final class CommunityDetailViewController: UIViewController {
                     userName: success.userName,
                     reward: success.reward,
                     characterImg: success.characterImg,
-                    imageUrls: success.imageUrls
+                    imageUrls: success.imageUrls,
+                    anonymous: success.anonymous,
+                    mine: success.mine
                 )
                 
-                DispatchQueue.main.async {
-                    self.updateNavigationBarTitle(with: self.postData?.categoryDisplayName ?? "커뮤니티")
-                    self.communityDetailView.updatePost(self.postData!)
+                DispatchQueue.main.async(group: nil, qos: .userInitiated, flags: []) {
+                    guard let post = self.postData else { return }
+                    self.updateNavigationBarTitle(with: post.categoryDisplayName)
+                    self.communityDetailView.updatePost(post)
                 }
                 
             case .failure(let error):
@@ -206,7 +230,8 @@ final class CommunityDetailViewController: UIViewController {
                             userId: userId,
                             userName: userName,
                             reward: reward,
-                            characterImg: characterImg
+                            characterImg: characterImg,
+                            mine: comment.mine
                         )
                     }
 
