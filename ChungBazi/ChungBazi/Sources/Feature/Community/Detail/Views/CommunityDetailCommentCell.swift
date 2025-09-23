@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import SwiftyToaster
 
 final class CommunityDetailCommentCell: UITableViewCell {
     
@@ -137,11 +138,34 @@ final class CommunityDetailCommentCell: UITableViewCell {
                 self.actionHandler.handle(action, entity: entity) { result in
                     switch result {
                     case .success:
-                        if case .delete = action { self.onRequestRefresh?() }
-                        if case .block  = action { self.onRequestRefresh?() }
-                        if case .report = action { self.onRequestRefresh?() }
-                        break
+                        switch action {
+                        case .delete:
+                            self.onRequestRefresh?()
+
+                        case .block:
+                            Toaster.shared.makeToast("해당 사용자를 차단했어요.")
+                            self.onRequestRefresh?()
+
+                        case .report:
+                            Toaster.shared.makeToast("신고가 접수되었어요.")
+                            self.onRequestRefresh?()
+
+                        default:
+                            break
+                        }
+
                     case .failure(let err):
+                        // 실패 메시지
+                        switch action {
+                        case .delete:
+                            Toaster.shared.makeToast("댓글 삭제에 실패했어요. 잠시 후 다시 시도해 주세요.")
+                        case .block:
+                            Toaster.shared.makeToast("차단에 실패했어요. 네트워크 상태를 확인해 주세요.")
+                        case .report:
+                            Toaster.shared.makeToast("신고에 실패했어요. 잠시 후 다시 시도해 주세요.")
+                        default:
+                            Toaster.shared.makeToast("요청을 처리하지 못했어요.")
+                        }
                         print("⚠️ action failed: \(err)")
                     }
                 }
