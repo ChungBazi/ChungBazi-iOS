@@ -55,6 +55,9 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
                 KeychainSwift().set(String(response.isFirst), forKey: "isFirst")
                 self?.isFirst = response.isFirst
                 self?.onLoginSuccess?(response.isFirst)
+                
+                
+                print("🔐 JWT accessToken:", response.accessToken)
             case .failure(let error):
                 self?.onLoginFailure?("서버 로그인 실패: \(error.localizedDescription)")
             }

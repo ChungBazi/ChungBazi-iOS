@@ -81,6 +81,7 @@ final class CommunityDetailViewController: UIViewController {
         communityDetailView.setPostDeleteHandler { [weak self] in
             guard let self else { return }
             DispatchQueue.main.async {
+                NotificationCenter.default.post(name: .communityShouldRefresh, object: nil)
                 self.navigationController?.popToRootViewController(animated: true)
             }
         }
