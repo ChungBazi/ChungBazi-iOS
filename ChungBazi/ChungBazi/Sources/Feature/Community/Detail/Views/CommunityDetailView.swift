@@ -27,7 +27,9 @@ final class CommunityDetailView: UIView {
         $0.register(CommunityDetailCommentCell.self, forCellReuseIdentifier: CommunityDetailCommentCell.identifier)
         $0.rowHeight = UITableView.automaticDimension
         $0.estimatedRowHeight = 136
-        $0.isScrollEnabled = true
+        $0.isScrollEnabled = false
+        $0.alwaysBounceVertical = false
+        $0.showsVerticalScrollIndicator = false
         $0.backgroundColor = .clear
         $0.isUserInteractionEnabled = true
         $0.separatorStyle = .none
@@ -92,12 +94,10 @@ final class CommunityDetailView: UIView {
                 $0.leading.trailing.equalToSuperview()
                 $0.height.equalTo(tableHeight)
             }
-
             self.contentView.snp.remakeConstraints {
                 $0.edges.width.equalToSuperview()
                 $0.bottom.equalTo(self.commentTableView.snp.bottom)
             }
-
             self.scrollView.layoutIfNeeded()
         }
     }
