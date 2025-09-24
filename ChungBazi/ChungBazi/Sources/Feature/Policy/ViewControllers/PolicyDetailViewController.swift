@@ -10,6 +10,8 @@ import SwiftyToaster
 
 final class PolicyDetailViewController: UIViewController {
 
+    private var posterViewHeightConstraint: Constraint?
+    
     var policyId: Int?
     var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
@@ -112,7 +114,7 @@ final class PolicyDetailViewController: UIViewController {
         posterView.snp.makeConstraints { make in
             make.top.equalTo(scrollView.snp.top)
             make.leading.trailing.equalToSuperview()
-            make.height.equalTo(237)
+            self.posterViewHeightConstraint = make.height.equalTo(237).constraint
         }
         
         expandButton.snp.makeConstraints { make in
@@ -206,16 +208,26 @@ final class PolicyDetailViewController: UIViewController {
 
         policyView.configure(with: policy, target: target)
 
-        if let posterUrl = policy.posterUrl, let url = URL(string: posterUrl) {
-            downloadImage(from: url) { image in
-                DispatchQueue.main.async { self.posterView.configure(with: image) }
-            }
-        }
-
+        // 유효 링크 세팅
         self.linkUrls = URLHelper.normalizedUrls(from: policy)
+        self.registerButton.setEnabled(isEnabled: !self.linkUrls.isEmpty)
 
-        let isEnabled = !self.linkUrls.isEmpty
-        self.registerButton.setEnabled(isEnabled: isEnabled)
+        // 포스터 처리 분기
+        if let posterUrl = policy.posterUrl, let url = URL(string: posterUrl) {
+            downloadImage(from: url) { [weak self] image in
+                DispatchQueue.main.async {
+                    guard let self = self else { return }
+                    self.posterViewHeightConstraint?.update(offset: 207)
+                    self.posterView.configure(with: image)
+                    self.view.layoutIfNeeded()
+                }
+            }
+        } else {
+            // 대체 포스터 모드
+            self.posterViewHeightConstraint?.update(offset: 207)
+            self.posterView.configureFallback(categoryName: policy.categoryName, title: policy.name)
+            self.view.layoutIfNeeded()
+        }
     }
 
     private func downloadImage(from url: URL, completion: @escaping (UIImage?) -> Void) {
@@ -226,13 +238,15 @@ final class PolicyDetailViewController: UIViewController {
 
     @objc private func handleExpandButtonTap() {
         let expandImageVC = ExpandImageViewController()
-        
+
         if let image = posterView.posterImageView.image {
             expandImageVC.image = image
         } else {
-            expandImageVC.image = UIImage(named: "")
+            expandImageVC.image = nil
+            expandImageVC.fallbackCategoryName = policy?.categoryName
+            expandImageVC.fallbackTitle = policy?.name
         }
-        
+
         expandImageVC.modalPresentationStyle = .overFullScreen
         present(expandImageVC, animated: true, completion: nil)
     }
