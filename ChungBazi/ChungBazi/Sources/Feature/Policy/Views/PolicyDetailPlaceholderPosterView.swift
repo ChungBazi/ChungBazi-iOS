@@ -13,19 +13,19 @@ import Then
 final class PolicyDetailPlaceholderPosterView: UIView {
 
     private let backgroundImageView = UIImageView(image: UIImage(named: "policyDetail")).then {
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
     }
 
     private let categoryContainer = UIView().then {
         $0.backgroundColor = .blue100
-        $0.layer.cornerRadius = 41.4
+        $0.layer.cornerRadius = 7.94
         $0.clipsToBounds = true
         $0.isUserInteractionEnabled = false
     }
 
     private let categoryLabel = UILabel().then {
-        $0.font = .ptdMediumFont(ofSize: 58)
+        $0.font = .ptdMediumFont(ofSize: 11)
         $0.textColor = .black
         $0.textAlignment = .center
         $0.numberOfLines = 1
@@ -34,7 +34,7 @@ final class PolicyDetailPlaceholderPosterView: UIView {
     }
 
     private let nameLabel = UILabel().then {
-        $0.font = .ptdBoldFont(ofSize: 105)
+        $0.font = .ptdBoldFont(ofSize: 20)
         $0.textColor = .gray800
         $0.numberOfLines = 2
         $0.lineBreakMode = .byTruncatingTail
@@ -66,18 +66,18 @@ final class PolicyDetailPlaceholderPosterView: UIView {
         }
 
         categoryContainer.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(88)
+            make.top.equalToSuperview().offset(16)
             make.centerX.equalToSuperview()
         }
 
         categoryLabel.snp.makeConstraints { make in
-            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 23.75, left: 41.45, bottom: 23.75, right: 41.45))
+            make.edges.equalToSuperview().inset(UIEdgeInsets(top: 4.81, left: 7.94, bottom: 4.81, right: 7.94))
         }
 
         nameLabel.snp.makeConstraints { make in
-            make.top.equalTo(categoryContainer.snp.bottom).offset(80)
-            make.leading.trailing.equalToSuperview().inset(100)
-            make.height.equalTo(294)
+            make.top.equalTo(categoryContainer.snp.bottom).offset(16.23)
+            make.leading.trailing.equalToSuperview().inset(19.94)
+            make.height.equalTo(56)
         }
     }
 }
