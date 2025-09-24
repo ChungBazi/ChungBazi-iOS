@@ -10,6 +10,9 @@ import SnapKit
 import Then
 
 final class CustomAlertView: UIView {
+    
+    var onDismiss: (() -> Void)?
+    var onSelectUrl: ((String) -> Void)?
 
     private let backgroundView = UIView().then {
         $0.backgroundColor = UIColor.black.withAlphaComponent(0.5)

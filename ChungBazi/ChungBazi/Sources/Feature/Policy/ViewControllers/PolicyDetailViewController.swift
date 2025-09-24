@@ -16,6 +16,7 @@ final class PolicyDetailViewController: UIViewController {
     var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
     let networkService = PolicyService()
+    private weak var currentUrlAlert: CustomAlertView?
     
     private var linkUrls: [String] = []   // 유효 링크만 저장
 
@@ -270,17 +271,33 @@ final class PolicyDetailViewController: UIViewController {
     }
 
     @objc private func handleRegisterButtonTap() {
-        let urls = self.linkUrls
+        if currentUrlAlert != nil { return }
 
-        guard !urls.isEmpty else {
+        let urls = self.linkUrls
+        guard !urls.isEmpty else { return }
+
+        if urls.count == 1, let url = URL(string: urls[0]) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
             return
         }
 
-        if urls.count > 1 {
-            showMultipleUrlsAlert(urls: urls)
-        } else if let url = URL(string: urls[0]) {
-            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        showMultipleUrlsAlert(urls: urls)
+    }
+    
+    private func presentUrlActionSheet(urls: [String]) {
+        let ac = UIAlertController(title: "담당기관 바로가기", message: "열 링크를 선택하세요", preferredStyle: .actionSheet)
+
+        for raw in urls {
+            let title = raw.replacingOccurrences(of: "^https?://", with: "", options: .regularExpression)
+            ac.addAction(UIAlertAction(title: title, style: .default) { _ in
+                if let u = URL(string: raw) {
+                    UIApplication.shared.open(u, options: [:], completionHandler: nil)
+                }
+            })
         }
+        ac.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
+
+        present(ac, animated: true, completion: nil)
     }
     
     private func filteredReferenceUrls(_ policy: PolicyModel) -> [String] {
@@ -290,10 +307,22 @@ final class PolicyDetailViewController: UIViewController {
     }
 
     private func showMultipleUrlsAlert(urls: [String]) {
-        let customAlert = CustomAlertView()
-        customAlert.configure(message: "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개 이상입니다.", urls: urls)
-        customAlert.show(in: self)
-    }
+            let alert = CustomAlertView()
+            alert.onDismiss = { [weak self] in
+                self?.currentUrlAlert = nil
+            }
+            alert.onSelectUrl = { urlString in
+                if let u = URL(string: urlString) {
+                    UIApplication.shared.open(u, options: [:], completionHandler: nil)
+                }
+            }
+
+            let msg = "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개입니다."
+            alert.configure(message: msg, urls: urls)
+            alert.show(in: self)
+
+            self.currentUrlAlert = alert
+        }
 }
 
 struct URLHelper {
