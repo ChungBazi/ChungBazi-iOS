@@ -9,22 +9,86 @@ import UIKit
 import SnapKit
 import Then
 
-final class EmailRegisterViewController: UIViewController {
-
+final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
+    
     private let authService = AuthService()
     private let registerView = EmailRegisterView()
     
     private var isPasswordVisible = false
     private var isCheckPasswordVisible = false
-
+    
     override func loadView() {
         self.view = registerView
     }
-
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         addCustomNavigationBar(titleText: "", showBackButton: true)
         setupActions()
+        setupTextFieldDelegates()
+        setupBackgroundTapToDismiss()
+        setupKeyboardFollowing()
+    }
+    
+    private func setupTextFieldDelegates() {
+        registerView.emailTextField.delegate = self
+        registerView.passwordTextField.delegate = self
+        registerView.checkPasswordTextField.delegate = self
+        
+        registerView.emailTextField.returnKeyType = .next
+        registerView.passwordTextField.returnKeyType = .next
+        registerView.checkPasswordTextField.returnKeyType = .done
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == registerView.emailTextField {
+            registerView.passwordTextField.becomeFirstResponder()
+        } else if textField == registerView.passwordTextField {
+            registerView.checkPasswordTextField.becomeFirstResponder()
+        } else {
+            view.endEditing(true)
+        }
+        return true
+    }
+    
+    private func setupBackgroundTapToDismiss() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc private func dismissKeyboard() {
+        view.endEditing(true)
+    }
+    
+    private func setupKeyboardFollowing() {
+        if #available(iOS 15.0, *) {
+            registerView.registerButton.snp.makeConstraints {
+                $0.bottom.lessThanOrEqualTo(view.keyboardLayoutGuide.snp.top).offset(-12).priority(.required)
+            }
+        } else {
+            NotificationCenter.default.addObserver(self, selector: #selector(kbWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
+            NotificationCenter.default.addObserver(self, selector: #selector(kbWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        }
+    }
+    
+    @objc private func kbWillShow(_ note: Notification) {
+        guard
+            let frame = note.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
+            let duration = note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval
+        else { return }
+        UIView.animate(withDuration: duration) {
+            self.additionalSafeAreaInsets.bottom = frame.height - self.view.safeAreaInsets.bottom
+            self.view.layoutIfNeeded()
+        }
+    }
+    
+    @objc private func kbWillHide(_ note: Notification) {
+        let duration = (note.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? TimeInterval) ?? 0.25
+        UIView.animate(withDuration: duration) {
+            self.additionalSafeAreaInsets.bottom = 0
+            self.view.layoutIfNeeded()
+        }
     }
 
     private func setupActions() {
@@ -33,41 +97,41 @@ final class EmailRegisterViewController: UIViewController {
          registerView.checkPasswordTextField].forEach {
             $0.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         }
-
+        
         registerView.registerButton.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
         registerView.passwordEyeButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
         registerView.checkPasswordEyeButton.addTarget(self, action: #selector(toggleCheckPasswordVisibility), for: .touchUpInside)
         registerView.passwordInfoButton.addTarget(self, action: #selector(showPasswordRule), for: .touchUpInside)
     }
-
+    
     @objc private func textFieldsChanged() {
         let isFilled = [registerView.emailTextField,
                         registerView.passwordTextField,
                         registerView.checkPasswordTextField]
             .allSatisfy { !($0.text ?? "").isEmpty }
-
+        
         registerView.registerButton.isEnabled = isFilled
         registerView.registerButton.backgroundColor = isFilled ? .blue700 : .gray200
     }
-
+    
     @objc private func togglePasswordVisibility() {
         isPasswordVisible.toggle()
         registerView.passwordTextField.isSecureTextEntry = !isPasswordVisible
         let icon = isPasswordVisible ? "eye" : "eye.slash"
         registerView.passwordEyeButton.setImage(UIImage(systemName: icon), for: .normal)
     }
-
+    
     @objc private func toggleCheckPasswordVisibility() {
         isCheckPasswordVisible.toggle()
         registerView.checkPasswordTextField.isSecureTextEntry = !isCheckPasswordVisible
         let icon = isCheckPasswordVisible ? "eye" : "eye.slash"
         registerView.checkPasswordEyeButton.setImage(UIImage(systemName: icon), for: .normal)
     }
-
+    
     @objc private func showPasswordRule() {
         showCustomAlert(title: "비밀번호 규칙", ButtonText: "영문, 숫자, 특수문자 8자 이상 필수")
     }
-
+    
     @objc private func registerTapped() {
         guard let email = registerView.emailTextField.text, !email.isEmpty,
               let password = registerView.passwordTextField.text, !password.isEmpty,
@@ -75,19 +139,19 @@ final class EmailRegisterViewController: UIViewController {
             showCustomAlert(title: "모든 항목을 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-
+        
         guard email.isValidEmail() else {
             showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-
+        
         guard password == checkPassword else {
             showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-
+        
         let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
-
+        
         authService.register(data: dto) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
@@ -99,7 +163,7 @@ final class EmailRegisterViewController: UIViewController {
                     } else {
                         self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
                     }
-
+                    
                 case .failure(let error):
                     self?.showCustomAlert(title: error.localizedDescription, rightButtonText: "확인", rightButtonAction: nil)
                 }
