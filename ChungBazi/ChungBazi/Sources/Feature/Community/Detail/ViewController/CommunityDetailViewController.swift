@@ -34,18 +34,19 @@ final class CommunityDetailViewController: UIViewController {
         $0.backgroundColor = .white
     }
     private let commentTextField = UITextField().then {
-        $0.backgroundColor = .gray100
+        $0.backgroundColor = .clear
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.attributedPlaceholder = NSAttributedString(
             string: "댓글을 입력하세요.",
             attributes: [.foregroundColor: UIColor.gray300]
         )
-        $0.layer.cornerRadius = 10
-        $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 19, height: 1))
+        $0.layer.cornerRadius = 0
+        $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 22))
         $0.leftViewMode = .always
-        $0.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 19 + 24 + 16, height: 1))
-        $0.rightViewMode = .always
+        $0.rightView = nil
+        $0.rightViewMode = .never
+        $0.returnKeyType = .send
     }
     
     private let sendButton = UIButton.createWithImage(image: .sendIcon, tintColor: .blue700, target: self, action: #selector(sendButtonTapped))
@@ -76,7 +77,7 @@ final class CommunityDetailViewController: UIViewController {
             self.fetchCommentData()
             self.fetchPostData()
         }
-
+        
         /// 글 삭제 후 루트로
         communityDetailView.setPostDeleteHandler { [weak self] in
             guard let self else { return }
@@ -138,23 +139,42 @@ final class CommunityDetailViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-
+        
         view.addSubview(commentInputView)
         commentInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-        commentInputView.addSubview(commentTextField)
-        commentTextField.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+        
+        let inputBackground = UIView()
+        inputBackground.backgroundColor = .gray100
+        inputBackground.layer.cornerRadius = 10
+        inputBackground.clipsToBounds = true
+        
+        commentInputView.addSubview(inputBackground)
+        inputBackground.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
-        commentTextField.addSubview(sendButton)
+        
+        inputBackground.addSubview(commentTextField)
+        inputBackground.addSubview(sendButton)
+        
         sendButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.trailing.equalToSuperview().inset(16)
+            $0.width.height.equalTo(24)
         }
+        
+        commentTextField.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(19)
+            $0.top.bottom.equalToSuperview()
+            $0.trailing.equalTo(sendButton.snp.leading).offset(-8)
+        }
+        
+        sendButton.setContentHuggingPriority(.required, for: .horizontal)
+        commentTextField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         
         enableKeyboardHandling(for: scrollView, inputView: commentInputView)
     }
@@ -198,7 +218,7 @@ final class CommunityDetailViewController: UIViewController {
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
         guard hasNext, !isFetching else { return }
-
+        
         isFetching = true
         
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
@@ -206,7 +226,7 @@ final class CommunityDetailViewController: UIViewController {
             
             DispatchQueue.main.async {
                 self.isFetching = false
-
+                
                 switch result {
                 case .success(let response):
                     guard let response = response else { return }
@@ -234,24 +254,24 @@ final class CommunityDetailViewController: UIViewController {
                             mine: comment.mine
                         )
                     }
-
+                    
                     if self.nextCursor == 0 {
                         self.comments = newComments
                     } else {
                         self.comments.append(contentsOf: newComments)
                     }
-
+                    
                     if response.nextCursor != self.nextCursor {
                         self.nextCursor = response.nextCursor
                     } else {
                         print("⚠️ nextCursor 변경 없음! 더 이상 로드할 데이터 없음")
                         self.hasNext = false
                     }
-
+                    
                     self.hasNext = !newComments.isEmpty && response.hasNext
-
+                    
                     self.communityDetailView.updateComments(self.comments)
-
+                    
                 case .failure(let error):
                     print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
                 }
@@ -260,57 +280,68 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     @objc private func sendButtonTapped() {
-        guard let commentText = commentTextField.text,
-              !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              sendButton.isEnabled else { return }
-
+        guard sendButton.isEnabled else { return }
+        let text = commentTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !text.isEmpty else { return }
+        
         sendButton.isEnabled = false
-        NotificationCenter.default.addObserver(self, selector: #selector(handleSendAfterKeyboardHide), name: UIResponder.keyboardDidHideNotification, object: nil)
-
+        
+        sendComment(text)
+        
         view.endEditing(true)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.forceSendCommentIfNeeded()
+    }
+    
+    private func sendComment(_ text: String) {
+        let commentRequest = CommunityCommentRequestDto(postId: postId, content: text)
+        
+        communityService.postCommunityComment(body: commentRequest) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.commentTextField.text = ""
+                    
+                    self.nextCursor = 0
+                    self.hasNext = true
+                    self.comments.removeAll()
+                    self.communityDetailView.updateComments(self.comments)
+                    self.fetchCommentData()
+                    self.fetchPostData()
+                    
+                case .failure(let error):
+                    print("❌ 댓글 작성 실패: \(error.localizedDescription)")
+                }
+                self.sendButton.isEnabled = true
+            }
         }
     }
-
-    @objc private func handleSendAfterKeyboardHide() {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidHideNotification, object: nil)
-        sendComment()
-    }
-
-    private func forceSendCommentIfNeeded() {
-        if commentTextField.isFirstResponder == false {
-            sendComment()
-        }
-    }
-
+    
     private func sendComment() {
         guard let commentText = commentTextField.text, !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("⚠️ 댓글이 비어있습니다.")
             sendButton.isEnabled = true
             return
         }
-
+        
         let commentRequest = CommunityCommentRequestDto(postId: postId, content: commentText)
-
+        
         communityService.postCommunityComment(body: commentRequest) { [weak self] result in
             guard let self = self else { return }
-
+            
             DispatchQueue.main.async {
                 switch result {
                 case .success:
                     self.commentTextField.text = ""
                     self.view.endEditing(true)
-
+                    
                     self.nextCursor = 0
                     self.hasNext = true
                     self.comments.removeAll()
                     self.communityDetailView.updateComments(self.comments)
-
+                    
                     self.fetchCommentData()
                     self.fetchPostData()
-
+                    
                 case .failure(let error):
                     print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
@@ -322,66 +353,66 @@ final class CommunityDetailViewController: UIViewController {
     @objc private func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
               let window = view.window else { return }
-
+        
         let keyboardHeight = window.frame.height - keyboardFrame.origin.y
         let safeAreaBottomInset = view.safeAreaInsets.bottom
         let adjustedKeyboardHeight = keyboardHeight - safeAreaBottomInset
-
+        
         UIView.animate(withDuration: 0.3) {
             self.commentInputBottomConstraint?.deactivate()
             self.commentInputBottomConstraint = nil
-
+            
             self.commentInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalToSuperview().offset(-keyboardHeight)
                 make.height.equalTo(68)
             }
-
+            
             self.scrollView.snp.remakeConstraints { make in
                 make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
                 make.bottom.equalTo(self.commentInputView.snp.top)
                 make.leading.trailing.equalToSuperview()
             }
-
+            
             self.communityDetailView.snp.remakeConstraints { make in
                 make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
                 make.width.equalTo(self.scrollView.frameLayoutGuide)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58 + adjustedKeyboardHeight)
             }
-
+            
             self.scrollView.contentInset.bottom = adjustedKeyboardHeight
             self.scrollView.scrollIndicatorInsets.bottom = adjustedKeyboardHeight
-
+            
             self.view.layoutIfNeeded()
         }
     }
-
+    
     @objc private func keyboardWillHide(_ notification: Notification) {
         UIView.animate(withDuration: 0.3) {
             self.commentInputBottomConstraint?.deactivate()
             self.commentInputBottomConstraint = nil
-
+            
             self.commentInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.height.equalTo(68)
             }
-
+            
             self.scrollView.snp.remakeConstraints { make in
                 make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.leading.trailing.equalToSuperview()
             }
-
+            
             self.communityDetailView.snp.remakeConstraints { make in
                 make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
                 make.width.equalTo(self.scrollView.frameLayoutGuide)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58)
             }
-
+            
             self.scrollView.contentInset.bottom = 0
             self.scrollView.scrollIndicatorInsets.bottom = 0
-
+            
             self.view.layoutIfNeeded()
         }
     }
@@ -401,7 +432,7 @@ final class CommunityDetailViewController: UIViewController {
         self.comments.removeAll()
         
         self.communityDetailView.updateComments(self.comments)
-
+        
         fetchPostData()
         fetchCommentData()
         
