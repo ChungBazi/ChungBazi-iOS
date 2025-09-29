@@ -14,7 +14,11 @@ struct CommunityDetailCommentModel {
     let userName: String
     let reward: String
     let characterImg: String
+    let likesCount: Int
+    let parentCommentId: Int?
+    let deleted: Bool
     let mine: Bool
+    let likedByUser: Bool
 }
 
 struct CommunityDetailPostModel {
@@ -23,18 +27,19 @@ struct CommunityDetailPostModel {
     let content: String
     let category: CommunityCategory
     let formattedCreatedAt: String
+    let status: String
     let views: Int
     let commentCount: Int
     let postLikes: Int
     let userId: Int
     let userName: String
     let reward: String
-    let characterImg: String?
+    let characterImg: String
+    let thumbnailUrl: String?
     let imageUrls: [String]?
     let anonymous: Bool
     let mine: Bool
-    
-    var categoryDisplayName: String {
-        return category.displayName
-    }
+    let likedByUser: Bool
+
+    var categoryDisplayName: String { category.displayName }
 }

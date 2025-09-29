@@ -191,6 +191,7 @@ final class CommunityDetailViewController: UIViewController {
                     content: success.content,
                     category: CommunityCategory(rawValue: success.category) ?? .all,
                     formattedCreatedAt: success.formattedCreatedAt,
+                    status: success.status,
                     views: success.views,
                     commentCount: success.commentCount,
                     postLikes: success.postLikes,
@@ -198,9 +199,11 @@ final class CommunityDetailViewController: UIViewController {
                     userName: success.userName,
                     reward: success.reward,
                     characterImg: success.characterImg,
+                    thumbnailUrl: success.thumbnailUrl,
                     imageUrls: success.imageUrls,
                     anonymous: success.anonymous,
-                    mine: success.mine
+                    mine: success.mine,
+                    likedByUser: success.likedByUser
                 )
                 
                 DispatchQueue.main.async(group: nil, qos: .userInitiated, flags: []) {
@@ -232,16 +235,19 @@ final class CommunityDetailViewController: UIViewController {
                     guard let response = response else { return }
                     
                     let newComments = response.commentsList.compactMap { comment -> CommunityDetailCommentModel? in
-                        guard let postId = comment.postId,
-                              let content = comment.content,
-                              let formattedCreatedAt = comment.formattedCreatedAt,
-                              let commentId = comment.commentId,
-                              let userId = comment.userId,
-                              let userName = comment.userName,
-                              let reward = comment.reward,
-                              let characterImg = comment.characterImg else {
+                        guard
+                            let postId = comment.postId,
+                            let content = comment.content,
+                            let formattedCreatedAt = comment.formattedCreatedAt,
+                            let commentId = comment.commentId,
+                            let userId = comment.userId,
+                            let userName = comment.userName,
+                            let reward = comment.reward,
+                            let characterImg = comment.characterImg
+                        else {
                             return nil
                         }
+
                         return CommunityDetailCommentModel(
                             postId: postId,
                             content: content,
@@ -251,7 +257,11 @@ final class CommunityDetailViewController: UIViewController {
                             userName: userName,
                             reward: reward,
                             characterImg: characterImg,
-                            mine: comment.mine
+                            likesCount: comment.likesCount ?? 0,
+                            parentCommentId: comment.parentCommentId,
+                            deleted: comment.deleted ?? false,
+                            mine: comment.mine,
+                            likedByUser: comment.likedByUser ?? false
                         )
                     }
                     

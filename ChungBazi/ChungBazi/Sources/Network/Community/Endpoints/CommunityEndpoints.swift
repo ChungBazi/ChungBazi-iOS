@@ -22,6 +22,10 @@ enum CommunityEndpoints {
     case deleteCommunityLike(postId: Int)
     case deleteCommunityPost(postId: Int)
     case deleteCommunityComment(commentId: Int)
+    case postLike(postId: Int)
+    case deleteLike(postId: Int)
+    case postCommentLike(commentId: Int)
+    case deleteCommentLike(commentId: Int)
 }
 
 extension CommunityEndpoints: TargetType {
@@ -55,6 +59,14 @@ extension CommunityEndpoints: TargetType {
             return "/posts/\(postId)"
         case .deleteCommunityComment(let commentId):
             return "/comments/\(commentId)"
+        case .postLike:
+            return "/community/likes"
+        case .deleteLike:
+            return "/community/likes"
+        case .postCommentLike(let commentId):
+            return "/community/likes/\(commentId)"
+        case .deleteCommentLike(let commentId):
+            return "/community/likes/\(commentId)"
         }
     }
     
@@ -62,11 +74,9 @@ extension CommunityEndpoints: TargetType {
         switch self {
         case .getCommunityPosts, .getCommunityPost, .getCommunityComments, .searchCommunity, .getCommunityPopularWords:
             return .get
-        case .postCommunityPost, .postCommunityComment, .postCommunityLike:
+        case .postCommunityPost, .postCommunityComment, .postCommunityLike, .postLike, .postCommentLike:
             return .post
-        case .deleteCommunityLike,
-             .deleteCommunityPost,
-             .deleteCommunityComment:
+        case .deleteCommunityLike, .deleteCommunityPost, .deleteCommunityComment, .deleteLike, .deleteCommentLike:
             return .delete
         }
     }
@@ -123,9 +133,9 @@ extension CommunityEndpoints: TargetType {
             return .requestParameters(parameters: ["query": query, "filter": filter, "period": period, "cursor": cursor, "size": 10], encoding: URLEncoding.queryString)
         case .getCommunityPopularWords:
             return .requestPlain
-        case .postCommunityLike(let postId), .deleteCommunityLike(let postId):
+        case .postCommunityLike(let postId), .deleteCommunityLike(let postId), .postLike(let postId), .deleteLike(let postId):
             return .requestParameters(parameters: ["postId": postId], encoding: URLEncoding.queryString)
-        case .deleteCommunityPost, .deleteCommunityComment:
+        case .deleteCommunityPost, .deleteCommunityComment, .postCommentLike, .deleteCommentLike:
             return .requestPlain
         }
     }
