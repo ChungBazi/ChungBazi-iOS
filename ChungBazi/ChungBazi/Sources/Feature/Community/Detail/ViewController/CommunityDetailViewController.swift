@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import SafeAreaBrush
+import SwiftyToaster
 
 final class CommunityDetailViewController: UIViewController {
     
@@ -54,6 +55,9 @@ final class CommunityDetailViewController: UIViewController {
         $0.backgroundColor = .white
     }
     
+    private var isPostLikeBusy = false
+    private var busyCommentLikes = Set<Int>()
+    
     init(postId: Int) {
         self.postId = postId
         super.init(nibName: nil, bundle: nil)
@@ -93,6 +97,8 @@ final class CommunityDetailViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        hookLikeHandlers()
     }
     
     deinit {
@@ -247,7 +253,7 @@ final class CommunityDetailViewController: UIViewController {
                         else {
                             return nil
                         }
-
+                        
                         return CommunityDetailCommentModel(
                             postId: postId,
                             content: content,
@@ -448,6 +454,149 @@ final class CommunityDetailViewController: UIViewController {
         
         DispatchQueue.main.async {
             self.refreshControl.endRefreshing()
+        }
+    }
+    
+    private func hookLikeHandlers() {
+        communityDetailView.onTapPostLike = { [weak self] in
+            self?.togglePostLike()
+        }
+        communityDetailView.onTapCommentLike = { [weak self] indexPath in
+            self?.toggleCommentLike(at: indexPath)
+        }
+    }
+    
+    private func togglePostLike() {
+        guard !isPostLikeBusy, var post = postData else { return }
+        isPostLikeBusy = true
+        
+        let newLiked = !post.likedByUser
+        let newCount = post.postLikes + (newLiked ? 1 : -1)
+        communityDetailView.updatePostLikeUI(liked: newLiked, count: max(0, newCount))
+        
+        post = CommunityDetailPostModel(
+            postId: post.postId,
+            title: post.title,
+            content: post.content,
+            category: post.category,
+            formattedCreatedAt: post.formattedCreatedAt,
+            status: post.status,
+            views: post.views,
+            commentCount: post.commentCount,
+            postLikes: max(0, newCount),
+            userId: post.userId,
+            userName: post.userName,
+            reward: post.reward,
+            characterImg: post.characterImg,
+            thumbnailUrl: post.thumbnailUrl,
+            imageUrls: post.imageUrls,
+            anonymous: post.anonymous,
+            mine: post.mine,
+            likedByUser: newLiked
+        )
+        self.postData = post
+        
+        let call: (@escaping (Result<Void, Error>) -> Void) -> Void = newLiked
+        ? { self.communityService.postLike(postId: post.postId, completion: $0) }
+        : { self.communityService.deleteLike(postId: post.postId, completion: $0) }
+        
+        call { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.isPostLikeBusy = false
+                switch result {
+                case .success:
+                    break
+                case .failure:
+                    let rolledLiked = !newLiked
+                    let rolledCount = post.postLikes + (rolledLiked ? 1 : -1)
+                    self.communityDetailView.updatePostLikeUI(liked: rolledLiked, count: max(0, rolledCount))
+                    self.postData = CommunityDetailPostModel(
+                        postId: post.postId,
+                        title: post.title,
+                        content: post.content,
+                        category: post.category,
+                        formattedCreatedAt: post.formattedCreatedAt,
+                        status: post.status,
+                        views: post.views,
+                        commentCount: post.commentCount,
+                        postLikes: max(0, rolledCount),
+                        userId: post.userId,
+                        userName: post.userName,
+                        reward: post.reward,
+                        characterImg: post.characterImg,
+                        thumbnailUrl: post.thumbnailUrl,
+                        imageUrls: post.imageUrls,
+                        anonymous: post.anonymous,
+                        mine: post.mine,
+                        likedByUser: rolledLiked
+                    )
+                    Toaster.shared.makeToast("좋아요 처리에 실패했어요. 네트워크를 확인해 주세요.")
+                }
+            }
+        }
+    }
+    
+    private func toggleCommentLike(at indexPath: IndexPath) {
+        guard indexPath.row < comments.count else { return }
+        let curr = comments[indexPath.row]
+        guard !busyCommentLikes.contains(curr.commentId) else { return }
+        busyCommentLikes.insert(curr.commentId)
+        
+        let newLiked = !curr.likedByUser
+        let newCount = curr.likesCount + (newLiked ? 1 : -1)
+        communityDetailView.updateCommentLikeUI(at: indexPath, liked: newLiked, count: max(0, newCount))
+        
+        let updated = CommunityDetailCommentModel(
+            postId: curr.postId,
+            content: curr.content,
+            formattedCreatedAt: curr.formattedCreatedAt,
+            commentId: curr.commentId,
+            userId: curr.userId,
+            userName: curr.userName,
+            reward: curr.reward,
+            characterImg: curr.characterImg,
+            likesCount: max(0, newCount),
+            parentCommentId: curr.parentCommentId,
+            deleted: curr.deleted,
+            mine: curr.mine,
+            likedByUser: newLiked
+        )
+        comments[indexPath.row] = updated
+        
+        let call: (@escaping (Result<Void, Error>) -> Void) -> Void = newLiked
+        ? { self.communityService.postCommentLike(commentId: curr.commentId, completion: $0) }
+        : { self.communityService.deleteCommentLike(commentId: curr.commentId, completion: $0) }
+        
+        call { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.busyCommentLikes.remove(curr.commentId)
+                switch result {
+                case .success:
+                    break
+                case .failure:
+                    let rolledLiked = !newLiked
+                    let rolledCount = updated.likesCount + (rolledLiked ? 1 : -1)
+                    self.communityDetailView.updateCommentLikeUI(at: indexPath, liked: rolledLiked, count: max(0, rolledCount))
+                    self.comments[indexPath.row] = CommunityDetailCommentModel(
+                        postId: curr.postId,
+                        content: curr.content,
+                        formattedCreatedAt: curr.formattedCreatedAt,
+                        commentId: curr.commentId,
+                        userId: curr.userId,
+                        userName: curr.userName,
+                        reward: curr.reward,
+                        characterImg: curr.characterImg,
+                        likesCount: max(0, rolledCount),
+                        parentCommentId: curr.parentCommentId,
+                        deleted: curr.deleted,
+                        mine: curr.mine,
+                        likedByUser: rolledLiked
+                    )
+                    Toaster.shared.makeToast("댓글 좋아요 처리에 실패했어요.")
+                }
+            }
         }
     }
 }

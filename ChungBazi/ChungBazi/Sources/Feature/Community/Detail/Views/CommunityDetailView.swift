@@ -10,7 +10,7 @@ import SnapKit
 import Then
 
 final class CommunityDetailView: UIView {
-
+    
     var onRequestRefresh: (() -> Void)?
     
     public let scrollView = UIScrollView()
@@ -36,6 +36,9 @@ final class CommunityDetailView: UIView {
     }
     
     private var comments: [CommunityDetailCommentModel] = []
+    
+    var onTapPostLike: (() -> Void)?
+    var onTapCommentLike: ((IndexPath) -> Void)?
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -75,6 +78,10 @@ final class CommunityDetailView: UIView {
             $0.bottom.leading.trailing.equalToSuperview()
             $0.height.greaterThanOrEqualTo(1)
         }
+        
+        postView.onTapLike = { [weak self] in self?.onTapPostLike?() }
+        commentTableView.delegate = self
+        commentTableView.dataSource = self
     }
     
     func updatePost(_ post: CommunityDetailPostModel) {
@@ -88,7 +95,7 @@ final class CommunityDetailView: UIView {
         DispatchQueue.main.async {
             self.commentTableView.layoutIfNeeded()
             let tableHeight = self.commentTableView.contentSize.height
-
+            
             self.commentTableView.snp.remakeConstraints {
                 $0.top.equalTo(self.gray100View.snp.bottom)
                 $0.leading.trailing.equalToSuperview()
@@ -108,8 +115,16 @@ final class CommunityDetailView: UIView {
     }
     
     func setPostDeleteHandler(_ handler: @escaping () -> Void) {
-            postView.setDeleteHandler(handler)
-        }
+        postView.setDeleteHandler(handler)
+    }
+    
+    func updatePostLikeUI(liked: Bool, count: Int) {
+        postView.updateLikeUI(liked: liked, count: count)
+    }
+    func updateCommentLikeUI(at indexPath: IndexPath, liked: Bool, count: Int) {
+        (commentTableView.cellForRow(at: indexPath) as? CommunityDetailCommentCell)?
+            .updateLikeUI(liked: liked, count: count)
+    }
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
@@ -119,16 +134,14 @@ extension CommunityDetailView: UITableViewDataSource, UITableViewDelegate {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: CommunityDetailCommentCell.identifier, for: indexPath) as? CommunityDetailCommentCell else {
-            return UITableViewCell()
+        let cell = tableView.dequeueReusableCell(
+            withIdentifier: CommunityDetailCommentCell.identifier, for: indexPath
+        ) as! CommunityDetailCommentCell
+        let model = comments[indexPath.row]
+        cell.configure(with: model)
+        cell.onTapLike = { [weak self] in
+            self?.onTapCommentLike?(indexPath)
         }
-        let comment = comments[indexPath.row]
-        cell.configure(with: comment)
-        
-        cell.onRequestRefresh = { [weak self] in
-            self?.onRequestRefresh?()
-        }
-        
         return cell
     }
 }

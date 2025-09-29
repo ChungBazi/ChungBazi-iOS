@@ -59,14 +59,10 @@ extension CommunityEndpoints: TargetType {
             return "/posts/\(postId)"
         case .deleteCommunityComment(let commentId):
             return "/comments/\(commentId)"
-        case .postLike:
-            return "/community/likes"
-        case .deleteLike:
-            return "/community/likes"
-        case .postCommentLike(let commentId):
-            return "/community/likes/\(commentId)"
-        case .deleteCommentLike(let commentId):
-            return "/community/likes/\(commentId)"
+        case .postLike, .deleteLike:
+            return "/likes"
+        case .postCommentLike(let id), .deleteCommentLike(let id):
+            return "/likes/\(id)"
         }
     }
     

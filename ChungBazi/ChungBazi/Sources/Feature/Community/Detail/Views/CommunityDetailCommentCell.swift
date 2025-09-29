@@ -14,6 +14,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     static let identifier = "CommunityDetailCommentCell"
     
+    var onTapLike: (() -> Void)?
+    
     var isMyComment: Bool = false
     var ownerUserId: Int = 0
     var commentId: Int = 0
@@ -173,10 +175,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
         }
     
     @objc private func likeBtnTapped() {
-        isLiked.toggle()
-        let image = isLiked ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
-                            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
-        likeButton.setImage(image, for: .normal)
+        onTapLike?()
     }
     
     @objc private func commentBtnTapped() {
@@ -211,5 +210,24 @@ final class CommunityDetailCommentCell: UITableViewCell {
         self.ownerUserId = comment.userId
         self.commentId = comment.commentId
         self.postId = comment.postId
+        
+        self.isLiked = comment.likedByUser
+        likeCountLabel.text = "\(comment.likesCount)"
+        let img = comment.likedByUser
+            ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
+
+        likeButton.isEnabled = !comment.deleted
+        contentView.alpha = comment.deleted ? 0.6 : 1.0
+    }
+    
+    func updateLikeUI(liked: Bool, count: Int) {
+        self.isLiked = liked
+        likeCountLabel.text = "\(count)"
+        let img = liked
+            ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
     }
 }
