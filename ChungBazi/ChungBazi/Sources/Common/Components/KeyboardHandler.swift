@@ -21,12 +21,13 @@
 import UIKit
 import SnapKit
 
-final class KeyboardHandler: NSObject, UIScrollViewDelegate {
+final class KeyboardHandler: NSObject, UIScrollViewDelegate, UIGestureRecognizerDelegate {
     private weak var scrollView: UIScrollView?
     private weak var viewController: UIViewController?
     private weak var inputView: UIView?
 
     private var inputViewBottomConstraint: Constraint?
+    private var dismissTap: UITapGestureRecognizer?
 
     init(scrollView: UIScrollView, inputView: UIView? = nil, viewController: UIViewController) {
         self.scrollView = scrollView
@@ -34,7 +35,7 @@ final class KeyboardHandler: NSObject, UIScrollViewDelegate {
         self.inputView = inputView
         super.init()
         setupKeyboardObservers()
-        scrollView.delegate = self
+        scrollView.panGestureRecognizer.addTarget(self, action: #selector(handleScrollPan))
     }
 
     deinit {
@@ -77,16 +78,34 @@ final class KeyboardHandler: NSObject, UIScrollViewDelegate {
     }
 
     func setTapGestureToDismissKeyboard() {
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        viewController?.view.addGestureRecognizer(tapGesture)
-    }
+            let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+            tap.cancelsTouchesInView = false
+            tap.delegate = self
+            viewController?.view.addGestureRecognizer(tap)
+            self.dismissTap = tap
+        }
 
     @objc private func dismissKeyboard() {
         viewController?.view.endEditing(true)
     }
 
     func scrollViewWillBeginDragging(_ scrollView: UIScrollView) {
+        dismissKeyboard()
+    }
+    
+    func gestureRecognizer(_ gestureRecognizer: UIGestureRecognizer, shouldReceive touch: UITouch) -> Bool {
+        guard gestureRecognizer === dismissTap else { return true }
+
+        if touch.view is UIControl { return false }
+
+        if let inputView, let v = touch.view, v.isDescendant(of: inputView) {
+            return false
+        }
+
+        return true
+    }
+    
+    @objc private func handleScrollPan() {
         dismissKeyboard()
     }
 }

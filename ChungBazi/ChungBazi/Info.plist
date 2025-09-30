@@ -74,5 +74,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+    <key>CFBundleDisplayName</key>
+    <string>청바지</string>
 </dict>
 </plist>

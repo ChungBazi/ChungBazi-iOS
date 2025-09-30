@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import SafeAreaBrush
+import SwiftyToaster
 
 final class CommunityDetailViewController: UIViewController {
     
@@ -34,24 +35,30 @@ final class CommunityDetailViewController: UIViewController {
         $0.backgroundColor = .white
     }
     private let commentTextField = UITextField().then {
-        $0.backgroundColor = .gray100
+        $0.backgroundColor = .clear
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.attributedPlaceholder = NSAttributedString(
             string: "댓글을 입력하세요.",
             attributes: [.foregroundColor: UIColor.gray300]
         )
-        $0.layer.cornerRadius = 10
-        $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 19, height: 1))
+        $0.layer.cornerRadius = 0
+        $0.leftView = UIView(frame: CGRect(x: 0, y: 0, width: 0, height: 22))
         $0.leftViewMode = .always
-        $0.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 19 + 24 + 16, height: 1))
-        $0.rightViewMode = .always
+        $0.rightView = nil
+        $0.rightViewMode = .never
+        $0.returnKeyType = .send
     }
     
     private let sendButton = UIButton.createWithImage(image: .sendIcon, tintColor: .blue700, target: self, action: #selector(sendButtonTapped))
     private let backgroundView = UIView().then {
         $0.backgroundColor = .white
     }
+    
+    private var isPostLikeBusy = false
+    private var busyCommentLikes = Set<Int>()
+    
+    private var replyTarget: (commentId: Int, userName: String)? = nil
     
     init(postId: Int) {
         self.postId = postId
@@ -76,7 +83,7 @@ final class CommunityDetailViewController: UIViewController {
             self.fetchCommentData()
             self.fetchPostData()
         }
-
+        
         /// 글 삭제 후 루트로
         communityDetailView.setPostDeleteHandler { [weak self] in
             guard let self else { return }
@@ -92,6 +99,9 @@ final class CommunityDetailViewController: UIViewController {
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
+        
+        hookLikeHandlers()
+        hookReplyHandlers()
     }
     
     deinit {
@@ -138,23 +148,42 @@ final class CommunityDetailViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-
+        
         view.addSubview(commentInputView)
         commentInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
-        commentInputView.addSubview(commentTextField)
-        commentTextField.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+        
+        let inputBackground = UIView()
+        inputBackground.backgroundColor = .gray100
+        inputBackground.layer.cornerRadius = 10
+        inputBackground.clipsToBounds = true
+        
+        commentInputView.addSubview(inputBackground)
+        inputBackground.snp.makeConstraints {
             $0.top.bottom.equalToSuperview().inset(10)
+            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
-        commentTextField.addSubview(sendButton)
+        
+        inputBackground.addSubview(commentTextField)
+        inputBackground.addSubview(sendButton)
+        
         sendButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
-            $0.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.trailing.equalToSuperview().inset(16)
+            $0.width.height.equalTo(24)
         }
+        
+        commentTextField.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(19)
+            $0.top.bottom.equalToSuperview()
+            $0.trailing.equalTo(sendButton.snp.leading).offset(-8)
+        }
+        
+        sendButton.setContentHuggingPriority(.required, for: .horizontal)
+        commentTextField.setContentCompressionResistancePriority(.defaultLow, for: .horizontal)
         
         enableKeyboardHandling(for: scrollView, inputView: commentInputView)
     }
@@ -171,6 +200,7 @@ final class CommunityDetailViewController: UIViewController {
                     content: success.content,
                     category: CommunityCategory(rawValue: success.category) ?? .all,
                     formattedCreatedAt: success.formattedCreatedAt,
+                    status: success.status,
                     views: success.views,
                     commentCount: success.commentCount,
                     postLikes: success.postLikes,
@@ -178,9 +208,11 @@ final class CommunityDetailViewController: UIViewController {
                     userName: success.userName,
                     reward: success.reward,
                     characterImg: success.characterImg,
+                    thumbnailUrl: success.thumbnailUrl,
                     imageUrls: success.imageUrls,
                     anonymous: success.anonymous,
-                    mine: success.mine
+                    mine: success.mine,
+                    likedByUser: success.likedByUser
                 )
                 
                 DispatchQueue.main.async(group: nil, qos: .userInitiated, flags: []) {
@@ -198,7 +230,7 @@ final class CommunityDetailViewController: UIViewController {
     // MARK: - API 요청: 개별 게시글의 댓글 가져오기
     private func fetchCommentData() {
         guard hasNext, !isFetching else { return }
-
+        
         isFetching = true
         
         communityService.getCommunityComments(postId: postId, cursor: nextCursor) { [weak self] result in
@@ -206,52 +238,29 @@ final class CommunityDetailViewController: UIViewController {
             
             DispatchQueue.main.async {
                 self.isFetching = false
-
+                
                 switch result {
                 case .success(let response):
                     guard let response = response else { return }
                     
-                    let newComments = response.commentsList.compactMap { comment -> CommunityDetailCommentModel? in
-                        guard let postId = comment.postId,
-                              let content = comment.content,
-                              let formattedCreatedAt = comment.formattedCreatedAt,
-                              let commentId = comment.commentId,
-                              let userId = comment.userId,
-                              let userName = comment.userName,
-                              let reward = comment.reward,
-                              let characterImg = comment.characterImg else {
-                            return nil
-                        }
-                        return CommunityDetailCommentModel(
-                            postId: postId,
-                            content: content,
-                            formattedCreatedAt: formattedCreatedAt,
-                            commentId: commentId,
-                            userId: userId,
-                            userName: userName,
-                            reward: reward,
-                            characterImg: characterImg,
-                            mine: comment.mine
-                        )
-                    }
-
+                    let newComments = self.flattenComments(response.commentsList)
                     if self.nextCursor == 0 {
                         self.comments = newComments
                     } else {
                         self.comments.append(contentsOf: newComments)
                     }
-
+                    
                     if response.nextCursor != self.nextCursor {
                         self.nextCursor = response.nextCursor
                     } else {
                         print("⚠️ nextCursor 변경 없음! 더 이상 로드할 데이터 없음")
                         self.hasNext = false
                     }
-
+                    
                     self.hasNext = !newComments.isEmpty && response.hasNext
-
+                    
                     self.communityDetailView.updateComments(self.comments)
-
+                    
                 case .failure(let error):
                     print("❌ 댓글 불러오기 실패: \(error.localizedDescription)")
                 }
@@ -260,57 +269,77 @@ final class CommunityDetailViewController: UIViewController {
     }
     
     @objc private func sendButtonTapped() {
-        guard let commentText = commentTextField.text,
-              !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              sendButton.isEnabled else { return }
-
+        guard sendButton.isEnabled else { return }
+        let text = commentTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        guard !text.isEmpty else { return }
+        
         sendButton.isEnabled = false
-        NotificationCenter.default.addObserver(self, selector: #selector(handleSendAfterKeyboardHide), name: UIResponder.keyboardDidHideNotification, object: nil)
-
+        sendComment(text)
         view.endEditing(true)
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
-            self.forceSendCommentIfNeeded()
+    }
+    
+    private func sendComment(_ text: String) {
+        let parentId = replyTarget?.commentId
+        let commentRequest = CommunityCommentRequestDto(
+            postId: postId,
+            content: text,
+            parentCommentId: parentId
+        )
+        
+        communityService.postCommunityComment(body: commentRequest) { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self.commentTextField.text = ""
+                    self.replyTarget = nil
+                    self.commentTextField.attributedPlaceholder = NSAttributedString(
+                        string: "댓글을 입력하세요.",
+                        attributes: [.foregroundColor: UIColor.gray300]
+                    )
+                    
+                    self.nextCursor = 0
+                    self.hasNext = true
+                    self.comments.removeAll()
+                    self.communityDetailView.updateComments(self.comments)
+                    self.fetchCommentData()
+                    self.fetchPostData()
+                    
+                case .failure(let error):
+                    Toaster.shared.makeToast("댓글 작성에 실패했어요. 다시 시도해 주세요.")
+                    print("❌ 댓글 작성 실패: \(error.localizedDescription)")
+                }
+                self.sendButton.isEnabled = true
+            }
         }
     }
-
-    @objc private func handleSendAfterKeyboardHide() {
-        NotificationCenter.default.removeObserver(self, name: UIResponder.keyboardDidHideNotification, object: nil)
-        sendComment()
-    }
-
-    private func forceSendCommentIfNeeded() {
-        if commentTextField.isFirstResponder == false {
-            sendComment()
-        }
-    }
-
+    
     private func sendComment() {
         guard let commentText = commentTextField.text, !commentText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
             print("⚠️ 댓글이 비어있습니다.")
             sendButton.isEnabled = true
             return
         }
-
+        
         let commentRequest = CommunityCommentRequestDto(postId: postId, content: commentText)
-
+        
         communityService.postCommunityComment(body: commentRequest) { [weak self] result in
             guard let self = self else { return }
-
+            
             DispatchQueue.main.async {
                 switch result {
                 case .success:
                     self.commentTextField.text = ""
                     self.view.endEditing(true)
-
+                    
                     self.nextCursor = 0
                     self.hasNext = true
                     self.comments.removeAll()
                     self.communityDetailView.updateComments(self.comments)
-
+                    
                     self.fetchCommentData()
                     self.fetchPostData()
-
+                    
                 case .failure(let error):
                     print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
@@ -322,66 +351,66 @@ final class CommunityDetailViewController: UIViewController {
     @objc private func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
               let window = view.window else { return }
-
+        
         let keyboardHeight = window.frame.height - keyboardFrame.origin.y
         let safeAreaBottomInset = view.safeAreaInsets.bottom
         let adjustedKeyboardHeight = keyboardHeight - safeAreaBottomInset
-
+        
         UIView.animate(withDuration: 0.3) {
             self.commentInputBottomConstraint?.deactivate()
             self.commentInputBottomConstraint = nil
-
+            
             self.commentInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalToSuperview().offset(-keyboardHeight)
                 make.height.equalTo(68)
             }
-
+            
             self.scrollView.snp.remakeConstraints { make in
                 make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
                 make.bottom.equalTo(self.commentInputView.snp.top)
                 make.leading.trailing.equalToSuperview()
             }
-
+            
             self.communityDetailView.snp.remakeConstraints { make in
                 make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
                 make.width.equalTo(self.scrollView.frameLayoutGuide)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58 + adjustedKeyboardHeight)
             }
-
+            
             self.scrollView.contentInset.bottom = adjustedKeyboardHeight
             self.scrollView.scrollIndicatorInsets.bottom = adjustedKeyboardHeight
-
+            
             self.view.layoutIfNeeded()
         }
     }
-
+    
     @objc private func keyboardWillHide(_ notification: Notification) {
         UIView.animate(withDuration: 0.3) {
             self.commentInputBottomConstraint?.deactivate()
             self.commentInputBottomConstraint = nil
-
+            
             self.commentInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.height.equalTo(68)
             }
-
+            
             self.scrollView.snp.remakeConstraints { make in
                 make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.leading.trailing.equalToSuperview()
             }
-
+            
             self.communityDetailView.snp.remakeConstraints { make in
                 make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
                 make.width.equalTo(self.scrollView.frameLayoutGuide)
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58)
             }
-
+            
             self.scrollView.contentInset.bottom = 0
             self.scrollView.scrollIndicatorInsets.bottom = 0
-
+            
             self.view.layoutIfNeeded()
         }
     }
@@ -401,13 +430,209 @@ final class CommunityDetailViewController: UIViewController {
         self.comments.removeAll()
         
         self.communityDetailView.updateComments(self.comments)
-
+        
         fetchPostData()
         fetchCommentData()
         
         DispatchQueue.main.async {
             self.refreshControl.endRefreshing()
         }
+    }
+    
+    private func hookLikeHandlers() {
+        communityDetailView.onTapPostLike = { [weak self] in
+            self?.togglePostLike()
+        }
+        communityDetailView.onTapCommentLike = { [weak self] indexPath in
+            self?.toggleCommentLike(at: indexPath)
+        }
+    }
+    
+    private func togglePostLike() {
+        guard !isPostLikeBusy, var post = postData else { return }
+        isPostLikeBusy = true
+        
+        let newLiked = !post.likedByUser
+        let newCount = post.postLikes + (newLiked ? 1 : -1)
+        communityDetailView.updatePostLikeUI(liked: newLiked, count: max(0, newCount))
+        
+        post = CommunityDetailPostModel(
+            postId: post.postId,
+            title: post.title,
+            content: post.content,
+            category: post.category,
+            formattedCreatedAt: post.formattedCreatedAt,
+            status: post.status,
+            views: post.views,
+            commentCount: post.commentCount,
+            postLikes: max(0, newCount),
+            userId: post.userId,
+            userName: post.userName,
+            reward: post.reward,
+            characterImg: post.characterImg,
+            thumbnailUrl: post.thumbnailUrl,
+            imageUrls: post.imageUrls,
+            anonymous: post.anonymous,
+            mine: post.mine,
+            likedByUser: newLiked
+        )
+        self.postData = post
+        
+        let call: (@escaping (Result<Void, Error>) -> Void) -> Void = newLiked
+        ? { self.communityService.postLike(postId: post.postId, completion: $0) }
+        : { self.communityService.deleteLike(postId: post.postId, completion: $0) }
+        
+        call { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.isPostLikeBusy = false
+                switch result {
+                case .success:
+                    break
+                case .failure:
+                    let rolledLiked = !newLiked
+                    let rolledCount = post.postLikes + (rolledLiked ? 1 : -1)
+                    self.communityDetailView.updatePostLikeUI(liked: rolledLiked, count: max(0, rolledCount))
+                    self.postData = CommunityDetailPostModel(
+                        postId: post.postId,
+                        title: post.title,
+                        content: post.content,
+                        category: post.category,
+                        formattedCreatedAt: post.formattedCreatedAt,
+                        status: post.status,
+                        views: post.views,
+                        commentCount: post.commentCount,
+                        postLikes: max(0, rolledCount),
+                        userId: post.userId,
+                        userName: post.userName,
+                        reward: post.reward,
+                        characterImg: post.characterImg,
+                        thumbnailUrl: post.thumbnailUrl,
+                        imageUrls: post.imageUrls,
+                        anonymous: post.anonymous,
+                        mine: post.mine,
+                        likedByUser: rolledLiked
+                    )
+                    Toaster.shared.makeToast("좋아요 처리에 실패했어요. 네트워크를 확인해 주세요.")
+                }
+            }
+        }
+    }
+    
+    private func toggleCommentLike(at indexPath: IndexPath) {
+        guard indexPath.row < comments.count else { return }
+        let curr = comments[indexPath.row]
+        guard !busyCommentLikes.contains(curr.commentId) else { return }
+        busyCommentLikes.insert(curr.commentId)
+        
+        let newLiked = !curr.likedByUser
+        let newCount = curr.likesCount + (newLiked ? 1 : -1)
+        communityDetailView.updateCommentLikeUI(at: indexPath, liked: newLiked, count: max(0, newCount))
+        
+        let updated = CommunityDetailCommentModel(
+            postId: curr.postId,
+            content: curr.content,
+            formattedCreatedAt: curr.formattedCreatedAt,
+            commentId: curr.commentId,
+            userId: curr.userId,
+            userName: curr.userName,
+            reward: curr.reward,
+            characterImg: curr.characterImg,
+            likesCount: max(0, newCount),
+            parentCommentId: curr.parentCommentId,
+            deleted: curr.deleted,
+            mine: curr.mine,
+            likedByUser: newLiked
+        )
+        comments[indexPath.row] = updated
+        
+        let call: (@escaping (Result<Void, Error>) -> Void) -> Void = newLiked
+        ? { self.communityService.postCommentLike(commentId: curr.commentId, completion: $0) }
+        : { self.communityService.deleteCommentLike(commentId: curr.commentId, completion: $0) }
+        
+        call { [weak self] result in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.busyCommentLikes.remove(curr.commentId)
+                switch result {
+                case .success:
+                    break
+                case .failure:
+                    let rolledLiked = !newLiked
+                    let rolledCount = updated.likesCount + (rolledLiked ? 1 : -1)
+                    self.communityDetailView.updateCommentLikeUI(at: indexPath, liked: rolledLiked, count: max(0, rolledCount))
+                    self.comments[indexPath.row] = CommunityDetailCommentModel(
+                        postId: curr.postId,
+                        content: curr.content,
+                        formattedCreatedAt: curr.formattedCreatedAt,
+                        commentId: curr.commentId,
+                        userId: curr.userId,
+                        userName: curr.userName,
+                        reward: curr.reward,
+                        characterImg: curr.characterImg,
+                        likesCount: max(0, rolledCount),
+                        parentCommentId: curr.parentCommentId,
+                        deleted: curr.deleted,
+                        mine: curr.mine,
+                        likedByUser: rolledLiked
+                    )
+                    Toaster.shared.makeToast("댓글 좋아요 처리에 실패했어요.")
+                }
+            }
+        }
+    }
+    
+    private func hookReplyHandlers() {
+        communityDetailView.onStartReply = { [weak self] indexPath in
+            guard let self = self, indexPath.row < self.comments.count else { return }
+            let c = self.comments[indexPath.row]
+            if c.deleted {
+                Toaster.shared.makeToast("삭제된 댓글에는 대댓글을 달 수 없어요.")
+                return
+            }
+            self.replyTarget = (commentId: c.commentId, userName: c.userName)
+
+            self.commentTextField.becomeFirstResponder()
+        }
+    }
+    
+    private func makeCommentModel(from c: Comment) -> CommunityDetailCommentModel? {
+        guard
+            let postId = c.postId,
+            let content = c.content,
+            let formatted = c.formattedCreatedAt,
+            let commentId = c.commentId,
+            let userId = c.userId,
+            let userName = c.userName,
+            let reward = c.reward,
+            let characterImg = c.characterImg
+        else { return nil }
+
+        return CommunityDetailCommentModel(
+            postId: postId,
+            content: content,
+            formattedCreatedAt: formatted,
+            commentId: commentId,
+            userId: userId,
+            userName: userName,
+            reward: reward,
+            characterImg: characterImg,
+            likesCount: c.likesCount ?? 0,
+            parentCommentId: c.parentCommentId,
+            deleted: c.deleted ?? false,
+            mine: c.mine,
+            likedByUser: c.likedByUser ?? false
+        )
+    }
+
+    private func flattenComments(_ list: [Comment]) -> [CommunityDetailCommentModel] {
+        var result: [CommunityDetailCommentModel] = []
+        func dfs(_ node: Comment) {
+            if let m = makeCommentModel(from: node) { result.append(m) }
+            (node.comments ?? []).forEach { dfs($0) }  // 재귀로 모든 자식 순회
+        }
+        list.forEach { dfs($0) }
+        return result
     }
 }
 

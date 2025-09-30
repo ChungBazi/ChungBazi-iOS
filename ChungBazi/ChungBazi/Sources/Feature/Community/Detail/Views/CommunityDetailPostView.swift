@@ -12,6 +12,8 @@ import Kingfisher
 
 final class CommunityDetailPostView: UIView {
     
+    var onTapLike: (() -> Void)?
+    
     private let profileView = CommunityDetailPostAuthoreProfileView()
     private var imageUrls: [String] = []
     
@@ -105,10 +107,7 @@ final class CommunityDetailPostView: UIView {
     }
     
     @objc private func likeBtnTapped() {
-        isLiked.toggle()
-        let image = isLiked ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
-                            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
-        likeButton.setImage(image, for: .normal)
+        onTapLike?()
     }
     
     func configure(with post: CommunityDetailPostModel) {
@@ -145,6 +144,12 @@ final class CommunityDetailPostView: UIView {
         commentCountLabel.text = "댓글 \(post.commentCount)"
         viewCountLabel.text = "조회 \(post.views)"
         
+        self.isLiked = post.likedByUser
+        let img = post.likedByUser
+            ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
+        
         imageUrls = post.imageUrls ?? []
         
         let hasImages = !imageUrls.isEmpty
@@ -177,6 +182,15 @@ final class CommunityDetailPostView: UIView {
     
     func setDeleteHandler(_ handler: @escaping () -> Void) {
         profileView.onRequestPopToRoot = handler
+    }
+    
+    func updateLikeUI(liked: Bool, count: Int) {
+        self.isLiked = liked
+        likeCountLabel.text = "좋아요 \(count)"
+        let img = liked
+            ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
     }
 }
 

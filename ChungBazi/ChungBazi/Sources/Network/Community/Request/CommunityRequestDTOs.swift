@@ -17,9 +17,16 @@ struct CommunityPostRequestDto: Codable {
     }
 }
 
-struct CommunityCommentRequestDto: Codable {
+struct CommunityCommentRequestDto: Encodable {
     let postId: Int
     let content: String
+    let parentCommentId: Int?
+
+    init(postId: Int, content: String, parentCommentId: Int? = nil) {
+        self.postId = postId
+        self.content = content
+        self.parentCommentId = parentCommentId
+    }
 }
 
 struct CommunityRequestDTO: Codable {

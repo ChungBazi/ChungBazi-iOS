@@ -43,6 +43,7 @@ struct CommunityDetailResponseDTO: Decodable {
     let content: String
     let category: String
     let formattedCreatedAt: String
+    let status: String
     let anonymous: Bool
     let views: Int
     let commentCount: Int
@@ -54,6 +55,7 @@ struct CommunityDetailResponseDTO: Decodable {
     let thumbnailUrl: String?
     let imageUrls: [String]?
     let mine: Bool
+    let likedByUser: Bool
 }
 
 struct CommunityCommentResponseDTO: Decodable {
@@ -71,7 +73,12 @@ struct Comment: Decodable {
     let userName: String?
     let reward: String?
     let characterImg: String?
+    let likesCount: Int?
+    let parentCommentId: Int?
+    let deleted: Bool?
     let mine: Bool
+    let likedByUser: Bool?
+    let comments: [Comment]?
 }
 
 struct PostPostResponse: Decodable {

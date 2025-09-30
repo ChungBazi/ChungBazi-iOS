@@ -16,6 +16,9 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     private var dimmingView: UIView?
     private var calendarService = CalendarService()
     
+    private var lastRequestedYearMonth: String?
+    private var debounceWorkItem: DispatchWorkItem?
+    
     // MARK: - Lifecycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,7 +28,8 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(true)
-        fetchData()
+        let initialDate = calendarView.currentPage ?? Date()
+        requestCalendar(for: initialDate)
     }
     
     // MARK: - Setup
@@ -41,37 +45,35 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
     }
     
     // MARK: - Data
-    private func fetchData() {
+    private func fetchData(yearMonth: String) {
+        showLoading()
         showLoading()
         
         self.policies = []
         self.calendarView.clearPolicies()
-
-        let currentYearMonth = DateFormatter.yearMonth.string(from: Date())
-
-        calendarService.getCalendarPolicies(yearMonth: currentYearMonth) { [weak self] result in
+        
+        calendarService.getCalendarPolicies(yearMonth: yearMonth) { [weak self] result in
             guard let self = self else { return }
             
-            DispatchQueue.main.async {
-                self.hideLoading()
-            }
+            DispatchQueue.main.async { self.hideLoading() }
             
             switch result {
             case .success(let response):
-                guard let policies = response, !policies.isEmpty else {
-                    print("데이터가 없습니다. API 응답 확인 필요")
+                guard let items = response, !items.isEmpty else {
+                    print("(\(yearMonth)) 해당 월 데이터 없음 — 빈 상태 UI")
                     return
                 }
-
-                self.policies = policies.compactMap { policy in
-                    guard let startDateStr = policy.startDate,
-                          let endDateStr = policy.endDate,
-                          let startDate = DateFormatter.yearMonthDay.date(from: startDateStr),
-                          let endDate = DateFormatter.yearMonthDay.date(from: endDateStr),
-                          let cartId = policy.cartId,
-                          let policyId = policy.policyId else {
-                        return nil
-                    }
+                
+                self.policies = items.compactMap { policy in
+                    guard
+                        let startDateStr = policy.startDate,
+                        let endDateStr   = policy.endDate,
+                        let startDate = DateFormatter.yearMonthDay.date(from: startDateStr),
+                        let endDate   = DateFormatter.yearMonthDay.date(from: endDateStr),
+                        let cartId    = policy.cartId,
+                        let policyId  = policy.policyId
+                    else { return nil }
+                    
                     return SortedPolicy(
                         cartId: cartId,
                         policyId: policyId,
@@ -90,6 +92,22 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
         }
     }
     
+    private func requestCalendar(for date: Date) {
+        let yearMonth = DateFormatter.yearMonth.string(from: date)
+        
+        if lastRequestedYearMonth == yearMonth {
+            return
+        }
+        lastRequestedYearMonth = yearMonth
+        
+        debounceWorkItem?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.fetchData(yearMonth: yearMonth)
+        }
+        debounceWorkItem = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25, execute: work)
+    }
+    
     private func bindPolicyData(_ policies: [SortedPolicy]) {
         guard !policies.isEmpty else { return }
         for policy in policies {
@@ -103,6 +121,15 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
 }
 
 extension CalenderViewController: CalendarViewDelegate {
+    
+    func configureCalendarViewDelegate() {
+        calendarView.delegate = self
+    }
+    
+    func calendarCurrentPageDidChange(to date: Date) {
+        requestCalendar(for: date)
+    }
+    
     func presentCalendarDetailViewController(for policy: Policy?) {
         guard let policy = policy else { return }
         let detailVC = CalendarDetailViewController(policy: policy)
@@ -115,22 +142,22 @@ extension CalenderViewController: CalendarViewDelegate {
     
     func presentPolicyListViewController(for date: Date) {
         addDimmingView()
-        
+
         let policyListVC = CalendarPolicyListViewController()
         policyListVC.modalPresentationStyle = .pageSheet
         policyListVC.selectedDate = DateFormatter.yearMonthDay.string(from: date)
         policyListVC.policies = getPolicies(for: date)
-        
+
         let navigationController = UINavigationController(rootViewController: policyListVC)
         navigationController.modalPresentationStyle = .pageSheet
-        
+
         if let sheet = navigationController.sheetPresentationController {
             sheet.detents = [.medium(), .large()]
             sheet.selectedDetentIdentifier = .medium
             sheet.delegate = self
             sheet.largestUndimmedDetentIdentifier = .large
         }
-        
+
         present(navigationController, animated: true)
     }
     
@@ -156,10 +183,6 @@ extension CalenderViewController: CalendarViewDelegate {
                   let policyEnd = DateFormatter.yearMonthDay.date(from: policy.endDate) else { return false }
             return policyStart <= date && policyEnd >= date
         }
-    }
-    
-    func configureCalendarViewDelegate() {
-        calendarView.delegate = self
     }
     
     private func createPolicy(from date: Date) -> Policy? {
