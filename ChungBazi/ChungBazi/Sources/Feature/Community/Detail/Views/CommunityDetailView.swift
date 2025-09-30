@@ -12,6 +12,7 @@ import Then
 final class CommunityDetailView: UIView {
     
     var onRequestRefresh: (() -> Void)?
+    var onStartReply: ((IndexPath) -> Void)?
     
     public let scrollView = UIScrollView()
     private let contentView = UIView()
@@ -139,8 +140,9 @@ extension CommunityDetailView: UITableViewDataSource, UITableViewDelegate {
         ) as! CommunityDetailCommentCell
         let model = comments[indexPath.row]
         cell.configure(with: model)
-        cell.onTapLike = { [weak self] in
-            self?.onTapCommentLike?(indexPath)
+
+        cell.onTapReply = { [weak self] in
+            self?.onStartReply?(indexPath)
         }
         return cell
     }

@@ -58,6 +58,8 @@ final class CommunityDetailViewController: UIViewController {
     private var isPostLikeBusy = false
     private var busyCommentLikes = Set<Int>()
     
+    private var replyTarget: (commentId: Int, userName: String)? = nil
+    
     init(postId: Int) {
         self.postId = postId
         super.init(nibName: nil, bundle: nil)
@@ -99,6 +101,7 @@ final class CommunityDetailViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
         
         hookLikeHandlers()
+        hookReplyHandlers()
     }
     
     deinit {
@@ -240,37 +243,7 @@ final class CommunityDetailViewController: UIViewController {
                 case .success(let response):
                     guard let response = response else { return }
                     
-                    let newComments = response.commentsList.compactMap { comment -> CommunityDetailCommentModel? in
-                        guard
-                            let postId = comment.postId,
-                            let content = comment.content,
-                            let formattedCreatedAt = comment.formattedCreatedAt,
-                            let commentId = comment.commentId,
-                            let userId = comment.userId,
-                            let userName = comment.userName,
-                            let reward = comment.reward,
-                            let characterImg = comment.characterImg
-                        else {
-                            return nil
-                        }
-                        
-                        return CommunityDetailCommentModel(
-                            postId: postId,
-                            content: content,
-                            formattedCreatedAt: formattedCreatedAt,
-                            commentId: commentId,
-                            userId: userId,
-                            userName: userName,
-                            reward: reward,
-                            characterImg: characterImg,
-                            likesCount: comment.likesCount ?? 0,
-                            parentCommentId: comment.parentCommentId,
-                            deleted: comment.deleted ?? false,
-                            mine: comment.mine,
-                            likedByUser: comment.likedByUser ?? false
-                        )
-                    }
-                    
+                    let newComments = self.flattenComments(response.commentsList)
                     if self.nextCursor == 0 {
                         self.comments = newComments
                     } else {
@@ -301,14 +274,17 @@ final class CommunityDetailViewController: UIViewController {
         guard !text.isEmpty else { return }
         
         sendButton.isEnabled = false
-        
         sendComment(text)
-        
         view.endEditing(true)
     }
     
     private func sendComment(_ text: String) {
-        let commentRequest = CommunityCommentRequestDto(postId: postId, content: text)
+        let parentId = replyTarget?.commentId
+        let commentRequest = CommunityCommentRequestDto(
+            postId: postId,
+            content: text,
+            parentCommentId: parentId
+        )
         
         communityService.postCommunityComment(body: commentRequest) { [weak self] result in
             guard let self = self else { return }
@@ -316,6 +292,11 @@ final class CommunityDetailViewController: UIViewController {
                 switch result {
                 case .success:
                     self.commentTextField.text = ""
+                    self.replyTarget = nil
+                    self.commentTextField.attributedPlaceholder = NSAttributedString(
+                        string: "댓글을 입력하세요.",
+                        attributes: [.foregroundColor: UIColor.gray300]
+                    )
                     
                     self.nextCursor = 0
                     self.hasNext = true
@@ -325,6 +306,7 @@ final class CommunityDetailViewController: UIViewController {
                     self.fetchPostData()
                     
                 case .failure(let error):
+                    Toaster.shared.makeToast("댓글 작성에 실패했어요. 다시 시도해 주세요.")
                     print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
                 self.sendButton.isEnabled = true
@@ -598,6 +580,59 @@ final class CommunityDetailViewController: UIViewController {
                 }
             }
         }
+    }
+    
+    private func hookReplyHandlers() {
+        communityDetailView.onStartReply = { [weak self] indexPath in
+            guard let self = self, indexPath.row < self.comments.count else { return }
+            let c = self.comments[indexPath.row]
+            if c.deleted {
+                Toaster.shared.makeToast("삭제된 댓글에는 대댓글을 달 수 없어요.")
+                return
+            }
+            self.replyTarget = (commentId: c.commentId, userName: c.userName)
+
+            self.commentTextField.becomeFirstResponder()
+        }
+    }
+    
+    private func makeCommentModel(from c: Comment) -> CommunityDetailCommentModel? {
+        guard
+            let postId = c.postId,
+            let content = c.content,
+            let formatted = c.formattedCreatedAt,
+            let commentId = c.commentId,
+            let userId = c.userId,
+            let userName = c.userName,
+            let reward = c.reward,
+            let characterImg = c.characterImg
+        else { return nil }
+
+        return CommunityDetailCommentModel(
+            postId: postId,
+            content: content,
+            formattedCreatedAt: formatted,
+            commentId: commentId,
+            userId: userId,
+            userName: userName,
+            reward: reward,
+            characterImg: characterImg,
+            likesCount: c.likesCount ?? 0,
+            parentCommentId: c.parentCommentId,
+            deleted: c.deleted ?? false,
+            mine: c.mine,
+            likedByUser: c.likedByUser ?? false
+        )
+    }
+
+    private func flattenComments(_ list: [Comment]) -> [CommunityDetailCommentModel] {
+        var result: [CommunityDetailCommentModel] = []
+        func dfs(_ node: Comment) {
+            if let m = makeCommentModel(from: node) { result.append(m) }
+            (node.comments ?? []).forEach { dfs($0) }  // 재귀로 모든 자식 순회
+        }
+        list.forEach { dfs($0) }
+        return result
     }
 }
 

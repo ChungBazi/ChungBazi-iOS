@@ -78,6 +78,7 @@ struct Comment: Decodable {
     let deleted: Bool?
     let mine: Bool
     let likedByUser: Bool?
+    let comments: [Comment]?
 }
 
 struct PostPostResponse: Decodable {
