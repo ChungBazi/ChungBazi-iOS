@@ -12,6 +12,7 @@ import FSCalendar
 
 protocol CalendarViewDelegate: AnyObject {
     func presentPolicyListViewController(for date: Date)
+    func calendarCurrentPageDidChange(to date: Date)
 }
 
 final class CalendarView: UIView {
@@ -195,25 +196,26 @@ extension CalendarView: FSCalendarDelegate, FSCalendarDataSource, FSCalendarDele
         print("✅ currentPage 업데이트됨: \(String(describing: currentPage))")
         updateHeader(for: calendar.currentPage)
         calendar.reloadData()
+        delegate?.calendarCurrentPageDidChange(to: calendar.currentPage)
     }
     
     func calendar(_ calendar: FSCalendar, didSelect date: Date, at monthPosition: FSCalendarMonthPosition) {
         let normalizedDate = Calendar.current.startOfDay(for: date)
-
+        
         if selectedDate == normalizedDate {
             if let eventsForDate = events[date], !eventsForDate.isEmpty {
                 delegate?.presentPolicyListViewController(for: date)
             }
             return
         }
-
+        
         if let previousDate = selectedDate {
             calendar.deselect(previousDate)
         }
-
+        
         selectedDate = normalizedDate
         calendar.reloadData()
-
+        
         if let eventsForDate = events[date], !eventsForDate.isEmpty {
             delegate?.presentPolicyListViewController(for: date)
         }
