@@ -264,6 +264,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
         : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
         likeButton.setImage(img, for: .normal)
         
+        commentCountLabel.text = "\(comment.replyCount)"
+        
         likeButton.isEnabled = !comment.deleted
         contentView.alpha = comment.deleted ? 0.6 : 1.0
         

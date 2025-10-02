@@ -19,6 +19,7 @@ struct CommunityDetailCommentModel {
     let deleted: Bool
     let mine: Bool
     let likedByUser: Bool
+    let replyCount: Int
 }
 
 struct CommunityDetailPostModel {

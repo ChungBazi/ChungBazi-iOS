@@ -79,6 +79,7 @@ struct Comment: Decodable {
     let mine: Bool
     let likedByUser: Bool?
     let comments: [Comment]?
+    let replyCount: Int?
 }
 
 struct PostPostResponse: Decodable {
