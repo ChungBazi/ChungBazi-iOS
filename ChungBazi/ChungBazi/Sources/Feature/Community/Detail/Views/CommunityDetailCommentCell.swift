@@ -245,8 +245,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
                 .foregroundColor: commentLabel.textColor ?? UIColor.gray800
             ]
         )
-        
         commentLabel.attributedText = attributedString
+        
         createdAtLabel.text = comment.formattedCreatedAt
         
         self.isMyComment = comment.mine
@@ -254,7 +254,8 @@ final class CommunityDetailCommentCell: UITableViewCell {
         self.commentId = comment.commentId
         self.postId = comment.postId
         
-        applyThreadIndent(isReply: comment.parentCommentId != nil)
+        let isReply = (comment.parentCommentId != nil)
+        applyThreadIndent(isReply: isReply)
         
         self.isLiked = comment.likedByUser
         likeCountLabel.text = "\(comment.likesCount)"
@@ -263,8 +264,13 @@ final class CommunityDetailCommentCell: UITableViewCell {
         : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
         likeButton.setImage(img, for: .normal)
         
+        commentCountLabel.text = "\(comment.replyCount)"
+        
         likeButton.isEnabled = !comment.deleted
         contentView.alpha = comment.deleted ? 0.6 : 1.0
+        
+        commentButton.isHidden = isReply
+        commentCountLabel.isHidden = isReply
     }
     
     func updateLikeUI(liked: Bool, count: Int) {

@@ -542,7 +542,8 @@ final class CommunityDetailViewController: UIViewController {
             parentCommentId: curr.parentCommentId,
             deleted: curr.deleted,
             mine: curr.mine,
-            likedByUser: newLiked
+            likedByUser: newLiked,
+            replyCount: curr.replyCount
         )
         comments[indexPath.row] = updated
         
@@ -574,7 +575,8 @@ final class CommunityDetailViewController: UIViewController {
                         parentCommentId: curr.parentCommentId,
                         deleted: curr.deleted,
                         mine: curr.mine,
-                        likedByUser: rolledLiked
+                        likedByUser: rolledLiked,
+                        replyCount: curr.replyCount
                     )
                     Toaster.shared.makeToast("댓글 좋아요 처리에 실패했어요.")
                 }
@@ -621,7 +623,8 @@ final class CommunityDetailViewController: UIViewController {
             parentCommentId: c.parentCommentId,
             deleted: c.deleted ?? false,
             mine: c.mine,
-            likedByUser: c.likedByUser ?? false
+            likedByUser: c.likedByUser ?? false,
+            replyCount: c.replyCount ?? 0
         )
     }
 
@@ -629,7 +632,7 @@ final class CommunityDetailViewController: UIViewController {
         var result: [CommunityDetailCommentModel] = []
         func dfs(_ node: Comment) {
             if let m = makeCommentModel(from: node) { result.append(m) }
-            (node.comments ?? []).forEach { dfs($0) }  // 재귀로 모든 자식 순회
+            (node.comments ?? []).forEach { dfs($0) }
         }
         list.forEach { dfs($0) }
         return result
