@@ -2,18 +2,18 @@
 //  EmailRegisterViewController.swift
 //  ChungBazi
 //
-//  Created by 엄민서 on 2025/09/01.
+//  Created by 엄민서 on 9/1/25.
 //
 
 import UIKit
 import SnapKit
 import Then
+import KeychainSwift
 
 final class EmailRegisterViewController: UIViewController {
-
+    
     private let authService = AuthService()
     private let registerView = EmailRegisterView()
-    
     private var isPasswordVisible = false
     private var isCheckPasswordVisible = false
 
@@ -23,27 +23,24 @@ final class EmailRegisterViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        addCustomNavigationBar(titleText: "", showBackButton: true)
+        addCustomNavigationBar(titleText: "이메일 로그인", showBackButton: true)
         setupActions()
     }
 
     private func setupActions() {
         [registerView.emailTextField,
-         registerView.passwordTextField,
-         registerView.checkPasswordTextField].forEach {
+         registerView.pwdTextField].forEach {
             $0.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
         }
-
-        registerView.registerButton.addTarget(self, action: #selector(registerTapped), for: .touchUpInside)
-        registerView.passwordEyeButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
-        registerView.checkPasswordEyeButton.addTarget(self, action: #selector(toggleCheckPasswordVisibility), for: .touchUpInside)
-        registerView.passwordInfoButton.addTarget(self, action: #selector(showPasswordRule), for: .touchUpInside)
+        
+        registerView.registerButton.addTarget(self, action: #selector(loginTapped), for: .touchUpInside)
+        registerView.pwdEyeButton.addTarget(self, action: #selector(togglePasswordVisibility), for: .touchUpInside)
+        registerView.findPwdButton.addTarget(self, action: #selector(findPwdTapped), for: .touchUpInside)
     }
 
     @objc private func textFieldsChanged() {
         let isFilled = [registerView.emailTextField,
-                        registerView.passwordTextField,
-                        registerView.checkPasswordTextField]
+                        registerView.pwdTextField]
             .allSatisfy { !($0.text ?? "").isEmpty }
 
         registerView.registerButton.isEnabled = isFilled
@@ -52,52 +49,52 @@ final class EmailRegisterViewController: UIViewController {
 
     @objc private func togglePasswordVisibility() {
         isPasswordVisible.toggle()
-        registerView.passwordTextField.isSecureTextEntry = !isPasswordVisible
+        registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
         let icon = isPasswordVisible ? "eye" : "eye.slash"
-        registerView.passwordEyeButton.setImage(UIImage(systemName: icon), for: .normal)
+        registerView.pwdEyeButton.setImage(UIImage(systemName: icon), for: .normal)
     }
-
-    @objc private func toggleCheckPasswordVisibility() {
-        isCheckPasswordVisible.toggle()
-        registerView.checkPasswordTextField.isSecureTextEntry = !isCheckPasswordVisible
-        let icon = isCheckPasswordVisible ? "eye" : "eye.slash"
-        registerView.checkPasswordEyeButton.setImage(UIImage(systemName: icon), for: .normal)
+    
+    @objc private func findPwdTapped() {
+        let vc = FindPwdViewController()
+        navigationController?.pushViewController(vc, animated: true)
     }
-
-    @objc private func showPasswordRule() {
-        showCustomAlert(title: "비밀번호 규칙", ButtonText: "영문, 숫자, 특수문자 8자 이상 필수")
-    }
-
-    @objc private func registerTapped() {
+    
+    @objc private func loginTapped() {
         guard let email = registerView.emailTextField.text, !email.isEmpty,
-              let password = registerView.passwordTextField.text, !password.isEmpty,
-              let checkPassword = registerView.checkPasswordTextField.text, !checkPassword.isEmpty else {
+              let password = registerView.pwdTextField.text, !password.isEmpty else {
             showCustomAlert(title: "모든 항목을 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-
+        
         guard email.isValidEmail() else {
             showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-
-        guard password == checkPassword else {
-            showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
-            return
-        }
-
-        let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
-
-        authService.register(data: dto) { [weak self] result in
+        
+        let fcmToken = KeychainSwift().get("fcmToken") ?? ""
+        
+        let dto = LoginRequestDto(email: email, password: password, fcmToken: fcmToken)
+        
+        authService.login(data: dto) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let response):
-                    if response.isSuccess {
-                        self?.showCustomAlert(title: "회원가입이 완료되었습니다", rightButtonText: "확인") {
+                    KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
+                    KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
+                    let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
+                    KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
+                    
+                    KeychainSwift().set(String(response.userId), forKey: "userId")
+                    KeychainSwift().set(response.userName, forKey: "userName")
+                    KeychainSwift().set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
+                    
+                    if response.isFirst {
+                        let nicknameVC = NicknameRegisterViewController(email: email)
+                        self?.navigationController?.pushViewController(nicknameVC, animated: true)
+                    } else {
+                        self?.showCustomAlert(title: "로그인에 성공했습니다", rightButtonText: "확인") {
                             self?.navigationController?.popViewController(animated: true)
                         }
-                    } else {
-                        self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
                     }
 
                 case .failure(let error):

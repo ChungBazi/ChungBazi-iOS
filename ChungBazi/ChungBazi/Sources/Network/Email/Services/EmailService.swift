@@ -26,8 +26,8 @@ final class EmailService: NetworkManager {
     }
 
     // MARK: - 이메일 인증 요청 
-    public func requestEmailVerification(completion: @escaping (Result<ApiResponse<String>, NetworkError>) -> Void) {
-        request(target: .postEmailRequest, decodingType: ApiResponse<String>.self, completion: completion)
+    public func requestEmailVerification(email: String, completion: @escaping (Result<ApiResponse<String>, NetworkError>) -> Void) {
+        request(target: .postEmailRequest(email: email), decodingType: ApiResponse<String>.self, completion: completion)
     }
 
     // MARK: - 인증 코드 검증

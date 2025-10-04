@@ -4,7 +4,7 @@
 //
 //  Created by 엄민서 on 9/1/25.
 //
-
+// TODO: - 모든 방법의 로그인 화면에서 닉네임 설정으로 연결되기
 import UIKit
 import SnapKit
 import Then
@@ -30,13 +30,20 @@ final class NicknameRegisterViewController: UIViewController {
 
     // MARK: - UI Components
     private let titleLabel = UILabel().then {
-        $0.text = "청바지에서 사용할\n정보를 알려주세요!"
+        $0.text = "청바지에서 사용할\n닉네임을 알려주세요!"
         $0.numberOfLines = 2
         $0.textColor = .black
         $0.font = .ptdExtraBoldFont(ofSize: 20)
         $0.textAlignment = .center
     }
 
+    // TODO: - 프로필 사진 추가 완료하기
+    private let profileImg = UIImageView().then {
+        $0.image = UIImage(named: "basicBaro")
+        $0.contentMode = .scaleAspectFill
+        $0.backgroundColor = .clear
+    }
+    
     private let nicknameLabel = UILabel().then {
         $0.text = "닉네임"
         $0.font = .ptdMediumFont(ofSize: 14)
@@ -50,12 +57,20 @@ final class NicknameRegisterViewController: UIViewController {
         $0.autocapitalizationType = .none
     }
 
-    private let checkDuplicateButton = UIButton(type: .system).then {
-        $0.setTitle("중복 확인", for: .normal)
-        $0.setTitleColor(.gray800, for: .normal)
-        $0.titleLabel?.font = .ptdMediumFont(ofSize: 14)
+    private let emailLabel = UILabel().then {
+        $0.text = "이메일"
+        $0.font = .ptdMediumFont(ofSize: 14)
+        $0.textColor = .gray800
     }
-
+    
+    // TODO: - 전에 설정한 이메일 자동으로 연동되기
+    private let emailTextField = UITextField().then {
+        $0.placeholder = "이메일"
+        $0.font = .ptdRegularFont(ofSize: 14)
+        $0.textColor = .black
+        $0.autocapitalizationType = .none
+    }
+    
     private let underlineView = UIView().then {
         $0.backgroundColor = .gray300
     }
@@ -73,12 +88,11 @@ final class NicknameRegisterViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupLayout()
-        setupActions()
     }
 
     // MARK: - Setup
     private func setupLayout() {
-        [titleLabel, nicknameLabel, nicknameTextField, checkDuplicateButton,
+        [titleLabel, nicknameLabel, nicknameTextField,
          underlineView, statusLabel, completeButton].forEach { view.addSubview($0) }
 
         titleLabel.snp.makeConstraints {
@@ -94,16 +108,27 @@ final class NicknameRegisterViewController: UIViewController {
         nicknameTextField.snp.makeConstraints {
             $0.top.equalTo(nicknameLabel.snp.bottom).offset(8)
             $0.leading.equalToSuperview().inset(24)
-            $0.trailing.equalTo(checkDuplicateButton.snp.leading).offset(-12)
         }
-
-        checkDuplicateButton.snp.makeConstraints {
-            $0.centerY.equalTo(nicknameTextField)
-            $0.trailing.equalToSuperview().inset(24)
-        }
-
+        
         underlineView.snp.makeConstraints {
             $0.top.equalTo(nicknameTextField.snp.bottom).offset(8)
+            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.height.equalTo(1)
+        }
+        
+        emailLabel.snp.makeConstraints {
+            $0.top.equalTo(nicknameTextField.snp.bottom).offset(40)
+            $0.leading.equalToSuperview().inset(24)
+        }
+
+        emailTextField.snp.makeConstraints {
+            $0.top.equalTo(emailLabel.snp.bottom).offset(8)
+            $0.leading.equalToSuperview().inset(24)
+        }
+       
+
+        underlineView.snp.makeConstraints {
+            $0.top.equalTo(emailTextField.snp.bottom).offset(8)
             $0.leading.trailing.equalToSuperview().inset(24)
             $0.height.equalTo(1)
         }
@@ -116,26 +141,6 @@ final class NicknameRegisterViewController: UIViewController {
         completeButton.snp.makeConstraints {
             $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
             $0.leading.trailing.equalToSuperview().inset(16)
-        }
-    }
-
-    private func setupActions() {
-        checkDuplicateButton.addTarget(self, action: #selector(handleCheckDuplicate), for: .touchUpInside)
-    }
-
-    // MARK: - Action
-    @objc private func handleCheckDuplicate() {
-        let nickname = nicknameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-
-        if nickname.isEmpty {
-            updateStatus(text: "", color: .clear, underline: .gray300)
-            isNicknameValid = false
-        } else if nickname == "" {
-            updateStatus(text: "중복 된 닉네임 입니다.", color: .red, underline: .red)
-            isNicknameValid = false
-        } else {
-            updateStatus(text: "사용 가능한 닉네임 입니다.", color: .blue500, underline: .blue500)
-            isNicknameValid = true
         }
     }
 
