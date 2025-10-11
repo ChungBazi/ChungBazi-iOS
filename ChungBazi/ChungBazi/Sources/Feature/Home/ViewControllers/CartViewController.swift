@@ -120,6 +120,7 @@ final class CartViewController: UIViewController {
     private func configureTableView() {
         tableView.dataSource = self
         tableView.delegate = self
+        tableView.allowsSelection = true
     }
     
     @objc private func handleAllSelect() {
@@ -249,7 +250,7 @@ final class CartViewController: UIViewController {
 }
 
 // MARK: - UITableViewDataSource, UITableViewDelegate
-extension CartViewController: UITableViewDataSource, UITableViewDelegate {
+extension CartViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
         return cartItems.keys.count
     }
@@ -297,5 +298,18 @@ extension CartViewController: UITableViewDataSource, UITableViewDelegate {
 
     func tableView(_ tableView: UITableView, heightForHeaderInSection section: Int) -> CGFloat {
         return 70
+    }
+}
+
+extension CartViewController: UITableViewDelegate {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        tableView.deselectRow(at: indexPath, animated: true)
+
+        let category = Array(cartItems.keys)[indexPath.section]
+        guard let item = cartItems[category]?[indexPath.row] else { return }
+
+        let vc = PolicyDetailViewController()
+        vc.policyId = item.policyId
+        navigationController?.pushViewController(vc, animated: true)
     }
 }

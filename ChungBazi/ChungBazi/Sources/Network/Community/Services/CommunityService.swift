@@ -48,7 +48,7 @@ final class CommunityService: NetworkManager {
     public func getCommunityPost(postId: Int, completion: @escaping (Result<CommunityDetailResponseDTO, NetworkError>) -> Void) {
         request(target: .getCommunityPost(postId: postId), decodingType: CommunityDetailResponseDTO.self, completion: completion)
     }
-  
+    
     /// 커뮤니티 댓글 리스트 조회 API
     public func getCommunityComments(postId: Int, cursor: Int, completion: @escaping (Result<CommunityCommentResponseDTO?, NetworkError>) -> Void) {
         requestOptional(target: .getCommunityComments(postId: postId, cursor: cursor), decodingType: CommunityCommentResponseDTO.self, completion: completion)
@@ -58,21 +58,21 @@ final class CommunityService: NetworkManager {
     func postCommunityPost(body: CommunityPostRequestDto, imageList: [UIImage], completion: @escaping (Result<PostPostResponse, Error>) -> Void) {
         
         var multipartData: [MultipartFormData] = []
-
+        
         if let jsonData = try? JSONEncoder().encode(body) {
             multipartData.append(MultipartFormData(provider: .data(jsonData), name: "info", mimeType: "application/json"))
         } else {
             print("🚨 JSON 인코딩 실패")
             return
         }
-
+        
         for (index, image) in imageList.enumerated() {
             if let imageData = image.jpegData(compressionQuality: 0.8) {
                 let imagePart = MultipartFormData(provider: .data(imageData), name: "imageList", fileName: "image\(index).jpg", mimeType: "image/jpeg")
                 multipartData.append(imagePart)
             }
         }
-
+        
         provider.request(.postCommunityPost(data: body, imageList: imageList)) { result in
             switch result {
             case .success(let response):
@@ -123,9 +123,57 @@ final class CommunityService: NetworkManager {
     public func deleteCommunityPost(postId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
         requestOptional(target: .deleteCommunityPost(postId: postId), decodingType: String.self, completion: completion)
     }
-
+    
     /// 댓글 삭제
     public func deleteCommunityComment(commentId: Int, completion: @escaping (Result<String?, NetworkError>) -> Void) {
         requestOptional(target: .deleteCommunityComment(commentId: commentId), decodingType: String.self, completion: completion)
+    }
+    
+    /// 게시글 좋아요
+    func postLike(postId: Int, completion: @escaping (Result<Void, Error>) -> Void) {
+        provider.request(.postLike(postId: postId)) { result in
+            switch result {
+            case .success:
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 게시글 좋아요 취소
+    func deleteLike(postId: Int, completion: @escaping (Result<Void, Error>) -> Void) {
+        provider.request(.deleteLike(postId: postId)) { result in
+            switch result {
+            case .success:
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 댓글 좋아요
+    func postCommentLike(commentId: Int, completion: @escaping (Result<Void, Error>) -> Void) {
+        provider.request(.postCommentLike(commentId: commentId)) { result in
+            switch result {
+            case .success:
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
+    }
+    
+    /// 댓글 좋아요 취소
+    func deleteCommentLike(commentId: Int, completion: @escaping (Result<Void, Error>) -> Void) {
+        provider.request(.deleteCommentLike(commentId: commentId)) { result in
+            switch result {
+            case .success:
+                completion(.success(()))
+            case .failure(let error):
+                completion(.failure(error))
+            }
+        }
     }
 }

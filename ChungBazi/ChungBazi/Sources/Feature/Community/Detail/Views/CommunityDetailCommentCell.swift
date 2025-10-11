@@ -8,10 +8,14 @@
 import UIKit
 import SnapKit
 import Then
+import SwiftyToaster
 
 final class CommunityDetailCommentCell: UITableViewCell {
     
     static let identifier = "CommunityDetailCommentCell"
+    
+    var onTapLike: (() -> Void)?
+    var onTapReply: (() -> Void)?
     
     var isMyComment: Bool = false
     var ownerUserId: Int = 0
@@ -19,7 +23,7 @@ final class CommunityDetailCommentCell: UITableViewCell {
     var postId: Int = 0
     
     var onRequestRefresh: (() -> Void)?
-
+    
     private let actionHandler = MoreActionHandler()
     
     private let profileView = CommunityDetailCommentAuthorProfileView()
@@ -53,10 +57,18 @@ final class CommunityDetailCommentCell: UITableViewCell {
         $0.font = .ptdMediumFont(ofSize: 14)
     }
     
+    private let replyIconView = UIImageView().then {
+        $0.image = .replyIcon.withRenderingMode(.alwaysOriginal)
+        $0.contentMode = .scaleAspectFill
+        $0.isHidden = true
+    }
+    
+    private let leadingGuide = UIView()
+    
     private let separatorView = UIView().then {
         $0.backgroundColor = .gray100
     }
-
+    
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
         super.init(style: style, reuseIdentifier: reuseIdentifier)
         backgroundColor = .clear
@@ -69,15 +81,28 @@ final class CommunityDetailCommentCell: UITableViewCell {
     
     private func setupUI() {
         selectionStyle = .none
-
+        
         contentView.addSubviews(
+            replyIconView, leadingGuide,
             profileView, moreButton, commentLabel, createdAtLabel,
             likeButton, likeCountLabel, commentButton, commentCountLabel, separatorView
         )
         
+        replyIconView.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(Constants.gutter + 8)
+            $0.top.equalToSuperview().inset(20.75)
+            $0.size.equalTo(16)
+        }
+        
+        leadingGuide.snp.makeConstraints {
+            $0.leading.equalToSuperview().inset(Constants.gutter)
+            $0.top.bottom.equalToSuperview()
+            $0.width.equalTo(0)
+        }
+        
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(12)
-            $0.leading.equalToSuperview().inset(Constants.gutter)
+            $0.leading.equalTo(leadingGuide.snp.leading)
         }
         
         moreButton.snp.makeConstraints {
@@ -87,17 +112,18 @@ final class CommunityDetailCommentCell: UITableViewCell {
         
         commentLabel.snp.makeConstraints {
             $0.top.equalTo(profileView.snp.bottom).offset(4)
-            $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
+            $0.leading.equalTo(leadingGuide.snp.leading)
+            $0.trailing.equalToSuperview().inset(Constants.gutter)
         }
         
         createdAtLabel.snp.makeConstraints {
             $0.top.equalTo(commentLabel.snp.bottom).offset(5)
-            $0.leading.equalToSuperview().inset(Constants.gutter)
+            $0.leading.equalTo(leadingGuide.snp.leading)
         }
         
         likeButton.snp.makeConstraints {
             $0.top.equalTo(createdAtLabel.snp.bottom).offset(8)
-            $0.leading.equalToSuperview().inset(Constants.gutter)
+            $0.leading.equalTo(leadingGuide.snp.leading)
         }
         
         likeCountLabel.snp.makeConstraints {
@@ -121,42 +147,82 @@ final class CommunityDetailCommentCell: UITableViewCell {
             $0.height.equalTo(1)
             $0.bottom.equalToSuperview()
         }
+        
+        commentButton.addTarget(self, action: #selector(commentBtnTapped), for: .touchUpInside)
+    }
+    
+    private func applyThreadIndent(isReply: Bool) {
+        if isReply {
+            replyIconView.isHidden = false
+            leadingGuide.snp.remakeConstraints {
+                $0.leading.equalTo(replyIconView.snp.trailing).offset(11)
+                $0.top.bottom.equalToSuperview()
+                $0.width.equalTo(0)
+            }
+        } else {
+            replyIconView.isHidden = true
+            leadingGuide.snp.remakeConstraints {
+                $0.leading.equalToSuperview().inset(Constants.gutter)
+                $0.top.bottom.equalToSuperview()
+                $0.width.equalTo(0)
+            }
+        }
     }
     
     @objc private func moreBtnTapped() {
-            guard let hostView = self.owningViewController?.view else { return }
-            let entity: MoreEntity = .comment(
-                commentId: commentId,
-                postId: postId,
-                ownerUserId: ownerUserId,
-                mine: isMyComment
-            )
-
-            MoreActionRouter.present(in: hostView, for: entity) { [weak self] action, entity in
-                guard let self else { return }
-                self.actionHandler.handle(action, entity: entity) { result in
-                    switch result {
-                    case .success:
-                        if case .delete = action { self.onRequestRefresh?() }
-                        if case .block  = action { self.onRequestRefresh?() }
-                        if case .report = action { self.onRequestRefresh?() }
+        guard let hostView = self.owningViewController?.view else { return }
+        let entity: MoreEntity = .comment(
+            commentId: commentId,
+            postId: postId,
+            ownerUserId: ownerUserId,
+            mine: isMyComment
+        )
+        
+        MoreActionRouter.present(in: hostView, for: entity) { [weak self] action, entity in
+            guard let self else { return }
+            self.actionHandler.handle(action, entity: entity) { result in
+                switch result {
+                case .success:
+                    switch action {
+                    case .delete:
+                        self.onRequestRefresh?()
+                        
+                    case .block:
+                        Toaster.shared.makeToast("해당 사용자를 차단했어요.")
+                        self.onRequestRefresh?()
+                        
+                    case .report:
+                        Toaster.shared.makeToast("신고가 접수되었어요.")
+                        self.onRequestRefresh?()
+                        
+                    default:
                         break
-                    case .failure(let err):
-                        print("⚠️ action failed: \(err)")
                     }
+                    
+                case .failure(let err):
+                    // 실패 메시지
+                    switch action {
+                    case .delete:
+                        Toaster.shared.makeToast("댓글 삭제에 실패했어요. 잠시 후 다시 시도해 주세요.")
+                    case .block:
+                        Toaster.shared.makeToast("차단에 실패했어요. 네트워크 상태를 확인해 주세요.")
+                    case .report:
+                        Toaster.shared.makeToast("신고에 실패했어요. 잠시 후 다시 시도해 주세요.")
+                    default:
+                        Toaster.shared.makeToast("요청을 처리하지 못했어요.")
+                    }
+                    print("⚠️ action failed: \(err)")
                 }
             }
         }
+    }
     
     @objc private func likeBtnTapped() {
-        isLiked.toggle()
-        let image = isLiked ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
-                            : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
-        likeButton.setImage(image, for: .normal)
+        onTapLike?()
     }
     
     @objc private func commentBtnTapped() {
-        
+        onTapReply?()
     }
     
     func configure(with comment: CommunityDetailCommentModel) {
@@ -165,12 +231,12 @@ final class CommunityDetailCommentCell: UITableViewCell {
             userLevel: comment.reward,
             characterImageUrl: comment.characterImg
         )
-
+        
         let paragraphStyle = NSMutableParagraphStyle()
         paragraphStyle.minimumLineHeight = 19.6
         paragraphStyle.maximumLineHeight = 19.6
         paragraphStyle.lineBreakMode = .byWordWrapping
-
+        
         let attributedString = NSAttributedString(
             string: comment.content,
             attributes: [
@@ -179,13 +245,40 @@ final class CommunityDetailCommentCell: UITableViewCell {
                 .foregroundColor: commentLabel.textColor ?? UIColor.gray800
             ]
         )
-
         commentLabel.attributedText = attributedString
+        
         createdAtLabel.text = comment.formattedCreatedAt
         
         self.isMyComment = comment.mine
         self.ownerUserId = comment.userId
         self.commentId = comment.commentId
         self.postId = comment.postId
+        
+        let isReply = (comment.parentCommentId != nil)
+        applyThreadIndent(isReply: isReply)
+        
+        self.isLiked = comment.likedByUser
+        likeCountLabel.text = "\(comment.likesCount)"
+        let img = comment.likedByUser
+        ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+        : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
+        
+        commentCountLabel.text = "\(comment.replyCount)"
+        
+        likeButton.isEnabled = !comment.deleted
+        contentView.alpha = comment.deleted ? 0.6 : 1.0
+        
+        commentButton.isHidden = isReply
+        commentCountLabel.isHidden = isReply
+    }
+    
+    func updateLikeUI(liked: Bool, count: Int) {
+        self.isLiked = liked
+        likeCountLabel.text = "\(count)"
+        let img = liked
+        ? UIImage.likeSelectedIcon.withRenderingMode(.alwaysOriginal)
+        : UIImage.likeIcon.withRenderingMode(.alwaysOriginal)
+        likeButton.setImage(img, for: .normal)
     }
 }
