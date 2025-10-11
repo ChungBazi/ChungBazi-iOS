@@ -11,15 +11,19 @@ import Moya
 import SwiftyToaster
 import AuthenticationServices
 
-class SelectLoginTypeViewController: UIViewController, UITextFieldDelegate {
-    
+class SelectLoginTypeViewController: UIViewController {
+
+    // MARK: - ViewModels / Services
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     let networkService = AuthService()
     var isFirst: Bool?
+    private var lastLoginEmail: String?
+    
     lazy var appleAuthVM: AppleAuthVM = {
         let vm = AppleAuthVM()
-        vm.onLoginSuccess = { [weak self] isFirst in
+        vm.onLoginSuccess = { [weak self] isFirst, email in
             self?.isFirst = isFirst
+            self?.lastLoginEmail = email
             self?.goToNextView()
         }
         vm.onLoginFailure = { errorMessage in
@@ -31,41 +35,21 @@ class SelectLoginTypeViewController: UIViewController, UITextFieldDelegate {
     private lazy var selectLoginView = SelectLoginView().then {
         $0.kakaoBtn.addTarget(self, action: #selector(kakaoLogin), for: .touchUpInside)
         $0.appleBtn.addTarget(self, action: #selector(appleBtnTapped), for: .touchUpInside)
-        $0.emailField.delegate = self
-        $0.passwordField.delegate = self
-        $0.startButton.addTarget(self, action: #selector(startButtonTapped), for: .touchUpInside)
-        $0.findIdButton.addTarget(self, action: #selector(findIdTapped), for: .touchUpInside)
-        $0.findPwButton.addTarget(self, action: #selector(findPwTapped), for: .touchUpInside)
         $0.signUpButton.addTarget(self, action: #selector(signUpTapped), for: .touchUpInside)
-        $0.otherMethodButton.addTarget(self, action: #selector(otherMethodTapped), for: .touchUpInside)
+        $0.emailLoginButton.addTarget(self, action: #selector(emailLoginTapped), for: .touchUpInside)
     }
-    
+
+    // MARK: - Lifecycle
     override func loadView() {
         view = selectLoginView
     }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureKeyboardDismiss()
+        view.backgroundColor = .blue700
     }
-    
-    private func configureKeyboardDismiss() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(endEditing))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-    @objc private func endEditing() { view.endEditing(true) }
-    
-    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
-        if textField == selectLoginView.emailField {
-            selectLoginView.passwordField.becomeFirstResponder()
-        } else {
-            textField.resignFirstResponder()
-            startEmailLogin()
-        }
-        return true
-    }
-    
+
+    // MARK: - Actions
     @objc private func appleBtnTapped() {
         appleAuthVM.startLogin()
     }
@@ -92,6 +76,7 @@ class SelectLoginTypeViewController: UIViewController, UITextFieldDelegate {
                 guard let name = user?.kakaoAccount?.profile?.nickname else { print("userName nil"); return }
                 guard let email = user?.kakaoAccount?.email else { print("userEmail nil"); return }
                 guard let fcmToken = KeychainSwift().get("FCMToken") else { print("FCMToken nil"); return }
+                self.lastLoginEmail = email
                 self.kakaoLoginProceed(name, email: email, fcmToken: fcmToken)
             }
         }
@@ -112,61 +97,37 @@ class SelectLoginTypeViewController: UIViewController, UITextFieldDelegate {
                 self.goToNextView()
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")
+                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패했습니다. 다시 시도해 주세요.") }
             }
         }
     }
-    
-    @objc private func startButtonTapped() {
-        startEmailLogin()
-    }
-    private func startEmailLogin() {
-        let email = selectLoginView.emailField.text?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
-        let password = selectLoginView.passwordField.text ?? ""
-        
-        guard !email.isEmpty, !password.isEmpty else {
-            Toaster.shared.makeToast("이메일과 비밀번호를 입력하세요.")
-            return
-        }
-        
-        guard let fcmToken = KeychainSwift().get("FCMToken") else {
-            Toaster.shared.makeToast("FCM 토큰이 없습니다.")
-            return
-        }
 
-        let dto = LoginRequestDto(email: email, password: password, fcmToken: fcmToken)
-        
-        networkService.login(data: dto) { [weak self] result in
-            switch result {
-            case .success(let response):
-                KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
-                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                let exp = Int(Date().timeIntervalSince1970) + response.accessExp
-                KeychainSwift().set(String(exp), forKey: "serverAccessTokenExp")
-                self?.isFirst = response.isFirst
-                self?.goToNextView()
-            case .failure(let error):
-                Toaster.shared.makeToast("로그인 실패: \(error.localizedDescription)")
-            }
-        }
-    }
-    
-    @objc private func findIdTapped() {
-        let vc = FindIdViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    @objc private func findPwTapped() {
-        let vc = FindPwdViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
     @objc private func signUpTapped() {
+        // 회원가입 화면으로 이동
+        let vc = SignupViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
+
+    @objc private func emailLoginTapped() {
+        // 이메일 로그인 화면으로 이동
         let vc = EmailRegisterViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
-    @objc private func otherMethodTapped() {
-        // TODO: 다른 로그인 방법 (구글, 네이버)
-    }
-    
+
     func goToNextView() {
+        if isFirst == true {
+            // 최초 로그인 사용자는 닉네임 등록으로
+            let vc = NicknameRegisterViewController(email: lastLoginEmail, isFirst: true)
+            if let nav = navigationController {
+                nav.pushViewController(vc, animated: true)
+            } else {
+                let nav = UINavigationController(rootViewController: vc)
+                nav.modalPresentationStyle = .fullScreen
+                present(nav, animated: true, completion: nil)
+            }
+            return
+        }
+        // 재방문 사용자: 기존 플로우 유지
         let vc = FinishLoginViewController()
         vc.isFirst = self.isFirst
         let navController = UINavigationController(rootViewController: vc)

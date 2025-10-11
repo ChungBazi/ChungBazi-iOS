@@ -42,6 +42,11 @@ final class AuthService: NetworkManager {
     public func makeAppleDTO(idToken: String, fcmToken: String) -> AppleLoginRequestDto {
         return AppleLoginRequestDto(idToken: idToken, fcmToken: fcmToken)
     }
+    
+    /// 닉네임 등록 DTO
+    public func makeRegisterNicknameDTO(name: String, email: String) -> RegisterNicknameRequestDto {
+        return RegisterNicknameRequestDto(name: name, email: email)
+    }
 
     //MARK: - API funcs
     /// 카카오 로그인 API

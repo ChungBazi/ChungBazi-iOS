@@ -86,12 +86,13 @@ extension AuthEndpoints: TargetType {
     var headers: [String : String]? {
         switch self {
         case .postKakaoLogin, .postAppleLogin, .postReIssueToken,
-                .postResetPassword, .postRegister, .postRegisterNickname, .postLogin:
+             .postRegister, .postRegisterNickname, .postLogin:
             return ["Content-Type": "application/json"]
-        default:
-            let accessToken = KeychainSwift().get("serverAccessToken")
+
+        case .postResetPassword, .postLogout, .deleteUser:
+            let accessToken = KeychainSwift().get("serverAccessToken") ?? ""
             return [
-                "Authorization": "Bearer \(accessToken!)",
+                "Authorization": "Bearer \(accessToken)",
                 "Content-type": "application/json"
             ]
         }

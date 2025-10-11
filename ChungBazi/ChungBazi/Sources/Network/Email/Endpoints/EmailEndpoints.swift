@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum EmailEndpoints {
     case postEmailRequest

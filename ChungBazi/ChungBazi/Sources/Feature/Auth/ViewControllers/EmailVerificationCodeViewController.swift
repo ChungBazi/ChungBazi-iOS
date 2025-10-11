@@ -14,10 +14,30 @@ final class EmailVerificationCodeViewController: UIViewController {
     private let email: String
     private let emailService = EmailService()
     
+    private let descriptionLabel = UILabel().then {
+        $0.text = "회원님의 이메일로\n코드를 전송했어요!"
+        $0.numberOfLines = 2
+        $0.font = UIFont.ptdSemiBoldFont(ofSize: 20)
+        $0.textColor = .black
+    }
+    
+    // MARK: - 이메일 그룹
+    private let codeLabel = UILabel().then {
+        $0.text = "코드 입력"
+        $0.font = UIFont.ptdMediumFont(ofSize: 14)
+        $0.textColor = .gray500
+    }
+    
     private let codeTextField = UITextField().then {
-        $0.placeholder = "인증 코드를 입력하세요"
+        $0.placeholder = "코드를 입력하세요"
         $0.borderStyle = .roundedRect
         $0.keyboardType = .numberPad
+    }
+    
+    private let resendButton = UIButton().then {
+        $0.setTitle("코드 재전송", for: .normal)
+        $0.setTitleColor(.blue, for: .normal)
+        $0.titleLabel?.font = .ptdMediumFont(ofSize: 14)
     }
     
     private let verifyButton = UIButton().then {
@@ -39,10 +59,11 @@ final class EmailVerificationCodeViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+        addCustomNavigationBar(titleText: "회원가입", showBackButton: true)
         setupViews()
         setupActions()
         
-        requestEmailVerification()
+//        requestEmailVerification()
     }
     
     private func setupViews() {
@@ -55,8 +76,13 @@ final class EmailVerificationCodeViewController: UIViewController {
             $0.height.equalTo(44)
         }
         
+        resendButton.snp.makeConstraints {
+            $0.top.equalTo(codeTextField.snp.bottom).offset(8)
+            $0.trailing.equalTo(codeTextField)
+        }
+        
         verifyButton.snp.makeConstraints {
-            $0.top.equalTo(codeTextField.snp.bottom).offset(16)
+            $0.top.equalTo(resendButton.snp.bottom).offset(16)
             $0.leading.trailing.equalTo(codeTextField)
             $0.height.equalTo(48)
         }
@@ -64,11 +90,16 @@ final class EmailVerificationCodeViewController: UIViewController {
 
     private func setupActions() {
         verifyButton.addTarget(self, action: #selector(verifyCodeTapped), for: .touchUpInside)
+        resendButton.addTarget(self, action: #selector(resendTapped), for: .touchUpInside)
     }
-
-    // MARK: - 인증 요청
+    
+    // MARK: - 인증 코드 재전송
+    @objc private func resendTapped() {
+        requestEmailVerification()
+    }
+    
     private func requestEmailVerification() {
-        EmailService().requestEmailVerification { [weak self] result in
+        emailService.requestEmailVerification { [weak self] result in
             switch result {
             case .success(let response):
                 print("✅ 인증 요청 성공: \(response)")
@@ -90,7 +121,6 @@ final class EmailVerificationCodeViewController: UIViewController {
             switch result {
             case .success(let response):
                 if response.isSuccess {
-                    print("✅ 인증 성공")
                     self?.navigateToNextStep()
                 } else {
                     self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
@@ -103,7 +133,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
 
     private func navigateToNextStep() {
-        let nicknameVC = NicknameRegisterViewController(email: email)
+        let nicknameVC = NicknameRegisterViewController(email: email, isFirst: true)
         self.navigationController?.pushViewController(nicknameVC, animated: true)
     }
 }
