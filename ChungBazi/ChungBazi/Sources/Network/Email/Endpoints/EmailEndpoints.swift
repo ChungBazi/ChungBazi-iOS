@@ -7,10 +7,9 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum EmailEndpoints {
-    case postEmailRequest(email: String)
+    case postEmailRequest
     case postEmailVerification(data: EmailVerificationRequestDTO)
 }
 
@@ -40,8 +39,8 @@ extension EmailEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .postEmailRequest(let email):
-            return .requestParameters(parameters: ["email": email], encoding: JSONEncoding.default)
+        case .postEmailRequest:
+            return .requestPlain
         case .postEmailVerification(let data):
             return .requestJSONEncodable(data)
         }

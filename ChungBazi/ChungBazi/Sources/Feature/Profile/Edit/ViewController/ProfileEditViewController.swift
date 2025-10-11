@@ -29,12 +29,14 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        addCustomNavigationBar(titleText: "프로필 설정", showBackButton: true, showCartButton: false, showAlarmButton: false)
         setupUI()
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
         profileEditView.nickNameTextField.delegate = self
         profileEditView.configure(with: profileData)
         fillSafeArea(position: .top, color: .white)
+        profileEditView.resetPwdButton.addTarget(self, action: #selector(didTapResetPassword), for: .touchUpInside)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -70,6 +72,11 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     @objc private func settingCharacterBtnTapped() {
         let vc = CharacterEditViewController()
         vc.delegate = self
+        navigationController?.pushViewController(vc, animated: true)
+    }
+    
+    @objc private func didTapResetPassword() {
+        let vc = ResetPasswordViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
     

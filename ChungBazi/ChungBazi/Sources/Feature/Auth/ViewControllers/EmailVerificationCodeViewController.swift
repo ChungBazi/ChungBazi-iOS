@@ -99,7 +99,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
     
     private func requestEmailVerification() {
-        emailService.requestEmailVerification(email: email) { [weak self] result in
+        emailService.requestEmailVerification { [weak self] result in
             switch result {
             case .success(let response):
                 print("✅ 인증 요청 성공: \(response)")
@@ -133,7 +133,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
 
     private func navigateToNextStep() {
-        let nicknameVC = NicknameRegisterViewController(email: email)
+        let nicknameVC = NicknameRegisterViewController(email: email, isFirst: true)
         self.navigationController?.pushViewController(nicknameVC, animated: true)
     }
 }

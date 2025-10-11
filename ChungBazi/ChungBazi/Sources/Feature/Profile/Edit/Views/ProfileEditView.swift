@@ -46,6 +46,18 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         $0.backgroundColor = .gray500
     }
     
+    public let resetPwdButton = UIButton(type: .system).then {
+        let title = "비밀번호 재설정"
+        let attrs: [NSAttributedString.Key: Any] = [
+            .font: UIFont.ptdMediumFont(ofSize: 14),
+            .foregroundColor: UIColor.gray500,
+            .underlineStyle: NSUnderlineStyle.single.rawValue
+        ]
+        let attributed = NSAttributedString(string: title, attributes: attrs)
+        $0.setAttributedTitle(attributed, for: .normal)
+        $0.contentHorizontalAlignment = .left
+    }
+    
     private let completeBtn = CustomButton(backgroundColor: .blue700, titleText: "프로필 설정 완료", titleColor: .white)
     
     override init(frame: CGRect) {
@@ -60,7 +72,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     private func setupUI() {
-        addSubviews(profileView, settingCharacterBtn, nickNameTitle, nickNameTextField, nickNameUnderLine, emailTitle, emailLabel, emailUnderLine, completeBtn)
+        addSubviews(profileView, settingCharacterBtn, nickNameTitle, nickNameTextField, nickNameUnderLine, emailTitle, emailLabel, emailUnderLine, resetPwdButton, completeBtn)
         
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(26)
@@ -105,6 +117,10 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
             $0.top.equalTo(emailLabel.snp.bottom).offset(5)
             $0.leading.trailing.equalTo(emailLabel)
             $0.height.equalTo(1)
+        }
+        resetPwdButton.snp.makeConstraints {
+            $0.top.equalTo(emailUnderLine.snp.bottom).offset(16)
+            $0.leading.trailing.equalTo(nickNameTitle)
         }
         completeBtn.snp.makeConstraints {
             $0.top.equalTo(emailUnderLine.snp.bottom).offset(144)

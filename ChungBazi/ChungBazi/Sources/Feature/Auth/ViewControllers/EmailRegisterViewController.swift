@@ -89,7 +89,7 @@ final class EmailRegisterViewController: UIViewController {
                     KeychainSwift().set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
                     
                     if response.isFirst {
-                        let nicknameVC = NicknameRegisterViewController(email: email)
+                        let nicknameVC = NicknameRegisterViewController(email: email, isFirst: true)
                         self?.navigationController?.pushViewController(nicknameVC, animated: true)
                     } else {
                         self?.showCustomAlert(title: "로그인에 성공했습니다", rightButtonText: "확인") {

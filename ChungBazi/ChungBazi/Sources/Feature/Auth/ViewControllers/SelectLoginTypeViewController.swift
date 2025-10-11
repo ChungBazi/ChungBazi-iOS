@@ -17,10 +17,13 @@ class SelectLoginTypeViewController: UIViewController {
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     let networkService = AuthService()
     var isFirst: Bool?
+    private var lastLoginEmail: String?
+    
     lazy var appleAuthVM: AppleAuthVM = {
         let vm = AppleAuthVM()
-        vm.onLoginSuccess = { [weak self] isFirst in
+        vm.onLoginSuccess = { [weak self] isFirst, email in
             self?.isFirst = isFirst
+            self?.lastLoginEmail = email
             self?.goToNextView()
         }
         vm.onLoginFailure = { errorMessage in
@@ -73,6 +76,7 @@ class SelectLoginTypeViewController: UIViewController {
                 guard let name = user?.kakaoAccount?.profile?.nickname else { print("userName nil"); return }
                 guard let email = user?.kakaoAccount?.email else { print("userEmail nil"); return }
                 guard let fcmToken = KeychainSwift().get("FCMToken") else { print("FCMToken nil"); return }
+                self.lastLoginEmail = email
                 self.kakaoLoginProceed(name, email: email, fcmToken: fcmToken)
             }
         }
@@ -93,23 +97,37 @@ class SelectLoginTypeViewController: UIViewController {
                 self.goToNextView()
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")
+                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패했습니다. 다시 시도해 주세요.") }
             }
         }
     }
 
     @objc private func signUpTapped() {
-        // 이메일 회원가입 화면으로 이동
+        // 회원가입 화면으로 이동
         let vc = SignupViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
 
     @objc private func emailLoginTapped() {
-        // 분리된 이메일 로그인 화면으로 이동 (필요 시 구현된 VC로 교체)
-        let vc = EmailRegisterViewController() // 프로젝트에 맞는 구현체 사용
+        // 이메일 로그인 화면으로 이동
+        let vc = EmailRegisterViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
 
     func goToNextView() {
+        if isFirst == true {
+            // 최초 로그인 사용자는 닉네임 등록으로
+            let vc = NicknameRegisterViewController(email: lastLoginEmail, isFirst: true)
+            if let nav = navigationController {
+                nav.pushViewController(vc, animated: true)
+            } else {
+                let nav = UINavigationController(rootViewController: vc)
+                nav.modalPresentationStyle = .fullScreen
+                present(nav, animated: true, completion: nil)
+            }
+            return
+        }
+        // 재방문 사용자: 기존 플로우 유지
         let vc = FinishLoginViewController()
         vc.isFirst = self.isFirst
         let navController = UINavigationController(rootViewController: vc)

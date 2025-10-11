@@ -125,7 +125,7 @@ final class SignupViewController: UIViewController {
             return
         }
         
-        emailService.requestEmailVerification(email: email) { [weak self] result in
+        emailService.requestEmailVerification { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
                 case .success(let response):
