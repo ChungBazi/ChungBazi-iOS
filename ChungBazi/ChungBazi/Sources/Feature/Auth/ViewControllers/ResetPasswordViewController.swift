@@ -1,0 +1,143 @@
+//
+//  ResetPasswordViewController.swift
+//  ChungBazi
+//
+//  Created by 엄민서 on 9/7/25.
+//
+
+import UIKit
+import SnapKit
+import Then
+
+final class ResetPasswordViewController: UIViewController {
+    
+    private let resetView = ResetPasswordView()
+    private var isNewPwdVisible = false
+    private var isConfirmPwdVisible = false
+    private let authService = AuthService()
+    
+    private let tooltipView = UIView().then {
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 10
+        $0.layer.shadowColor = UIColor.black.cgColor
+        $0.layer.shadowOpacity = 0.25
+        $0.layer.shadowOffset = CGSize(width: 0, height: 1)
+        $0.layer.shadowRadius = 4
+        $0.isHidden = true
+        $0.alpha = 1.0
+        $0.clipsToBounds = false
+    }
+    private let tooltipLabel = UILabel().then {
+        $0.text = "영문, 숫자, 특수문자 포함 8자 이상"
+        $0.font = .ptdRegularFont(ofSize: 12)
+        $0.textColor = .black
+        $0.numberOfLines = 1
+        $0.textAlignment = .left
+    }
+    
+    // MARK: - Lifecycle
+    override func loadView() {
+        self.view = resetView
+    }
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
+        setupTooltip()
+        setupActions()
+    }
+    
+    // MARK: - Tooltip Layout
+    private func setupTooltip() {
+        resetView.addSubview(tooltipView)
+        tooltipView.addSubview(tooltipLabel)
+        
+        tooltipView.snp.makeConstraints {
+            $0.width.equalTo(190)
+            $0.height.equalTo(24)
+            $0.leading.equalTo(resetView.questionButton.snp.trailing).offset(0)
+            $0.bottom.equalTo(resetView.questionButton.snp.top).offset(0)
+        }
+        tooltipLabel.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(8)
+            $0.centerY.equalToSuperview()
+        }
+    }
+    
+    // MARK: - Actions
+    private func setupActions() {
+        [resetView.newPwdField, resetView.confirmPwdField].forEach {
+            $0.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
+        }
+        resetView.newPwdEye.addTarget(self, action: #selector(toggleNewPwdVisibility), for: .touchUpInside)
+        resetView.confirmPwdEye.addTarget(self, action: #selector(toggleConfirmPwdVisibility), for: .touchUpInside)
+        resetView.questionButton.addTarget(self, action: #selector(toggleTooltip), for: .touchUpInside)
+        resetView.completeButton.addTarget(self, action: #selector(completeTapped), for: .touchUpInside)
+    }
+    
+    @objc private func toggleTooltip() {
+        tooltipView.isHidden.toggle()
+    }
+    
+    @objc private func toggleNewPwdVisibility() {
+        isNewPwdVisible.toggle()
+        resetView.newPwdField.isSecureTextEntry = !isNewPwdVisible
+        let iconName = isNewPwdVisible ? "eye" : "eye_closed"
+        resetView.newPwdEye.setImage(UIImage(named: iconName), for: .normal)
+    }
+    
+    @objc private func toggleConfirmPwdVisibility() {
+        isConfirmPwdVisible.toggle()
+        resetView.confirmPwdField.isSecureTextEntry = !isConfirmPwdVisible
+        let iconName = isConfirmPwdVisible ? "eye" : "eye_closed"
+        resetView.confirmPwdEye.setImage(UIImage(named: iconName), for: .normal)
+    }
+    
+    @objc private func textFieldsChanged() {
+        let newPwd = resetView.newPwdField.text ?? ""
+        let confirm = resetView.confirmPwdField.text ?? ""
+        let valid = isValidPassword(newPwd) && newPwd == confirm && !newPwd.isEmpty
+        
+        resetView.completeButton.isEnabled = valid
+        resetView.completeButton.backgroundColor = valid ? .blue700 : .gray200
+    }
+    
+    @objc private func completeTapped() {
+        let newPwd = resetView.newPwdField.text ?? ""
+        let confirm = resetView.confirmPwdField.text ?? ""
+        guard isValidPassword(newPwd) else {
+            showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil)
+            return
+        }
+        guard newPwd == confirm else {
+            showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
+            return
+        }
+        
+        let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
+        authService.resetPassword(data: dto) { [weak self] result in
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    self?.showCustomAlert(title: "비밀번호가 재설정되었습니다", rightButtonText: "확인") {
+                        self?.navigationController?.popToRootViewController(animated: true)
+                    }
+                case .failure(let error):
+                    let message: String
+                    switch error {
+                    case .serverError(_, let msg):
+                        message = msg
+                    default:
+                        message = error.localizedDescription
+                    }
+                    self?.showCustomAlert(title: message, rightButtonText: "확인", rightButtonAction: nil)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Validation
+    private func isValidPassword(_ pwd: String) -> Bool {
+        let pattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
+        return pwd.range(of: pattern, options: .regularExpression) != nil
+    }
+}

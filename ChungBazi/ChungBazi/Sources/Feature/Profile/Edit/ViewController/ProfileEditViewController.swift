@@ -77,6 +77,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     @objc private func didTapResetPassword() {
         let vc = ResetPasswordViewController()
+        vc.hidesBottomBarWhenPushed = true
         navigationController?.pushViewController(vc, animated: true)
     }
     

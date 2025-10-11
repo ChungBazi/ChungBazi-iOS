@@ -95,7 +95,7 @@ final class FindPwdViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true)
+        addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupActions()
     }
     
