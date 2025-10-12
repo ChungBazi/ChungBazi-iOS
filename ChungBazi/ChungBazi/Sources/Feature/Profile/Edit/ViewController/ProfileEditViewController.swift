@@ -29,7 +29,6 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        addCustomNavigationBar(titleText: "프로필 설정", showBackButton: true, showCartButton: false, showAlarmButton: false)
         setupUI()
         enableKeyboardHandling(for: scrollView)
         profileEditView.delegate = self
@@ -51,7 +50,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
     
     private func setupUI() {
         view.backgroundColor = .gray50
-        addCustomNavigationBar(titleText: "", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
+        addCustomNavigationBar(titleText: "프로필 설정", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
         scrollView.showsVerticalScrollIndicator = false
         
         profileEditView.settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)

@@ -35,7 +35,6 @@ final class ResetPasswordViewController: UIViewController {
         $0.textAlignment = .left
     }
     
-    // MARK: - Lifecycle
     override func loadView() {
         self.view = resetView
     }
@@ -46,7 +45,6 @@ final class ResetPasswordViewController: UIViewController {
         setupActions()
     }
     
-    // MARK: - Tooltip Layout
     private func setupTooltip() {
         resetView.addSubview(tooltipView)
         tooltipView.addSubview(tooltipLabel)
@@ -63,7 +61,6 @@ final class ResetPasswordViewController: UIViewController {
         }
     }
     
-    // MARK: - Actions
     private func setupActions() {
         [resetView.newPwdField, resetView.confirmPwdField].forEach {
             $0.addTarget(self, action: #selector(textFieldsChanged), for: .editingChanged)
@@ -81,15 +78,19 @@ final class ResetPasswordViewController: UIViewController {
     @objc private func toggleNewPwdVisibility() {
         isNewPwdVisible.toggle()
         resetView.newPwdField.isSecureTextEntry = !isNewPwdVisible
-        let iconName = isNewPwdVisible ? "eye" : "eye_closed"
-        resetView.newPwdEye.setImage(UIImage(named: iconName), for: .normal)
+        let iconName = isNewPwdVisible
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        resetView.newPwdEye.setImage(iconName, for: .normal)
     }
     
     @objc private func toggleConfirmPwdVisibility() {
         isConfirmPwdVisible.toggle()
         resetView.confirmPwdField.isSecureTextEntry = !isConfirmPwdVisible
-        let iconName = isConfirmPwdVisible ? "eye" : "eye_closed"
-        resetView.confirmPwdEye.setImage(UIImage(named: iconName), for: .normal)
+        let iconName = isConfirmPwdVisible
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        resetView.confirmPwdEye.setImage(iconName, for: .normal)
     }
     
     @objc private func textFieldsChanged() {
@@ -135,7 +136,6 @@ final class ResetPasswordViewController: UIViewController {
         }
     }
     
-    // MARK: - Validation
     private func isValidPassword(_ pwd: String) -> Bool {
         let pattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
         return pwd.range(of: pattern, options: .regularExpression) != nil
