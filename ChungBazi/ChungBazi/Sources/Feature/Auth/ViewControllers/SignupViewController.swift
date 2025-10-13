@@ -92,15 +92,19 @@ final class SignupViewController: UIViewController {
     @objc private func togglePasswordVisibility() {
         isPasswordVisible.toggle()
         registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
-        let iconName = isPasswordVisible ? "eye" : "eye_closed"
-        registerView.pwdEyeButton.setImage(UIImage(named: iconName), for: .normal)
+        let iconName = isPasswordVisible 
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        registerView.pwdEyeButton.setImage(iconName, for: .normal)
     }
 
     @objc private func toggleCheckPasswordVisibility() {
         isCheckPasswordVisible.toggle()
         registerView.checkPwdTextField.isSecureTextEntry = !isCheckPasswordVisible
-        let iconName = isCheckPasswordVisible ? "eye" : "eye_closed"
-        registerView.checkPwdEyeButton.setImage(UIImage(named: iconName), for: .normal)
+        let iconName = isCheckPasswordVisible 
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        registerView.checkPwdEyeButton.setImage(iconName, for: .normal)
     }
 
     @objc private func showPasswordRule() {

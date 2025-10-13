@@ -10,13 +10,12 @@ import SnapKit
 import Then
 import KeychainSwift
 
-final class EmailRegisterViewController: UIViewController {
+final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
 
     
     private let authService = AuthService()
     private let registerView = EmailRegisterView()
     private var isPasswordVisible = false
-    private var isCheckPasswordVisible = false
     
     override func loadView() {
         self.view = registerView
@@ -33,19 +32,17 @@ final class EmailRegisterViewController: UIViewController {
     
     private func setupTextFieldDelegates() {
         registerView.emailTextField.delegate = self
-        registerView.passwordTextField.delegate = self
-        registerView.checkPasswordTextField.delegate = self
+        registerView.pwdTextField.delegate = self
         
         registerView.emailTextField.returnKeyType = .next
-        registerView.passwordTextField.returnKeyType = .next
-        registerView.checkPasswordTextField.returnKeyType = .done
+        registerView.pwdTextField.returnKeyType = .done
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         if textField == registerView.emailTextField {
-            registerView.passwordTextField.becomeFirstResponder()
-        } else if textField == registerView.passwordTextField {
-            registerView.checkPasswordTextField.becomeFirstResponder()
+            registerView.pwdTextField.becomeFirstResponder()
+        } else if textField == registerView.pwdTextField {
+            view.endEditing(true)
         } else {
             view.endEditing(true)
         }
@@ -115,6 +112,11 @@ final class EmailRegisterViewController: UIViewController {
     @objc private func togglePasswordVisibility() {
         isPasswordVisible.toggle()
         registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
+        if registerView.pwdTextField.isFirstResponder {
+            let existingText = registerView.pwdTextField.text
+            registerView.pwdTextField.text = nil
+            registerView.pwdTextField.text = existingText
+        }
         let icon = isPasswordVisible ? "eye" : "eye.slash"
         registerView.pwdEyeButton.setImage(UIImage(systemName: icon), for: .normal)
     }
