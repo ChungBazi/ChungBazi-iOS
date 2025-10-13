@@ -196,7 +196,7 @@ extension ProfileViewController: ProfileViewDelegate {
                             self.showSplashScreen()
                         }
                     } else {
-                        Toaster.shared.makeToast("회원탈퇴 실패")
+//                        Toaster.shared.makeToast("회원탈퇴 실패")
                     }
                 }
             case .failure(_):
