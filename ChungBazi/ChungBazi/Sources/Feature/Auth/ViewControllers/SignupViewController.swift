@@ -47,6 +47,11 @@ final class SignupViewController: UIViewController {
         addCustomNavigationBar(titleText: "회원가입", showBackButton: true)
         setupActions()
         setupTooltipLayout()
+        enableKeyboardHandling(for: registerView.scrollView)
+        registerView.scrollView.keyboardDismissMode = .onDrag
+        
+        registerView.scrollView.canCancelContentTouches = true
+        registerView.scrollView.panGestureRecognizer.cancelsTouchesInView = false
     }
 
     private func setupActions() {

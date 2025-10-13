@@ -14,6 +14,9 @@ final class NicknameRegisterViewController: UIViewController {
     
     private let authService = AuthService()
     
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     private let initialEmail: String?
     private let isFirst: Bool
     private var isRequesting = false
@@ -92,23 +95,42 @@ final class NicknameRegisterViewController: UIViewController {
         setupLayout()
         bind()
         prefill()
+        enableKeyboardHandling(for: scrollView)
+        scrollView.keyboardDismissMode = .onDrag
     }
-
+    
     // MARK: - Setup
     private func setupLayout() {
-        profileImg.layer.cornerRadius = 36
+        view.addSubviews(scrollView, completeButton)
+        scrollView.addSubview(contentView)
         
-        view.addSubviews(
+        scrollView.snp.makeConstraints {
+            $0.top.leading.trailing.equalToSuperview()
+            $0.bottom.equalTo(completeButton.snp.top)
+        }
+        contentView.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+            $0.width.equalTo(scrollView)
+        }
+        
+        completeButton.snp.makeConstraints {
+            $0.leading.trailing.equalToSuperview().inset(16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.height.equalTo(48)
+        }
+        
+        contentView.addSubviews(
             titleLabel, profileBgView, profileImg,
             nicknameLabel, nicknameTextField, nicknameUnderlineView,
             emailLabel, emailTextField, emailUnderlineView,
-            completeButton, activity
+            activity
         )
-
+        
         titleLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(86)
+            $0.top.equalTo(contentView.safeAreaLayoutGuide).offset(86)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
+        
         profileBgView.snp.makeConstraints {
             $0.top.equalTo(titleLabel.snp.bottom).offset(27.12)
             $0.centerX.equalToSuperview()
@@ -119,18 +141,16 @@ final class NicknameRegisterViewController: UIViewController {
             $0.centerX.equalToSuperview()
             $0.width.height.equalTo(97.74)
         }
-
+        
         nicknameLabel.snp.makeConstraints {
             $0.top.equalTo(profileImg.snp.bottom).offset(20)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
-
         nicknameTextField.snp.makeConstraints {
             $0.top.equalTo(nicknameLabel.snp.bottom).offset(10)
             $0.leading.trailing.equalTo(nicknameLabel)
             $0.height.equalTo(22)
         }
-        
         nicknameUnderlineView.snp.makeConstraints {
             $0.top.equalTo(nicknameTextField.snp.bottom).offset(5)
             $0.leading.trailing.equalTo(nicknameTextField)
@@ -141,28 +161,24 @@ final class NicknameRegisterViewController: UIViewController {
             $0.top.equalTo(nicknameUnderlineView.snp.bottom).offset(32)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
-
         emailTextField.snp.makeConstraints {
             $0.top.equalTo(emailLabel.snp.bottom).offset(10)
             $0.leading.trailing.equalTo(emailLabel)
             $0.height.equalTo(22)
         }
-
         emailUnderlineView.snp.makeConstraints {
             $0.top.equalTo(emailTextField.snp.bottom).offset(5)
             $0.leading.trailing.equalTo(emailTextField)
             $0.height.equalTo(1)
         }
-
-        completeButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.leading.trailing.equalToSuperview().inset(16)
-        }
         
         activity.snp.makeConstraints {
             $0.centerX.equalToSuperview()
-            $0.bottom.equalTo(completeButton.snp.top).offset(-12)
+            $0.top.equalTo(emailUnderlineView.snp.bottom).offset(24)
+            $0.bottom.equalToSuperview().inset(24)
         }
+        
+        scrollView.delaysContentTouches = false
     }
     
     private func bind() {
