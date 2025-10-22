@@ -117,8 +117,10 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             registerView.pwdTextField.text = nil
             registerView.pwdTextField.text = existingText
         }
-        let icon = isPasswordVisible ? "eye" : "eye.slash"
-        registerView.pwdEyeButton.setImage(UIImage(systemName: icon), for: .normal)
+        let icon = isPasswordVisible 
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        registerView.pwdEyeButton.setImage(icon, for: .normal)
     }
     
     @objc private func findPwdTapped() {
