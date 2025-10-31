@@ -7,10 +7,11 @@
 
 import Foundation
 import Moya
+import KeychainSwift
 
 enum EmailEndpoints {
-    case postEmailRequest
-    case postEmailVerification(data: EmailVerificationRequestDTO)
+    case postEmailRequest(email: String)
+    case postEmailVerification(email: String, authCode: String)
 }
 
 extension EmailEndpoints: TargetType {
@@ -39,14 +40,24 @@ extension EmailEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .postEmailRequest:
-            return .requestPlain
-        case .postEmailVerification(let data):
-            return .requestJSONEncodable(data)
+        case .postEmailRequest(let email):
+            return .requestParameters(
+                parameters: ["email": email],
+                encoding: JSONEncoding.default
+            )
+        case .postEmailVerification(let email, let authCode):
+            return .requestParameters(
+                parameters: ["email": email, "authCode": authCode],
+                encoding: JSONEncoding.default
+            )
         }
     }
-    
-    var headers: [String: String]? {
-        return ["Content-Type": "application/json"]
+
+    var headers: [String : String]? {
+        var headers: [String: String] = ["Content-Type": "application/json"]
+        if let token = KeychainSwift().get("serverAccessToken"), !token.isEmpty {
+            headers["Authorization"] = "Bearer \(token)"
+        }
+        return headers
     }
 }

@@ -9,30 +9,38 @@ import Foundation
 import Moya
 
 final class EmailService: NetworkManager {
-    
     typealias Endpoint = EmailEndpoints
 
-    // MARK: - Provider 설정
+    // NetworkManager 프로토콜 요구사항
     let provider: MoyaProvider<EmailEndpoints>
 
-    public init(provider: MoyaProvider<EmailEndpoints>? = nil) {
-        // 플러그인 추가
-        let plugins: [PluginType] = [
+    init(provider: MoyaProvider<EmailEndpoints>? = nil) {
+        self.provider = provider ?? MoyaProvider<EmailEndpoints>(plugins: [
             NetworkLoggerPlugin(configuration: .init(logOptions: .verbose))
-        ]
-        
-        // provider 초기화
-        self.provider = provider ?? MoyaProvider<EmailEndpoints>(plugins: plugins)
+        ])
     }
 
-    // MARK: - 이메일 인증 요청 
-    public func requestEmailVerification(completion: @escaping (Result<ApiResponse<String>, NetworkError>) -> Void) {
-        request(target: .postEmailRequest, decodingType: ApiResponse<String>.self, completion: completion)
+    // 인증번호 전송
+    // 서버: {"isSuccess":true,"code":"COMMON200","message":"성공입니다.","result":"인증번호 전송이 완료되었습니다."}
+    // NetworkManager가 ApiResponse<String>을 내부에서 디코딩하고 result(String?)만 반환함
+    func requestEmailVerification(email: String,
+                                  completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(
+            target: .postEmailRequest(email: email),
+            decodingType: String.self,
+            completion: completion
+        )
     }
 
-    // MARK: - 인증 코드 검증
-    public func verifyEmailCode(authCode: String, completion: @escaping (Result<ApiResponse<String>, NetworkError>) -> Void) {
-        let dto = EmailVerificationRequestDTO(authCode: authCode)
-        request(target: .postEmailVerification(data: dto), decodingType: ApiResponse<String>.self, completion: completion)
+    // 코드 검증
+    // 서버: {"isSuccess":true,"code":"COMMON200","message":"성공입니다.","result":"인증에 성공했습니다."}
+    // result가 반드시 문자열로 옴 → 필수형(String)으로 요청
+    func verifyEmailCode(email: String, code: String,
+                         completion: @escaping (Result<String, NetworkError>) -> Void) {
+        request(
+            target: .postEmailVerification(email: email, authCode: code),
+            decodingType: String.self,
+            completion: completion
+        )
     }
 }
