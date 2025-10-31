@@ -110,8 +110,8 @@ class SelectLoginTypeViewController: UIViewController {
 
     @objc private func emailLoginTapped() {
         // 이메일 로그인 화면으로 이동
-        let vc = EmailRegisterViewController()
-        navigationController?.pushViewController(vc, animated: true)
+        let loginVC = EmailRegisterViewController(initialEmail: nil, signupEntry: false)
+        navigationController?.pushViewController(loginVC, animated: true)
     }
 
     func goToNextView() {

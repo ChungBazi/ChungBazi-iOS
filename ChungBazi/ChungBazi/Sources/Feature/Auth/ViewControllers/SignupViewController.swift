@@ -8,11 +8,11 @@
 import UIKit
 import SnapKit
 import Then
+import SwiftyToaster
 
 final class SignupViewController: UIViewController {
 
     private let authService = AuthService()
-    private let emailService = EmailService()
     private let registerView = SignupView()
     
     private var isPasswordVisible = false
@@ -47,11 +47,6 @@ final class SignupViewController: UIViewController {
         addCustomNavigationBar(titleText: "회원가입", showBackButton: true)
         setupActions()
         setupTooltipLayout()
-        enableKeyboardHandling(for: registerView.scrollView)
-        registerView.scrollView.keyboardDismissMode = .onDrag
-        
-        registerView.scrollView.canCancelContentTouches = true
-        registerView.scrollView.panGestureRecognizer.cancelsTouchesInView = false
     }
 
     private func setupActions() {
@@ -97,18 +92,18 @@ final class SignupViewController: UIViewController {
     @objc private func togglePasswordVisibility() {
         isPasswordVisible.toggle()
         registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
-        let iconName = isPasswordVisible 
-            ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+        let iconName = isPasswordVisible
+        ? UIImage(systemName: "eye")
+        : UIImage(named: "eye_closed")
         registerView.pwdEyeButton.setImage(iconName, for: .normal)
     }
 
     @objc private func toggleCheckPasswordVisibility() {
         isCheckPasswordVisible.toggle()
         registerView.checkPwdTextField.isSecureTextEntry = !isCheckPasswordVisible
-        let iconName = isCheckPasswordVisible 
-            ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+        let iconName = isCheckPasswordVisible
+        ? UIImage(systemName: "eye")
+        : UIImage(named: "eye_closed")
         registerView.checkPwdEyeButton.setImage(iconName, for: .normal)
     }
 
@@ -134,19 +129,18 @@ final class SignupViewController: UIViewController {
             return
         }
         
-        emailService.requestEmailVerification { [weak self] result in
+        let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
+        authService.register(data: dto) { [weak self] result in
             DispatchQueue.main.async {
                 switch result {
-                case .success(let response):
-                    if response.isSuccess {
-                        let vc = EmailVerificationCodeViewController(email: email)
-                        self?.navigationController?.pushViewController(vc, animated: true)
-                    } else {
-                        self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
-                    }
-                case .failure(let error):
-                    self?.showCustomAlert(title: "인증 메일 전송 실패", rightButtonText: "확인", rightButtonAction: nil)
-                    print("❌ 인증 요청 실패: \(error)")
+                case .success:
+                    Toaster.shared.makeToast("회원가입 성공")
+                    let loginVC = EmailRegisterViewController(initialEmail: email, signupEntry: true)
+                    self?.navigationController?.pushViewController(loginVC, animated: true)
+                    
+                case .failure(_):
+                    Toaster.shared.makeToast("회원가입 실패")
+
                 }
             }
         }

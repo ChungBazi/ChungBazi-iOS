@@ -16,7 +16,21 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
     private let authService = AuthService()
     private let registerView = EmailRegisterView()
     private var isPasswordVisible = false
-    
+
+    private let signupEntry: Bool
+    private let initialEmail: String?
+
+    init(initialEmail: String? = nil, signupEntry: Bool = false) {
+        self.initialEmail = initialEmail
+        self.signupEntry = signupEntry
+        super.init(nibName: nil, bundle: nil)
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
+
     override func loadView() {
         self.view = registerView
     }
@@ -28,6 +42,11 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         setupTextFieldDelegates()
         setupBackgroundTapToDismiss()
         setupKeyboardFollowing()
+
+        if let email = initialEmail {
+            registerView.emailTextField.text = email
+            textFieldsChanged()
+        }
     }
     
     private func setupTextFieldDelegates() {
@@ -117,8 +136,10 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             registerView.pwdTextField.text = nil
             registerView.pwdTextField.text = existingText
         }
-        let icon = isPasswordVisible ? "eye" : "eye.slash"
-        registerView.pwdEyeButton.setImage(UIImage(systemName: icon), for: .normal)
+        let icon = isPasswordVisible 
+            ? UIImage(systemName: "eye")
+            : UIImage(named: "eye_closed")
+        registerView.pwdEyeButton.setImage(icon, for: .normal)
     }
     
     @objc private func findPwdTapped() {
@@ -144,30 +165,36 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         
         authService.login(data: dto) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self else { return }
                 switch result {
                 case .success(let response):
-                    KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                    KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
+                    let kc = KeychainSwift()
+                    kc.set(response.accessToken, forKey: "serverAccessToken")
+                    kc.set(response.refreshToken, forKey: "serverRefreshToken")
                     let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                    KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                    
-                    KeychainSwift().set(String(response.userId), forKey: "userId")
-                    KeychainSwift().set(response.userName, forKey: "userName")
-                    KeychainSwift().set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
-                    
-                    if response.isFirst {
-                        let nicknameVC = NicknameRegisterViewController(email: email, isFirst: true)
-                        self?.navigationController?.pushViewController(nicknameVC, animated: true)
-                    } else {
-                        self?.showCustomAlert(title: "로그인에 성공했습니다", rightButtonText: "확인") {
-                            self?.navigationController?.popViewController(animated: true)
-                        }
-                    }
-                    
+                    kc.set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
+                    kc.set(String(response.userId), forKey: "userId")
+                    kc.set(response.userName, forKey: "userName")
+                    kc.set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
+
+                    self.routeAfterLogin(email: email, isFirst: response.isFirst)
+
                 case .failure(let error):
-                    self?.showCustomAlert(title: error.localizedDescription, rightButtonText: "확인", rightButtonAction: nil)
+                    self.showCustomAlert(title: "로그인 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
                 }
             }
         }
+    }
+
+    private func routeAfterLogin(email: String, isFirst: Bool) {
+        if signupEntry {
+            let verifyVC = EmailVerificationCodeViewController(email: email)
+            navigationController?.pushViewController(verifyVC, animated: true)
+            return
+        }
+
+        let finish = FinishLoginViewController()
+        finish.isFirst = isFirst
+        navigationController?.pushViewController(finish, animated: true)
     }
 }

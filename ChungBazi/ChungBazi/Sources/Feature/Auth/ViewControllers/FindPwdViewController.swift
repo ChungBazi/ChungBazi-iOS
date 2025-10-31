@@ -239,20 +239,16 @@ final class FindPwdViewController: UIViewController {
     
     private func requestEmailVerification(email: String) {
         completeButton.isEnabled = false
-        emailService.requestEmailVerification { [weak self] result in
+        emailService.requestEmailVerification(email: email) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self else { return }
                 switch result {
-                case .success(let response):
-                    if response.isSuccess {
-                        self?.step = .enterCode
-                    } else {
-                        self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
-                        self?.textFieldsChanged()
-                    }
+                case .success(let message):
+                    if let msg = message, !msg.isEmpty { print("✅ \(msg)") }
+                    self.step = .enterCode
                 case .failure(let error):
-                    self?.showCustomAlert(title: "인증번호 전송 실패", rightButtonText: "확인", rightButtonAction: nil)
-                    print("❌ 인증요청 실패: \(error)")
-                    self?.textFieldsChanged()
+                    self.showCustomAlert(title: "인증번호 전송 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+                    self.textFieldsChanged()
                 }
             }
         }
@@ -260,22 +256,24 @@ final class FindPwdViewController: UIViewController {
     
     private func verifyCode(_ code: String) {
         completeButton.isEnabled = false
-        emailService.verifyEmailCode(authCode: code) { [weak self] result in
+        guard let email = emailField.text, !email.isEmpty else {
+            showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
+            completeButton.isEnabled = true
+            completeButton.backgroundColor = .blue700
+            return
+        }
+        
+        emailService.verifyEmailCode(email: email, code: code) { [weak self] result in
             DispatchQueue.main.async {
+                guard let self else { return }
                 switch result {
-                case .success(let response):
-                    if response.isSuccess {
-                        self?.invalidateTimer()
-                        let resetVC = ResetPasswordViewController()
-                        self?.navigationController?.pushViewController(resetVC, animated: true)
-                    } else {
-                        self?.showCustomAlert(title: response.message, rightButtonText: "확인", rightButtonAction: nil)
-                        self?.textFieldsChanged()
-                    }
+                case .success:
+                    self.invalidateTimer()
+                    let resetVC = ResetPasswordViewController()
+                    self.navigationController?.pushViewController(resetVC, animated: true)
                 case .failure(let error):
-                    self?.showCustomAlert(title: "인증에 실패했습니다", rightButtonText: "확인", rightButtonAction: nil)
-                    print("❌ 인증 실패: \(error)")
-                    self?.textFieldsChanged()
+                    self.showCustomAlert(title: "인증 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+                    self.textFieldsChanged()
                 }
             }
         }
