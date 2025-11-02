@@ -89,7 +89,7 @@ final class ResetPasswordView: UIView {
         
         descriptionLabel.snp.makeConstraints {
             $0.top.equalTo(safeAreaLayoutGuide).offset(93)
-            $0.leading.trailing.equalToSuperview().inset(24)
+            $0.leading.trailing.equalToSuperview().inset(45)
         }
         
         newPwdLabel.snp.makeConstraints {

@@ -114,7 +114,7 @@ final class FindPwdViewController: UIViewController {
         }
         
         emailLabel.snp.makeConstraints {
-            $0.top.equalTo(descriptionLabel.snp.bottom).offset(54)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(143)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
         
