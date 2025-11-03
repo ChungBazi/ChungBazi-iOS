@@ -9,6 +9,7 @@ import UIKit
 import SnapKit
 import Then
 import KeychainSwift
+import SwiftyToaster
 
 final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
 
@@ -180,7 +181,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                     self.routeAfterLogin(email: email, isFirst: response.isFirst)
 
                 case .failure(let error):
-                    self.showCustomAlert(title: "로그인 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+                    Toaster.shared.makeToast("로그인 실패: \(error.localizedDescription)")
                 }
             }
         }

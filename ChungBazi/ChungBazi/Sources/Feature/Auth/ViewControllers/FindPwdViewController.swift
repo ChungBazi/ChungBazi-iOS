@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import SwiftyToaster
 
 final class FindPwdViewController: UIViewController {
     
@@ -248,7 +249,7 @@ final class FindPwdViewController: UIViewController {
                    case .success:
                        self.step = .enterCode
                    case .failure(let error):
-                       self.showCustomAlert(title: "인증번호 전송 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+                       Toaster.shared.makeToast("인증번호 전송 실패")
                        self.textFieldsChanged()
                    }
                }
