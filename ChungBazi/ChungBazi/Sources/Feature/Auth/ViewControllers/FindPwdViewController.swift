@@ -8,6 +8,7 @@
 import UIKit
 import SnapKit
 import Then
+import SwiftyToaster
 
 final class FindPwdViewController: UIViewController {
     
@@ -23,7 +24,8 @@ final class FindPwdViewController: UIViewController {
     private let emailService = EmailService()
     private var timer: Timer?
     private var remainingSeconds = 300
-    
+    private var verifyEmail: String?
+
     // MARK: - UI
     private let descriptionLabel = UILabel().then {
         $0.text = "회원가입 시 등록하신\n이메일을 입력해주세요."
@@ -114,7 +116,7 @@ final class FindPwdViewController: UIViewController {
         }
         
         emailLabel.snp.makeConstraints {
-            $0.top.equalTo(descriptionLabel.snp.bottom).offset(54)
+            $0.top.equalTo(descriptionLabel.snp.bottom).offset(143)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
         
@@ -238,46 +240,32 @@ final class FindPwdViewController: UIViewController {
     }
     
     private func requestEmailVerification(email: String) {
-        completeButton.isEnabled = false
-        emailService.requestEmailVerification(email: email) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                switch result {
-                case .success(let message):
-                    if let msg = message, !msg.isEmpty { print("✅ \(msg)") }
-                    self.step = .enterCode
-                case .failure(let error):
-                    self.showCustomAlert(title: "인증번호 전송 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
-                    self.textFieldsChanged()
-                }
-            }
-        }
-    }
+           let fixed = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+           self.verifyEmail = fixed
+           emailService.requestEmailVerificationNoAuth(email: fixed) { [weak self] result in
+               DispatchQueue.main.async {
+                   guard let self else { return }
+                   switch result {
+                   case .success:
+                       self.step = .enterCode
+                   case .failure(let error):
+                       Toaster.shared.makeToast("인증번호 전송 실패")
+                       self.textFieldsChanged()
+                   }
+               }
+           }
+       }
     
     private func verifyCode(_ code: String) {
-        completeButton.isEnabled = false
-        guard let email = emailField.text, !email.isEmpty else {
-            showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
-            completeButton.isEnabled = true
-            completeButton.backgroundColor = .blue700
-            return
-        }
-        
-        emailService.verifyEmailCode(email: email, code: code) { [weak self] result in
-            DispatchQueue.main.async {
-                guard let self else { return }
-                switch result {
-                case .success:
-                    self.invalidateTimer()
-                    let resetVC = ResetPasswordViewController()
-                    self.navigationController?.pushViewController(resetVC, animated: true)
-                case .failure(let error):
-                    self.showCustomAlert(title: "인증 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
-                    self.textFieldsChanged()
-                }
+            guard let email = verifyEmail, !email.isEmpty else {
+                showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
+                return
             }
+            let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
+            invalidateTimer()
+            let resetVC = ResetPasswordViewController(mode: .noAuth(email: email, code: trimmedCode))
+            navigationController?.pushViewController(resetVC, animated: true)
         }
-    }
     
     private func startTimer() {
         invalidateTimer()
@@ -299,14 +287,9 @@ final class FindPwdViewController: UIViewController {
                 self.updateTimerLabel()
             }
         })
-        RunLoop.main.add(timer!, forMode: .common)
+        if let timer { RunLoop.main.add(timer, forMode: .common) }
     }
-    
-    private func invalidateTimer() {
-        timer?.invalidate()
-        timer = nil
-    }
-    
+    private func invalidateTimer() { timer?.invalidate(); timer = nil }
     private func updateTimerLabel() {
         let minutes = remainingSeconds / 60
         let seconds = remainingSeconds % 60

@@ -8,9 +8,16 @@
 import UIKit
 import SnapKit
 import Then
+import KeychainSwift
 
 final class ResetPasswordViewController: UIViewController {
-    
+
+    enum Mode {
+        case loggedIn
+        case noAuth(email: String, code: String)
+    }
+
+    private let mode: Mode
     private let resetView = ResetPasswordView()
     private var isNewPwdVisible = false
     private var isConfirmPwdVisible = false
@@ -34,7 +41,11 @@ final class ResetPasswordViewController: UIViewController {
         $0.numberOfLines = 1
         $0.textAlignment = .left
     }
-    
+
+    convenience init() { self.init(mode: .loggedIn) }
+    init(mode: Mode) { self.mode = mode; super.init(nibName: nil, bundle: nil) }
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
     override func loadView() {
         self.view = resetView
     }
@@ -103,35 +114,38 @@ final class ResetPasswordViewController: UIViewController {
     }
     
     @objc private func completeTapped() {
-        let newPwd = resetView.newPwdField.text ?? ""
-        let confirm = resetView.confirmPwdField.text ?? ""
-        guard isValidPassword(newPwd) else {
-            showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil)
-            return
+            let newPwd = resetView.newPwdField.text ?? ""
+            let confirm = resetView.confirmPwdField.text ?? ""
+            guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+            guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
+
+            switch mode {
+            case .loggedIn:
+                let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
+                authService.resetPassword(data: dto, completion: handleResult)
+            case .noAuth(let email, let code):
+                authService.resetPasswordNoAuth(
+                    email: email,
+                    authCode: code,
+                    newPassword: newPwd
+                , completion: handleResult)
+            }
         }
-        guard newPwd == confirm else {
-            showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
-            return
-        }
-        
-        let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
-        authService.resetPassword(data: dto) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    self?.showCustomAlert(title: "비밀번호가 재설정되었습니다", rightButtonText: "확인") {
-                        self?.navigationController?.popToRootViewController(animated: true)
-                    }
-                case .failure(let error):
-                    let message: String
-                    switch error {
-                    case .serverError(_, let msg):
-                        message = msg
-                    default:
-                        message = error.localizedDescription
-                    }
-                    self?.showCustomAlert(title: message, rightButtonText: "확인", rightButtonAction: nil)
+
+
+    
+    private func handleResult(_ result: Result<String, NetworkError>) {
+        DispatchQueue.main.async {
+            switch result {
+            case .success:
+                KeychainSwift().delete("resetPasswordToken")
+                self.showCustomAlert(title: "비밀번호가 재설정되었습니다.", rightButtonText: "확인") {
+                    self.navigationController?.popToRootViewController(animated: true)
                 }
+            case .failure(let error):
+                let msg: String
+                switch error { case .serverError(_, let m): msg = m; default: msg = error.localizedDescription }
+                self.showCustomAlert(title: msg, rightButtonText: "확인", rightButtonAction: nil)
             }
         }
     }
