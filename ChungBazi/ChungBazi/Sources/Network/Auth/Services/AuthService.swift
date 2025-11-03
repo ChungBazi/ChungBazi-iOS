@@ -100,6 +100,17 @@ final class AuthService: NetworkManager {
         request(target: .postResetPassword(data: data), decodingType: String.self, completion: completion)
     }
     
+    /// 로그인 없이 비밀번호 재설정 API
+    public func resetPasswordNoAuth(email: String, authCode: String, newPassword: String,
+                                    completion: @escaping (Result<String, NetworkError>) -> Void) {
+        let dto = ResetPasswordNoAuthRequestDto(
+            email: email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased(),
+            authCode: authCode.trimmingCharacters(in: .whitespacesAndNewlines),
+            newPassword: newPassword
+        )
+        request(target: .postResetPasswordNoAuth(data: dto), decodingType: String.self, completion: completion)
+    }
+    
     /// 일반 사용자 회원가입 API
     public func register(data: RegisterRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
         request(target: .postRegister(data: data), decodingType: String.self, completion: completion)

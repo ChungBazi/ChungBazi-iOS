@@ -40,6 +40,13 @@ struct ResetPasswordRequestDto: Codable {
     let checkNewPassword: String
 }
 
+
+struct ResetPasswordNoAuthRequestDto: Encodable {
+    let email: String
+    let authCode: String
+    let newPassword: String
+}
+
 struct RegisterRequestDto: Codable {
     let email: String
     let password: String

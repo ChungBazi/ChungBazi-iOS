@@ -11,6 +11,7 @@ import KeychainSwift
 
 enum EmailEndpoints {
     case postEmailRequest(email: String)
+    case postEmailRequestNoAuth(email: String)
     case postEmailVerification(email: String, authCode: String)
 }
 
@@ -26,6 +27,8 @@ extension EmailEndpoints: TargetType {
         switch self {
         case .postEmailRequest:
             return "/verification-requests"
+        case .postEmailRequestNoAuth:     
+            return "/verification-requests/no-authorization"
         case .postEmailVerification:
             return "/verification"
         }
@@ -33,7 +36,7 @@ extension EmailEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postEmailRequest, .postEmailVerification:
+        case .postEmailRequest, .postEmailRequestNoAuth, .postEmailVerification:
             return .post
         }
     }
@@ -45,6 +48,11 @@ extension EmailEndpoints: TargetType {
                 parameters: ["email": email],
                 encoding: JSONEncoding.default
             )
+        case .postEmailRequestNoAuth(let email):
+                    return .requestParameters(
+                        parameters: ["email": email],
+                        encoding: URLEncoding.httpBody
+                    )
         case .postEmailVerification(let email, let authCode):
             return .requestParameters(
                 parameters: ["email": email, "authCode": authCode],
@@ -54,10 +62,17 @@ extension EmailEndpoints: TargetType {
     }
 
     var headers: [String : String]? {
-        var headers: [String: String] = ["Content-Type": "application/json"]
-        if let token = KeychainSwift().get("serverAccessToken"), !token.isEmpty {
-            headers["Authorization"] = "Bearer \(token)"
+        switch self {
+        case .postEmailRequestNoAuth:
+            return ["Content-Type": "application/x-www-form-urlencoded"]
+        case .postEmailVerification:
+            return ["Content-Type": "application/json"]
+        case .postEmailRequest:
+            var headers = ["Content-Type": "application/json"]
+            if let token = KeychainSwift().get("serverAccessToken"), !token.isEmpty {
+                headers["Authorization"] = "Bearer \(token)"
+            }
+            return headers
         }
-        return headers
     }
 }

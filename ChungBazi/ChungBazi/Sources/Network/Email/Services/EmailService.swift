@@ -21,8 +21,6 @@ final class EmailService: NetworkManager {
     }
 
     // 인증번호 전송
-    // 서버: {"isSuccess":true,"code":"COMMON200","message":"성공입니다.","result":"인증번호 전송이 완료되었습니다."}
-    // NetworkManager가 ApiResponse<String>을 내부에서 디코딩하고 result(String?)만 반환함
     func requestEmailVerification(email: String,
                                   completion: @escaping (Result<String?, NetworkError>) -> Void) {
         requestOptional(
@@ -31,10 +29,16 @@ final class EmailService: NetworkManager {
             completion: completion
         )
     }
-
+    
+    // 로그인 없이 인증번호 전송
+    func requestEmailVerificationNoAuth(email: String,
+                                        completion: @escaping (Result<String?, NetworkError>) -> Void) {
+        requestOptional(target: .postEmailRequestNoAuth(email: email),
+                        decodingType: String.self,
+                        completion: completion)
+    }
+    
     // 코드 검증
-    // 서버: {"isSuccess":true,"code":"COMMON200","message":"성공입니다.","result":"인증에 성공했습니다."}
-    // result가 반드시 문자열로 옴 → 필수형(String)으로 요청
     func verifyEmailCode(email: String, code: String,
                          completion: @escaping (Result<String, NetworkError>) -> Void) {
         request(
@@ -42,5 +46,10 @@ final class EmailService: NetworkManager {
             decodingType: String.self,
             completion: completion
         )
+    }
+    
+    private func isLikelyJWT(_ s: String) -> Bool {
+        let parts = s.split(separator: ".")
+        return parts.count == 3 && parts.allSatisfy { !$0.isEmpty } && s.count > 30
     }
 }

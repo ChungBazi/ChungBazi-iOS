@@ -16,6 +16,7 @@ enum AuthEndpoints {
     case deleteUser
     case postReIssueToken(data: ReIssueRequestDto)
     case postResetPassword(data: ResetPasswordRequestDto)
+    case postResetPasswordNoAuth(data: ResetPasswordNoAuthRequestDto)
     case postRegister(data: RegisterRequestDto)
     case postRegisterNickname(data: RegisterNicknameRequestDto)
     case postLogin(data: LoginRequestDto)
@@ -43,6 +44,8 @@ extension AuthEndpoints: TargetType {
             return "/refresh-token"
         case .postResetPassword:
             return "/reset-password"
+        case .postResetPasswordNoAuth:
+            return "/reset-password/no-auth"
         case .postRegister:
             return "/register"
         case .postRegisterNickname:
@@ -55,7 +58,7 @@ extension AuthEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .postLogout, .postReIssueToken, .postKakaoLogin, .postAppleLogin, .postResetPassword, .postRegister, .postRegisterNickname, .postLogin:
+        case .postLogout, .postReIssueToken, .postKakaoLogin, .postAppleLogin, .postResetPassword, .postResetPasswordNoAuth, .postRegister, .postRegisterNickname, .postLogin:
             return .post
         case .deleteUser:
             return .delete
@@ -74,6 +77,8 @@ extension AuthEndpoints: TargetType {
             return .requestJSONEncodable(data)
         case .postResetPassword(let data):
             return .requestJSONEncodable(data)
+        case .postResetPasswordNoAuth(let data):
+            return .requestJSONEncodable(data)
         case .postRegister(let data):
             return .requestJSONEncodable(data)
         case .postRegisterNickname(let data):
@@ -84,17 +89,32 @@ extension AuthEndpoints: TargetType {
     }
     
     var headers: [String : String]? {
+        var base: [String: String] = ["Content-Type": "application/json"]
+        let kc = KeychainSwift()
+
         switch self {
         case .postKakaoLogin, .postAppleLogin, .postReIssueToken,
-             .postRegister, .postRegisterNickname, .postLogin:
-            return ["Content-Type": "application/json"]
+             .postRegister, .postRegisterNickname, .postLogin,
+             .postResetPasswordNoAuth:
+            return base
 
         case .postResetPassword, .postLogout, .deleteUser:
-            let accessToken = KeychainSwift().get("serverAccessToken") ?? ""
-            return [
-                "Authorization": "Bearer \(accessToken)",
-                "Content-type": "application/json"
-            ]
+            if let access = kc.get("serverAccessToken"), !access.isEmpty {
+                base["Authorization"] = "Bearer \(access)"
+                return base
+            }
+            if case .postResetPassword = self,
+               let reset = kc.get("resetPasswordToken"),
+               !reset.isEmpty,
+               isLikelyJWT(reset) {
+                base["Authorization"] = "Bearer \(reset)"
+            }
+            return base
         }
+    }
+    
+    private func isLikelyJWT(_ s: String) -> Bool {
+        let parts = s.split(separator: ".")
+        return parts.count == 3 && parts.allSatisfy { !$0.isEmpty } && s.count > 30
     }
 }
