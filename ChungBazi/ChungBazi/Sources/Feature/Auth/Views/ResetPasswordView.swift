@@ -11,6 +11,9 @@ import Then
 
 final class ResetPasswordView: UIView {
     
+    let scrollView = UIScrollView()
+    private let contentView = UIView()
+    
     // MARK: - UI
     let descriptionLabel = UILabel().then {
         $0.text = "새로운 비밀번호를\n입력해 주세요."
@@ -80,21 +83,39 @@ final class ResetPasswordView: UIView {
     // MARK: - Layout
     private func setupLayout() {
         backgroundColor = .white
+        
+        addSubview(scrollView)
+        addSubview(completeButton)
+        scrollView.addSubview(contentView)
+        
+        completeButton.snp.makeConstraints {
+            $0.leading.trailing.equalTo(self).inset(16)
+            $0.bottom.equalTo(self.safeAreaLayoutGuide).inset(20)
+            $0.height.equalTo(48)
+        }
+        scrollView.snp.makeConstraints {
+            $0.top.leading.trailing.equalTo(self.safeAreaLayoutGuide)
+            $0.bottom.equalTo(completeButton.snp.top).offset(-12)
+        }
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        
         [
             descriptionLabel,
             newPwdLabel, questionButton, newPwdField, newPwdEye, newPwdUnderline,
-            confirmPwdLabel, confirmPwdField, confirmPwdEye, confirmPwdUnderline,
-            completeButton
-        ].forEach { addSubview($0) }
+            confirmPwdLabel, confirmPwdField, confirmPwdEye, confirmPwdUnderline
+        ].forEach { contentView.addSubview($0) }
         
         descriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(safeAreaLayoutGuide).offset(93)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.top.equalTo(contentView).offset(93)
+            $0.leading.trailing.equalTo(contentView).inset(45)
         }
         
         newPwdLabel.snp.makeConstraints {
             $0.top.equalTo(descriptionLabel.snp.bottom).offset(136)
-            $0.leading.equalToSuperview().inset(45)
+            $0.leading.equalTo(contentView).inset(45)
         }
         
         questionButton.snp.makeConstraints {
@@ -105,7 +126,7 @@ final class ResetPasswordView: UIView {
         
         newPwdField.snp.makeConstraints {
             $0.top.equalTo(newPwdLabel.snp.bottom).offset(10)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.leading.trailing.equalTo(contentView).inset(45)
             $0.height.equalTo(22)
         }
         
@@ -123,12 +144,12 @@ final class ResetPasswordView: UIView {
         
         confirmPwdLabel.snp.makeConstraints {
             $0.top.equalTo(newPwdUnderline.snp.bottom).offset(32)
-            $0.leading.equalToSuperview().inset(45)
+            $0.leading.equalTo(contentView).inset(45)
         }
         
         confirmPwdField.snp.makeConstraints {
             $0.top.equalTo(confirmPwdLabel.snp.bottom).offset(10)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.leading.trailing.equalTo(contentView).inset(45)
             $0.height.equalTo(22)
         }
         
@@ -144,10 +165,10 @@ final class ResetPasswordView: UIView {
             $0.width.height.equalTo(24)
         }
         
-        completeButton.snp.makeConstraints {
-            $0.bottom.equalTo(safeAreaLayoutGuide).inset(20)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(48)
+        contentView.snp.makeConstraints {
+            $0.bottom.equalTo(confirmPwdUnderline.snp.bottom).offset(40)
         }
+        
+        scrollView.delaysContentTouches = false
     }
 }

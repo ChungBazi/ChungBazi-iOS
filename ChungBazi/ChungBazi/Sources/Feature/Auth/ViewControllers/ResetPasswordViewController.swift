@@ -54,6 +54,11 @@ final class ResetPasswordViewController: UIViewController {
         addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupTooltip()
         setupActions()
+        enableKeyboardHandling(for: resetView.scrollView, inputView: resetView.completeButton)
+        resetView.scrollView.keyboardDismissMode = .onDrag
+        
+        resetView.scrollView.canCancelContentTouches = true
+        resetView.scrollView.panGestureRecognizer.cancelsTouchesInView = false
     }
     
     private func setupTooltip() {

@@ -25,6 +25,9 @@ final class FindPwdViewController: UIViewController {
     private var timer: Timer?
     private var remainingSeconds = 300
     private var verifyEmail: String?
+    
+    private let scrollView = UIScrollView()
+    private let contentView = UIView()
 
     // MARK: - UI
     private let descriptionLabel = UILabel().then {
@@ -99,25 +102,45 @@ final class FindPwdViewController: UIViewController {
         setupUI()
         addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupActions()
+        enableKeyboardHandling(for: scrollView, inputView: completeButton)
+        scrollView.keyboardDismissMode = .onDrag
     }
     
     private func setupUI() {
         view.backgroundColor = .white
+        
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        view.addSubview(completeButton)
+        
+        scrollView.snp.makeConstraints {
+            $0.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
+            $0.bottom.equalTo(completeButton.snp.top).offset(-12)
+        }
+        contentView.snp.makeConstraints {
+            $0.edges.equalTo(scrollView.contentLayoutGuide)
+            $0.width.equalTo(scrollView.frameLayoutGuide)
+        }
+        completeButton.snp.makeConstraints {
+            $0.leading.trailing.equalTo(view).inset(16)
+            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
+            $0.height.equalTo(48)
+        }
+        
         [
             descriptionLabel,
             emailLabel, emailField, emailUnderline,
-            codeLabel, codeField, codeUnderline, timerLabel,
-            completeButton
-        ].forEach { view.addSubview($0) }
+            codeLabel, codeField, codeUnderline, timerLabel
+        ].forEach { contentView.addSubview($0) }
         
         descriptionLabel.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(86)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.top.equalTo(contentView).offset(86)
+            $0.leading.trailing.equalTo(contentView).inset(45)
         }
         
         emailLabel.snp.makeConstraints {
             $0.top.equalTo(descriptionLabel.snp.bottom).offset(143)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.leading.trailing.equalTo(contentView).inset(45)
         }
         
         emailField.snp.makeConstraints {
@@ -134,7 +157,7 @@ final class FindPwdViewController: UIViewController {
         
         codeLabel.snp.makeConstraints {
             $0.top.equalTo(emailField.snp.bottom).offset(24)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.leading.trailing.equalTo(contentView).inset(45)
         }
         
         codeField.snp.makeConstraints {
@@ -151,13 +174,11 @@ final class FindPwdViewController: UIViewController {
         
         timerLabel.snp.makeConstraints {
             $0.centerY.equalTo(codeField)
-            $0.trailing.equalToSuperview().inset(45)
+            $0.trailing.equalTo(contentView).inset(45)
         }
         
-        completeButton.snp.makeConstraints {
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).inset(20)
-            $0.leading.trailing.equalToSuperview().inset(16)
-            $0.height.equalTo(48)
+        contentView.snp.makeConstraints {
+            $0.bottom.equalTo(codeUnderline.snp.bottom).offset(40)
         }
     }
     
