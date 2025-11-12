@@ -2,7 +2,7 @@
 import UIKit
 
 public struct API {
-    public static let baseURL = "http://54.161.39.40:8080/api"
+    public static let baseURL = "http://chungbazi.shop/api"
     public static let authURL = "\(baseURL)/auth"
     public static let emailURL = "\(baseURL)/email"
     public static let userURL = "\(baseURL)/user"
@@ -12,4 +12,5 @@ public struct API {
     public static let cartURL = "\(baseURL)/cart/policies"
     public static let calendarURL = "\(baseURL)/calendar"
     public static let notificationURL = "\(baseURL)/notifications"
+    public static let chatbotURL = "\(baseURL)/chatbot"    
 }

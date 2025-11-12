@@ -26,20 +26,7 @@
 		<string>kakaoplus</string>
 	</array>
 	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSExceptionDomains</key>
-		<dict>
-			<key>54.161.39.40</key>
-			<dict>
-				<key>NSIncludesSubdomains</key>
-				<true/>
-				<key>NSTemporaryExceptionAllowsInsecureHTTPLoads</key>
-				<true/>
-				<key>NSTemporaryExceptionMinimumTLSVersion</key>
-				<string>TLSv1.2</string>
-			</dict>
-		</dict>
-	</dict>
+	<dict/>
 	<key>UIAppFonts</key>
 	<array>
 		<string>AssacomFreeGothic-Regular.otf</string>
@@ -74,7 +61,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-    <key>CFBundleDisplayName</key>
-    <string>청바지</string>
+	<key>CFBundleDisplayName</key>
+	<string>청바지</string>
 </dict>
 </plist>
