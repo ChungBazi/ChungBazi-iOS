@@ -27,7 +27,7 @@ final class ChatbotViewController: UIViewController {
         $0.font = .ptdMediumFont(ofSize: 16)
         $0.textColor = .gray800
         $0.attributedPlaceholder = NSAttributedString(
-            string: "궁금한점을 입력하세요.",
+            string: "궁금한 점을 입력하세요.",
             attributes: [.foregroundColor: UIColor.gray300]
         )
         $0.layer.cornerRadius = 10
@@ -53,10 +53,13 @@ final class ChatbotViewController: UIViewController {
         view.backgroundColor = .blue50
         
         addCustomNavigationBar(titleText: "바로봇", showBackButton: true)
-        setupTableView()
+        
         setupChatInputView()
+        setupTableView()
         fillSafeArea(position: .bottom, color: .white)
         loadDummyMessages()
+        
+        enableKeyboardHandling(for: tableView, inputView: chatInputView)
         
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
@@ -82,63 +85,48 @@ final class ChatbotViewController: UIViewController {
         tableView.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(Constants.navigationHeight)
             $0.leading.trailing.equalToSuperview()
-            $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom).inset(68)
+            $0.bottom.equalTo(chatInputView.snp.top)
         }
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
         tableView.estimatedRowHeight = 44
         tableView.register(ChatbotMessageCell.self, forCellReuseIdentifier: "ChatbotMessageCell")
-        
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tapGesture.cancelsTouchesInView = false
-        tableView.addGestureRecognizer(tapGesture)
     }
     
     private func setupChatInputView() {
-        // 그림자용 뷰
-        let shadowView = UIView()
-        view.addSubview(shadowView)
-        shadowView.snp.makeConstraints {
+        view.addSubview(chatInputView)
+        chatInputView.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalTo(view.safeAreaLayoutGuide.snp.bottom)
             $0.height.equalTo(68)
         }
         
-        // 그림자 설정 (원본 수치 그대로)
-        shadowView.layer.shadowPath = UIBezierPath(roundedRect: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 68), cornerRadius: 10).cgPath
-        shadowView.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
-        shadowView.layer.shadowOpacity = 1
-        shadowView.layer.shadowRadius = 10
-        shadowView.layer.shadowOffset = CGSize(width: 0, height: 3)
-        shadowView.layer.masksToBounds = false
-
-        // 배경뷰
+        chatInputView.layer.shadowPath = UIBezierPath(
+            roundedRect: CGRect(x: 0, y: 0, width: UIScreen.main.bounds.width, height: 68),
+            cornerRadius: 10
+        ).cgPath
+        chatInputView.layer.shadowColor = UIColor.black.withAlphaComponent(0.18).cgColor
+        chatInputView.layer.shadowOpacity = 1
+        chatInputView.layer.shadowRadius = 10
+        chatInputView.layer.shadowOffset = CGSize(width: 0, height: 3)
+        chatInputView.layer.masksToBounds = false
+        
         backgroundView.layer.cornerRadius = 10
         backgroundView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
         backgroundView.clipsToBounds = true
-
-        shadowView.addSubview(backgroundView)
+        
+        chatInputView.addSubview(backgroundView)
         backgroundView.snp.makeConstraints {
             $0.edges.equalToSuperview()
         }
-
-        // 입력창 뷰
-        chatInputView.layer.cornerRadius = 10
-        chatInputView.layer.maskedCorners = [.layerMinXMinYCorner, .layerMaxXMinYCorner]
-        chatInputView.clipsToBounds = true
-
-        backgroundView.addSubview(chatInputView)
-        chatInputView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
-        }
-
-        chatInputView.addSubview(chatTextField)
+        
+        backgroundView.addSubview(chatTextField)
         chatTextField.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
             $0.top.bottom.equalToSuperview().inset(10)
         }
-
+        
         chatTextField.addSubview(sendButton)
         sendButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
