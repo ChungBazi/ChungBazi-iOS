@@ -84,7 +84,6 @@ final class ChatbotButtonCell: UITableViewCell {
             print("❌ 버튼 타이틀 없음")
             return
         }
-        print("✅ 버튼 클릭됨 - \(title)")
         delegate?.chatbotButtonCell(self, didTapButtonWith: title)
     }
 }

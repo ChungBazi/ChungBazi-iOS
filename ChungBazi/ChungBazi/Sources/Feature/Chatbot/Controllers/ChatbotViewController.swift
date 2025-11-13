@@ -194,8 +194,6 @@ final class ChatbotViewController: UIViewController {
             return
         }
 
-        print("📤 [sendMessage] 사용자 메시지 전송: \(trimmedText)")
-
         // 1. 사용자 메시지 추가
         let userMessage = ChatbotMessage(
             type: .text(trimmedText),
@@ -296,7 +294,6 @@ extension ChatbotViewController: UITableViewDelegate {}
 // MARK: - ChatbotButtonCellDelegate
 extension ChatbotViewController: ChatbotButtonCellDelegate {
     func chatbotButtonCell(_ cell: ChatbotButtonCell, didTapButtonWith title: String) {
-        print("✅ [버튼 클릭됨] title: \(title)")
         sendMessage(text: title)
     }
 }

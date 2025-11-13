@@ -19,6 +19,8 @@ final class ChatbotMessageCell: UITableViewCell {
         $0.lineBreakMode = .byCharWrapping
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
         $0.layer.masksToBounds = true
+        $0.setContentCompressionResistancePriority(.required, for: .vertical)
+        $0.setContentHuggingPriority(.required, for: .vertical)
     }
     
     private let timestampLabel = UILabel().then {
@@ -236,7 +238,6 @@ final class ChatbotMessageCell: UITableViewCell {
     
     @objc private func buttonTapped(_ sender: UIButton) {
         guard let title = sender.title(for: .normal) else { return }
-        print("✅ 버튼 클릭됨 - \(title)")
         delegate?.chatbotButtonCell(ChatbotButtonCell(), didTapButtonWith: title)
     }
     
