@@ -29,7 +29,7 @@
 	<dict>
 		<key>NSExceptionDomains</key>
 		<dict>
-			<key>54.161.39.40</key>
+			<key>chungbazi.shop</key>
 			<dict>
 				<key>NSIncludesSubdomains</key>
 				<true/>
@@ -74,7 +74,7 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
-    <key>CFBundleDisplayName</key>
-    <string>청바지</string>
+	<key>CFBundleDisplayName</key>
+	<string>청바지</string>
 </dict>
 </plist>
