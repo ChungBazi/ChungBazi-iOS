@@ -90,7 +90,6 @@ final class ChatbotViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
-        tableView.estimatedRowHeight = 44
         tableView.register(ChatbotMessageCell.self, forCellReuseIdentifier: "ChatbotMessageCell")
     }
     

@@ -17,20 +17,12 @@ class ChatbotDataManager {
     
     func getDummyMessages() -> [ChatbotMessage] {
         return [
-            // 1️⃣ 메시지만 있는 경우
-            ChatbotMessage(
-                type: .text("안녕하세요. 청바지 챗봇 ‘바로봇'이에요! 궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요."),
-                isUser: false,
-                timestamp: Date()
-            ),
-            
-            // 2️⃣ 메시지 + 버튼
             ChatbotMessage(
                 type: .textWithButtons(
-                    "어떤 정책이 궁금하신가요?",
+                    "안녕하세요.\n청바지 챗봇 ‘바로봇'이에요!\n궁금한 내용을 바로 질문하시거나, 아래 버튼을 선택해 주세요.",
                     [
-                        ChatbotButton(title: "정책 찾기", actionType: .sendMessage(text: "정책 찾기"), style: .blue),
-                        ChatbotButton(title: "정책 용어 쉽게 알기", actionType: .sendMessage(text: "정책 용어 쉽게 알기"), style: .blue),
+//                        ChatbotButton(title: "정책 찾기", actionType: .sendMessage(text: "정책 찾기"), style: .blue),
+//                        ChatbotButton(title: "정책 용어 쉽게 알기", actionType: .sendMessage(text: "정책 용어 쉽게 알기"), style: .blue),
                         ChatbotButton(title: "인기있는 청년 정책은?", actionType: .sendMessage(text: "인기있는 청년 정책은?"), style: .normal),
                         ChatbotButton(title: "월세 지원", actionType: .sendMessage(text: "월세 지원"), style: .normal),
                         ChatbotButton(title: "청년 인턴 지원", actionType: .sendMessage(text: "청년 인턴 지원"), style: .normal),
