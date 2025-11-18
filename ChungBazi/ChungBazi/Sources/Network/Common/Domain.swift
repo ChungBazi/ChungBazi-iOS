@@ -12,4 +12,5 @@ public struct API {
     public static let cartURL = "\(baseURL)/cart/policies"
     public static let calendarURL = "\(baseURL)/calendar"
     public static let notificationURL = "\(baseURL)/notifications"
+    public static let chatbotURL = "\(baseURL)/chatbot"    
 }
