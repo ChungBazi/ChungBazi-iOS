@@ -87,7 +87,8 @@ final class ChatbotMessageCell: UITableViewCell {
                 botIconBackgroundView.isHidden = true
                 
                 messageLabel.snp.remakeConstraints {
-                    $0.top.bottom.equalToSuperview().inset(4)
+                    $0.top.equalToSuperview().offset(3)
+                    $0.bottom.equalToSuperview().inset(11)
                     $0.trailing.equalToSuperview().inset(16)
                     $0.width.lessThanOrEqualTo(243)
                 }
@@ -104,7 +105,7 @@ final class ChatbotMessageCell: UITableViewCell {
                 botIconBackgroundView.isHidden = false
                 
                 botIconBackgroundView.snp.remakeConstraints {
-                    $0.top.equalToSuperview().offset(4)
+                    $0.top.equalToSuperview().offset(11)
                     $0.leading.equalToSuperview().offset(16)
                     $0.width.height.equalTo(47.25)
                 }
@@ -120,7 +121,7 @@ final class ChatbotMessageCell: UITableViewCell {
                     $0.top.equalTo(botIconBackgroundView.snp.bottom).offset(9)
                     $0.leading.equalTo(botIconBackgroundView.snp.leading)
                     $0.width.lessThanOrEqualTo(230)
-                    $0.bottom.equalToSuperview().inset(4)
+                    $0.bottom.equalToSuperview().inset(19)
                 }
                 
                 timestampLabel.snp.remakeConstraints {
@@ -229,7 +230,7 @@ final class ChatbotMessageCell: UITableViewCell {
                 $0.leading.equalTo(botIconBackgroundView.snp.leading)
                 $0.width.lessThanOrEqualTo(262)
                 $0.height.equalTo(currentY + currentRowHeight)
-                $0.bottom.equalToSuperview().inset(4)
+                $0.bottom.equalToSuperview().inset(19)
             }
             
         default:

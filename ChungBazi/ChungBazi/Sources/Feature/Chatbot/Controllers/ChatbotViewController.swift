@@ -35,6 +35,8 @@ final class ChatbotViewController: UIViewController {
         $0.leftViewMode = .always
         $0.rightView = UIView(frame: CGRect(x: 0, y: 0, width: 19 + 24 + 16, height: 1))
         $0.rightViewMode = .always
+        $0.autocorrectionType = .no
+        $0.spellCheckingType = .no
     }
     
     private let sendButton = UIButton.createWithImage(image: .sendIcon, tintColor: .blue700, target: self, action: #selector(sendButtonTapped))
