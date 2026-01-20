@@ -18,6 +18,7 @@ final class ChatbotMessageCell: UITableViewCell {
         $0.numberOfLines = 0
         $0.lineBreakMode = .byCharWrapping
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
+        $0.layer.cornerRadius = 10
         $0.layer.masksToBounds = true
         $0.setContentCompressionResistancePriority(.required, for: .vertical)
         $0.setContentHuggingPriority(.required, for: .vertical)
@@ -239,14 +240,5 @@ final class ChatbotMessageCell: UITableViewCell {
     @objc private func buttonTapped(_ sender: UIButton) {
         guard let title = sender.title(for: .normal) else { return }
         delegate?.chatbotButtonCell(ChatbotButtonCell(), didTapButtonWith: title)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if isUserMessage {
-            messageLabel.applyUserBubbleStyle()
-        } else {
-            messageLabel.applyChatbotBubbleStyle()
-        }
     }
 }

@@ -33,22 +33,22 @@ extension UIView {
     }
     
     /// 챗봇 메시지용 말풍선: 왼쪽 위는 0, 나머지는 radius
-    func applyChatbotBubbleStyle(radius: CGFloat = 10) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.layoutIfNeeded()
-            self.roundCorners(corners: [.topRight, .bottomLeft, .bottomRight], radius: radius)
-        }
-    }
+//    func applyChatbotBubbleStyle(radius: CGFloat = 10) {
+//        DispatchQueue.main.async { [weak self] in
+//            guard let self = self else { return }
+//            self.layoutIfNeeded()
+//            self.roundCorners(corners: [.topRight, .bottomLeft, .bottomRight], radius: radius)
+//        }
+//    }
     
     /// 사용자 메시지용 말풍선: 오른쪽 위는 0, 나머지는 radius
-    func applyUserBubbleStyle(radius: CGFloat = 10) {
-        DispatchQueue.main.async { [weak self] in
-            guard let self = self else { return }
-            self.layoutIfNeeded()
-            self.roundCorners(corners: [.topLeft, .bottomLeft, .bottomRight], radius: radius)
-        }
-    }
+//    func applyUserBubbleStyle(radius: CGFloat = 10) {
+//        DispatchQueue.main.async { [weak self] in
+//            guard let self = self else { return }
+//            self.layoutIfNeeded()
+//            self.roundCorners(corners: [.topLeft, .bottomLeft, .bottomRight], radius: radius)
+//        }
+//    }
     
     var owningViewController: UIViewController? {
         var r: UIResponder? = self
