@@ -124,8 +124,8 @@ final class ChatbotMessageCell: UITableViewCell {
                 }
                 
                 timestampLabel.snp.remakeConstraints {
-                    $0.bottom.equalTo(botIconBackgroundView.snp.bottom)
-                    $0.leading.equalTo(botIconBackgroundView.snp.trailing).offset(10)
+                    $0.bottom.equalTo(messageLabel.snp.bottom)
+                    $0.leading.equalTo(messageLabel.snp.trailing).offset(9)
                 }
                 
                 messageLabel.backgroundColor = UIColor.white
@@ -152,8 +152,8 @@ final class ChatbotMessageCell: UITableViewCell {
             }
 
             timestampLabel.snp.remakeConstraints {
-                $0.bottom.equalTo(botIconBackgroundView.snp.bottom)
-                $0.leading.equalTo(botIconBackgroundView.snp.trailing).offset(10)
+                $0.bottom.equalTo(messageLabel.snp.bottom)
+                $0.leading.equalTo(messageLabel.snp.trailing).offset(9)
             }
 
             messageLabel.isHidden = false
