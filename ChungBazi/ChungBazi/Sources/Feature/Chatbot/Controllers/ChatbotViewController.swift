@@ -92,6 +92,10 @@ final class ChatbotViewController: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.rowHeight = UITableView.automaticDimension
+        tableView.estimatedRowHeight = 80
+        tableView.contentInsetAdjustmentBehavior = .never
+        tableView.contentInset = .zero
+        tableView.scrollIndicatorInsets = .zero
         tableView.register(ChatbotMessageCell.self, forCellReuseIdentifier: "ChatbotMessageCell")
     }
     
@@ -148,32 +152,52 @@ final class ChatbotViewController: UIViewController {
               sendButton.isEnabled else { return }
         
         sendButton.isEnabled = false
+        
+        // 사용자 메시지 추가
         let userMessage = ChatbotMessage(type: .text(messageText), isUser: true, timestamp: Date())
         messages.append(userMessage)
-        tableView.reloadData()
-        scrollToBottom()
+        
+        // 로딩 메시지 추가
+        let loadingMessage = ChatbotMessage(type: .loading, isUser: false, timestamp: Date())
+        messages.append(loadingMessage)
+        
+        tableView.performBatchUpdates({
+            let userIndexPath = IndexPath(row: messages.count - 2, section: 0)
+            let loadingIndexPath = IndexPath(row: messages.count - 1, section: 0)
+            tableView.insertRows(at: [userIndexPath, loadingIndexPath], with: .none)
+        }, completion: { _ in
+            self.scrollToBottom()
+        })
+        
         chatTextField.text = ""
         
         ChatbotDataManager.shared.sendMessage(messageText) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
+                // 챗봇 로딩 메시지 제거
+                if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                    self.messages.removeLast()
+                    let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
+                    self.tableView.deleteRows(at: [loadingIndexPath], with: .none)
+                }
+                
+                // 실제 응답 추가
                 switch result {
                 case .success(let botResponse):
                     self.messages.append(botResponse)
-                    self.tableView.reloadData()
-                    self.scrollToBottom()
+                    let responseIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
+                    
+                    self.tableView.performBatchUpdates({
+                        self.tableView.insertRows(at: [responseIndexPath], with: .none)
+                    }, completion: { _ in
+                        self.scrollToBottom()
+                    })
                 case .failure(let error):
                     print("❌ 메시지 전송 실패: \(error.localizedDescription)")
                 }
                 self.sendButton.isEnabled = true
             }
         }
-    }
-    
-    private func scrollToBottom() {
-        guard !messages.isEmpty else { return }
-        let indexPath = IndexPath(row: messages.count - 1, section: 0)
-        tableView.scrollToRow(at: indexPath, at: .bottom, animated: true)
     }
     
     func sendMessage(text: String) {
@@ -190,22 +214,60 @@ final class ChatbotViewController: UIViewController {
             timestamp: Date()
         )
         messages.append(userMessage)
-        tableView.reloadData()
-        scrollToBottom()
+        
+        let loadingMessage = ChatbotMessage(type: .loading, isUser: false, timestamp: Date())
+        messages.append(loadingMessage)
+        
+        DispatchQueue.main.async {
+            self.tableView.reloadData()
+            self.scrollToBottom()
+        }
 
         // 2. 더미 응답 요청
         ChatbotDataManager.shared.sendMessage(trimmedText) { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
+                // 로딩 메시지 제거
+                if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                    self.messages.removeLast()
+                }
+                
                 switch result {
                 case .success(let botMessage):
                     print("🤖 [응답 수신] \(botMessage)")
                     self.messages.append(botMessage)
                     self.tableView.reloadData()
-                    self.scrollToBottom()
+                    DispatchQueue.main.async {
+                        self.scrollToBottom()
+                    }
                 case .failure(let error):
                     print("❌ [응답 실패] \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
+    private func scrollToBottom() {
+        guard !messages.isEmpty else { return }
+        
+        tableView.layoutIfNeeded()
+        
+        let indexPath = IndexPath(row: messages.count - 1, section: 0)
+        
+        if tableView.numberOfRows(inSection: 0) > indexPath.row {
+            // 애니메이션 없이 즉시 스크롤
+            tableView.scrollToRow(at: indexPath, at: .bottom, animated: false)
+            
+            // contentOffset을 직접 계산
+            DispatchQueue.main.async {
+                let contentHeight = self.tableView.contentSize.height
+                let tableViewHeight = self.tableView.bounds.height
+                
+                if contentHeight > tableViewHeight {
+                    // 전체 컨텐츠 높이 - 보이는 영역 높이
+                    let bottomOffset = CGPoint(x: 0, y: contentHeight - tableViewHeight)
+                    self.tableView.setContentOffset(bottomOffset, animated: false)
                 }
             }
         }
@@ -218,13 +280,11 @@ final class ChatbotViewController: UIViewController {
     // MARK: - Keyboard Handling
     @objc private func keyboardWillShow(_ notification: Notification) {
         guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-              let window = view.window else { return }
+              let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
 
-        let keyboardHeight = window.frame.height - keyboardFrame.origin.y
-        let safeAreaBottomInset = view.safeAreaInsets.bottom
-        let adjustedKeyboardHeight = keyboardHeight - safeAreaBottomInset
+        let keyboardHeight = keyboardFrame.height
 
-        UIView.animate(withDuration: 0.3) {
+        UIView.animate(withDuration: duration) {
             self.chatInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalToSuperview().offset(-keyboardHeight)
@@ -238,23 +298,28 @@ final class ChatbotViewController: UIViewController {
             }
 
             self.view.layoutIfNeeded()
+        } completion: { _ in
+            // 레이아웃 업데이트 후 스크롤
+            self.scrollToBottom()
         }
     }
 
     @objc private func keyboardWillHide(_ notification: Notification) {
-        UIView.animate(withDuration: 0.3) {
+        guard let duration = notification.userInfo?[UIResponder.keyboardAnimationDurationUserInfoKey] as? Double else { return }
+        
+        UIView.animate(withDuration: duration) {
             self.chatInputView.snp.remakeConstraints { make in
                 make.leading.trailing.equalToSuperview()
                 make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
                 make.height.equalTo(68)
             }
-
+            
             self.tableView.snp.remakeConstraints { make in
                 make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).offset(Constants.navigationHeight)
                 make.bottom.equalTo(self.chatInputView.snp.top)
                 make.leading.trailing.equalToSuperview()
             }
-
+            
             self.view.layoutIfNeeded()
         }
     }
