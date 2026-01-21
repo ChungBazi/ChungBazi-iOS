@@ -174,26 +174,31 @@ final class ChatbotViewController: UIViewController {
         ChatbotDataManager.shared.sendMessage(messageText) { [weak self] result in
             guard let self = self else { return }
             DispatchQueue.main.async {
-                // 챗봇 로딩 메시지 제거
-                if let lastMessage = self.messages.last, case .loading = lastMessage.type {
-                    self.messages.removeLast()
-                    let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
-                    self.tableView.deleteRows(at: [loadingIndexPath], with: .none)
-                }
-                
-                // 실제 응답 추가
                 switch result {
                 case .success(let botResponse):
-                    self.messages.append(botResponse)
-                    let responseIndexPath = IndexPath(row: self.messages.count - 1, section: 0)
-                    
-                    self.tableView.performBatchUpdates({
-                        self.tableView.insertRows(at: [responseIndexPath], with: .none)
-                    }, completion: { _ in
-                        self.scrollToBottom()
-                    })
+                    // 로딩 메시지를 실제 응답으로 교체
+                    if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                        let loadingIndex = self.messages.count - 1
+                        self.messages[loadingIndex] = botResponse  // 교체
+                        
+                        let indexPath = IndexPath(row: loadingIndex, section: 0)
+                        
+                        // 해당 셀만 리로드 (부드러운 전환)
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        
+                        // 스크롤 조정
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            self.scrollToBottom()
+                        }
+                    }
                 case .failure(let error):
                     print("❌ 메시지 전송 실패: \(error.localizedDescription)")
+                    // 로딩 메시지 제거
+                    if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                        self.messages.removeLast()
+                        let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
+                        self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
+                    }
                 }
                 self.sendButton.isEnabled = true
             }
@@ -207,7 +212,7 @@ final class ChatbotViewController: UIViewController {
             return
         }
 
-        // 1. 사용자 메시지 추가
+        // 사용자 메시지 추가
         let userMessage = ChatbotMessage(
             type: .text(trimmedText),
             isUser: true,
@@ -215,34 +220,47 @@ final class ChatbotViewController: UIViewController {
         )
         messages.append(userMessage)
         
+        // 로딩 메시지 추가
         let loadingMessage = ChatbotMessage(type: .loading, isUser: false, timestamp: Date())
         messages.append(loadingMessage)
         
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
+        tableView.performBatchUpdates({
+            let userIndexPath = IndexPath(row: messages.count - 2, section: 0)
+            let loadingIndexPath = IndexPath(row: messages.count - 1, section: 0)
+            tableView.insertRows(at: [userIndexPath, loadingIndexPath], with: .none)
+        }, completion: { _ in
             self.scrollToBottom()
-        }
+        })
 
-        // 2. 더미 응답 요청
         ChatbotDataManager.shared.sendMessage(trimmedText) { [weak self] result in
             guard let self = self else { return }
 
             DispatchQueue.main.async {
-                // 로딩 메시지 제거
-                if let lastMessage = self.messages.last, case .loading = lastMessage.type {
-                    self.messages.removeLast()
-                }
-                
                 switch result {
                 case .success(let botMessage):
-                    print("🤖 [응답 수신] \(botMessage)")
-                    self.messages.append(botMessage)
-                    self.tableView.reloadData()
-                    DispatchQueue.main.async {
-                        self.scrollToBottom()
+                    // 로딩 메시지를 실제 응답으로 교체
+                    if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                        let loadingIndex = self.messages.count - 1
+                        self.messages[loadingIndex] = botMessage  // 교체
+                        
+                        let indexPath = IndexPath(row: loadingIndex, section: 0)
+                        
+                        // 해당 셀만 리로드 (부드러운 전환)
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        
+                        // 스크롤 조정
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            self.scrollToBottom()
+                        }
                     }
                 case .failure(let error):
                     print("❌ [응답 실패] \(error.localizedDescription)")
+                    // 로딩 메시지 제거
+                    if let lastMessage = self.messages.last, case .loading = lastMessage.type {
+                        self.messages.removeLast()
+                        let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
+                        self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
+                    }
                 }
             }
         }
