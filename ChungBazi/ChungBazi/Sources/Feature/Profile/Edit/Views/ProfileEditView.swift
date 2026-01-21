@@ -123,7 +123,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
             $0.leading.trailing.equalTo(nickNameTitle)
         }
         completeBtn.snp.makeConstraints {
-            $0.top.equalTo(emailUnderLine.snp.bottom).offset(144)
+//            $0.top.equalTo(emailUnderLine.snp.bottom).offset(144)
             $0.bottom.equalToSuperview().inset(20)
             $0.leading.trailing.equalToSuperview().inset(Constants.gutter)
         }
