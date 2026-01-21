@@ -132,6 +132,8 @@ final class ChatbotViewController: UIViewController {
             $0.top.bottom.equalToSuperview().inset(10)
         }
         
+        chatTextField.delegate = self
+        
         chatTextField.addSubview(sendButton)
         sendButton.snp.makeConstraints {
             $0.centerY.equalToSuperview()
@@ -367,5 +369,13 @@ extension ChatbotViewController: UITableViewDelegate {}
 extension ChatbotViewController: ChatbotButtonCellDelegate {
     func chatbotButtonCell(_ cell: ChatbotButtonCell, didTapButtonWith title: String) {
         sendMessage(text: title)
+    }
+}
+
+// MARK: - UITextFieldDelegate
+extension ChatbotViewController: UITextFieldDelegate {
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder()
+        return true
     }
 }
