@@ -58,7 +58,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
         $0.contentHorizontalAlignment = .left
     }
     
-    private let completeBtn = CustomButton(backgroundColor: .blue700, titleText: "프로필 설정 완료", titleColor: .white)
+    public let completeBtn = CustomActiveButton(title: "프로필 설정 완료", isEnabled: true)
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -131,17 +131,28 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     
     private func setupActions() {
         completeBtn.addTarget(self, action: #selector(completeBtnTapped), for: .touchUpInside)
+        nickNameTextField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
     }
     
     func configure(with data: ProfileModel) {
         nickNameTextField.text = data.name
         emailLabel.text = data.email
         profileImageView.image = UIImage(named: data.characterImg)
+        updateCompleteButtonState()
     }
     
     func updateProfileImage(characterImage: String) {
         profileImageView.image = UIImage(named: characterImage)
         selectedCharacter = characterImage
+    }
+    
+    private func updateCompleteButtonState() {
+        let hasText = !(nickNameTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true)
+        completeBtn.setEnabled(isEnabled: hasText)
+    }
+    
+    @objc private func textFieldDidChange() {
+        updateCompleteButtonState()
     }
     
     @objc private func completeBtnTapped() {
