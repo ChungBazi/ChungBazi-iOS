@@ -77,11 +77,11 @@ final class CategoryPolicyViewController: UIViewController {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
             $0.width.equalTo(91)
-            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+            $0.height.equalTo(36)
         }
         
         tableView.snp.makeConstraints {
-            $0.top.equalTo(sortDropdown.snp.bottom).offset(-70)
+            $0.top.equalTo(sortDropdown.snp.bottom).offset(16)
             $0.leading.trailing.bottom.equalToSuperview()
         }
     }

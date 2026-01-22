@@ -37,7 +37,7 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
         dropdown.snp.makeConstraints {
             $0.top.equalTo(baseSurveyView.title.snp.bottom).offset(48)
             $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(118)
-            $0.height.equalTo(48 * Constants.eduDropDownItems.count + 48 + 8)
+            $0.height.equalTo(48)
         }
     }
     
@@ -53,7 +53,7 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
     }
     
     @objc private func goToSetRegion() {
-        userInfoData.setRegion("서울시 마포구") //데모데이용 임시데이터 (지역 설정 화면 제거용)
+        userInfoData.setRegion("") // 빈 지역 데이터
         let vc = SetInterestViewController() // 기존: SetRegionViewController()
         navigationController?.pushViewController(vc, animated: true)
     }

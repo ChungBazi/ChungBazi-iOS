@@ -96,18 +96,18 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
             make.top.equalTo(titleLabel.snp.bottom).offset(25)
             make.trailing.equalTo(sortDropdown.snp.leading).offset(-8)
             make.width.equalTo(91)
-            make.height.equalTo(36 * Constants.interestItems.count + 36 + 20)
+            make.height.equalTo(36)
         }
 
         sortDropdown.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(25)
             make.trailing.equalToSuperview().offset(-16)
             make.width.equalTo(91)
-            make.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+            make.height.equalTo(36)
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).inset(70)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(16)
             make.leading.trailing.bottom.equalToSuperview()
         }
     }
