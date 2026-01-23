@@ -38,12 +38,12 @@ final class PolicyService: NetworkManager {
     }
     
     /// 카테고리별 정책 API
-    public func fetchCategoryPolicy(category: String, cursor: Int, order: String, completion: @escaping (Result<PolicyListResponseDto?, NetworkError>) -> Void) {
+    public func fetchCategoryPolicy(category: String, cursor: String, order: String, completion: @escaping (Result<PolicyListResponseDto?, NetworkError>) -> Void) {
         requestOptional(target: .fetchCategoryPolicy(category: category, cursor: cursor, order: order), decodingType: PolicyListResponseDto.self, completion: completion)
     }
     
     /// 정책 추천 조회 API
-    public func fetchRecommendPolicy(category: String, cursor: Int, order: String, completion: @escaping (Result<RecommendPolicyListResponseDto?, NetworkError>) -> Void) {
+    public func fetchRecommendPolicy(category: String, cursor: String, order: String, completion: @escaping (Result<RecommendPolicyListResponseDto?, NetworkError>) -> Void) {
         requestOptional(target: .fetchRecommendPolicy(category: category, cursor: cursor, order: order), decodingType: RecommendPolicyListResponseDto.self, completion: completion)
     }
     

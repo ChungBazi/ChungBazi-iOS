@@ -12,10 +12,10 @@ import KeychainSwift
 enum PolicyEndpoints {
     case searchPolicy(name: String, cursor: String, order: String)
     case fetchPopularSearchText
-    case fetchCategoryPolicy(category: String, cursor: Int, order: String)
+    case fetchCategoryPolicy(category: String, cursor: String, order: String)
     case fetchPolicyDetail(policyId: Int)
     case fetchCalendarPolicyList(yearMonth: String)
-    case fetchRecommendPolicy(category: String, cursor: Int, order: String)
+    case fetchRecommendPolicy(category: String, cursor: String, order: String)
     case fetchCalendarPolicyDetail(cartId: Int)
 }
 
