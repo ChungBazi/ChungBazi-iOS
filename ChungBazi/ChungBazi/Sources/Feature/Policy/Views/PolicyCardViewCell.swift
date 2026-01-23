@@ -148,7 +148,10 @@ final class PolicyCardViewCell: UITableViewCell {
         let formattedPeriod = formatPeriod(startDate: item.startDate, endDate: item.endDate)
         periodLabel.text = formattedPeriod
 
-        let badgeText = item.dday == 0 ? "D-0" : (item.dday < 0 ? "D\(item.dday)" : "마감")
+        let badgeText = {
+            guard let dday = item.dday else { return "상시" }
+            return dday <= 0 ? "D\(dday)" : "마감"
+        }()
         badgeTextLabel.text = badgeText
         badgeTextLabel.textColor = badgeTextColor(for: badgeText)
         badgeImageView.image = badgeImage(for: badgeText)
@@ -157,7 +160,7 @@ final class PolicyCardViewCell: UITableViewCell {
             let attributedText = NSMutableAttributedString(string: item.policyName)
             if let range = item.policyName.range(of: keyword) {
                 let nsRange = NSRange(range, in: item.policyName)
-                attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: nsRange)
+                attributedText.addAttribute(.foregroundColor, value: AppColor.blue700!, range: nsRange)
             }
             titleLabel.attributedText = attributedText
         }
@@ -184,7 +187,7 @@ final class PolicyCardViewCell: UITableViewCell {
         switch badge {
         case "마감":
             return UIImage(named: "d_day_grayscale200")
-        case "D-0":
+        case "상시":
             return UIImage(named: "d_day_red")
         case let value where value.starts(with: "D-"):
             if let day = Int(value.dropFirst(2)) {
@@ -192,7 +195,7 @@ final class PolicyCardViewCell: UITableViewCell {
                     return UIImage(named: "d_day_blue200")
                 } else if day >= 2 {
                     return UIImage(named: "d_day_blue700")
-                } else if day == 1 {
+                } else if day >= 0 {
                     return UIImage(named: "d_day_blue900")
                 }
             }
@@ -206,7 +209,7 @@ final class PolicyCardViewCell: UITableViewCell {
         switch badge {
         case "마감":
             return AppColor.gray500
-        case "D-0":
+        case "상시":
             return .white
         case let value where value.starts(with: "D-"):
             if let day = Int(value.dropFirst(2)) {
@@ -214,7 +217,7 @@ final class PolicyCardViewCell: UITableViewCell {
                     return AppColor.gray800
                 } else if day >= 2 {
                     return .white
-                } else if day == 1 {
+                } else if day >= 0 {
                     return .white
                 }
             }
