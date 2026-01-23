@@ -12,9 +12,9 @@ struct PolicyItem {
     let policyName: String
     let startDate: String
     let endDate: String
-    let dday: Int
+    let dday: Int?
     
-    init(policyId: Int, policyName: String, startDate: String, endDate: String, dday: Int) {
+    init(policyId: Int, policyName: String, startDate: String, endDate: String, dday: Int?) {
         self.policyId = policyId
         self.policyName = policyName
         self.startDate = startDate

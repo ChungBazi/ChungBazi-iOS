@@ -208,7 +208,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                         policyName: data.policyName ?? "이름 없음",
                         startDate: data.startDate ?? "상시",
                         endDate: data.endDate ?? "상시",
-                        dday: data.dday ?? 0
+                        dday: data.dday
                     )
                 } ?? []
                 

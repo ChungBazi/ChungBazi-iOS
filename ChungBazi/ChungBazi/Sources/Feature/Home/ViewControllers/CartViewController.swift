@@ -222,7 +222,7 @@ final class CartViewController: UIViewController {
                     policyName: name,
                     startDate: startDate,
                     endDate: endDate,
-                    dday: policy.dday ?? 0
+                    dday: policy.dday
                 )
             }
 
