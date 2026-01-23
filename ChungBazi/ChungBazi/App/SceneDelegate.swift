@@ -27,7 +27,12 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         // 앱이 딥링크를 통해 실행되었는지 체크
         if let urlContext = connectionOptions.urlContexts.first {
-            pendingDeepLink = urlContext.url
+            let url = urlContext.url
+            if isKakaoLink(url) {
+                pendingDeepLink = extractDeepLinkFromKakaoLink(url)
+            } else {
+                pendingDeepLink = url
+            }
         }
         
         setRootViewController()
@@ -155,7 +160,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
     
     private func isKakaoLink(_ url: URL) -> Bool {
-        // 예: kakao1234567890://kakaolink?url=chungbazi%3A%2F%2Fpolicy%2F123
         return (url.scheme?.hasPrefix("kakao") == true) && (url.host == "kakaolink")
     }
 
@@ -163,16 +167,24 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems else { return }
 
-        // 너가 iosExecutionParams로 넘긴 key가 "url" 이었지
         if let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
            let decoded = deepLinkString.removingPercentEncoding,
            let deepLinkURL = URL(string: decoded) {
 
-            // 여기서 기존 로직 재사용
             if deepLinkURL.scheme == "chungbazi" {
                 handleDeepLink(url: deepLinkURL)
             }
         }
+    }
+    
+    private func extractDeepLinkFromKakaoLink(_ url: URL) -> URL? {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let queryItems = components.queryItems,
+              let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
+              let decoded = deepLinkString.removingPercentEncoding,
+              let deepLinkURL = URL(string: decoded) else { return nil }
+
+        return deepLinkURL
     }
     
     func scene(_ scene: UIScene, openURLContexts URLContexts: Set<UIOpenURLContext>) {
