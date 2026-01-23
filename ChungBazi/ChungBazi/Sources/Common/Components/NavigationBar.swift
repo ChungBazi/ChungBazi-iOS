@@ -186,7 +186,7 @@ extension UIViewController {
     
     // MARK: - Button Handlers with Effects
     @objc private func handleBackButtonTapped() {
-        triggerCustomTransition(type: .push, direction: .fromLeft)
+//        triggerCustomTransition(type: .push, direction: .fromLeft)
         popViewController()
     }
     
