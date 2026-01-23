@@ -12,6 +12,7 @@ class AlarmViewController: UIViewController {
     var alarmType: AlarmType = .policy
     var nextCursor = 0
     var hasNext: Bool = false
+    var isLoadingMore: Bool = false
     
     private lazy var alarmListCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
         $0.scrollDirection = .vertical
@@ -60,7 +61,7 @@ class AlarmViewController: UIViewController {
     
     private func setConstraints() {
         alarmListCollectionView.snp.makeConstraints {
-            $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(16)
+            $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
             $0.top.equalTo(view.safeAreaLayoutGuide).offset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
@@ -71,12 +72,23 @@ class AlarmViewController: UIViewController {
     }
     
     private func fetchAlarmList(type: String, cursor: Int) {
+        if isLoadingMore && cursor != 0 {
+            return
+        }
+        
+        if cursor != 0 {
+            isLoadingMore = true
+        }
+        
         self.networkService.fetchAlarmList(type: type, cursor: cursor) { [weak self] result in
             guard let self = self else { return }
+            
+            self.isLoadingMore = false
+            
             switch result {
             case .success(let response):
                 guard let response = response,
-                      let alarmContent = response.notifications else { return }
+                      let alarmContent = response.items else { return }
                 // 알림 15개 매핑
                 let nextAlarmDatas: [AlarmModel] = alarmContent.compactMap { data in
                     guard let notificationId = data.notificationId,
@@ -128,7 +140,7 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
     }
     
     func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
-        return CGSize(width: collectionView.frame.width, height: 106)
+        return CGSize(width: collectionView.frame.width - 32, height: 106)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
@@ -155,6 +167,8 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
         if scrollView.contentOffset.y < 0 {
             scrollView.contentOffset.y = 0 // 위쪽 바운스 막기
         }
+        
+        guard !isLoadingMore else { return }
         
         guard let collectionView = scrollView as? UICollectionView else { return }
         
