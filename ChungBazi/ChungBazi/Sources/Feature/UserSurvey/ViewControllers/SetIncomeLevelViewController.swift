@@ -53,7 +53,7 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
     }
     
     @objc private func goToSetRegion() {
-        userInfoData.setRegion("") // 빈 지역 데이터
+        userInfoData.setRegion("서울시 마포구") // 빈 지역 데이터
         let vc = SetInterestViewController() // 기존: SetRegionViewController()
         navigationController?.pushViewController(vc, animated: true)
     }

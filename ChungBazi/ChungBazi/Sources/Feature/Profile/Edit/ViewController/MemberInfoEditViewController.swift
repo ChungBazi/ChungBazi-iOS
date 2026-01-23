@@ -97,7 +97,7 @@ class MemberInfoEditViewController: UIViewController {
         saveToDataManager(userInfo)
         
         let updateDto = networkService.makeUserInfoDTO(
-            region: "",
+            region: "서울시 마포구",
             employment: userInfo.employment,
             income: userInfo.income,
             education: userInfo.education,
