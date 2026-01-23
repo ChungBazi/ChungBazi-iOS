@@ -54,7 +54,7 @@ class SelectLoginView: UIView {
         configuration.image = UIImage(named: "kakao")?.withRenderingMode(.alwaysOriginal).withTintColor(.black)
         configuration.imagePlacement = .leading
         configuration.imagePadding = 14
-
+        
         // 타이틀 속성 설정
         let attributes: AttributeContainer = AttributeContainer([
             .font: UIFont.ptdSemiBoldFont(ofSize: 15), .foregroundColor: UIColor.black.withAlphaComponent(0.85)])
@@ -62,7 +62,7 @@ class SelectLoginView: UIView {
         configuration.titleAlignment = .center
         
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 14) // 여백 설정
-
+        
         // 버튼 설정
         $0.configuration = configuration
         $0.layer.cornerRadius = 12
@@ -82,8 +82,10 @@ class SelectLoginView: UIView {
         $0.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 14)
     }
     private let divider = UIView().then { $0.backgroundColor = UIColor.gray300 }
-
+    
     private let linkRow = UIView()
+    private let leftContainer = UIView()
+    private let rightContainer = UIView()
     
     // MARK: - Init
     override init(frame: CGRect) {
@@ -98,12 +100,13 @@ class SelectLoginView: UIView {
     }
     
     func addComponents() {
-        [labelStackView, logo, appleBtn, kakaoBtn, linkRow].forEach(addSubview)
-        [signUpButton, divider, emailLoginButton].forEach { linkRow.addSubview($0) }
+        addSubviews(labelStackView, logo, appleBtn, kakaoBtn, linkRow)
+        linkRow.addSubviews(divider, leftContainer, rightContainer)
+        leftContainer.addSubview(signUpButton)
+        rightContainer.addSubview(emailLoginButton)
     }
     
     private func setConstraints() {
-        
         labelStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(101)
             $0.leading.trailing.equalToSuperview().inset(40)
@@ -129,6 +132,7 @@ class SelectLoginView: UIView {
         
         divider.snp.makeConstraints {
             $0.top.equalTo(kakaoBtn.snp.bottom).offset(31)
+            $0.center.equalToSuperview()
             $0.width.equalTo(1)
             $0.height.equalTo(17.5)
         }
@@ -138,21 +142,24 @@ class SelectLoginView: UIView {
             $0.bottom.equalTo(safeAreaLayoutGuide).inset(18)
         }
         
-        signUpButton.snp.makeConstraints {
-            $0.leading.equalTo(linkRow.snp.leading).offset(79)
-            $0.centerY.equalTo(linkRow)
+        leftContainer.snp.makeConstraints {
+            $0.leading.equalTo(kakaoBtn.snp.leading)
+            $0.trailing.equalTo(divider.snp.leading)
+            $0.verticalEdges.equalTo(divider.snp.verticalEdges)
         }
         
-        divider.snp.makeConstraints {
-            $0.leading.equalTo(signUpButton.snp.trailing).offset(59)
-            $0.centerY.equalTo(linkRow)
-            $0.width.equalTo(1)
-            $0.height.equalTo(17.5)
+        rightContainer.snp.makeConstraints {
+            $0.leading.equalTo(divider.snp.trailing)
+            $0.trailing.equalTo(kakaoBtn.snp.trailing)
+            $0.verticalEdges.equalTo(divider.snp.verticalEdges)
+        }
+        
+        signUpButton.snp.makeConstraints {
+            $0.center.equalToSuperview()
         }
         
         emailLoginButton.snp.makeConstraints {
-            $0.leading.equalTo(divider.snp.trailing).offset(50)
-            $0.centerY.equalTo(linkRow)
+            $0.center.equalToSuperview()
         }
     }
 }
