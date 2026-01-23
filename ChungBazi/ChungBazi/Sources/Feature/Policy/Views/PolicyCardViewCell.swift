@@ -101,7 +101,7 @@ final class PolicyCardViewCell: UITableViewCell {
         
         containerView.snp.makeConstraints { make in
             make.leading.trailing.equalToSuperview().inset(16)
-            make.top.bottom.equalToSuperview().inset(8)
+            make.top.bottom.equalToSuperview().inset(6.5)
             make.height.equalTo(showControls ? 131 : 94)
         }
         
@@ -150,7 +150,7 @@ final class PolicyCardViewCell: UITableViewCell {
 
         let badgeText = {
             guard let dday = item.dday else { return "상시" }
-            return dday <= 0 ? "D\(dday)" : "마감"
+            return dday >= 0 ? "D-\(dday)" : "마감"
         }()
         badgeTextLabel.text = badgeText
         badgeTextLabel.textColor = badgeTextColor(for: badgeText)
