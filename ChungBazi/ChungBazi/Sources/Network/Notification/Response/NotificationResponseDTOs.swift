@@ -15,8 +15,7 @@ struct NotificationInfo: Decodable {
     let notificationId: Int?
     let message: String?
     let type: String?
-    let policyId: Int?
-    let postId: Int?
+    let targetId: Int?
     let formattedCreatedAt: String?
     let read: Bool?
 }
