@@ -14,6 +14,7 @@ enum UserEndpoints {
     case fetchProfile
     case updateProfile(data: ProfileUpdateRequestDto)
     case fetchReward
+    case fetchUserInfo
     case postUserInfo(data: UserInfoRequestDto)
     case updateUserInfo(data: UserInfoRequestDto)
     case fetchProfileImg
@@ -35,6 +36,8 @@ extension UserEndpoints: TargetType {
             return "/update"
         case .fetchReward:
             return "/reward"
+        case .fetchUserInfo:
+            return ""
         case .postUserInfo:
             return "/register"
         case .updateProfile:
@@ -46,7 +49,7 @@ extension UserEndpoints: TargetType {
     
     var method: Moya.Method {
         switch self {
-        case .fetchProfile, .fetchReward, .fetchProfileImg:
+        case .fetchProfile, .fetchReward, .fetchProfileImg, .fetchUserInfo:
             return .get
         case .updateUserInfo, .updateProfile:
             return .patch
@@ -57,7 +60,7 @@ extension UserEndpoints: TargetType {
     
     var task: Task {
         switch self {
-        case .fetchProfile, .fetchReward, .fetchProfileImg:
+        case .fetchProfile, .fetchReward, .fetchProfileImg, .fetchUserInfo:
             return .requestPlain
         case .updateUserInfo(let data):
             return .requestJSONEncodable(data)
