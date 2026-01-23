@@ -50,6 +50,14 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         return tableView
     }()
     
+    private let emptyStateLabel = UILabel().then {
+        $0.text = "정책이 존재하지 않습니다."
+        $0.textAlignment = .center
+        $0.textColor = .gray600
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.isHidden = true
+    }
+    
     private lazy var interestDropdown = CustomDropdown(
         height: 36,
         fontSize: 14,
@@ -88,7 +96,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     }
 
     private func setupLayout() {
-        view.addSubviews(titleLabel, interestDropdown, sortDropdown, tableView)
+        view.addSubviews(titleLabel, interestDropdown, sortDropdown, tableView, emptyStateLabel)
         
         titleLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
@@ -112,6 +120,10 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         tableView.snp.makeConstraints { make in
             make.top.equalTo(sortDropdown.snp.bottom).inset(70)
             make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        emptyStateLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -233,6 +245,8 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                 
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
+                    let hasResults = self.policyList.isEmpty
+                    self.emptyStateLabel.isHidden = !hasResults
                 }
                 
             case .failure(let error):

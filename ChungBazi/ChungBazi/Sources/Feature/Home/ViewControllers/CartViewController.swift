@@ -52,6 +52,14 @@ final class CartViewController: UIViewController {
         tableView.isScrollEnabled = false
         return tableView
     }()
+    
+    private let emptyStateLabel = UILabel().then {
+        $0.text = "담은 정책이 없습니다."
+        $0.textAlignment = .center
+        $0.textColor = .gray600
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.isHidden = true
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -70,7 +78,7 @@ final class CartViewController: UIViewController {
     
     private func setupScrollView() {
         view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        scrollView.addSubviews(contentView, emptyStateLabel)
         contentView.addSubviews(headerView, tableView)
         
         guard let navigationBarView = self.view.subviews.first(where: { $0 is UIView }) else { return }
@@ -78,6 +86,10 @@ final class CartViewController: UIViewController {
         scrollView.snp.makeConstraints { make in
             make.top.equalTo(navigationBarView.snp.bottom)
             make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        emptyStateLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
         
         contentView.snp.makeConstraints { make in
@@ -116,6 +128,8 @@ final class CartViewController: UIViewController {
             make.height.equalTo(1)
             make.bottom.equalToSuperview()
         }
+        
+        
     }
 
     private func configureTableView() {
@@ -141,20 +155,6 @@ final class CartViewController: UIViewController {
     private func updateDeleteButtonState() {
         deleteButton.isEnabled = !selectedItems.isEmpty
         deleteButton.setTitleColor(selectedItems.isEmpty ? .gray300 : .blue700, for: .normal)
-    }
-    
-    public func postCart(policyId: Int) {
-        networkService.postCart(policyId: policyId) { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    self.fetchCartList()
-                case .failure(let error):
-                    print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
-                }
-            }
-        }
     }
     
     public func deleteCart() {
@@ -192,6 +192,8 @@ final class CartViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.updateTableViewHeight()
+                    let hasResults = self.categories.isEmpty
+                    self.emptyStateLabel.isHidden = !hasResults
                 }
             case .failure(let error):
                 print("❌ 네트워크 요청 실패: \(error.localizedDescription)")
