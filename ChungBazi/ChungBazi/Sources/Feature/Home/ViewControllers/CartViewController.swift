@@ -211,17 +211,14 @@ final class CartViewController: UIViewController {
                 return
             }
             
-            let policies: [PolicyItem] = cartPolicies.compactMap { policy in
-                guard let policyId = policy.policyId,
-                      let name = policy.name,
-                      let startDate = policy.startDate,
-                      let endDate = policy.endDate else { return nil }
+            let policies: [PolicyItem] = cartPolicies.compactMap { policy -> PolicyItem? in
+                guard let policyId = policy.policyId else { return nil }
 
                 return PolicyItem(
                     policyId: policyId,
-                    policyName: name,
-                    startDate: startDate,
-                    endDate: endDate,
+                    policyName: policy.name ?? "제목 없음",
+                    startDate: policy.startDate ?? "상시",
+                    endDate: policy.endDate ?? "상시",
                     dday: policy.dday
                 )
             }
