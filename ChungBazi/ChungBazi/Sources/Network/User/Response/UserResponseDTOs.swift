@@ -23,10 +23,9 @@ struct ProfileImgResponseDto: Decodable {
 }
 
 struct UserInfoResponseDto: Decodable {
-    let region: String
     let employment: String
-    let income: String
     let education: String
+    let income: String
     let interests: [String]
-    let additionInfo: [String]
+    let additions: [String]
 }

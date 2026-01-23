@@ -6,7 +6,7 @@
 //
 
 struct NoticeListResponseDto: Decodable {
-    let notifications: [NotificationInfo]?
+    let items: [NotificationInfo]?
     let nextCursor: Int?
     let hasNext: Bool
 }

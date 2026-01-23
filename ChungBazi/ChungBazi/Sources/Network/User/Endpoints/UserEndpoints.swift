@@ -37,7 +37,7 @@ extension UserEndpoints: TargetType {
         case .fetchReward:
             return "/reward"
         case .fetchUserInfo:
-            return ""
+            return "/information"
         case .postUserInfo:
             return "/register"
         case .updateProfile:

@@ -121,12 +121,11 @@ class MemberInfoEditViewController: UIViewController {
     
     private func convertToUserInfo(from response: UserInfoResponseDto) -> UserInfo {
         return UserInfo(
-            region: response.region,
             employment: response.employment,
             income: response.income,
             education: response.education,
             interests: response.interests,
-            additionInfo: response.additionInfo
+            additionInfo: response.additions
         )
     }
     
