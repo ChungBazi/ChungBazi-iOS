@@ -29,6 +29,8 @@ class MultiSelectCollectionViewCell: UICollectionViewCell {
     }
     
     private func setupUI() {
+        titleLabel.numberOfLines = 1
+        
         contentView.addSubview(titleLabel)
         
         contentView.layer.cornerRadius = 10

@@ -57,6 +57,7 @@ class MemberInfoEditView: UIView {
         super.init(frame: frame)
         setupUI()
         setupActions()
+        setupInternalDelegates()
     }
     
     required init?(coder: NSCoder) {
@@ -155,8 +156,10 @@ class MemberInfoEditView: UIView {
     
     /// 초기 데이터 설정
     func configure(with userInfo: UserInfo) {
-        // 드롭다운은 delegate를 통해 설정
-        // Multi-select만 설정
+        educationView.setSelectedItem(userInfo.education)
+        employmentView.setSelectedItem(userInfo.employment)
+        incomeView.setSelectedItem(userInfo.income)
+        
         additionalInfoView.setSelected(items: userInfo.additionInfo)
         interestView.setSelected(items: userInfo.interests)
     }
@@ -165,7 +168,6 @@ class MemberInfoEditView: UIView {
 extension MemberInfoEditView: CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         // 어떤 dropdown인지 확인하고 적절한 delegate 메서드 호출
-        // 초기 데이터 설정
         if dropdown == educationView.getDropdown() {
             educationView.setSelectedItem(item)
             delegate?.memberInfoEditView(self, didSelectEducation: item)

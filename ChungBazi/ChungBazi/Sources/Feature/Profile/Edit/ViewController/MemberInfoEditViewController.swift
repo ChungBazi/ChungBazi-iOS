@@ -173,27 +173,22 @@ class MemberInfoEditViewController: UIViewController {
 
 extension MemberInfoEditViewController: MemberInfoEditViewDelegate {
     func memberInfoEditView(_ view: MemberInfoEditView, didSelectEducation item: String) {
-        print("학력 선택: \(item)")
         validateForm()
     }
     
     func memberInfoEditView(_ view: MemberInfoEditView, didSelectEmployment item: String) {
-        print("취업상태 선택: \(item)")
         validateForm()
     }
     
     func memberInfoEditView(_ view: MemberInfoEditView, didSelectIncome item: String) {
-        print("소득분위 선택: \(item)")
         validateForm()
     }
     
     func memberInfoEditView(_ view: MemberInfoEditView, didSelectAdditionalInfo items: [String]) {
-        print("추가사항 선택: \(items)")
         validateForm()
     }
     
     func memberInfoEditView(_ view: MemberInfoEditView, didSelectInterests items: [String]) {
-        print("관심분야 선택: \(items)")
         validateForm()
     }
 }
