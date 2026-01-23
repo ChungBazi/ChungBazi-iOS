@@ -10,6 +10,7 @@ import Then
 final class CartViewController: UIViewController {
     
     private let networkService = CartService()
+    private var categories: [String] = []
     private var cartItems: [String: [PolicyItem]] = [:]
     private var selectedItems: Set<Int> = []
     private var categoryExpansionState: [String: Bool] = [:]
@@ -200,6 +201,7 @@ final class CartViewController: UIViewController {
     
     private func convertCartResponse(_ response: [CategoryPolicyList]) -> [String: [PolicyItem]] {
         var categorizedItems: [String: [PolicyItem]] = [:]
+        var orderedCategories: [String] = [] // 카테고리 순서 저장 배열
         
         response.forEach { categoryData in
             guard let categoryName = categoryData.categoryName else {
@@ -225,8 +227,11 @@ final class CartViewController: UIViewController {
 
             if !policies.isEmpty {
                 categorizedItems[categoryName] = policies
+                orderedCategories.append(categoryName)
             }
         }
+        
+        self.categories = orderedCategories
         return categorizedItems
     }
 
@@ -239,6 +244,8 @@ final class CartViewController: UIViewController {
         tableView.snp.updateConstraints { make in
             make.height.equalTo(totalHeight)
         }
+        
+        view.layoutIfNeeded()
     }
 
     @objc private func handleDeleteSelectedItems() {
@@ -249,11 +256,12 @@ final class CartViewController: UIViewController {
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension CartViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return cartItems.keys.count
+        return categories.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let category = Array(cartItems.keys)[section]
+        guard section < categories.count else { return 0 }
+        let category = categories[section]
         return cartItems[category]?.count ?? 0
     }
 
@@ -262,7 +270,7 @@ extension CartViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
-        let category = Array(cartItems.keys)[indexPath.section]
+        let category = categories[indexPath.section]
         if let item = cartItems[category]?[indexPath.row] {
             cell.configure(with: item, keyword: nil)
             cell.selectedBackgroundView = UIView()
@@ -284,7 +292,7 @@ extension CartViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let category = Array(cartItems.keys)[section]
+        let category = categories[section]
 
         let categoryView = CartCategoryView()
         categoryView.configure(with: category)
@@ -302,7 +310,7 @@ extension CartViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        let category = Array(cartItems.keys)[indexPath.section]
+        let category = categories[indexPath.section]
         guard let item = cartItems[category]?[indexPath.row] else { return }
 
         let vc = PolicyDetailViewController()
