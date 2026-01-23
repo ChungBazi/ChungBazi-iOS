@@ -210,24 +210,37 @@ extension UIViewController {
     }
     
     @objc private func handleShareButtonTapped() {
-        guard let viewController = self as? PolicyDetailViewController, let policy = viewController.policy else {
+        
+        guard let viewController = self as? PolicyDetailViewController else {
             return
         }
-
+        
+        guard let policy = viewController.policy else {
+            return
+        }
+        
         let policyTitle = policy.name
-        let policyDetailLink = "chungbazi://policy/\(policy.policyId)" 
-
-        if let encodedPosterUrl = policy.posterUrl?.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+        let policyId = policy.policyId
+        let policyDetailLink = "chungbazi://policy/\(policyId)"
+        let webLink = "https://apps.apple.com/kr/app/청바지/id6753987371"
+        
+        // posterUrl이 있으면 이미지와 함께, 없으면 텍스트만
+        if let posterUrlString = policy.posterUrl,
+           !posterUrlString.isEmpty,
+           let encodedPosterUrl = posterUrlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
            let imageUrl = URL(string: encodedPosterUrl) {
-            shareToKakao(policyTitle: policyTitle, policyURL: policyDetailLink, imageUrl: imageUrl)
+            shareToKakaoWithImage(policyTitle: policyTitle, policyURL: policyDetailLink, appStoreLink: webLink, imageUrl: imageUrl)
         } else {
+            shareToKakaoTextOnly(policyTitle: policyTitle, policyURL: policyDetailLink, appStoreLink: webLink)
         }
     }
     
-    private func shareToKakao(policyTitle: String, policyURL: String, imageUrl: URL) {
+    private func shareToKakaoWithImage(policyTitle: String, policyURL: String, appStoreLink: String, imageUrl: URL) {
         let link = Link(
-            webUrl: URL(string: policyURL),
-            mobileWebUrl: URL(string: policyURL)
+            webUrl: URL(string: appStoreLink),
+            mobileWebUrl: URL(string: appStoreLink),
+            androidExecutionParams: nil,
+            iosExecutionParams: ["url": policyURL]
         )
 
         let content = Content(
@@ -238,10 +251,35 @@ extension UIViewController {
         )
 
         let template = FeedTemplate(content: content)
+        
+        shareKakaoTemplate(template: template)
+    }
+    
+    private func shareToKakaoTextOnly(policyTitle: String, policyURL: String, appStoreLink: String) {
+        let link = Link(
+            webUrl: URL(string: appStoreLink),
+            mobileWebUrl: URL(string: appStoreLink),
+            androidExecutionParams: nil,
+            iosExecutionParams: ["url": policyURL]
+        )
 
+        let content = Content(
+            title: policyTitle,
+            imageUrl: nil,
+            description: "이 정책을 확인해보세요!",
+            link: link
+        )
+
+        let template = FeedTemplate(content: content)
+        
+        shareKakaoTemplate(template: template)
+    }
+    
+    private func shareKakaoTemplate(template: FeedTemplate) {
         if ShareApi.isKakaoTalkSharingAvailable() {
             ShareApi.shared.shareDefault(templatable: template) { linkResult, error in
                 if let error = error {
+                    print("Kakao share error: \(error.localizedDescription)")
                 } else if let linkResult = linkResult {
                     UIApplication.shared.open(linkResult.url, options: [:], completionHandler: nil)
                 }
