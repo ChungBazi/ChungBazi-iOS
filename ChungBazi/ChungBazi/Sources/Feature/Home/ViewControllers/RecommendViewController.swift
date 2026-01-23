@@ -11,14 +11,18 @@ import Then
 
 final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     
-    var userName: String = ""
-    var interest: String = ""
-    private let networkService = PolicyService()
+    private var userName: String = ""
+    private var interest: String = ""
     private var policyList: [PolicyItem] = []
-    private var nextCursor: Int?
+    private var nextCursor: String = ""
     private var hasNext: Bool = false
     private var sortOrder: String = "latest"
     private var interestList: [String] = []
+    private var readAllNotifications: Bool = false
+    private var isInitialLoad: Bool = true
+    private var isLoadingMore: Bool = false
+    
+    private let networkService = PolicyService()
     
     private let categoryMapping: [String: String] = [
         "JOBS": "일자리",
@@ -42,6 +46,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
+        tableView.contentInset.bottom = 20
         return tableView
     }()
     
@@ -50,7 +55,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         fontSize: 14,
         title: "관심",
         hasBorder: false,
-        items: interestList.map { categoryMapping[$0] ?? $0 }
+        items: []
     )
     
     private lazy var sortDropdown = CustomDropdown(
@@ -79,9 +84,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         
         setupLayout()
         configureDropdowns()
-        updateTitleLabel()
-        updateUserInfo()
-        fetchRecommendPolicies(cursor: 0, order: sortOrder)
+        fetchInitialSetting()
     }
 
     private func setupLayout() {
@@ -123,28 +126,6 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         sortDropdown.delegate = self
     }
     
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        
-        let updatedUserName = UserProfileDataManager.shared.getNickname()
-        if updatedUserName != userName {
-            userName = updatedUserName
-            updateTitleLabel()
-        }
-    }
-    
-    private func moveToCategoryPolicyViewController(selectedCategory: String) {
-        guard let categoryKey = categoryMapping.first(where: { $0.value == selectedCategory })?.key else {
-            print("⚠️ 지원되지 않는 카테고리: \(selectedCategory)")
-            return
-        }
-        
-        let categoryVC = CategoryPolicyViewController()
-        categoryVC.configure(categoryTitle: selectedCategory, categoryKey: categoryKey)
-        categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
-        navigationController?.pushViewController(categoryVC, animated: true)
-    }
-    
     private func updateTitleLabel() {
         let localizedInterest = categoryMapping[interest] ?? interest
         let text = "\(userName)님께 딱 맞는 \(localizedInterest) 정책\n추천 리스트를 준비했어요!"
@@ -159,7 +140,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         
         if let range = text.range(of: localizedInterest) {
             let nsRange = NSRange(range, in: text)
-            attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: nsRange)
+            attributedText.addAttribute(.foregroundColor, value: AppColor.blue700!, range: nsRange)
         }
         
         titleLabel.attributedText = attributedText
@@ -167,53 +148,87 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         titleLabel.sizeToFit()
     }
     
-    private func updateUserInfo() {
-        let interestList = UserInfoDataManager.shared.getInterests()
-        print("📢 저장된 관심 카테고리: \(interestList)")
-        
-        let validCategories = ["JOBS", "HOUSING", "EDUCATION", "WELFARE_CULTURE", "PARTICIPATION_RIGHTS"]
-        if let userInterest = interestList.first, validCategories.contains(userInterest) {
-            interest = userInterest
-        } else {
-            interest = "JOBS"
-        }
-        print("✅ 선택된 관심 카테고리: \(interest)")
-    }
-    
-    private func fetchRecommendPolicies(cursor: Int, order: String) {
-        networkService.fetchRecommendPolicy(category: interest, cursor: cursor, order: order) { [weak self] result in
+    private func fetchInitialSetting() {
+        networkService.fetchRecommendPolicy(category: "JOBS", cursor: "", order: sortOrder) { [weak self] result in
             guard let self = self else { return }
+            
             switch result {
             case .success(let response):
-                guard let response = response else {
-                    print("❌ 추천 정책 데이터 없음")
-                    return
+                guard let response = response else { return  }
+                
+                let previousState = self.readAllNotifications
+                self.readAllNotifications = response.readAllNotifications
+                
+                if previousState != self.readAllNotifications {
+                    DispatchQueue.main.async {
+                        self.updateAlarmButtonIcon(isUnread: !self.readAllNotifications)
+                    }
                 }
                 
                 self.userName = response.username ?? "사용자"
-                self.interestList = response.interests ?? ["JOBS"]
                 
-                let localizedInterests = self.interestList.compactMap { self.categoryMapping[$0] ?? $0 }
-                self.interestDropdown.setItems(localizedInterests)
+                self.interestList = response.interests ?? ["JOBS"]
                 
                 if let firstInterest = self.interestList.first {
                     self.interest = firstInterest
                 }
                 
+                let localizedInterests = self.interestList.compactMap { self.categoryMapping[$0] ?? $0 }
+                
+                DispatchQueue.main.async {
+                    self.interestDropdown.setItems(localizedInterests)
+                    
+                    // 첫 번째 아이템을 드롭다운 title로 설정
+                    if !localizedInterests.isEmpty {
+                        self.interestDropdown.didSelectItem(at: 0)
+                    }
+                    
+                    self.updateTitleLabel()
+                }
+                
+                self.isInitialLoad = false
+                self.fetchRecommendPolicies(interest: self.interest, cursor: "", order: self.sortOrder)
+                
+            case .failure(let error):
+                print("정책 추천 초기 세팅 API 실패: \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func fetchRecommendPolicies(interest: String, cursor: String, order: String) {
+        if isLoadingMore && !cursor.isEmpty {
+            return
+        }
+        
+        if !cursor.isEmpty {
+            isLoadingMore = true
+        }
+        
+        networkService.fetchRecommendPolicy(category: interest, cursor: cursor, order: order) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoadingMore = false
+            
+            switch result {
+            case .success(let response):
+                guard let response = response,
+                      let policyContent = response.policies else { return }
+                
                 self.updateTitleLabel()
                 
-                let recommendPolicies = response.policies?.compactMap { data in
-                    PolicyItem(
-                        policyId: data.policyId ?? 0,
-                        policyName: data.policyName ?? "이름 없음",
-                        startDate: data.startDate ?? "상시",
-                        endDate: data.endDate ?? "상시",
-                        dday: data.dday
+                let policies: [PolicyItem] = policyContent.compactMap { policy -> PolicyItem? in
+                    guard let policyId = policy.policyId else { return nil }
+
+                    return PolicyItem(
+                        policyId: policyId,
+                        policyName: policy.policyName ?? "제목 없음",
+                        startDate: policy.startDate ?? "상시",
+                        endDate: policy.endDate ?? "상시",
+                        dday: policy.dday
                     )
-                } ?? []
+                }
                 
-                self.policyList = (cursor == 0) ? recommendPolicies : self.policyList + recommendPolicies
-                self.nextCursor = response.nextCursor
+                self.policyList = (cursor == "") ? policies : self.policyList + policies
+                self.nextCursor = response.nextCursor ?? ""
                 self.hasNext = response.hasNext
                 
                 DispatchQueue.main.async {
@@ -229,15 +244,32 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String) {
         if dropdown == interestDropdown {
             if let selectedKey = categoryMapping.first(where: { $0.value == item })?.key {
+                if isInitialLoad {
+                    return
+                }
+                
+                // 이미 같은 카테고리면 무시
+                guard interest != selectedKey else { return }
+                
                 interest = selectedKey
-                updateTitleLabel()
-                fetchRecommendPolicies(cursor: 0, order: sortOrder)
+                
+                DispatchQueue.main.async {
+                    self.updateTitleLabel()
+                    self.tableView.setContentOffset(.zero, animated: true)
+                }
+                
+                fetchRecommendPolicies(interest: interest, cursor: "", order: sortOrder)
             }
         } else if dropdown == sortDropdown {
             let order = (item == "마감순") ? "deadline" : "latest"
             if sortOrder != order {
                 sortOrder = order
-                fetchRecommendPolicies(cursor: 0, order: order)
+                
+                DispatchQueue.main.async {
+                    self.tableView.setContentOffset(.zero, animated: true)
+                }
+                
+                fetchRecommendPolicies(interest: interest, cursor: "", order: order)
             }
         }
     }
@@ -272,13 +304,15 @@ extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
     }
     
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isLoadingMore else { return }
+        
         let contentOffsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
         
         if contentOffsetY > contentHeight - scrollViewHeight - 100 {
             guard hasNext else { return }
-            fetchRecommendPolicies(cursor: nextCursor ?? 0, order: sortOrder)
+            fetchRecommendPolicies(interest: interest, cursor: nextCursor, order: sortOrder)
         }
     }
 }
