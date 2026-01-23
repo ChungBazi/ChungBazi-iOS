@@ -9,24 +9,9 @@ class AlarmViewController: UIViewController {
     
     let networkService = NotificationService()
     var alarmList: [AlarmModel] = []
-    var alarmType: String?
+    var alarmType: AlarmType = .policy
     var nextCursor = 0
     var hasNext: Bool = false
-    
-    private lazy var entireBtn = createAlarmKindButton(title: "전체", action: #selector(alarmKindButtonTapped))
-    
-    private lazy var calendarBtn = createAlarmKindButton(title: "캘린더", action: #selector(alarmKindButtonTapped))
-    
-    private lazy var communityBtn = createAlarmKindButton(title: "커뮤니티", action: #selector(alarmKindButtonTapped))
-    
-    private lazy var rewardBtn = createAlarmKindButton(title: "리워드", action: #selector(alarmKindButtonTapped))
-    
-    private lazy var buttonStackView = UIStackView(arrangedSubviews: [entireBtn, calendarBtn, communityBtn, rewardBtn]).then {
-        $0.axis = .horizontal // 가로 방향으로 정렬
-        $0.spacing = 11       // 버튼 간 간격
-        $0.alignment = .leading  // 버튼의 크기를 동일하게
-        $0.distribution = .equalSpacing // 균등한 간격 분배
-    }
     
     private lazy var alarmListCollectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout().then {
         $0.scrollDirection = .vertical
@@ -56,8 +41,7 @@ class AlarmViewController: UIViewController {
         addCustomNavigationBar(titleText: "알림", showBackButton: true, showCartButton: false, showAlarmButton: false)
         addComoponents()
         setConstraints()
-        setBtnTag()
-        alarmKindButtonTapped(entireBtn)
+        fetchAlarmList(type: alarmType.rawValue, cursor: 0)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -70,103 +54,20 @@ class AlarmViewController: UIViewController {
         tabBarController?.tabBar.isHidden = false
     }
     
-    private func createAlarmKindButton(
-        title: String,
-        target: Any? = self,
-        action: Selector? = nil
-    ) -> UIButton {
-        return UIButton(type: .system).then {
-            // 타이틀 설정
-            $0.setTitle(title, for: .normal)
-            $0.setTitleColor(UIColor.gray800, for: .normal)
-            $0.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 14)
-            
-            // 배경색 및 코너 반경
-            $0.backgroundColor = .clear
-            $0.layer.cornerRadius = 10
-            
-            // 테두리 설정
-            $0.layer.borderWidth = 1
-            $0.layer.borderColor = UIColor.gray400.cgColor
-            
-            $0.sizeToFit() // 타이틀 크기에 맞게 버튼 크기 조정
-            $0.contentEdgeInsets = UIEdgeInsets(top: 8, left: 10, bottom: 8, right: 10)
-            
-            // 액션 추가
-            if let action = action {
-                $0.addTarget(target, action: action, for: .touchUpInside)
-            }
-            
-            $0.snp.makeConstraints {
-                $0.height.equalTo(36)
-            }
-        }
-    }
-    
-    @objc private func alarmKindButtonTapped(_ sender: UIButton) {
-        let buttons = [entireBtn, calendarBtn, communityBtn, rewardBtn]
-        buttons.forEach { button in
-            button.backgroundColor = .clear
-            button.setTitleColor(UIColor.gray800, for: .normal)
-            button.layer.borderWidth = 1
-            button.layer.borderColor = UIColor.gray400.cgColor
-        }
-        
-        // 클릭된 버튼 활성화
-        sender.backgroundColor = UIColor.blue700
-        sender.setTitleColor(.white, for: .normal)
-        sender.layer.borderWidth = 0
-        sender.layer.borderColor = nil
-        
-        let type: AlarmType
-        
-        switch sender.tag {
-        case 0:
-            type = .entire
-        case 1:
-            type = .policy
-        case 2:
-            type = .community
-        case 3:
-            type = .reward
-        default:
-            type = .unknown
-        }
-        
-        DispatchQueue.main.async {
-            // 강제로 맨위로 올리기
-            self.alarmListCollectionView.setContentOffset(.zero, animated: true)
-        }
-        
-        fetchAlarmList(type: type.rawValue, cursor: 0)
-    }
-    
     private func addComoponents() {
-        [buttonStackView, alarmListCollectionView, emptyStateLabel].forEach { view.addSubview($0) }
+        [alarmListCollectionView, emptyStateLabel].forEach { view.addSubview($0) }
     }
     
     private func setConstraints() {
-        buttonStackView.snp.makeConstraints {
-            $0.leading.equalTo(view.safeAreaLayoutGuide).offset(16)
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(Constants.navigationHeight + 23)
-        }
-        
         alarmListCollectionView.snp.makeConstraints {
             $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(16)
-            $0.top.equalTo(buttonStackView.snp.bottom).offset(16)
+            $0.top.equalTo(view.safeAreaLayoutGuide).offset(Constants.navigationHeight)
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
         emptyStateLabel.snp.makeConstraints { make in
             make.center.equalToSuperview()
         }
-    }
-    
-    private func setBtnTag() {
-        entireBtn.tag = 0
-        calendarBtn.tag = 1
-        communityBtn.tag = 2
-        rewardBtn.tag = 3
     }
     
     private func fetchAlarmList(type: String, cursor: Int) {
@@ -186,7 +87,7 @@ class AlarmViewController: UIViewController {
                         return nil
                     }
                     let type = AlarmType.from(typeString)
-                    return AlarmModel(notificationId: notificationId, message: message, type: type, policyId: data.policyId, postId: data.postId, sentTime: sentTime)
+                    return AlarmModel(notificationId: notificationId, message: message, type: type, targetId: data.targetId, sentTime: sentTime)
                 }
                 
                 if cursor != 0 { // 맨 처음 요청한게 아니면, 이전 데이터가 이미 저장이 되어있는 상황이면
@@ -236,17 +137,10 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
         
         switch alarm.type {
         case .policy:
-            guard let policyId = alarm.policyId else { return }
+            guard let policyId = alarm.targetId else { return }
             let vc = PolicyDetailViewController()
             vc.policyId = policyId
             destinationVC = vc
-            
-        case .community:
-            guard let postId = alarm.postId else { return }
-            destinationVC = CommunityDetailViewController(postId: postId)
-            
-        case .reward:
-            destinationVC = MyCharacterViewController()
             
         default:
             return
@@ -271,7 +165,7 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
         // Check if user has scrolled to the bottom
         if contentOffsetY > contentHeight - scrollViewHeight { // Trigger when arrive the bottom
             guard hasNext else { return }
-            fetchAlarmList(type: alarmType ?? "", cursor: nextCursor)
+            fetchAlarmList(type: alarmType.rawValue, cursor: nextCursor)
         }
     }
 }
