@@ -21,3 +21,11 @@ struct RewardResponseDto: Decodable {
 struct ProfileImgResponseDto: Decodable {
     let characterImg: String
 }
+
+struct UserInfoResponseDto: Decodable {
+    let employment: String
+    let education: String
+    let income: String
+    let interests: [String]
+    let additions: [String]
+}

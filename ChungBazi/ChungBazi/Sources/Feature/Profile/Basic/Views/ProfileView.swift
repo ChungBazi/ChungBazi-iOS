@@ -12,11 +12,11 @@ import Then
 protocol ProfileViewDelegate: AnyObject {
     func didTapEditProfile()
     func didTapNotificationSettings()
+    func didTapEditMemberInfo()
+    func didTapContact()
     func didTapAppInfo()
     func didTapLogout()
     func didTapWithdraw()
-    func didTapMyRewardView()
-    func didTapMyCharacterView()
 }
 
 final class ProfileView: UIView {
@@ -40,31 +40,14 @@ final class ProfileView: UIView {
         $0.tintColor = .gray800
     }
     private let emailLabel = B14_M(text: "", textColor: .gray500)
-    
-    private let myRewardView = UIView()
-    private let myRewardIcon = UIImageView().then {
-        $0.image = .rewardIcon
-        $0.contentMode = .scaleAspectFit
-        $0.clipsToBounds = true
-    }
-    private let myRewardLabel = B14_M(text: "마이 리워드")
-    
-    
-    private let myCharacterView = UIView()
-    private let myCharacterIcon = UIImageView().then {
-        $0.image = .myCharacterIcon
-        $0.contentMode = .scaleAspectFit
-        $0.clipsToBounds = true
-    }
-    private let myCharacterLabel = B14_M(text: "마이 캐릭터")
-    
     private let gray100View = UIView().then {
         $0.backgroundColor = .gray100
     }
+
     private let tableView = UITableView()
     private let menuItems = ["알림 설정",
-//                             "공지사항",
-//                             "문의하기",
+                             "회원정보 수정",
+                             "문의하기",
                              "앱 정보",
                              "로그아웃",
                              "탈퇴"]
@@ -100,7 +83,8 @@ final class ProfileView: UIView {
             $0.width.equalToSuperview()
         }
         
-        contentView.addSubviews(profileView, nameLabel, editProfileBtn, emailLabel, myRewardView, myCharacterView, gray100View, tableView)
+        contentView.addSubviews(profileView, nameLabel, editProfileBtn, emailLabel, gray100View, tableView)
+        
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(15)
             $0.centerX.equalToSuperview()
@@ -126,43 +110,12 @@ final class ProfileView: UIView {
             $0.centerX.equalToSuperview()
         }
         
-        myRewardView.addSubviews(myRewardIcon, myRewardLabel)
-        myRewardView.snp.makeConstraints {
-            $0.top.equalTo(emailLabel.snp.bottom).offset(35.5)
-            $0.leading.equalToSuperview().inset(80)
-            $0.width.equalTo(55)
-            $0.height.equalTo(51)
-        }
-        myRewardIcon.snp.makeConstraints {
-            $0.top.centerX.equalToSuperview()
-        }
-        myRewardLabel.snp.makeConstraints {
-            $0.bottom.centerX.equalToSuperview()
-        }
-        myRewardView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(myRewardViewTapped)))
-        myRewardView.isUserInteractionEnabled = true
-        
-        myCharacterView.addSubviews(myCharacterIcon, myCharacterLabel)
-        myCharacterView.snp.makeConstraints {
-            $0.top.equalTo(emailLabel.snp.bottom).offset(35.5)
-            $0.trailing.equalToSuperview().inset(80)
-            $0.width.equalTo(55)
-            $0.height.equalTo(51)
-        }
-        myCharacterIcon.snp.makeConstraints {
-            $0.top.centerX.equalToSuperview()
-        }
-        myCharacterLabel.snp.makeConstraints {
-            $0.bottom.centerX.equalToSuperview()
-        }
-        myCharacterView.addGestureRecognizer(UITapGestureRecognizer(target: self, action: #selector(myCharacterTapped)))
-        myCharacterView.isUserInteractionEnabled = true
-        
         gray100View.snp.makeConstraints {
             $0.leading.trailing.equalToSuperview()
-            $0.top.equalTo(myRewardView.snp.bottom).offset(26.5)
+            $0.top.equalTo(emailLabel.snp.bottom).offset(26.5)
             $0.height.equalTo(8)
         }
+        
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.isScrollEnabled = false
@@ -183,14 +136,6 @@ final class ProfileView: UIView {
     
     @objc private func editProfileBtnTapped() {
         delegate?.didTapEditProfile()
-    }
-    
-    @objc private func myRewardViewTapped() {
-        delegate?.didTapMyRewardView()
-    }
-    
-    @objc private func myCharacterTapped() {
-        delegate?.didTapMyCharacterView()
     }
 }
 
@@ -214,6 +159,10 @@ extension ProfileView: UITableViewDelegate, UITableViewDataSource {
         switch menuItems[indexPath.row] {
         case "알림 설정":
             delegate?.didTapNotificationSettings()
+        case "회원정보 수정":
+            delegate?.didTapEditMemberInfo()
+        case "문의하기":
+            delegate?.didTapContact()
         case "앱 정보":
             delegate?.didTapAppInfo()
         case "로그아웃":

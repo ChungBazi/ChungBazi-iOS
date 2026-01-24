@@ -42,7 +42,7 @@ final class SearchResultViewController: UIViewController {
     }
 
     private lazy var popularKeywordsCollectionView: UICollectionView = {
-        let layout = UICollectionViewFlowLayout()
+        let layout = LeftAlignedCollectionViewFlowLayout()
         layout.minimumInteritemSpacing = 9
         layout.minimumLineSpacing = 9
         layout.sectionInset = UIEdgeInsets(top: 0, left: 16, bottom: 0, right: 16)
@@ -155,11 +155,11 @@ final class SearchResultViewController: UIViewController {
             $0.top.equalTo(searchView.snp.top).offset(60)
             $0.trailing.equalToSuperview().inset(16)
             $0.width.equalTo(91)
-            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+            $0.height.equalTo(36)
         }
         
         tableView.snp.makeConstraints { make in
-            make.top.equalTo(sortDropdown.snp.bottom).inset(65)
+            make.top.equalTo(sortDropdown.snp.bottom).offset(16)
             make.leading.trailing.bottom.equalToSuperview()
             make.bottom.equalToSuperview().inset(tabBarController?.tabBar.frame.height ?? 0)
         }

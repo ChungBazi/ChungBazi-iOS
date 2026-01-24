@@ -8,6 +8,7 @@
 import Foundation
 
 enum ChatbotMessageType {
+    case loading
     case text(String)
     case buttons([ChatbotButton])
     case policyCards([ChatbotPolicy])
