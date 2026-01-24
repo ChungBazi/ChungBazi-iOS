@@ -27,8 +27,6 @@ final class CommunityDetailViewController: UIViewController {
     
     private let refreshControl = UIRefreshControl()
     
-    private var commentInputBottomConstraint: Constraint?
-    
     private var isLoadingMore = false
     
     private let commentInputView = UIView().then {
@@ -97,15 +95,11 @@ final class CommunityDetailViewController: UIViewController {
         fetchCommentData()
         communityDetailView.scrollView.delegate = self
         
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillShow(_:)), name: UIResponder.keyboardWillShowNotification, object: nil)
-        NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
-        
         hookLikeHandlers()
         hookReplyHandlers()
     }
     
     deinit {
-        NotificationCenter.default.removeObserver(self)
     }
     
     override func viewWillAppear(_ animated: Bool) {
@@ -345,73 +339,6 @@ final class CommunityDetailViewController: UIViewController {
                 }
                 self.sendButton.isEnabled = true
             }
-        }
-    }
-    
-    @objc private func keyboardWillShow(_ notification: Notification) {
-        guard let keyboardFrame = notification.userInfo?[UIResponder.keyboardFrameEndUserInfoKey] as? CGRect,
-              let window = view.window else { return }
-        
-        let keyboardHeight = window.frame.height - keyboardFrame.origin.y
-        let safeAreaBottomInset = view.safeAreaInsets.bottom
-        let adjustedKeyboardHeight = keyboardHeight - safeAreaBottomInset
-        
-        UIView.animate(withDuration: 0.3) {
-            self.commentInputBottomConstraint?.deactivate()
-            self.commentInputBottomConstraint = nil
-            
-            self.commentInputView.snp.remakeConstraints { make in
-                make.leading.trailing.equalToSuperview()
-                make.bottom.equalToSuperview().offset(-keyboardHeight)
-                make.height.equalTo(68)
-            }
-            
-            self.scrollView.snp.remakeConstraints { make in
-                make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-                make.bottom.equalTo(self.commentInputView.snp.top)
-                make.leading.trailing.equalToSuperview()
-            }
-            
-            self.communityDetailView.snp.remakeConstraints { make in
-                make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
-                make.width.equalTo(self.scrollView.frameLayoutGuide)
-                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58 + adjustedKeyboardHeight)
-            }
-            
-            self.scrollView.contentInset.bottom = adjustedKeyboardHeight
-            self.scrollView.scrollIndicatorInsets.bottom = adjustedKeyboardHeight
-            
-            self.view.layoutIfNeeded()
-        }
-    }
-    
-    @objc private func keyboardWillHide(_ notification: Notification) {
-        UIView.animate(withDuration: 0.3) {
-            self.commentInputBottomConstraint?.deactivate()
-            self.commentInputBottomConstraint = nil
-            
-            self.commentInputView.snp.remakeConstraints { make in
-                make.leading.trailing.equalToSuperview()
-                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
-                make.height.equalTo(68)
-            }
-            
-            self.scrollView.snp.remakeConstraints { make in
-                make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top).inset(Constants.navigationHeight)
-                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom)
-                make.leading.trailing.equalToSuperview()
-            }
-            
-            self.communityDetailView.snp.remakeConstraints { make in
-                make.top.leading.trailing.equalTo(self.scrollView.contentLayoutGuide)
-                make.width.equalTo(self.scrollView.frameLayoutGuide)
-                make.bottom.equalTo(self.view.safeAreaLayoutGuide.snp.bottom).inset(58)
-            }
-            
-            self.scrollView.contentInset.bottom = 0
-            self.scrollView.scrollIndicatorInsets.bottom = 0
-            
-            self.view.layoutIfNeeded()
         }
     }
     
