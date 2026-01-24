@@ -94,10 +94,10 @@ final class PolicyView: UIView {
         categoryLabel.text = policy.categoryName
         titleLabel.text = policy.name
         
-        addPolicyInfo(title: "정책소개", value: policy.intro)
+        addPolicyInfo(title: "정책소개", value: policy.intro.nilIfBlank ?? "정보 없음")
         addPolicyInfo(title: "신청기간", value: formatDateRange(start: policy.startDate, end: policy.endDate))
         addPolicyInfo(title: "신청대상", value: formatTargetInfo(target))
-        addPolicyInfo(title: "심사결과", value: policy.result ?? "정보 없음")
+        addPolicyInfo(title: "심사결과", value: policy.result?.nilIfBlank ?? "-")
         
         let urls = URLHelper.normalizedUrls(from: policy)
         if urls.isEmpty {
@@ -106,9 +106,9 @@ final class PolicyView: UIView {
             addPolicyInfoLinks(title: "참고링크", urls: urls)
         }
         
-        addDetailInfo(title: "지원내용", value: policy.content)
-        addDetailInfo(title: "신청절차", value: policy.applyProcedure ?? "정보 없음")
-        addDetailInfo(title: "구비서류", value: policy.document ?? "정보 없음")
+        addDetailInfo(title: "지원내용", value: policy.content.nilIfBlank ?? "정보 없음")
+        addDetailInfo(title: "신청절차", value: policy.applyProcedure?.nilIfBlank ?? "-")
+        addDetailInfo(title: "구비서류", value: policy.document?.nilIfBlank ?? "-")
     }
     
     private func formatDateRange(start: String?, end: String?) -> String {

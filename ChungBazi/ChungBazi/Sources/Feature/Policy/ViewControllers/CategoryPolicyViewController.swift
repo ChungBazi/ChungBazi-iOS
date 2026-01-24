@@ -12,10 +12,11 @@ final class CategoryPolicyViewController: UIViewController {
     private let networkService = PolicyService()
     private var policyList: [PolicyItem] = []
     private var categoryTitle: String?
-    private var nextCursor: String?
+    private var nextCursor: String = ""
     private var hasNext: Bool = false
     private var sortOrder: String = "latest"
     private var categoryKey: String?
+    private var isLoadingMore: Bool = false
 
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
@@ -30,8 +31,17 @@ final class CategoryPolicyViewController: UIViewController {
         tableView.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
         tableView.separatorStyle = .none
         tableView.backgroundColor = .clear
+        tableView.contentInset.bottom = 20
         return tableView
     }()
+    
+    private let emptyStateLabel = UILabel().then {
+        $0.text = "정책이 존재하지 않습니다."
+        $0.textAlignment = .center
+        $0.textColor = .gray600
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.isHidden = true
+    }
 
     private let safeAreaBackgroundView: UIView = {
         let view = UIView()
@@ -57,7 +67,7 @@ final class CategoryPolicyViewController: UIViewController {
         configureDropdown()
         
         if let categoryKey = categoryKey {
-            fetchCategoryPolicy(category: categoryKey, cursor: 0)
+            fetchCategoryPolicy(category: categoryKey, cursor: "", order: sortOrder)
         }
     }
 
@@ -71,18 +81,22 @@ final class CategoryPolicyViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubviews(sortDropdown, tableView)
+        view.addSubviews(sortDropdown, tableView, emptyStateLabel)
         
         sortDropdown.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
             $0.trailing.equalTo(view.safeAreaLayoutGuide).offset(-16)
             $0.width.equalTo(91)
-            $0.height.equalTo(36 * Constants.sortItems.count + 36 + 8)
+            $0.height.equalTo(36)
         }
         
         tableView.snp.makeConstraints {
-            $0.top.equalTo(sortDropdown.snp.bottom).offset(-70)
+            $0.top.equalTo(sortDropdown.snp.bottom).offset(16)
             $0.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        emptyStateLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
     }
     
@@ -105,37 +119,51 @@ final class CategoryPolicyViewController: UIViewController {
         self.categoryKey = categoryKey
     }
 
-    func fetchCategoryPolicy(category: String, cursor: Int) {
-        networkService.fetchCategoryPolicy(category: category, cursor: cursor, order: sortOrder) { [weak self] result in
-        guard let self = self else { return }
-        switch result {
-        case .success(let response):
-            guard let response = response,
-                    let policyContent = response.policies else { return }
-                    
-            let newPolicies = response.policies?.compactMap { data in
-                PolicyItem(
-                    policyId: data.policyId ?? 0,
-                    policyName: data.policyName ?? "이름 없음",
-                    startDate: data.startDate ?? "상시",
-                    endDate: data.endDate ?? "상시",
-                    dday: data.dday ?? 0
-                )
-            } ?? []
-                    
-            if cursor != 0 {
-                self.policyList.append(contentsOf: newPolicies)
-            } else {
-                self.policyList = newPolicies
-            }
+    func fetchCategoryPolicy(category: String, cursor: String, order: String) {
+        if isLoadingMore && !cursor.isEmpty {
+            return
+        }
+        
+        if !cursor.isEmpty {
+            isLoadingMore = true
+        }
+        
+        networkService.fetchCategoryPolicy(category: category, cursor: cursor, order: order) { [weak self] result in
+            guard let self = self else { return }
+            self.isLoadingMore = false
+            
+            switch result {
+            case .success(let response):
+                guard let response = response,
+                      let policyContent = response.policies else { return }
+                
+                let policies: [PolicyItem] = policyContent.compactMap { policy -> PolicyItem? in
+                    guard let policyId = policy.policyId else { return nil }
 
-            self.nextCursor = response.nextCursor ?? ""
-            self.hasNext = response.hasNext
-                    
+                    return PolicyItem(
+                        policyId: policyId,
+                        policyName: policy.policyName ?? "제목 없음",
+                        startDate: policy.startDate ?? "상시",
+                        endDate: policy.endDate ?? "상시",
+                        dday: policy.dday
+                    )
+                }
+                
+                if cursor.isEmpty {
+                    self.policyList = policies
+                } else {
+                    self.policyList.append(contentsOf: policies)
+                }
+                
+                self.nextCursor = response.nextCursor ?? ""
+                self.hasNext = response.hasNext
+                
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
+                    let hasResults = self.policyList.isEmpty
+                    self.emptyStateLabel.isHidden = !hasResults
                 }
-
+                
             case .failure(let error):
                 print("❌ 카테고리별 정책 조회 실패: \(error.localizedDescription)")
             }
@@ -173,6 +201,8 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
     }
 
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isLoadingMore else { return }
+        
         let contentOffsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
@@ -180,7 +210,7 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
         if contentOffsetY > contentHeight - scrollViewHeight - 100 {
             guard hasNext else { return }
             if let categoryKey = categoryKey {
-                fetchCategoryPolicy(category: categoryKey, cursor: 0)
+                fetchCategoryPolicy(category: categoryKey, cursor: nextCursor, order: sortOrder)
             }
         }
     }
@@ -193,9 +223,11 @@ extension CategoryPolicyViewController: CustomDropdownDelegate {
             let order = (item == "마감순") ? "deadline" : "latest"
             if sortOrder != order {
                 sortOrder = order
-                sortDropdown.dropdownView.titleLabel.text = item
+                DispatchQueue.main.async {
+                    self.tableView.setContentOffset(.zero, animated: true)
+                }
                 if let categoryKey = categoryKey {
-                    fetchCategoryPolicy(category: categoryKey, cursor: 0)
+                    fetchCategoryPolicy(category: categoryKey, cursor: "", order: sortOrder)
                 }
             }
         }

@@ -109,13 +109,14 @@ class ProfileViewController: UIViewController {
         let vc = ProfileAppInfoViewController()
         navigationController?.pushViewController(vc, animated: true)
     }
+    
+    private func navigateToEditMemberInfo() {
+        let vc = MemberInfoEditViewController()
+        navigationController?.pushViewController(vc, animated: true)
+    }
 }
 
 extension ProfileViewController: ProfileViewDelegate {
-    func didTapMyCharacterView() {
-        let vc = MyCharacterViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
     
     func didTapEditProfile() {
         navigateToEditProfile()
@@ -123,6 +124,14 @@ extension ProfileViewController: ProfileViewDelegate {
     
     func didTapNotificationSettings() {
         navigateToNotificationSettings()
+    }
+    
+    func didTapEditMemberInfo() {
+        navigateToEditMemberInfo()
+    }
+    
+    func didTapContact() {
+        print("")
     }
     
     func didTapAppInfo() {

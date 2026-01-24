@@ -57,19 +57,69 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         if (AuthApi.isKakaoTalkLoginUrl(url)) {
             return AuthController.handleOpenUrl(url: url)
         }
-//        if url.scheme == "chungbazi", let host = url.host, host == "policy",
-//           let policyIdString = url.pathComponents.last, let policyId = Int(policyIdString) {
-//            
-//            let policyDetailVC = PolicyDetailViewController()
-//            policyDetailVC.policyId = policyId
-//            
-//            if let keyWindow = UIApplication.shared.windows.first(where: { $0.isKeyWindow }),
-//               let rootVC = keyWindow.rootViewController as? UINavigationController {
-//                rootVC.pushViewController(policyDetailVC, animated: true)
-//            }
-//            return true
-//        }
+        
+        if (url.scheme?.hasPrefix("kakao") == true) && (url.host == "kakaolink") {
+            handleKakaoLink(url)   // AppDelegate에도 동일 함수 두거나 공용으로 빼기
+            return true
+        }
+        
+        if url.scheme == "chungbazi" {
+            // SceneDelegate에서 처리
+            if #available(iOS 13.0, *) {
+                return true
+            }
+            
+            // iOS 12 이하에서는 여기서 직접 처리
+            handleDeepLink(url: url)
+            return true
+        }
+        
         return false
+    }
+    
+    private func handleDeepLink(url: URL) {
+        guard url.scheme == "chungbazi", let host = url.host else { return }
+        
+        let pathComponents = url.pathComponents
+        
+        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+              let window = windowScene.windows.first,
+              let navigationController = window.rootViewController as? UINavigationController else {
+            return
+        }
+        
+        var destinationVC: UIViewController?
+        
+        switch host {
+        case "policy":
+            if pathComponents.count > 1, let policyId = Int(pathComponents[1]) {
+                let vc = PolicyDetailViewController()
+                vc.policyId = policyId
+                destinationVC = vc
+            }
+        default:
+            break
+        }
+        
+        if let destinationVC = destinationVC {
+            navigationController.pushViewController(destinationVC, animated: true)
+        }
+    }
+    
+    private func handleKakaoLink(_ url: URL) {
+        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
+              let queryItems = components.queryItems else { return }
+
+        // 너가 iosExecutionParams로 넘긴 key가 "url" 이었지
+        if let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
+           let decoded = deepLinkString.removingPercentEncoding,
+           let deepLinkURL = URL(string: decoded) {
+
+            // 여기서 기존 로직 재사용
+            if deepLinkURL.scheme == "chungbazi" {
+                handleDeepLink(url: deepLinkURL)
+            }
+        }
     }
 
     // MARK: UISceneSession Lifecycle
