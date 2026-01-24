@@ -267,18 +267,14 @@ final class HomeViewController: UIViewController {
     
     @objc private func categoryButtonTapped(_ sender: UIButton) {
         let categoryTitle = categories[sender.tag].title
-        guard let categoryKey = categoryMapping[categoryTitle] else {
-            print("⚠️ 지원되지 않는 카테고리: \(categoryTitle)")
-            return
-        }
+        guard let categoryKey = categoryMapping[categoryTitle] else { return }
         let categoryVC = CategoryPolicyViewController()
         categoryVC.configure(categoryTitle: categoryTitle, categoryKey: categoryKey)
-        categoryVC.fetchCategoryPolicy(category: categoryKey, cursor: 0)
         navigationController?.pushViewController(categoryVC, animated: true)
     }
     
     private func fetchNotificationStatus() {
-        networkService.fetchRecommendPolicy(category: "JOBS", cursor: 0, order: sortOrder) { [weak self] result in
+        networkService.fetchRecommendPolicy(category: "JOBS", cursor: "", order: sortOrder) { [weak self] result in
             guard let self = self else { return }
             
             switch result {

@@ -10,6 +10,7 @@ import Then
 final class CartViewController: UIViewController {
     
     private let networkService = CartService()
+    private var categories: [String] = []
     private var cartItems: [String: [PolicyItem]] = [:]
     private var selectedItems: Set<Int> = []
     private var categoryExpansionState: [String: Bool] = [:]
@@ -51,6 +52,14 @@ final class CartViewController: UIViewController {
         tableView.isScrollEnabled = false
         return tableView
     }()
+    
+    private let emptyStateLabel = UILabel().then {
+        $0.text = "담은 정책이 없습니다."
+        $0.textAlignment = .center
+        $0.textColor = .gray600
+        $0.font = .ptdMediumFont(ofSize: 16)
+        $0.isHidden = true
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -69,7 +78,7 @@ final class CartViewController: UIViewController {
     
     private func setupScrollView() {
         view.addSubview(scrollView)
-        scrollView.addSubview(contentView)
+        scrollView.addSubviews(contentView, emptyStateLabel)
         contentView.addSubviews(headerView, tableView)
         
         guard let navigationBarView = self.view.subviews.first(where: { $0 is UIView }) else { return }
@@ -77,6 +86,10 @@ final class CartViewController: UIViewController {
         scrollView.snp.makeConstraints { make in
             make.top.equalTo(navigationBarView.snp.bottom)
             make.leading.trailing.bottom.equalToSuperview()
+        }
+        
+        emptyStateLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
         }
         
         contentView.snp.makeConstraints { make in
@@ -115,6 +128,8 @@ final class CartViewController: UIViewController {
             make.height.equalTo(1)
             make.bottom.equalToSuperview()
         }
+        
+        
     }
 
     private func configureTableView() {
@@ -140,20 +155,6 @@ final class CartViewController: UIViewController {
     private func updateDeleteButtonState() {
         deleteButton.isEnabled = !selectedItems.isEmpty
         deleteButton.setTitleColor(selectedItems.isEmpty ? .gray300 : .blue700, for: .normal)
-    }
-    
-    public func postCart(policyId: Int) {
-        networkService.postCart(policyId: policyId) { [weak self] result in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    self.fetchCartList()
-                case .failure(let error):
-                    print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
-                }
-            }
-        }
     }
     
     public func deleteCart() {
@@ -191,6 +192,8 @@ final class CartViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     self.updateTableViewHeight()
+                    let hasResults = self.categories.isEmpty
+                    self.emptyStateLabel.isHidden = !hasResults
                 }
             case .failure(let error):
                 print("❌ 네트워크 요청 실패: \(error.localizedDescription)")
@@ -200,6 +203,7 @@ final class CartViewController: UIViewController {
     
     private func convertCartResponse(_ response: [CategoryPolicyList]) -> [String: [PolicyItem]] {
         var categorizedItems: [String: [PolicyItem]] = [:]
+        var orderedCategories: [String] = [] // 카테고리 순서 저장 배열
         
         response.forEach { categoryData in
             guard let categoryName = categoryData.categoryName else {
@@ -211,25 +215,25 @@ final class CartViewController: UIViewController {
                 return
             }
             
-            let policies: [PolicyItem] = cartPolicies.compactMap { policy in
-                guard let policyId = policy.policyId,
-                      let name = policy.name,
-                      let startDate = policy.startDate,
-                      let endDate = policy.endDate else { return nil }
+            let policies: [PolicyItem] = cartPolicies.compactMap { policy -> PolicyItem? in
+                guard let policyId = policy.policyId else { return nil }
 
                 return PolicyItem(
                     policyId: policyId,
-                    policyName: name,
-                    startDate: startDate,
-                    endDate: endDate,
-                    dday: policy.dday ?? 0
+                    policyName: policy.name ?? "제목 없음",
+                    startDate: policy.startDate ?? "상시",
+                    endDate: policy.endDate ?? "상시",
+                    dday: policy.dday
                 )
             }
 
             if !policies.isEmpty {
                 categorizedItems[categoryName] = policies
+                orderedCategories.append(categoryName)
             }
         }
+        
+        self.categories = orderedCategories
         return categorizedItems
     }
 
@@ -242,6 +246,8 @@ final class CartViewController: UIViewController {
         tableView.snp.updateConstraints { make in
             make.height.equalTo(totalHeight)
         }
+        
+        view.layoutIfNeeded()
     }
 
     @objc private func handleDeleteSelectedItems() {
@@ -252,11 +258,12 @@ final class CartViewController: UIViewController {
 // MARK: - UITableViewDataSource, UITableViewDelegate
 extension CartViewController: UITableViewDataSource {
     func numberOfSections(in tableView: UITableView) -> Int {
-        return cartItems.keys.count
+        return categories.count
     }
     
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        let category = Array(cartItems.keys)[section]
+        guard section < categories.count else { return 0 }
+        let category = categories[section]
         return cartItems[category]?.count ?? 0
     }
 
@@ -265,7 +272,7 @@ extension CartViewController: UITableViewDataSource {
             return UITableViewCell()
         }
 
-        let category = Array(cartItems.keys)[indexPath.section]
+        let category = categories[indexPath.section]
         if let item = cartItems[category]?[indexPath.row] {
             cell.configure(with: item, keyword: nil)
             cell.selectedBackgroundView = UIView()
@@ -287,7 +294,7 @@ extension CartViewController: UITableViewDataSource {
     }
 
     func tableView(_ tableView: UITableView, viewForHeaderInSection section: Int) -> UIView? {
-        let category = Array(cartItems.keys)[section]
+        let category = categories[section]
 
         let categoryView = CartCategoryView()
         categoryView.configure(with: category)
@@ -305,7 +312,7 @@ extension CartViewController: UITableViewDelegate {
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         tableView.deselectRow(at: indexPath, animated: true)
 
-        let category = Array(cartItems.keys)[indexPath.section]
+        let category = categories[indexPath.section]
         guard let item = cartItems[category]?[indexPath.row] else { return }
 
         let vc = PolicyDetailViewController()

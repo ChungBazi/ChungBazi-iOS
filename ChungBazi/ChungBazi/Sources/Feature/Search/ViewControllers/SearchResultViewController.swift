@@ -15,6 +15,7 @@ final class SearchResultViewController: UIViewController {
     private var nextCursor: String = ""
     private var hasNext: Bool = false
     private var sortOrder: String = "latest"
+    private var isLoadingMore = false
     
     private let searchView = UIView().then {
         $0.backgroundColor = .white
@@ -63,6 +64,7 @@ final class SearchResultViewController: UIViewController {
         $0.register(PolicyCardViewCell.self, forCellReuseIdentifier: PolicyCardViewCell.identifier)
         $0.separatorStyle = .none
         $0.backgroundColor = .clear
+        $0.contentInset.bottom = 20
     }
     
     private let emptyStateLabel = UILabel().then {
@@ -187,30 +189,41 @@ final class SearchResultViewController: UIViewController {
         executeSearch()
     }
 
-    private func searchPolicy(name: String, cursor: String) {
-        networkService.searchPolicy(name: name, cursor: cursor, order: sortOrder) { [weak self] result in
+    private func searchPolicy(name: String, cursor: String, order: String) {
+        if isLoadingMore && !cursor.isEmpty {
+            return
+        }
+        
+        if !cursor.isEmpty {
+            isLoadingMore = true
+        }
+        
+        networkService.searchPolicy(name: name, cursor: cursor, order: order) { [weak self] result in
             guard let self = self else { return }
+            
+            self.isLoadingMore = false
+            
             switch result {
             case .success(let response):
                 guard let response = response,
                       let policyContent = response.policies else { return }
                 
-                let newPolicies: [PolicyItem] = policyContent.compactMap { data in
-                    guard let policyId = data.policyId,
-                          let policyName = data.policyName,
-                          let startDate = data.startDate,
-                          let endDate = data.endDate,
-                          let dday = data.dday else {
-                        print("정책이 없습니다.")
-                        return nil
-                    }
-                    return PolicyItem(policyId: policyId, policyName: policyName, startDate: startDate, endDate: endDate, dday: dday)
+                let policies: [PolicyItem] = policyContent.compactMap { policy -> PolicyItem? in
+                    guard let policyId = policy.policyId else { return nil }
+
+                    return PolicyItem(
+                        policyId: policyId,
+                        policyName: policy.policyName ?? "제목 없음",
+                        startDate: policy.startDate ?? "상시",
+                        endDate: policy.endDate ?? "상시",
+                        dday: policy.dday
+                    )
                 }
 
                 if cursor.isEmpty {
-                    self.policyList = newPolicies
+                    self.policyList = policies
                 } else {
-                    self.policyList.append(contentsOf: newPolicies)
+                    self.policyList.append(contentsOf: policies)
                 }
 
                 self.nextCursor = response.nextCursor ?? ""
@@ -263,7 +276,7 @@ final class SearchResultViewController: UIViewController {
         searchTextField.resignFirstResponder()
         policyList.removeAll()
         tableView.reloadData()
-        searchPolicy(name: query, cursor: "")
+        searchPolicy(name: query, cursor: "", order: sortOrder)
     }
     
     private func showCharacterLimitAlert() {
@@ -273,8 +286,10 @@ final class SearchResultViewController: UIViewController {
     }
     
     private func fetchMorePolicies() {
-        guard !nextCursor.isEmpty else { return }
-        searchPolicy(name: searchTextField.text ?? "", cursor: nextCursor)
+        guard !isLoadingMore, !nextCursor.isEmpty, hasNext else {
+            return
+        }
+        searchPolicy(name: searchTextField.text ?? "", cursor: nextCursor, order: sortOrder)
     }
 
 }
@@ -371,6 +386,8 @@ extension SearchResultViewController: UICollectionViewDelegateFlowLayout {
 // MARK: - UIScrollViewDelegate (페이징)
 extension SearchResultViewController: UIScrollViewDelegate {
     func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard !isLoadingMore else { return }
+        
         let contentOffsetY = scrollView.contentOffset.y
         let contentHeight = scrollView.contentSize.height
         let scrollViewHeight = scrollView.frame.size.height
