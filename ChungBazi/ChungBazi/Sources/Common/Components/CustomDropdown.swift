@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import SnapKit
 
 protocol CustomDropdownDelegate: AnyObject {
     func dropdown(_ dropdown: CustomDropdown, didSelectItem item: String)
@@ -17,28 +18,30 @@ class CustomDropdown: UIView {
     weak var delegate: CustomDropdownDelegate?
     
     private var viewHeight: CGFloat = 0
-    private var cellHeight: CGFloat = 0 // 각 셀의 높이
-    private var fontSize: CGFloat = 0 // 폰트 크기
+    private var cellHeight: CGFloat = 0
+    private var fontSize: CGFloat = 0
     private var hasShadow: Bool
     
     let dropdownView: CustomDropdownView
     
     private lazy var dropdownTableView: UITableView = {
         let tableView = UITableView()
-        tableView.isHidden = true // 초기에는 숨김
+        tableView.isHidden = true
         tableView.layer.cornerRadius = 10
         tableView.layer.masksToBounds = true
         tableView.delegate = self
         tableView.dataSource = self
         tableView.separatorStyle = .none
-        tableView.isScrollEnabled = false // 스크롤 비활성화
+        tableView.isScrollEnabled = false
+        tableView.backgroundColor = .white
         return tableView
     }()
     
     private lazy var dropdownContainerView: UIView = {
         let view = UIView()
         view.backgroundColor = .clear
-        if hasShadow { // 쉐도우 옵션에 따라 적용 여부 결정
+        view.isHidden = true
+        if hasShadow {
             applyShadow(to: view)
         }
         return view
@@ -46,7 +49,7 @@ class CustomDropdown: UIView {
     
     private var dropdownItems: [String] = []
     private var isDropdownOpen = false
-    private var selectedItem: String?
+    var selectedItem: String?
     private var panGesture: UIPanGestureRecognizer!
     
     // MARK: - Initializer
@@ -58,6 +61,7 @@ class CustomDropdown: UIView {
         self.dropdownView = CustomDropdownView(title: title, fontSize: fontSize, hasBorder: hasBorder)
         self.hasShadow = hasShadow
         super.init(frame: .zero)
+        
         setupUI()
         setupGesture()
         configureDropdownView()
@@ -69,34 +73,28 @@ class CustomDropdown: UIView {
     
     // MARK: - Setup UI
     private func setupUI() {
+        // dropdownView만 CustomDropdown에 추가
         addSubview(dropdownView)
-        addSubview(dropdownContainerView)
+        
+        // dropdownContainerView에 tableView 추가 (아직 어디에도 추가 안함)
         dropdownContainerView.addSubview(dropdownTableView)
         
-        // 드롭다운 뷰 레이아웃
+        // dropdownView가 CustomDropdown의 크기를 결정
         dropdownView.snp.makeConstraints {
-            $0.top.leading.trailing.equalToSuperview()
+            $0.edges.equalToSuperview()
             $0.height.equalTo(viewHeight)
         }
         
-        dropdownContainerView.snp.makeConstraints {
-            $0.top.equalTo(dropdownView.snp.bottom).offset(8)
-            $0.leading.trailing.equalToSuperview()
-            $0.height.equalTo(0)
-        }
-        
-        // 테이블 뷰 레이아웃
+        // dropdownTableView는 dropdownContainerView를 채움
         dropdownTableView.snp.makeConstraints {
             $0.edges.equalToSuperview()
-            $0.height.equalTo(0) // 초기 높이 0
         }
     }
     
     private func applyShadow(to view: UIView) {
-        view.layer.shadowColor = UIColor.black.cgColor // 블랙 색상 (#000000)
-        view.layer.shadowOpacity = 0.2 // 투명도 20%
-        view.layer.shadowOffset = CGSize(width: 0, height: 4) // X: 0, Y: 4
-        view.layer.shadowRadius = 10 // Blur 값 (흐림 정도)
+        view.layer.shadowColor = UIColor.black.cgColor
+        view.layer.shadowOpacity = 0.2
+        view.layer.shadowOffset = CGSize(width: 0, height: 4)
         view.layer.shadowRadius = 10
         view.layer.masksToBounds = false
     }
@@ -119,11 +117,11 @@ class CustomDropdown: UIView {
             // 선택된 셀 동작 실행
             dropdownTableView.selectRow(at: indexPath, animated: true, scrollPosition: .none)
             tableView(dropdownTableView, didSelectRowAt: indexPath)
-            
             // 하이라이트 해제
             applyHighlight(to: dropdownTableView, at: indexPath, highlight: false)
         }
     }
+    
     private func applyHighlight(to tableView: UITableView, at indexPath: IndexPath, highlight: Bool) {
         guard let cell = tableView.cellForRow(at: indexPath) else { return }
         
@@ -151,17 +149,73 @@ class CustomDropdown: UIView {
         isDropdownOpen.toggle()
         let iconName = isDropdownOpen ? "dropup_icon" : "dropdown_icon"
         dropdownView.dropdownImageView.image = UIImage(named: iconName)?.withRenderingMode(.alwaysOriginal)
-        dropdownContainerView.isHidden = !isDropdownOpen
-        dropdownTableView.isHidden = !isDropdownOpen
         
-        // 테이블 높이를 동적으로 계산
-        let tableHeight = dropdownTableView.contentSize.height
-        dropdownTableView.snp.updateConstraints { make in
-            make.height.equalTo(isDropdownOpen ? tableHeight : 0)
+        if isDropdownOpen {
+            showDropdown()
+        } else {
+            hideDropdown()
         }
-        dropdownContainerView.snp.updateConstraints { make in
-            make.height.equalTo(isDropdownOpen ? tableHeight : 0)
+    }
+    
+    // 드롭다운 표시 - 부모 뷰에 overlay로 추가
+    private func showDropdown() {
+        guard let parentView = findScrollViewOrView() else { return }
+        
+        // dropdownContainerView를 부모 뷰에 추가
+        parentView.addSubview(dropdownContainerView)
+        
+        // dropdownView의 부모 뷰 기준 위치 계산
+        let dropdownFrame = dropdownView.convert(dropdownView.bounds, to: parentView)
+        
+        let tableHeight = CGFloat(dropdownItems.count) * cellHeight
+        
+        dropdownContainerView.snp.makeConstraints {
+            $0.top.equalTo(parentView.snp.top).offset(dropdownFrame.maxY + 8)
+            $0.leading.equalTo(parentView.snp.leading).offset(dropdownFrame.minX)
+            $0.width.equalTo(dropdownFrame.width)
+            $0.height.equalTo(tableHeight)
         }
+        
+        dropdownContainerView.isHidden = false
+        dropdownTableView.isHidden = false
+        
+        dropdownContainerView.alpha = 0
+        UIView.animate(withDuration: 0.2) {
+            self.dropdownContainerView.alpha = 1
+        }
+    }
+    
+    // 드롭다운 숨김
+    private func hideDropdown() {
+        UIView.animate(withDuration: 0.2, animations: {
+            self.dropdownContainerView.alpha = 0
+        }) { _ in
+            self.dropdownContainerView.removeFromSuperview()
+            self.dropdownContainerView.isHidden = true
+            self.dropdownTableView.isHidden = true
+            
+            // 제약조건 제거
+            self.dropdownContainerView.snp.removeConstraints()
+        }
+    }
+    
+    // 적절한 부모 뷰 찾기 (ScrollView 또는 최상위 뷰)
+    private func findScrollViewOrView() -> UIView? {
+        var currentView: UIView? = self.superview
+        
+        while currentView != nil {
+            // ScrollView를 찾으면 그것을 사용
+            if currentView is UIScrollView {
+                return currentView
+            }
+            // 또는 ViewController의 view까지 올라감
+            if currentView?.next is UIViewController {
+                return currentView
+            }
+            currentView = currentView?.superview
+        }
+        
+        return self.superview
     }
     
     func didSelectItem(at index: Int) {
@@ -173,6 +227,20 @@ class CustomDropdown: UIView {
     func setItems(_ items: [String]) {
         self.dropdownItems = items
         dropdownTableView.reloadData()
+    }
+    
+    func setSelectedItem(_ item: String?) {
+        guard let item = item else { return }
+        self.selectedItem = item
+        dropdownView.titleLabel.text = item
+        dropdownView.titleLabel.textColor = .black
+    }
+    
+    // 외부에서 드롭다운 닫기
+    func closeDropdown() {
+        if isDropdownOpen {
+            toggleDropdown()
+        }
     }
 }
 
@@ -187,20 +255,24 @@ extension CustomDropdown: UITableViewDelegate, UITableViewDataSource {
         cell.textLabel?.text = dropdownItems[indexPath.row]
         cell.textLabel?.font = UIFont.ptdMediumFont(ofSize: fontSize)
         cell.textLabel?.textColor = UIColor.gray400
-        
         cell.selectionStyle = .none
+        cell.backgroundColor = .white
         return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return cellHeight
     }
     
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let selectedItem = dropdownItems[indexPath.row]
-        dropdownView.titleLabel.text = selectedItem // 선택된 항목 업데이트
+        dropdownView.titleLabel.text = selectedItem
         dropdownView.titleLabel.textColor = .black
+        self.selectedItem = selectedItem
         toggleDropdown()
         delegate?.dropdown(self, didSelectItem: selectedItem)
     }
     
-    // 셀 하이라이트 처리 (터치로 훑을 때)
     func tableView(_ tableView: UITableView, willHighlightRowAt indexPath: IndexPath) -> IndexPath? {
         let cell = tableView.cellForRow(at: indexPath)
         UIView.animate(withDuration: 0.2) {
@@ -216,6 +288,7 @@ extension CustomDropdown: UITableViewDelegate, UITableViewDataSource {
         }
     }
     
+    // 셀 하이라이트 처리
     func tableView(_ tableView: UITableView, didUnhighlightRowAt indexPath: IndexPath) {
         let cell = tableView.cellForRow(at: indexPath)
         UIView.animate(withDuration: 0.2) {

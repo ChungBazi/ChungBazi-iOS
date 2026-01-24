@@ -18,9 +18,23 @@ final class ChatbotMessageCell: UITableViewCell {
         $0.numberOfLines = 0
         $0.lineBreakMode = .byCharWrapping
         $0.font = UIFont.ptdMediumFont(ofSize: 14)
+        $0.layer.cornerRadius = 10
         $0.layer.masksToBounds = true
         $0.setContentCompressionResistancePriority(.required, for: .vertical)
         $0.setContentHuggingPriority(.required, for: .vertical)
+    }
+    
+    private let loadingContainerView = UIView().then {
+        $0.backgroundColor = .white
+        $0.layer.cornerRadius = 10
+        $0.layer.masksToBounds = true
+    }
+    
+    private let loadingDotsStackView = UIStackView().then {
+        $0.axis = .horizontal
+        $0.spacing = 6
+        $0.alignment = .center
+        $0.distribution = .equalSpacing
     }
     
     private let timestampLabel = UILabel().then {
@@ -48,6 +62,7 @@ final class ChatbotMessageCell: UITableViewCell {
         backgroundColor = .clear
         contentView.backgroundColor = .clear
         setupViews()
+        setupLoadingDots()
     }
     
     required init?(coder: NSCoder) {
@@ -57,16 +72,74 @@ final class ChatbotMessageCell: UITableViewCell {
     private func setupViews() {
         selectionStyle = .none
         contentView.addSubview(messageLabel)
+        contentView.addSubview(loadingContainerView)
+        loadingContainerView.addSubview(loadingDotsStackView)
         contentView.addSubview(timestampLabel)
         contentView.addSubview(botIconBackgroundView)
         botIconBackgroundView.addSubview(botIconImageView)
         contentView.addSubview(buttonContainerView)
     }
     
+    private func setupLoadingDots() {
+        let colors: [UIColor] = [
+            UIColor.blue200,
+            UIColor.blue500,
+            UIColor.blue700
+        ]
+        
+        for color in colors {
+            let dot = createDot(color: color)
+            loadingDotsStackView.addArrangedSubview(dot)
+        }
+        
+        loadingDotsStackView.snp.makeConstraints {
+            $0.centerY.equalToSuperview()
+            $0.leading.trailing.equalToSuperview().inset(21)
+            $0.height.equalTo(8)
+        }
+    }
+    
+    private func createDot(color: UIColor) -> UIView {
+        let dot = UIView()
+        dot.backgroundColor = color
+        dot.layer.cornerRadius = 4
+        dot.snp.makeConstraints {
+            $0.width.height.equalTo(8)
+        }
+        return dot
+    }
+    
+    override func prepareForReuse() {
+        super.prepareForReuse()
+        
+        // 모든 뷰 숨김
+        messageLabel.isHidden = true
+        loadingContainerView.isHidden = true
+        timestampLabel.isHidden = true
+        botIconBackgroundView.isHidden = true
+        buttonContainerView.isHidden = true
+        
+        // 텍스트 초기화
+        messageLabel.text = nil
+        timestampLabel.text = nil
+        
+        // 버튼 제거
+        buttonContainerView.subviews.forEach { $0.removeFromSuperview() }
+        
+        // 제약조건 완전히 제거
+        messageLabel.snp.removeConstraints()
+        loadingContainerView.snp.removeConstraints()
+        timestampLabel.snp.removeConstraints()
+        botIconBackgroundView.snp.removeConstraints()
+        botIconImageView.snp.removeConstraints()
+        buttonContainerView.snp.removeConstraints()
+    }
+    
     func configure(with message: ChatbotMessage, delegate: ChatbotButtonCellDelegate?) {
         self.delegate = delegate
         
         messageLabel.isHidden = true
+        loadingContainerView.isHidden = true
         timestampLabel.isHidden = true
         botIconBackgroundView.isHidden = true
         buttonContainerView.isHidden = true
@@ -76,6 +149,30 @@ final class ChatbotMessageCell: UITableViewCell {
         timestampLabel.text = dateFormatter.string(from: message.timestamp)
         
         switch message.type {
+        case .loading:
+            isUserMessage = message.isUser
+            botIconBackgroundView.isHidden = false
+            loadingContainerView.isHidden = false
+            
+            botIconBackgroundView.snp.remakeConstraints {
+                $0.top.equalToSuperview().offset(11)
+                $0.leading.equalToSuperview().offset(16)
+                $0.width.height.equalTo(47.25)
+            }
+            
+            botIconImageView.snp.remakeConstraints {
+                $0.top.equalTo(botIconBackgroundView).offset(4)
+                $0.left.equalTo(botIconBackgroundView).offset(6)
+                $0.right.equalTo(botIconBackgroundView).inset(5.25)
+                $0.bottom.equalTo(botIconBackgroundView).inset(7.25)
+            }
+            
+            loadingContainerView.snp.remakeConstraints {
+                $0.top.equalTo(botIconBackgroundView.snp.bottom).offset(9)
+                $0.leading.equalTo(botIconBackgroundView.snp.leading)
+                $0.bottom.equalToSuperview().inset(19)
+                $0.height.equalTo(40)
+            }
         case .text(let text):
             isUserMessage = message.isUser
             messageLabel.isHidden = false
@@ -86,9 +183,10 @@ final class ChatbotMessageCell: UITableViewCell {
                 botIconBackgroundView.isHidden = true
                 
                 messageLabel.snp.remakeConstraints {
-                    $0.top.bottom.equalToSuperview().inset(4)
+                    $0.top.equalToSuperview().offset(3)
                     $0.trailing.equalToSuperview().inset(16)
                     $0.width.lessThanOrEqualTo(243)
+                    $0.bottom.equalToSuperview().inset(11)
                 }
                 
                 timestampLabel.snp.remakeConstraints {
@@ -103,7 +201,7 @@ final class ChatbotMessageCell: UITableViewCell {
                 botIconBackgroundView.isHidden = false
                 
                 botIconBackgroundView.snp.remakeConstraints {
-                    $0.top.equalToSuperview().offset(4)
+                    $0.top.equalToSuperview().offset(11)
                     $0.leading.equalToSuperview().offset(16)
                     $0.width.height.equalTo(47.25)
                 }
@@ -119,12 +217,12 @@ final class ChatbotMessageCell: UITableViewCell {
                     $0.top.equalTo(botIconBackgroundView.snp.bottom).offset(9)
                     $0.leading.equalTo(botIconBackgroundView.snp.leading)
                     $0.width.lessThanOrEqualTo(230)
-                    $0.bottom.equalToSuperview().inset(4)
+                    $0.bottom.equalToSuperview().inset(19)
                 }
                 
                 timestampLabel.snp.remakeConstraints {
-                    $0.bottom.equalTo(botIconBackgroundView.snp.bottom)
-                    $0.leading.equalTo(botIconBackgroundView.snp.trailing).offset(10)
+                    $0.bottom.equalTo(messageLabel.snp.bottom)
+                    $0.leading.equalTo(messageLabel.snp.trailing).offset(9)
                 }
                 
                 messageLabel.backgroundColor = UIColor.white
@@ -151,8 +249,8 @@ final class ChatbotMessageCell: UITableViewCell {
             }
 
             timestampLabel.snp.remakeConstraints {
-                $0.bottom.equalTo(botIconBackgroundView.snp.bottom)
-                $0.leading.equalTo(botIconBackgroundView.snp.trailing).offset(10)
+                $0.bottom.equalTo(messageLabel.snp.bottom)
+                $0.leading.equalTo(messageLabel.snp.trailing).offset(9)
             }
 
             messageLabel.isHidden = false
@@ -228,25 +326,19 @@ final class ChatbotMessageCell: UITableViewCell {
                 $0.leading.equalTo(botIconBackgroundView.snp.leading)
                 $0.width.lessThanOrEqualTo(262)
                 $0.height.equalTo(currentY + currentRowHeight)
-                $0.bottom.equalToSuperview().inset(4)
+                $0.bottom.equalToSuperview().inset(19)
             }
             
         default:
             break
         }
+        
+        contentView.setNeedsLayout()
+        contentView.layoutIfNeeded()
     }
     
     @objc private func buttonTapped(_ sender: UIButton) {
         guard let title = sender.title(for: .normal) else { return }
         delegate?.chatbotButtonCell(ChatbotButtonCell(), didTapButtonWith: title)
-    }
-    
-    override func layoutSubviews() {
-        super.layoutSubviews()
-        if isUserMessage {
-            messageLabel.applyUserBubbleStyle()
-        } else {
-            messageLabel.applyChatbotBubbleStyle()
-        }
     }
 }

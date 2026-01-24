@@ -37,7 +37,7 @@ class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegat
         dropdown.snp.makeConstraints {
             $0.top.equalTo(baseSurveyView.title.snp.bottom).offset(48)
             $0.horizontalEdges.equalTo(view.safeAreaLayoutGuide).inset(45)
-            $0.height.equalTo(48 * Constants.eduDropDownItems.count + 48 + 8)
+            $0.height.equalTo(48)
         }
     }
     

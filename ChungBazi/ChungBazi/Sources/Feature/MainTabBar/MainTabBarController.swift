@@ -36,8 +36,8 @@ class MainTabBarController: UITabBarController {
         viewControllers = [
             createNavigationController(for: HomeViewController(), title: "홈", image: .tabHomeIcon, tag: 0),
             createNavigationController(for: CalenderViewController(), title: "캘린더", image: .tabCalendarIcon, tag: 1),
-            createNavigationController(for: CommunityViewController(), title: "커뮤니티", image: .tabCommunityIcon, tag: 2),
-            createNavigationController(for: ProfileViewController(), title: "프로필", image: .tabProfileIcon, tag: 3)
+//            createNavigationController(for: CommunityViewController(), title: "커뮤니티", image: .tabCommunityIcon, tag: 2),
+            createNavigationController(for: ProfileViewController(), title: "프로필", image: .tabProfileIcon, tag: 2)
         ]
     }
     

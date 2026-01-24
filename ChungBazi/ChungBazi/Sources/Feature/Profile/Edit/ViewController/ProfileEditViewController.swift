@@ -65,6 +65,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         }
         profileEditView.snp.makeConstraints {
             $0.edges.width.equalToSuperview()
+            $0.height.greaterThanOrEqualTo(scrollView.snp.height)
         }
     }
     

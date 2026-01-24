@@ -44,6 +44,11 @@ final class UserService: NetworkManager {
         request(target: .fetchProfile, decodingType: ProfileResponseDto.self, completion: completion)
     }
     
+    /// 사용자 정보 조회 API
+    public func fetchUserInfo(completion: @escaping (Result<UserInfoResponseDto, NetworkError>) -> Void) {
+        request(target: .fetchUserInfo, decodingType: UserInfoResponseDto.self, completion: completion)
+    }
+    
     /// 사용자 정보 수정 API
     public func updateUserInfo(body: UserInfoRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
         request(target: .updateUserInfo(data: body), decodingType: String.self, completion: completion)
