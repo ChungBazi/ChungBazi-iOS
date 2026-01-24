@@ -131,7 +131,9 @@ extension ProfileViewController: ProfileViewDelegate {
     }
     
     func didTapContact() {
-        print("")
+        if let url = URL(string: "https://forms.gle/7XGnZof7Jwdvgyzs5") {
+            UIApplication.shared.open(url)
+        }
     }
     
     func didTapAppInfo() {
