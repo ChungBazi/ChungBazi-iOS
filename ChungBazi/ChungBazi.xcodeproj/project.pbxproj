@@ -26,6 +26,7 @@
 		1FEC1DCB2D4BF45400FC4B1E /* FirebaseMessaging in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */; };
 		1FEC1DCE2D4BF70600FC4B1E /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */; };
 		5E819E932D3E1D36005FC310 /* SafeAreaBrush in Frameworks */ = {isa = PBXBuildFile; productRef = 5E819E922D3E1D36005FC310 /* SafeAreaBrush */; };
+		CF15F27F2F3B384700E272F6 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CF15F27E2F3B384700E272F6 /* AmplitudeSwift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +67,7 @@
 				1F09A1D22D3580E2000E8762 /* Then in Frameworks */,
 				1F09A2622D3582C5000E8762 /* SwiftyToaster in Frameworks */,
 				1F09A1E02D35814E000E8762 /* KakaoSDKCommon in Frameworks */,
+				CF15F27F2F3B384700E272F6 /* AmplitudeSwift in Frameworks */,
 				1F09A2552D35820C000E8762 /* Moya in Frameworks */,
 				1F09A2592D35820C000E8762 /* RxMoya in Frameworks */,
 				1F09A2572D35820C000E8762 /* ReactiveMoya in Frameworks */,
@@ -138,6 +140,7 @@
 				1FEC1DC82D4BF45400FC4B1E /* FirebaseAuth */,
 				1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */,
 				1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */,
+				CF15F27E2F3B384700E272F6 /* AmplitudeSwift */,
 			);
 			productName = ChungBazi;
 			productReference = 1F09A0A42D357328000E8762 /* ChungBazi.app */;
@@ -179,6 +182,7 @@
 				5E819E912D3E1D36005FC310 /* XCRemoteSwiftPackageReference "SafeAreaBrush" */,
 				1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */,
 				1FEC1DCC2D4BF70600FC4B1E /* XCRemoteSwiftPackageReference "keychain-swift" */,
+				CF15F27D2F3B384600E272F6 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 1F09A0A52D357328000E8762 /* Products */;
@@ -291,6 +295,8 @@
 		};
 		1F09A0BD2D35732A000E8762 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 1F09A0A62D357328000E8762 /* ChungBazi */;
+			baseConfigurationReferenceRelativePath = Secret.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -357,6 +363,8 @@
 		};
 		1F09A0BE2D35732A000E8762 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReferenceAnchor = 1F09A0A62D357328000E8762 /* ChungBazi */;
+			baseConfigurationReferenceRelativePath = Secret.xcconfig;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
@@ -518,6 +526,14 @@
 				minimumVersion = 1.0.4;
 			};
 		};
+		CF15F27D2F3B384600E272F6 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/amplitude/Amplitude-Swift";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -615,6 +631,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 5E819E912D3E1D36005FC310 /* XCRemoteSwiftPackageReference "SafeAreaBrush" */;
 			productName = SafeAreaBrush;
+		};
+		CF15F27E2F3B384700E272F6 /* AmplitudeSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CF15F27D2F3B384600E272F6 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
+			productName = AmplitudeSwift;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
