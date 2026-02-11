@@ -225,12 +225,26 @@ final class ChatbotViewController: UIViewController {
                 case .failure(_):
                     // 로딩 메시지 제거
                     if let lastMessage = self.messages.last, case .loading = lastMessage.type {
-                        self.messages.removeLast()
-                        let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
-                        self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
+                        let loadingIndex = self.messages.count - 1
+                        
+                        let errorMessage = ChatbotMessage(
+                            type: .text("잠시 문제가 생겼어요 😢\n다시 보내주시면 바로 도와드릴게요!"),
+                            isUser: false,
+                            timestamp: Date()
+                        )
+                        
+                        self.messages[loadingIndex] = errorMessage // 에러 메시지로 교체
+                        
+                        let indexPath = IndexPath(row: loadingIndex, section: 0)
+                        
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            self.scrollToBottom()
+                        }
+                        
+                        self.lastAction = .apiFail
                     }
-                    
-                    self.lastAction = .apiFail
                 }
                 self.sendButton.isEnabled = true
             }
@@ -298,12 +312,26 @@ final class ChatbotViewController: UIViewController {
                 case .failure(_):
                     // 로딩 메시지 제거
                     if let lastMessage = self.messages.last, case .loading = lastMessage.type {
-                        self.messages.removeLast()
-                        let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
-                        self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
+                        let loadingIndex = self.messages.count - 1
+                        
+                        let errorMessage = ChatbotMessage(
+                            type: .text("잠시 문제가 생겼어요 😢\n다시 보내주시면 바로 도와드릴게요!"),
+                            isUser: false,
+                            timestamp: Date()
+                        )
+                        
+                        self.messages[loadingIndex] = errorMessage // 에러 메시지로 교체
+                        
+                        let indexPath = IndexPath(row: loadingIndex, section: 0)
+                        
+                        self.tableView.reloadRows(at: [indexPath], with: .fade)
+                        
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                            self.scrollToBottom()
+                        }
+                        
+                        self.lastAction = .apiFail
                     }
-                    
-                    self.lastAction = .apiFail
                 }
                 self.sendButton.isEnabled = true
             }
