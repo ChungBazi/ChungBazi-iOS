@@ -20,10 +20,14 @@ import KeychainSwift
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
+    var lastScreenName: String {
+        return UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        // 카카오 sdk 초기화
         if let kakaoAPIkey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
             KakaoSDK.initSDK(appKey: "\(kakaoAPIkey)")
         }
@@ -32,9 +36,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         if FirebaseApp.app() == nil {
             Toaster.shared.makeToast("FirebaseApp 시작 에러 : 어플을 재실행 해주세요")
-//            print("FirebaseApp is not initialized. Configuring now...")
             FirebaseApp.configure()
         }
+        
         // 앱 실행 시 사용자에게 알림 허용 권한을 받음
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound] // 필요한 알림 권한을 설정
@@ -46,9 +50,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        
         // 파이어베이스 Meesaging 설정
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+        
+        // Amplitude 초기화
+        AmplitudeManager.shared.initialize(apiKey: Config.amplitudeKey)
+       
+        AmplitudeManager.shared.trackAppOpen()
 
         return true
     }
@@ -110,7 +120,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
               let queryItems = components.queryItems else { return }
 
-        // 너가 iosExecutionParams로 넘긴 key가 "url" 이었지
+        // iosExecutionParams로 넘긴 key가 "url"
         if let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
            let decoded = deepLinkString.removingPercentEncoding,
            let deepLinkURL = URL(string: decoded) {
@@ -134,6 +144,22 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: lastScreenName
+        )
+    }
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {
+        AmplitudeManager.shared.trackAppOpen()
+    }
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: lastScreenName
+        )
     }
 
     // MARK: - Core Data stack
