@@ -24,11 +24,6 @@ final class AmplitudeManager {
         amplitude?.setUserId(userId: userId)
     }
     
-    func getUserId() -> String? {
-        // Amplitude에 설정된 userId 반환
-        return amplitude?.getUserId()
-    }
-    
     func setUserProperties(_ properties: [String: Any]) {
         let identify = Identify()
         properties.forEach { key, value in
@@ -53,22 +48,17 @@ final class AmplitudeManager {
 
 // MARK: - 1. 정책 탐색 퍼널 이벤트
 extension AmplitudeManager {
-    func trackAppOpen(userType: String) {
-        track(eventName: "app_open", properties: [
-            "user_type": userType
-        ])
+    func trackAppOpen() {
+        track(eventName: "app_open")
     }
     
-    func trackHomeView(userType: String) {
-        track(eventName: "home_view", properties: [
-            "user_type": userType
-        ])
+    func trackHomeView() {
+        track(eventName: "home_view")
     }
     
-    func trackPolicyListView(entryPoint: String, userType: String) {
+    func trackPolicyListView(entryPoint: String) {
         track(eventName: "policy_list_view", properties: [
-            "entry_point": entryPoint,
-            "user_type": userType
+            "entry_point": entryPoint
         ])
     }
     
@@ -76,15 +66,13 @@ extension AmplitudeManager {
         policyId: Int,
         policyName: String,
         policyCategory: String,
-        entryPoint: String,
-        userType: String
+        entryPoint: String
     ) {
         track(eventName: "policy_detail_view", properties: [
             "policy_id": policyId,
             "policy_name": policyName,
             "policy_category": policyCategory,
-            "entry_point": entryPoint,
-            "user_type": userType
+            "entry_point": entryPoint
         ])
     }
     
@@ -138,9 +126,8 @@ extension AmplitudeManager {
 
 // MARK: - 4. 챗봇 이벤트
 extension AmplitudeManager {
-    func trackChatbotOpen(userType: String, sessionId: String) {
+    func trackChatbotOpen(sessionId: String) {
         track(eventName: "chatbot_open", properties: [
-            "user_type": userType,
             "session_id": sessionId
         ])
     }
@@ -172,10 +159,9 @@ extension AmplitudeManager {
 
 // MARK: - 5. 이탈 이벤트
 extension AmplitudeManager {
-    func trackAppExit(lastScreen: String, sessionDuration: TimeInterval) {
+    func trackAppExit(lastScreen: String) {
         track(eventName: "app_exit", properties: [
-            "last_screen": lastScreen,
-            "session_duration": sessionDuration
+            "last_screen": lastScreen
         ])
     }
 }
