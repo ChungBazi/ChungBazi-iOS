@@ -23,6 +23,9 @@ final class PolicyDetailViewController: UIViewController {
     
     private var linkUrls: [String] = []   // 유효 링크만 저장
     
+    private var trackedDepths: Set<Int> = []
+    private var currentScrollDepth: Int = 0
+    
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
         $0.showsHorizontalScrollIndicator = false
@@ -106,6 +109,15 @@ final class PolicyDetailViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
+        
+        if isMovingFromParent {
+            guard let policyId = policy?.policyId else { return }
+            
+            AmplitudeManager.shared.trackBackClick(
+                policyId: policyId,
+                scrollDepth: currentScrollDepth
+            )
+        }
     }
     
     private func setupLayout() {
@@ -401,6 +413,39 @@ final class PolicyDetailViewController: UIViewController {
     // MARK: - Public Method
     public func configureEntryPoint(_ entryPoint: PolicyDetailEntryPoint) {
         self.entryPoint = entryPoint
+    }
+}
+
+extension PolicyDetailViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let policyId = policy?.policyId else { return }
+
+        let contentHeight = scrollView.contentSize.height
+        let visibleHeight = scrollView.frame.height
+        let offsetY = scrollView.contentOffset.y
+
+        let totalScrollableHeight = contentHeight - visibleHeight
+        guard totalScrollableHeight > 0 else { return }
+
+        let percentage = (offsetY / totalScrollableHeight) * 100
+        currentScrollDepth = min(100, max(0, Int(percentage)))
+
+        trackDepthIfNeeded(policyId: policyId)
+    }
+    
+    private func trackDepthIfNeeded(policyId: Int) {
+        let checkpoints = [25, 50, 75, 100]
+
+        for point in checkpoints {
+            if currentScrollDepth >= point && !trackedDepths.contains(point) {
+                trackedDepths.insert(point)
+
+                AmplitudeManager.shared.trackScrollDepth(
+                    policyId: policyId,
+                    depth: point
+                )
+            }
+        }
     }
 }
 

@@ -111,7 +111,7 @@ extension AmplitudeManager {
 
 // MARK: - 3. 정책 상세 행동 이벤트
 extension AmplitudeManager {
-    func trackScrollDepth(policyId: String, depth: Int) {
+    func trackScrollDepth(policyId: Int, depth: Int) {
         track(eventName: "scroll_depth", properties: [
             "policy_id": policyId,
             "depth": depth
@@ -119,7 +119,7 @@ extension AmplitudeManager {
     }
     
     func trackBackClick(
-        policyId: String,
+        policyId: Int,
         scrollDepth: Int
     ) {
         track(eventName: "back_click", properties: [
