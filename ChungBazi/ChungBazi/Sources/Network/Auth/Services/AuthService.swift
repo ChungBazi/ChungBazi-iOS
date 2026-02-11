@@ -50,13 +50,13 @@ final class AuthService: NetworkManager {
 
     //MARK: - API funcs
     /// 카카오 로그인 API
-    public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<KakaoLoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postKakaoLogin(data: data), decodingType: KakaoLoginResponseDto.self, completion: completion)
+    public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postKakaoLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
     }
     
     /// Apple 로그인 API
-    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<AppleLoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postAppleLogin(data: data), decodingType: AppleLoginResponseDto.self, completion: completion)
+    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
+        request(target: .postAppleLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
     }
     
     /// 로그아웃 API
