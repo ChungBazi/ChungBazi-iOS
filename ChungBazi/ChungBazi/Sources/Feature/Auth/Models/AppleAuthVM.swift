@@ -7,7 +7,6 @@
 
 import Foundation
 import AuthenticationServices
-import KeychainSwift
 
 final class AppleAuthVM: NSObject {
     
@@ -42,13 +41,14 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
         // 닉네임 설정 화면에서 이메일 받아오기 위함
         let emailFromCredential = credential.email
         let emailFromIdToken = Self.extractEmailFromIDToken(idToken)
-        let emailFromKeychain = KeychainSwift().get("lastAppleLoginEmail")
+        let emailFromKeychain = AuthManager.shared.lastAppleLoginEmail
         let resolvedEmail = emailFromCredential ?? emailFromIdToken ?? emailFromKeychain
-        if let e = resolvedEmail, !e.isEmpty {
-            KeychainSwift().set(e, forKey: "lastAppleLoginEmail")
+        
+        if let email = resolvedEmail, !email.isEmpty {
+            AuthManager.shared.lastAppleLoginEmail = email
         }
         
-        guard let fcmToken = KeychainSwift().get("FCMToken") ?? KeychainSwift().get("fcmToken") else {
+        guard let fcmToken = AuthManager.shared.fcmToken else {
             self.onLoginFailure?("FCM Token 없음")
             return
         }
@@ -57,15 +57,17 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
         networkService.appleLogin(data: appleDTO) { [weak self] result in
             switch result {
             case .success(let response):
-                KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
-                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                KeychainSwift().set(String(response.isFirst), forKey: "isFirst")
+                AuthManager.shared.saveLoginData(
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresIn: response.accessExp,
+                    loginType: .apple,
+                    isFirst: response.isFirst
+                )
+                
                 self?.isFirst = response.isFirst
                 self?.onLoginSuccess?(response.isFirst, resolvedEmail)
                 
-                print("🔐 JWT accessToken:", response.accessToken)
             case .failure(let error):
                 self?.onLoginFailure?("서버 로그인 실패: \(error.localizedDescription)")
             }
@@ -100,6 +102,9 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
 
 extension AppleAuthVM: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return UIApplication.shared.windows.first { $0.isKeyWindow } ?? UIWindow()
+        return UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                    .first?.windows
+                    .first { $0.isKeyWindow } ?? UIWindow()
     }
 }
