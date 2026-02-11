@@ -96,6 +96,7 @@ final class PolicyDetailViewController: UIViewController {
         setExpandButtonVisible(false)
         showLoading()
         
+        setupDelegate()
         setupLayout()
         fetchPolicyDetail()
         setupActions()
@@ -118,6 +119,10 @@ final class PolicyDetailViewController: UIViewController {
                 scrollDepth: currentScrollDepth
             )
         }
+    }
+    
+    private func setupDelegate() {
+        scrollView.delegate = self
     }
     
     private func setupLayout() {

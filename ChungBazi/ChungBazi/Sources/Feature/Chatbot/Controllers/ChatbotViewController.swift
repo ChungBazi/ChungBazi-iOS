@@ -47,7 +47,9 @@ final class ChatbotViewController: UIViewController {
     
     // MARK: - Properties
     private var messages: [ChatbotMessage] = []
-    private var chatInputBottomConstraint: Constraint?
+    private var sessionId: String = UUID().uuidString
+    private var hasTrackedOpen = false
+    private var lastAction: ChatbotLastAction = .userExit
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -67,6 +69,16 @@ final class ChatbotViewController: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(keyboardWillHide(_:)), name: UIResponder.keyboardWillHideNotification, object: nil)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        guard !hasTrackedOpen else { return }
+        hasTrackedOpen = true
+
+        AmplitudeManager.shared.trackChatbotOpen(sessionId: sessionId)
+    }
+
+    
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         tabBarController?.tabBar.isHidden = true
@@ -75,6 +87,14 @@ final class ChatbotViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
+        
+        if isMovingFromParent {
+            AmplitudeManager.shared.trackChatbotSessionEnd(
+                sessionId: sessionId,
+                messageCount: messages.count,
+                lastAction: lastAction.rawValue
+            )
+        }
     }
     
     deinit {
@@ -159,6 +179,13 @@ final class ChatbotViewController: UIViewController {
         let userMessage = ChatbotMessage(type: .text(messageText), isUser: true, timestamp: Date())
         messages.append(userMessage)
         
+        // chatbot_message_send event
+        AmplitudeManager.shared.trackChatbotMessageSend(
+            messageLength: messageText.count,
+            sessionId: sessionId,
+            messageOrder: messages.count
+        )
+        
         // 로딩 메시지 추가
         let loadingMessage = ChatbotMessage(type: .loading, isUser: false, timestamp: Date())
         messages.append(loadingMessage)
@@ -192,15 +219,18 @@ final class ChatbotViewController: UIViewController {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             self.scrollToBottom()
                         }
+                        
+                        self.lastAction = .success
                     }
-                case .failure(let error):
-                    print("❌ 메시지 전송 실패: \(error.localizedDescription)")
+                case .failure(_):
                     // 로딩 메시지 제거
                     if let lastMessage = self.messages.last, case .loading = lastMessage.type {
                         self.messages.removeLast()
                         let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
                         self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
                     }
+                    
+                    self.lastAction = .apiFail
                 }
                 self.sendButton.isEnabled = true
             }
@@ -213,6 +243,7 @@ final class ChatbotViewController: UIViewController {
             print("⚠️ [sendMessage] 빈 문자열입니다. 전송 중단.")
             return
         }
+        sendButton.isEnabled = false
 
         // 사용자 메시지 추가
         let userMessage = ChatbotMessage(
@@ -221,6 +252,13 @@ final class ChatbotViewController: UIViewController {
             timestamp: Date()
         )
         messages.append(userMessage)
+        
+        // chatbot_message_send event
+        AmplitudeManager.shared.trackChatbotMessageSend(
+            messageLength: trimmedText.count,
+            sessionId: sessionId,
+            messageOrder: messages.count
+        )
         
         // 로딩 메시지 추가
         let loadingMessage = ChatbotMessage(type: .loading, isUser: false, timestamp: Date())
@@ -254,16 +292,20 @@ final class ChatbotViewController: UIViewController {
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
                             self.scrollToBottom()
                         }
+                        
+                        self.lastAction = .success
                     }
-                case .failure(let error):
-                    print("❌ [응답 실패] \(error.localizedDescription)")
+                case .failure(_):
                     // 로딩 메시지 제거
                     if let lastMessage = self.messages.last, case .loading = lastMessage.type {
                         self.messages.removeLast()
                         let loadingIndexPath = IndexPath(row: self.messages.count, section: 0)
                         self.tableView.deleteRows(at: [loadingIndexPath], with: .fade)
                     }
+                    
+                    self.lastAction = .apiFail
                 }
+                self.sendButton.isEnabled = true
             }
         }
     }

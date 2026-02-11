@@ -138,12 +138,12 @@ extension AmplitudeManager {
     }
     
     func trackChatbotMessageSend(
-        messageContent: String,
+        messageLength: Int,
         sessionId: String,
         messageOrder: Int
     ) {
         track(eventName: "chatbot_message_send", properties: [
-            "message_content": messageContent,
+            "message_length": messageLength,
             "session_id": sessionId,
             "message_order": messageOrder
         ])
