@@ -76,14 +76,14 @@ extension AmplitudeManager {
         ])
     }
     
-    func trackApplyClick(policyId: String, policyName: String) {
-        track(eventName: "apply_click", properties: [
+    func trackSavedClick(policyId: Int, policyName: String) {
+        track(eventName: "saved_click", properties: [
             "policy_id": policyId,
             "policy_name": policyName
         ])
     }
     
-    func trackExternalApplyLinkOpen(policyId: String, externalUrl: [String]) {
+    func trackExternalApplyLinkOpen(policyId: Int, externalUrl: String) {
         track(eventName: "external_apply_link_open", properties: [
             "policy_id": policyId,
             "external_url": externalUrl
@@ -97,10 +97,15 @@ extension AmplitudeManager {
         filterType: String?,
         filterValue: String
     ) {
-        track(eventName: "filter_apply", properties: [
-            "filter_type": filterType ?? "",
+        var properties: [String: Any] = [
             "filter_value": filterValue
-        ])
+        ]
+        
+        if let filterType = filterType {
+            properties["filter_type"] = filterType
+        }
+        
+        track(eventName: "filter_apply", properties: properties)
     }
 }
 

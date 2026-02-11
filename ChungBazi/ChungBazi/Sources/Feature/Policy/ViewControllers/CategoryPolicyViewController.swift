@@ -49,6 +49,12 @@ final class CategoryPolicyViewController: UIViewController {
         return view
     }()
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        AmplitudeManager.shared.trackPolicyListView(entryPoint: categoryKey ?? "unknown")
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = AppColor.gray50
@@ -195,6 +201,7 @@ extension CategoryPolicyViewController: UITableViewDataSource, UITableViewDelega
         print("Selected policy: \(selectedPolicy.policyName)")
 
         let detailVC = PolicyDetailViewController()
+        detailVC.configureEntryPoint(.category)
         detailVC.policyId = selectedPolicy.policyId
 
         navigationController?.pushViewController(detailVC, animated: true)
@@ -227,6 +234,12 @@ extension CategoryPolicyViewController: CustomDropdownDelegate {
                     self.tableView.setContentOffset(.zero, animated: true)
                 }
                 if let categoryKey = categoryKey {
+                    
+                    AmplitudeManager.shared.trackFilterApply(
+                        filterType: nil,
+                        filterValue: sortOrder
+                    )
+                    
                     fetchCategoryPolicy(category: categoryKey, cursor: "", order: sortOrder)
                 }
             }

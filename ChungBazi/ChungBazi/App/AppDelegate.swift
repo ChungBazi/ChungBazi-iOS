@@ -104,6 +104,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         case "policy":
             if pathComponents.count > 1, let policyId = Int(pathComponents[1]) {
                 let vc = PolicyDetailViewController()
+                vc.configureEntryPoint(.deepLink)
                 vc.policyId = policyId
                 destinationVC = vc
             }

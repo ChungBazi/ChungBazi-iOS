@@ -9,8 +9,9 @@ import UIKit
 import SnapKit
 import Then
 
-final class CustomAlertView: UIView {
+final class MultiURLCustomAlertView: UIView {
     
+    private var policyId: Int?
     var onDismiss: (() -> Void)?
     var onSelectUrl: ((String) -> Void)?
 
@@ -91,7 +92,9 @@ final class CustomAlertView: UIView {
         }
     }
 
-    func configure(message: String, urls: [String]) {
+    func configure(message: String, urls: [String], policyId: Int) {
+        self.policyId = policyId
+        
         messageLabel.text = message
 
         buttonStackView.arrangedSubviews.forEach { $0.removeFromSuperview() }
@@ -120,7 +123,15 @@ final class CustomAlertView: UIView {
     }
 
     @objc private func urlButtonTapped(_ sender: UIButton) {
-        if let urlString = sender.accessibilityLabel, let url = URL(string: urlString) {
+        if let urlString = sender.accessibilityLabel,
+            let url = URL(string: urlString),
+            let policyId = policyId {
+            
+            AmplitudeManager.shared.trackExternalApplyLinkOpen(
+                policyId: policyId,
+                externalUrl: url.absoluteString
+            )
+            
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             dismissAlert()
         }

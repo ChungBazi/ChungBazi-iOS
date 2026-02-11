@@ -12,11 +12,14 @@ final class PolicyDetailViewController: UIViewController {
     
     private var posterViewHeightConstraint: Constraint?
     
+    private var entryPoint: PolicyDetailEntryPoint?
+    private var hasTrackedView = false
+    
     var policyId: Int?
     var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
     let networkService = PolicyService()
-    private weak var currentUrlAlert: CustomAlertView?
+    private weak var currentUrlAlert: MultiURLCustomAlertView?
     
     private var linkUrls: [String] = []   // 유효 링크만 저장
     
@@ -65,6 +68,12 @@ final class PolicyDetailViewController: UIViewController {
     
     private let registerButton = CustomActiveButton(title: "담당기관 바로가기", isEnabled: false).then {
         $0.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        trackPolicyDetailViewIfNeeded()
     }
     
     override func viewDidLoad() {
@@ -197,6 +206,7 @@ final class PolicyDetailViewController: UIViewController {
                 
                 DispatchQueue.main.async {
                     self.updateUI()
+                    self.trackPolicyDetailViewIfNeeded()
                 }
             case .failure(let error):
                 print("❌ 정책 상세 조회 실패: \(error.localizedDescription)")
@@ -270,18 +280,23 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     @objc private func handleCartButtonTap() {
-        guard let policyId = policy?.policyId else {
-            print("❌ 정책 ID가 없습니다.")
+        guard let policyId = policy?.policyId,
+              let policyName = policy?.name else {
             return
         }
+        
+        AmplitudeManager.shared.trackSavedClick(
+            policyId: policyId,
+            policyName: policyName
+        )
         
         let cartService = CartService()
         cartService.postCart(policyId: policyId) { result in
             switch result {
             case .success:
                 Toaster.shared.makeToast("해당 정책이 장바구니에 추가되었습니다.")
+                
             case .failure(let error):
-                print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
                 Toaster.shared.makeToast(error.localizedDescription)
             }
         }
@@ -291,9 +306,15 @@ final class PolicyDetailViewController: UIViewController {
         if currentUrlAlert != nil { return }
         
         let urls = self.linkUrls
-        guard !urls.isEmpty else { return }
+        guard let policyId = policy?.policyId,
+              !urls.isEmpty else { return }
         
         if urls.count == 1, let url = URL(string: urls[0]) {
+            AmplitudeManager.shared.trackExternalApplyLinkOpen(
+                policyId: policyId,
+                externalUrl: url.absoluteString
+            )
+            
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             return
         }
@@ -324,7 +345,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private func showMultipleUrlsAlert(urls: [String]) {
-        let alert = CustomAlertView()
+        let alert = MultiURLCustomAlertView()
         alert.onDismiss = { [weak self] in
             self?.currentUrlAlert = nil
         }
@@ -335,7 +356,9 @@ final class PolicyDetailViewController: UIViewController {
         }
         
         let msg = "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개입니다."
-        alert.configure(message: msg, urls: urls)
+        
+        guard let policyId = policyId else { return }
+        alert.configure(message: msg, urls: urls, policyId: policyId)
         alert.show(in: self)
         
         self.currentUrlAlert = alert
@@ -353,6 +376,31 @@ final class PolicyDetailViewController: UIViewController {
             self.scrollView.alpha = 1
             self.bottomBackgroundView.alpha = 1
         }
+    }
+    
+    private func trackPolicyDetailViewIfNeeded() {
+        // 이미 트래킹했거나 필수 데이터가 없으면 스킵
+        guard !hasTrackedView,
+              let policyId = policyId,
+              let policyName = policy?.name,
+              let policyCategory = policy?.categoryName,
+              let entryPoint = entryPoint else {
+            return
+        }
+        
+        hasTrackedView = true
+        
+        AmplitudeManager.shared.trackPolicyDetailView(
+            policyId: policyId,
+            policyName: policyName,
+            policyCategory: policyCategory,
+            entryPoint: entryPoint.rawValue
+        )
+    }
+    
+    // MARK: - Public Method
+    public func configureEntryPoint(_ entryPoint: PolicyDetailEntryPoint) {
+        self.entryPoint = entryPoint
     }
 }
 

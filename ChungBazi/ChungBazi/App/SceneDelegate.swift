@@ -96,6 +96,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         case "POLICY_ALARM":
             if let policyIdString = userInfo["policyId"] as? String, let policyId = Int(policyIdString) {
                 let vc = PolicyDetailViewController()
+                vc.configureEntryPoint(.alarm)
                 vc.policyId = policyId
                 destinationVC = vc
             }
@@ -137,6 +138,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let policyIdString = pathComponents[1]
                 if let policyId = Int(policyIdString) {
                     let vc = PolicyDetailViewController()
+                    vc.configureEntryPoint(.deepLink)
                     vc.policyId = policyId
                     destinationVC = vc
                 }
