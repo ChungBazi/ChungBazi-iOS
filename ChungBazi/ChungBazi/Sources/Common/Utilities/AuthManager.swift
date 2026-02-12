@@ -21,7 +21,9 @@ final class AuthManager {
         static let fcmToken = "FCMToken"
         static let loginType = "loginType"
         static let isFirstLaunch = "isFirstLaunch"
+        static let userName = "userName"
         static let lastAppleLoginEmail = "lastAppleLoginEmail"
+        
     }
     
     var accessToken: String? {
@@ -109,6 +111,22 @@ final class AuthManager {
         }
     }
     
+    var userName: String? {
+        get { keychain.get(KeychainKey.userName) }
+        set {
+            if let name = newValue {
+                keychain.set(name, forKey: KeychainKey.userName)
+            } else {
+                keychain.delete(KeychainKey.userName)
+            }
+        }
+    }
+    
+    /// 닉네임 설정 여부
+    var hasNickname: Bool {
+        return userName != nil && !userName!.isEmpty
+    }
+    
     /// 온보딩 완료 처리
     func completeOnboarding() {
         isFirstLaunch = false
@@ -125,7 +143,9 @@ final class AuthManager {
                        refreshToken: String,
                        expiresIn: Int,
                        loginType: LoginType,
-                       isFirst: Bool) {
+                       isFirst: Bool,
+                       userName: String?
+    ) {
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         
@@ -135,6 +155,7 @@ final class AuthManager {
         
         self.loginType = loginType
         self.isFirstLaunch = isFirst
+        self.userName = userName
     }
     
     func updateTokens(accessToken: String,
@@ -148,6 +169,10 @@ final class AuthManager {
         // 절대 시간으로 변환하여 저장
         let expirationTimestamp = Int(Date().timeIntervalSince1970) + expiresIn
         self.accessTokenExpiration = String(expirationTimestamp)
+    }
+    
+    func updateUserName(_ name: String) {
+        userName = name
     }
     
     func isAccessTokenExpired() -> Bool {
@@ -187,5 +212,6 @@ final class AuthManager {
         accessTokenExpiration = nil
         loginType = nil
         isFirstLaunch = true
+        userName = nil
     }
 }
