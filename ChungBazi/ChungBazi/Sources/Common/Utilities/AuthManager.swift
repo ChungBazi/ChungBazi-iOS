@@ -15,6 +15,7 @@ final class AuthManager {
     private init() {}
     
     private enum KeychainKey {
+        static let hashedUserId = "hashedUserId"
         static let serverAccessToken = "serverAccessToken"
         static let serverAccessTokenExp = "serverAccessTokenExp"
         static let serverRefreshToken = "serverRefreshToken"
@@ -24,6 +25,17 @@ final class AuthManager {
         static let userName = "userName"
         static let lastAppleLoginEmail = "lastAppleLoginEmail"
         
+    }
+    
+    var hashedUserId: String? {
+        get { keychain.get(KeychainKey.hashedUserId) }
+        set {
+            if let hashed = newValue {
+                keychain.set(hashed, forKey: KeychainKey.hashedUserId)
+            } else {
+                keychain.delete(KeychainKey.hashedUserId)
+            }
+        }
     }
     
     var accessToken: String? {
@@ -139,13 +151,15 @@ final class AuthManager {
         return true
     }
     
-    func saveLoginData(accessToken: String,
+    func saveLoginData(hashedUserId: String,
+                       accessToken: String,
                        refreshToken: String,
                        expiresIn: Int,
                        loginType: LoginType,
                        isFirst: Bool,
                        userName: String?
     ) {
+        self.hashedUserId = hashedUserId
         self.accessToken = accessToken
         self.refreshToken = refreshToken
         
@@ -207,6 +221,7 @@ final class AuthManager {
     
     /// 회원탈퇴 시: 모든 데이터 완전 삭제
     func clearAuthDataForWithdrawal() {
+        hashedUserId = nil
         accessToken = nil
         refreshToken = nil
         accessTokenExpiration = nil

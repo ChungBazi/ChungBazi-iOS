@@ -58,27 +58,21 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
         networkService.appleLogin(data: appleDTO) { [weak self] result in
             switch result {
             case .success(let response):
-                guard let accessToken = response?.accessToken,
-                          let refreshToken = response?.refreshToken,
-                          let accessExp = response?.accessExp,
-                          let loginTypeString = response?.loginType,
-                          let isFirst = response?.isFirst else {
-                        self?.onLoginFailure?("로그인 응답 데이터가 올바르지 않습니다")
-                        return
-                    }
+                guard let response = response else { return }
                 
-                let loginType = LoginType.from(serverType: loginTypeString)
+                let loginType = LoginType.from(serverType: response.loginType)
                 
                 AuthManager.shared.saveLoginData(
-                    accessToken: accessToken,
-                    refreshToken: refreshToken,
-                    expiresIn: accessExp,
+                    hashedUserId: response.hashedUserId,
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresIn: response.accessExp,
                     loginType: loginType,
-                    isFirst: isFirst,
-                    userName: response?.userName
+                    isFirst: response.isFirst,
+                    userName: response.userName
                 )
                 
-                self?.isFirst = isFirst
+                self?.isFirst = response.isFirst
                 self?.hasNickName = AuthManager.shared.hasNickname
                 guard let hasNickName = self?.hasNickName, let isFirst = self?.isFirst else { return }
                 self?.onLoginSuccess?(hasNickName, isFirst, resolvedEmail)

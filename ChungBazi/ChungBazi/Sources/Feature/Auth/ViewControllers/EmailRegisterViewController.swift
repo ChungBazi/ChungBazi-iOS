@@ -170,21 +170,18 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                 guard let self else { return }
                 switch result {
                 case .success(let response):
-                    guard let accessToken = response?.accessToken,
-                              let refreshToken = response?.refreshToken,
-                              let accessExp = response?.accessExp,
-                              let loginTypeString = response?.loginType,
-                              let isFirst = response?.isFirst else { return }
+                    guard let response = response else { return }
                     
-                    let loginType = LoginType.from(serverType: loginTypeString)
+                    let loginType = LoginType.from(serverType: response.loginType)
                     
                     AuthManager.shared.saveLoginData(
-                        accessToken: accessToken,
-                        refreshToken: refreshToken,
-                        expiresIn: accessExp,
+                        hashedUserId: response.hashedUserId,
+                        accessToken: response.accessToken,
+                        refreshToken: response.refreshToken,
+                        expiresIn: response.accessExp,
                         loginType: loginType,
-                        isFirst: isFirst,
-                        userName: response?.userName
+                        isFirst: response.isFirst,
+                        userName: response.userName
                     )
 
                     self.routeAfterLogin(email: email)
