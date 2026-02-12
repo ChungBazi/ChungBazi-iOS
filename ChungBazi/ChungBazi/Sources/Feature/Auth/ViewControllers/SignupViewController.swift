@@ -135,19 +135,7 @@ final class SignupViewController: UIViewController {
         }
         
         let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
-        authService.register(data: dto) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    Toaster.shared.makeToast("회원가입 성공")
-                    let loginVC = EmailRegisterViewController(initialEmail: email, signupEntry: true)
-                    self?.navigationController?.pushViewController(loginVC, animated: true)
-                    
-                case .failure(_):
-                    Toaster.shared.makeToast("회원가입 실패")
-
-                }
-            }
-        }
+        let EmailVerifyVC = EmailVerificationCodeViewController(registerInfo: dto)
+        self.navigationController?.pushViewController(EmailVerifyVC, animated: true)
     }
 }
