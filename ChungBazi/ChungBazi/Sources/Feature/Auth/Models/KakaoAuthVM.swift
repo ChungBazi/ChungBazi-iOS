@@ -9,7 +9,6 @@ import UIKit
 import Combine
 import KakaoSDKAuth
 import KakaoSDKUser
-import KeychainSwift
 
 public class KakaoAuthVM: ObservableObject {
     
@@ -36,7 +35,7 @@ public class KakaoAuthVM: ObservableObject {
                 if let error = error {
                     print("카카오톡 로그인 실패: \(error.localizedDescription)")
                     completion(false)
-                } else if let oauthToken = oauthToken {
+                } else if oauthToken != nil {
                     print("카카오톡 로그인 성공")
                     completion(true)
                 }
@@ -46,7 +45,7 @@ public class KakaoAuthVM: ObservableObject {
                 if let error = error {
                     print("카카오 계정 로그인 실패: \(error.localizedDescription)")
                     completion(false)
-                } else if let oauthToken = oauthToken {
+                } else if oauthToken != nil {
                     print("카카오 계정 로그인 성공")
                     completion(true)
                 }
