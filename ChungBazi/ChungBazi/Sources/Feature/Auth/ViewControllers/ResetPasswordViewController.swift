@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import KeychainSwift
 
 final class ResetPasswordViewController: UIViewController {
 
@@ -143,7 +142,6 @@ final class ResetPasswordViewController: UIViewController {
         DispatchQueue.main.async {
             switch result {
             case .success:
-                KeychainSwift().delete("resetPasswordToken")
                 self.showCustomAlert(title: "비밀번호가 재설정되었습니다.", rightButtonText: "확인") {
                     self.navigationController?.popToRootViewController(animated: true)
                 }

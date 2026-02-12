@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import KeychainSwift
 import SwiftyToaster
 
 final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
@@ -160,7 +159,9 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             return
         }
         
-        let fcmToken = KeychainSwift().get("fcmToken") ?? ""
+        let fcmToken = AuthManager.shared.fcmToken
+        
+        guard let fcmToken = fcmToken else { return }
         
         let dto = LoginRequestDto(email: email, password: password, fcmToken: fcmToken)
         
@@ -169,16 +170,24 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                 guard let self else { return }
                 switch result {
                 case .success(let response):
-                    let kc = KeychainSwift()
-                    kc.set(response.accessToken, forKey: "serverAccessToken")
-                    kc.set(response.refreshToken, forKey: "serverRefreshToken")
-                    let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                    kc.set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                    kc.set(String(response.userId), forKey: "userId")
-                    kc.set(response.userName, forKey: "userName")
-                    kc.set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
+                    guard let accessToken = response?.accessToken,
+                              let refreshToken = response?.refreshToken,
+                              let accessExp = response?.accessExp,
+                              let loginTypeString = response?.loginType,
+                              let isFirst = response?.isFirst else { return }
+                    
+                    let loginType = LoginType.from(serverType: loginTypeString)
+                    
+                    AuthManager.shared.saveLoginData(
+                        accessToken: accessToken,
+                        refreshToken: refreshToken,
+                        expiresIn: accessExp,
+                        loginType: loginType,
+                        isFirst: isFirst,
+                        userName: response?.userName
+                    )
 
-                    self.routeAfterLogin(email: email, isFirst: response.isFirst)
+                    self.routeAfterLogin(email: email)
 
                 case .failure(let error):
                     Toaster.shared.makeToast("로그인 실패: \(error.localizedDescription)")
@@ -187,15 +196,14 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         }
     }
 
-    private func routeAfterLogin(email: String, isFirst: Bool) {
-        if signupEntry {
-            let verifyVC = EmailVerificationCodeViewController(email: email)
-            navigationController?.pushViewController(verifyVC, animated: true)
+    private func routeAfterLogin(email: String) {
+        if AuthManager.shared.hasNickname {
+            let nickNameRegisterVC = NicknameRegisterViewController(email: email, fromLogin: true)
+            navigationController?.pushViewController(nickNameRegisterVC, animated: true)
             return
         }
 
         let finish = FinishLoginViewController()
-        finish.isFirst = isFirst
         navigationController?.pushViewController(finish, animated: true)
     }
 }
