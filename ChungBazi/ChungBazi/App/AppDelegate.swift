@@ -14,7 +14,6 @@ import KakaoSDKAuth
 
 import FirebaseCore
 import FirebaseMessaging
-import KeychainSwift
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -194,7 +193,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 print("Error fetching FCM registration token: \(error)")
             } else if let token = token {
                 print("----FCM registration token: \(token)")
-                KeychainSwift().set(token, forKey: "FCMToken")
+                AuthManager.shared.fcmToken = token
             }
         }
     }
@@ -219,9 +218,9 @@ extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
         
-        let storedToken = KeychainSwift().get("FCMToken")
+        let storedToken = AuthManager.shared.fcmToken
         if storedToken != fcmToken { // 기존 토큰과 다를 때만 업데이트
-            KeychainSwift().set(fcmToken, forKey: "FCMToken")
+            AuthManager.shared.fcmToken = fcmToken
             print("🔄 FCM Token 업데이트됨: \(fcmToken)")
         } else {
             print("✅ 기존 FCM Token 유지됨")
