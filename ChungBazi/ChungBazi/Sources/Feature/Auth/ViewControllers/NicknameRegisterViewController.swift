@@ -18,12 +18,12 @@ final class NicknameRegisterViewController: UIViewController {
     private let contentView = UIView()
     
     private let initialEmail: String?
-    private let isFirst: Bool
+    private let fromLogin: Bool
     private var isRequesting = false
     
-    init(email: String?, isFirst: Bool) {
+    init(email: String?, fromLogin: Bool) {
         self.initialEmail = email
-        self.isFirst = isFirst
+        self.fromLogin = fromLogin
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -91,7 +91,7 @@ final class NicknameRegisterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        addCustomNavigationBar(titleText: "회원가입", showBackButton: true)
+        addCustomNavigationBar(titleText: "회원가입", showBackButton: !fromLogin)
         setupLayout()
         bind()
         prefill()
@@ -229,21 +229,24 @@ final class NicknameRegisterViewController: UIViewController {
             switch result {
             case .success:
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("닉네임이 등록되었습니다.")
-                    let vc = FinishRegisterViewController()
-                    vc.isFirst = self.isFirst
-                    if let nav = self.navigationController {
-                        nav.pushViewController(vc, animated: true)
+                    AuthManager.shared.updateUserName(nickname)
+                    
+                    if self.fromLogin {
+                        let vc = FinishLoginViewController()
+                        let navController = UINavigationController(rootViewController: vc)
+                        navController.modalPresentationStyle = .fullScreen
+                        self.present(navController, animated: true, completion: nil)
                     } else {
-                        let nav = UINavigationController(rootViewController: vc)
-                        nav.modalPresentationStyle = .fullScreen
-                        self.present(nav, animated: true, completion: nil)
+                        let vc = FinishRegisterViewController()
+                        let navController = UINavigationController(rootViewController: vc)
+                        navController.modalPresentationStyle = .fullScreen
+                        self.present(navController, animated: true, completion: nil)
                     }
                 }
             case .failure(let error):
                 print("registerNickname 실패: \(error)")
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("닉네임 등록에 실패했어요. 잠시 후 다시 시도해 주세요.")
+                    Toaster.shared.makeToast("닉네임 등록에 실패하였습니다. 잠시 후 다시 시도해 주세요.")
                 }
             }
         }
