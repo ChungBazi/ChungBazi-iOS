@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import KeychainSwift
 
 class SetInterestViewController: UIViewController {
     
@@ -92,7 +91,7 @@ class SetInterestViewController: UIViewController {
             
             switch result {
             case .success(_):
-                KeychainSwift().set("false", forKey: "isFirst")
+                AuthManager.shared.completeOnboarding()
             case .failure(let response):
                 print(response)
             }
