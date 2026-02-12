@@ -7,7 +7,6 @@
 
 import UIKit
 import SwiftyToaster
-import KeychainSwift
 
 class ProfileViewController: UIViewController {
     private let profileView = ProfileView()
@@ -258,7 +257,11 @@ extension ProfileViewController: ProfileViewDelegate {
             return
         }
         
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
+        UIView.transition(
+            with: window,
+            duration: 0.5,
+            options: .transitionCrossDissolve,
+            animations: {
             window.rootViewController = splashViewController
         }, completion: nil)
     }
