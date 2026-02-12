@@ -7,6 +7,7 @@
 
 import UIKit
 import KakaoSDKAuth
+import SwiftyToaster
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
@@ -36,7 +37,38 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         setRootViewController()
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNotificationFromForeground(_:)), name: NSNotification.Name("NotificationReceived"), object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNotificationFromForeground(_:)),
+            name: NSNotification.Name("NotificationReceived"),
+            object: nil)
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleForceLogout),
+            name: .forceLogout,
+            object: nil
+        )
+    }
+    
+    @objc private func handleForceLogout() {
+        DispatchQueue.main.async { [weak self] in
+            guard let window = self?.window else { return }
+            
+            let loginVC = SelectLoginTypeViewController()
+            let nav = UINavigationController(rootViewController: loginVC)
+            nav.isNavigationBarHidden = true
+            
+            window.rootViewController = nav
+            UIView.transition(
+                with: window,
+                duration: 0.3,
+                options: .transitionCrossDissolve,
+                animations: nil
+            )
+            
+            Toaster.shared.makeToast("세션이 만료되어 로그아웃되었습니다")
+        }
     }
     
     private func setRootViewController() {
@@ -99,14 +131,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 vc.policyId = policyId
                 destinationVC = vc
             }
-//        case "COMMUNITY_ALARM":
-//            if let postIdString = userInfo["postId"] as? String, let postId = Int(postIdString) {
-//                let vc = CommunityDetailViewController(postId: postId)
-//                destinationVC = vc
-//            }
-//        case "REWARD_ALARM":
-//            let vc = MyCharacterViewController()
-//            destinationVC = vc
         default:
             break
         }
