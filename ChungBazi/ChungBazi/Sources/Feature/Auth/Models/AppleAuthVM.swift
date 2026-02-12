@@ -12,8 +12,9 @@ final class AppleAuthVM: NSObject {
     
     private let networkService = AuthService()
     var isFirst: Bool?
+    var hasNickName: Bool?
     
-    var onLoginSuccess: ((Bool, String?) -> Void)?
+    var onLoginSuccess: ((Bool, Bool, String?) -> Void)?
     var onLoginFailure: ((String) -> Void)?
 
     func startLogin() {
@@ -38,7 +39,7 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
             return
         }
 
-        // 닉네임 설정 화면에서 이메일 받아오기 위함
+        // 닉네임 설정 화면에서 이메일 받아오기 위해 추출
         let emailFromCredential = credential.email
         let emailFromIdToken = Self.extractEmailFromIDToken(idToken)
         let emailFromKeychain = AuthManager.shared.lastAppleLoginEmail
@@ -57,16 +58,30 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
         networkService.appleLogin(data: appleDTO) { [weak self] result in
             switch result {
             case .success(let response):
+                guard let accessToken = response?.accessToken,
+                          let refreshToken = response?.refreshToken,
+                          let accessExp = response?.accessExp,
+                          let loginTypeString = response?.loginType,
+                          let isFirst = response?.isFirst else {
+                        self?.onLoginFailure?("로그인 응답 데이터가 올바르지 않습니다")
+                        return
+                    }
+                
+                let loginType = LoginType.from(serverType: loginTypeString)
+                
                 AuthManager.shared.saveLoginData(
-                    accessToken: response.accessToken,
-                    refreshToken: response.refreshToken,
-                    expiresIn: response.accessExp,
-                    loginType: .apple,
-                    isFirst: response.isFirst
+                    accessToken: accessToken,
+                    refreshToken: refreshToken,
+                    expiresIn: accessExp,
+                    loginType: loginType,
+                    isFirst: isFirst,
+                    userName: response?.userName
                 )
                 
-                self?.isFirst = response.isFirst
-                self?.onLoginSuccess?(response.isFirst, resolvedEmail)
+                self?.isFirst = isFirst
+                self?.hasNickName = AuthManager.shared.hasNickname
+                guard let hasNickName = self?.hasNickName, let isFirst = self?.isFirst else { return }
+                self?.onLoginSuccess?(hasNickName, isFirst, resolvedEmail)
                 
             case .failure(let error):
                 self?.onLoginFailure?("서버 로그인 실패: \(error.localizedDescription)")
