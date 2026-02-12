@@ -7,11 +7,14 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 final class AuthService: NetworkManager {
     
     typealias Endpoint = AuthEndpoints
+    
+    // MARK: - 토큰 재발급 상태 관리
+    private static var isRefreshingToken = false
+    private static var refreshCallbacks: [(Bool) -> Void] = []
     
     // MARK: - Provider 설정
     let provider: MoyaProvider<AuthEndpoints>
@@ -19,7 +22,8 @@ final class AuthService: NetworkManager {
     public init(provider: MoyaProvider<AuthEndpoints>? = nil) {
         // 플러그인 추가
         let plugins: [PluginType] = [
-            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)) // 로그 플러그인
+            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)), // 로그 플러그인
+            TokenRefreshPlugin() // 토큰 재발급 플러그인
         ]
         
         // provider 초기화
@@ -50,13 +54,13 @@ final class AuthService: NetworkManager {
 
     //MARK: - API funcs
     /// 카카오 로그인 API
-    public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postKakaoLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
+    public func kakaoLogin(data: KakaoLoginRequestDto, completion: @escaping (Result<LoginResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .postKakaoLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
     }
     
     /// Apple 로그인 API
-    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postAppleLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
+    public func appleLogin(data: AppleLoginRequestDto, completion: @escaping (Result<LoginResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .postAppleLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
     }
     
     /// 로그아웃 API
@@ -67,27 +71,6 @@ final class AuthService: NetworkManager {
     /// 토큰 재발급 API
     public func reissueToken(data: ReIssueRequestDto, completion: @escaping (Result<ReIssueResponseDto, NetworkError>) -> Void) {
         request(target: .postReIssueToken(data: data), decodingType: ReIssueResponseDto.self, completion: completion)
-    }
-    
-    /// 토큰 재발급 API 함수
-    public func reIssueAccesToken(completion: @escaping (Bool) -> Void) {
-        guard let refreshToken = KeychainSwift().get("serverRefreshToken") else {
-            completion(false)
-            return
-        }
-        
-        let reIssueDto = AuthService().makeReIssueDTO(refreshToken: refreshToken)
-        AuthService().reissueToken(data: reIssueDto) { result in
-            switch result {
-            case .success(let response):
-                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                completion(true)
-            case .failure:
-                completion(false)
-            }
-        }
     }
     
     /// 회원 탈퇴 API
@@ -122,7 +105,56 @@ final class AuthService: NetworkManager {
     }
     
     /// 일반 사용자 로그인 API
-    public func login(data: LoginRequestDto, completion: @escaping (Result<LoginResponseDto, NetworkError>) -> Void) {
-        request(target: .postLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
+    public func login(data: LoginRequestDto, completion: @escaping (Result<LoginResponseDto?, NetworkError>) -> Void) {
+        requestOptional(target: .postLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
+    }
+}
+
+extension AuthService {
+    /// 토큰 재발급 API 함수
+    public func reIssueAccesToken(completion: @escaping (Bool) -> Void) {
+        // 중복 재발급 방지
+        if Self.isRefreshingToken {
+            Self.refreshCallbacks.append(completion)
+            return
+        }
+        
+        // Refresh Token 확인
+        guard let refreshToken = AuthManager.shared.refreshToken else {
+            completion(false)
+            return
+        }
+        
+        // 재발급 시작
+        Self.isRefreshingToken = true
+        Self.refreshCallbacks.append(completion)
+        
+        print("토큰 재발급 시작 (대기 중인 요청: \(Self.refreshCallbacks.count)개)")
+        
+        let reIssueDto = makeReIssueDTO(refreshToken: refreshToken)
+        
+        reissueToken(data: reIssueDto) { result in
+            Self.isRefreshingToken = false
+            
+            switch result {
+            case .success(let response):
+                AuthManager.shared.updateTokens(
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresIn: response.accessExp
+                )
+            
+                print("\(Self.refreshCallbacks.count)개의 대기 요청에 성공 알림")
+                Self.refreshCallbacks.forEach { $0(true) }
+                Self.refreshCallbacks.removeAll()
+                
+            case .failure(let error):
+                AuthManager.shared.clearAuthDataForLogout()
+                
+                print("\(Self.refreshCallbacks.count)개의 대기 요청에 실패 알림")
+                Self.refreshCallbacks.forEach { $0(false) }
+                Self.refreshCallbacks.removeAll()
+            }
+        }
     }
 }
