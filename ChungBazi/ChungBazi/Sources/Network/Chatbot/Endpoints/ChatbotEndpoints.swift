@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum ChatbotEndpoints {
     case getPolicyDetail(policyId: Int)
@@ -59,13 +58,6 @@ extension ChatbotEndpoints: TargetType {
     }
     
     var headers: [String: String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        var baseHeaders: [String: String] = [
-            "Content-Type": "application/json"
-        ]
-        if let token = accessToken {
-            baseHeaders["Authorization"] = "Bearer \(token)"
-        }
-        return baseHeaders
+        return ["Content-Type": "application/json"]
     }
 }

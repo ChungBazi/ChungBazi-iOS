@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 import Moya
-import KeychainSwift
 
 enum CommunityEndpoints {
     case getCommunityPosts(category: String, cursor: Int)
@@ -137,12 +136,6 @@ extension CommunityEndpoints: TargetType {
     }
     
     var headers: [String : String]? {
-        guard let accessToken = KeychainSwift().get("serverAccessToken") else {
-            return ["Content-type": "application/json"]
-        }
-        return [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

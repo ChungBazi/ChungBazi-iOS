@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum EmailEndpoints {
     case postEmailRequest(email: String)
@@ -68,11 +67,7 @@ extension EmailEndpoints: TargetType {
         case .postEmailVerification:
             return ["Content-Type": "application/json"]
         case .postEmailRequest:
-            var headers = ["Content-Type": "application/json"]
-            if let token = KeychainSwift().get("serverAccessToken"), !token.isEmpty {
-                headers["Authorization"] = "Bearer \(token)"
-            }
-            return headers
+            return ["Content-Type": "application/json"]
         }
     }
 }

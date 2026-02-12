@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum PolicyEndpoints {
     case searchPolicy(name: String, cursor: String, order: String)
@@ -74,10 +73,6 @@ extension PolicyEndpoints: TargetType {
     }
     
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

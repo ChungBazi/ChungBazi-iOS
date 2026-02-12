@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum ReportsEndpoints {
     case reportPost(postId: Int, body: ReportRequestDTO)
@@ -42,10 +41,6 @@ extension ReportsEndpoints: TargetType {
     }
 
     var headers: [String : String]? {
-        var headers: [String: String] = ["Content-Type": "application/json"]
-        if let token = KeychainSwift().get("serverAccessToken") {
-            headers["Authorization"] = "Bearer \(token)"
-        }
-        return headers
+        return ["Content-Type": "application/json"]
     }
 }

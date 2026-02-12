@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum BlockEndpoints {
     case postBlock(blockedUserId: Int)
@@ -39,12 +38,6 @@ extension BlockEndpoints: TargetType {
     }
 
     var headers: [String: String]? {
-        if let token = KeychainSwift().get("serverAccessToken") {
-            return [
-                "Authorization": "Bearer \(token)",
-                "Content-Type": "application/json"
-            ]
-        }
         return ["Content-Type": "application/json"]
     }
 }
