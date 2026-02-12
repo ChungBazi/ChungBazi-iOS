@@ -15,7 +15,8 @@ final class BlockService: NetworkManager {
 
     init(provider: MoyaProvider<BlockEndpoints>? = nil) {
         let plugins: [PluginType] = [
-            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose))
+            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)),
+            TokenRefreshPlugin()
         ]
         self.provider = provider ?? MoyaProvider<BlockEndpoints>(plugins: plugins)
     }
