@@ -17,9 +17,10 @@ struct ReIssueResponseDto: Decodable {
 struct LoginResponseDto: Decodable {
     let userId: Int
     let hashedUserId: String
-    let userName: String
+    let userName: String?
     let isFirst: Bool
     let accessToken: String
     let refreshToken: String
     let accessExp: Int
+    let loginType: String
 }
