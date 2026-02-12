@@ -269,7 +269,7 @@ final class FindPwdViewController: UIViewController {
                    switch result {
                    case .success:
                        self.step = .enterCode
-                   case .failure(let error):
+                   case .failure(_):
                        Toaster.shared.makeToast("인증번호 전송 실패")
                        self.textFieldsChanged()
                    }
@@ -278,15 +278,49 @@ final class FindPwdViewController: UIViewController {
        }
     
     private func verifyCode(_ code: String) {
-            guard let email = verifyEmail, !email.isEmpty else {
-                showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
-                return
-            }
-            let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
-            invalidateTimer()
-            let resetVC = ResetPasswordViewController(mode: .noAuth(email: email, code: trimmedCode))
-            navigationController?.pushViewController(resetVC, animated: true)
+        guard let email = verifyEmail, !email.isEmpty else {
+            showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
+            return
         }
+        let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
+        invalidateTimer()
+        verifyEmailCode(email: email, code: trimmedCode)
+    }
+    
+    private func verifyEmailCode(email: String, code: String) {
+        emailService.verifyEmailCode(email: email, code: code) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    let resetVC = ResetPasswordViewController(mode: .noAuth(email: email, code: code))
+                    self.navigationController?.pushViewController(resetVC, animated: true)
+                    
+                case .failure(let error):
+                    self.showVerificationFailureAlert(error: error)
+                }
+            }
+        }
+    }
+    
+    private func showVerificationFailureAlert(error: NetworkError) {
+        let message: String
+        
+        switch error {
+        case .serverError(_, let serverMessage):
+            message = serverMessage
+        default:
+            message = "인증 코드가 올바르지 않습니다"
+        }
+        
+        showCustomAlert(
+            title: message,
+            rightButtonText: "확인",
+            rightButtonAction: nil
+        )
+    }
     
     private func startTimer() {
         invalidateTimer()
