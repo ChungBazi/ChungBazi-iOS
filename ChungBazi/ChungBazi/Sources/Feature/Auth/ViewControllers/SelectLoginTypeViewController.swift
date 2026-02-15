@@ -25,7 +25,7 @@ class SelectLoginTypeViewController: UIViewController {
             }
         }
         vm.onLoginFailure = { errorMessage in
-            DispatchQueue.main.async { Toaster.shared.makeToast("로그인을 실패하였습니다. 다시 시도해주세요.") }
+            DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해주세요.") }
         }
         return vm
     }()
@@ -67,8 +67,12 @@ class SelectLoginTypeViewController: UIViewController {
             guard let self = self, success else { return }
             UserApi.shared.me { (user, error) in
                 if let error = error {
-                    DispatchQueue.main.async { Toaster.shared.makeToast("사용자 정보 가져오기 실패") }
-                    print("카카오 사용자 조회 실패: \(error.localizedDescription)")
+                    DispatchQueue.main.async {
+                        if (error as NSError).code == -2 { // 사용자가 취소
+                            return
+                        }
+                        Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해주세요.")
+                    }
                     return
                 }
                 guard let name = user?.kakaoAccount?.profile?.nickname else { return }
@@ -100,13 +104,14 @@ class SelectLoginTypeViewController: UIViewController {
                     userName: response.userName
                 )
         
+                AmplitudeManager.shared.setUserId(response.hashedUserId)
                 DispatchQueue.main.async {
                     self.goToNextView()
                 }
                 
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")
-                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패했습니다. 다시 시도해 주세요.") }
+                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해주세요.") }
             }
         }
     }
@@ -125,13 +130,11 @@ class SelectLoginTypeViewController: UIViewController {
 
     func goToNextView() {
         if !AuthManager.shared.hasNickname {
-            let vc = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
-            if let nav = navigationController {
-                nav.pushViewController(vc, animated: true)
-            } else {
-                let navController = UINavigationController(rootViewController: vc)
-                navController.modalPresentationStyle = .fullScreen
-                present(navController, animated: true, completion: nil)
+            let nickNameRegisterVC = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = nickNameRegisterVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
             }
             return
         }

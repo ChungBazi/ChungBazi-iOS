@@ -40,9 +40,6 @@ final class ProfileView: UIView {
         $0.tintColor = .gray800
     }
     private let emailLabel = B14_M(text: "", textColor: .gray500)
-    private let gray100View = UIView().then {
-        $0.backgroundColor = .gray100
-    }
 
     private let tableView = UITableView()
     private let menuItems = ["알림 설정",
@@ -83,7 +80,7 @@ final class ProfileView: UIView {
             $0.width.equalToSuperview()
         }
         
-        contentView.addSubviews(profileView, nameLabel, editProfileBtn, emailLabel, gray100View, tableView)
+        contentView.addSubviews(profileView, nameLabel, editProfileBtn, emailLabel, tableView)
         
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().inset(15)
@@ -110,17 +107,11 @@ final class ProfileView: UIView {
             $0.centerX.equalToSuperview()
         }
         
-        gray100View.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview()
-            $0.top.equalTo(emailLabel.snp.bottom).offset(26.5)
-            $0.height.equalTo(8)
-        }
-        
         tableView.backgroundColor = .clear
         tableView.separatorStyle = .none
         tableView.isScrollEnabled = false
         tableView.snp.makeConstraints {
-            $0.top.equalTo(gray100View.snp.bottom)
+            $0.top.equalTo(emailLabel.snp.bottom).offset(23)
             $0.leading.trailing.equalToSuperview()
             $0.bottom.equalToSuperview().inset(70)
             $0.height.equalTo(1)

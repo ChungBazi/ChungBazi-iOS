@@ -18,6 +18,8 @@ struct AppFontName {
     static let pSemiBold = "Pretendard-SemiBold"
     static let pBlack = "Pretendard-Black"
     static let afgRegular = "AssacomFreeGothic-Regular"
+    static let appleSDGothicNeoMedium = "AppleSDGothicNeoM00"
+    static let appleSDGothicNeoRSemiBold = "AppleSDGothicNeoSB00"
 }
 
 extension UIFont {
@@ -69,5 +71,13 @@ extension UIFont {
     // AssacomFreeGothic Regular Font - '청바지'에만 쓰임
     public class func afgRegularFont(ofSize size: CGFloat) -> UIFont {
         return UIFont(name: AppFontName.afgRegular, size: size)!
+    }
+    
+    public class func appleSDMediumFont(ofSize size: CGFloat) -> UIFont {
+        return UIFont(name: AppFontName.appleSDGothicNeoMedium, size: size)!
+    }
+    
+    public class func appleSDSemiBoldFont(ofSize size: CGFloat) -> UIFont {
+        return UIFont(name: AppFontName.appleSDGothicNeoRSemiBold, size: size)!
     }
 }

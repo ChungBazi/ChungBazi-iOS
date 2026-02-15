@@ -21,7 +21,7 @@ final class CalendarDetailDocumentListCell: UITableViewCell, UITextFieldDelegate
     var onCheckChanged: ((Bool) -> Void)?
     
     private let checkButton = UIButton().then {
-        $0.setImage(UIImage(named: "checkbox_unchecked")?.withRenderingMode(.alwaysTemplate), for: .normal)
+        $0.setImage(UIImage(resource: .checkboxUnchecked).withRenderingMode(.alwaysTemplate), for: .normal)
         $0.tintColor = .gray500
         $0.addTarget(self, action: #selector(didTapCheckButton), for: .touchUpInside)
         $0.isUserInteractionEnabled = true
@@ -86,9 +86,9 @@ final class CalendarDetailDocumentListCell: UITableViewCell, UITextFieldDelegate
     }
 
     private func updateCheckButton() {
-        let imageName = document?.isChecked == true ? "checkbox_checked" : "checkbox_unchecked"
-        checkButton.setImage(UIImage(named: imageName)?.withRenderingMode(.alwaysTemplate), for: .normal)
-        checkButton.tintColor = document?.isChecked == true ? .blue700 : .gray500
+        let imageName: ImageResource = document?.isChecked == true ? .checkboxChecked : .checkboxUnchecked
+        checkButton.setImage(UIImage(resource: imageName).withRenderingMode(.alwaysTemplate), for: .normal)
+        checkButton.tintColor = document?.isChecked == true ? AppColor.blue700 : AppColor.gray500
     }
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {

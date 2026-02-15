@@ -147,8 +147,8 @@ class CustomDropdown: UIView {
     // MARK: - Actions
     private func toggleDropdown() {
         isDropdownOpen.toggle()
-        let iconName = isDropdownOpen ? "dropup_icon" : "dropdown_icon"
-        dropdownView.dropdownImageView.image = UIImage(named: iconName)?.withRenderingMode(.alwaysOriginal)
+        let iconName: ImageResource = isDropdownOpen ? .dropupIcon : .dropdownIcon
+        dropdownView.dropdownImageView.image = UIImage(resource: iconName).withRenderingMode(.alwaysOriginal)
         
         if isDropdownOpen {
             showDropdown()

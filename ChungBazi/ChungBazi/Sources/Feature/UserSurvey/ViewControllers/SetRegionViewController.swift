@@ -15,7 +15,7 @@ class SetRegionViewController: UIViewController {
     private var selectedFirstSlot: String = "서울시"
     private var selectedSecondSlot: String = ""
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "정책 확인을 원하는 지역을\n선택해주세요", logo: "fifthPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "정책 확인을 원하는 지역을\n선택해주세요", logo: .fifthPageLogo).then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetInterests), for: .touchUpInside)
     }

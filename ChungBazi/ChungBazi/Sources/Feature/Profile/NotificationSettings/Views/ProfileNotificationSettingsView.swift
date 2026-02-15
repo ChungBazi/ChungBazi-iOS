@@ -13,10 +13,7 @@ final class ProfileNotificationSettingsView: UIView {
     
     private let tableView = UITableView()
     var menuItems: [NotificationItem] = [
-        NotificationItem(title: "푸시 알림", isOn: false),
-        NotificationItem(title: "장바구니 알림", isOn: false),
-        NotificationItem(title: "커뮤니티 알림", isOn: false),
-        NotificationItem(title: "리워드 알림", isOn: false)
+        NotificationItem(title: "푸시 알림", isOn: false)
     ]
     private var settings: NotificationSettingModel = NotificationSettingModel(push: true, policy: true, community: true, reward: true)
     
@@ -50,9 +47,6 @@ final class ProfileNotificationSettingsView: UIView {
         self.settings = settings
         
         menuItems[0].isOn = settings.push
-        menuItems[1].isOn = settings.policy
-        menuItems[2].isOn = settings.community
-        menuItems[3].isOn = settings.reward
         
         DispatchQueue.main.async {
             self.tableView.reloadData()
@@ -81,16 +75,7 @@ extension ProfileNotificationSettingsView: UITableViewDelegate, UITableViewDataS
                 self.settings.policy = isOn
                 self.settings.community = isOn
                 self.settings.reward = isOn
-                // 모든 알림을 다 변경
-                for i in 1..<self.menuItems.count {
-                    self.menuItems[i].isOn = isOn
-                    if let otherCell = tableView.cellForRow(at: IndexPath(row: i, section: 0)) as? ProfileTableCell {
-                        otherCell.setToggleState(isOn)
-                    }
-                }
-            case 1: self.settings.policy = isOn
-            case 2: self.settings.community = isOn
-            case 3: self.settings.reward = isOn
+
             default: break
             }
             

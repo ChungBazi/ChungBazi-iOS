@@ -23,8 +23,8 @@ final class CartViewController: UIViewController {
 
     private let allSelectButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
-        button.setImage(UIImage(named: "checkbox_checked"), for: .selected)
+        button.setImage(UIImage(resource: .checkboxUnchecked), for: .normal)
+        button.setImage(UIImage(resource: .checkboxChecked), for: .selected)
         button.setTitle(" 전체선택", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont(name: AppFontName.pMedium, size: 16)
@@ -53,19 +53,13 @@ final class CartViewController: UIViewController {
         return tableView
     }()
     
-    private let emptyStateLabel = UILabel().then {
-        $0.text = "담은 정책이 없습니다."
-        $0.textAlignment = .center
-        $0.textColor = .gray600
-        $0.font = .ptdMediumFont(ofSize: 16)
-        $0.isHidden = true
-    }
+    private let emptyView = EmptyBaroWithTitleView(title: "아직 저장한 정책이 없어요")
 
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .gray50
         addCustomNavigationBar(
-            titleText: "장바구니",
+            titleText: "저장한 정책",
             showBackButton: true,
             showCartButton: false,
             showAlarmButton: false,
@@ -77,8 +71,8 @@ final class CartViewController: UIViewController {
     }
     
     private func setupScrollView() {
-        view.addSubview(scrollView)
-        scrollView.addSubviews(contentView, emptyStateLabel)
+        view.addSubviews(scrollView, emptyView)
+        scrollView.addSubviews(contentView)
         contentView.addSubviews(headerView, tableView)
         
         guard let navigationBarView = self.view.subviews.first(where: { $0 is UIView }) else { return }
@@ -88,8 +82,9 @@ final class CartViewController: UIViewController {
             make.leading.trailing.bottom.equalToSuperview()
         }
         
-        emptyStateLabel.snp.makeConstraints { make in
+        emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
         
         contentView.snp.makeConstraints { make in
@@ -193,7 +188,7 @@ final class CartViewController: UIViewController {
                     self.tableView.reloadData()
                     self.updateTableViewHeight()
                     let hasResults = self.categories.isEmpty
-                    self.emptyStateLabel.isHidden = !hasResults
+                    self.emptyView.isHidden = !hasResults
                 }
             case .failure(let error):
                 print("❌ 네트워크 요청 실패: \(error.localizedDescription)")

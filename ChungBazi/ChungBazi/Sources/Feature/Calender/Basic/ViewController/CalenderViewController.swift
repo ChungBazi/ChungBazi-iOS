@@ -87,7 +87,7 @@ final class CalenderViewController: UIViewController, UISheetPresentationControl
                 self.bindPolicyData(self.policies)
                 
             case .failure(let error):
-                print("Error fetching policies: \(error.localizedDescription)")
+                showCustomAlert(title: "일정을 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }

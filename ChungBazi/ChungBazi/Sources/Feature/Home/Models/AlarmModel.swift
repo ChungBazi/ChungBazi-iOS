@@ -42,9 +42,9 @@ enum AlarmType: String {
         case .policy:
             return .alarmCalendarIcon
         case .community:
-            return .alarmCommunityIcon
+            return .alarmCalendarIcon
         case .reward:
-            return .alarmRewardIcon
+            return .alarmCalendarIcon
         case .unknown, .entire, .notice, .chat:
             return nil
         }

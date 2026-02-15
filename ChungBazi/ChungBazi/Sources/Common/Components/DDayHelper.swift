@@ -8,48 +8,99 @@
 import UIKit
 
 enum DDayStyle {
-    case moreThanTen
-    case twoToTen
-    case oneDay
-    case deadline
-    case today
+    case scheduled      // 예정 (dday < 0)
+    case permanent      // 상시 (dday > 999 또는 nil)
+    case moreThanTen    // D-10 이상
+    case twoToNine      // D-2 ~ D-9
+    case today          // D-0 ~ D-1
+    case closed         // 마감
     
-    var assetName: String {
+    var assetName: ImageResource {
         switch self {
-        case .moreThanTen: return "d_day_blue200"
-        case .twoToTen: return "d_day_blue700"
-        case .oneDay: return "d_day_blue900"
-        case .deadline: return "d_day_grayscale200"
-        case .today: return "d_day_red"
+        case .scheduled:
+            return .blue50Pocket
+        case .permanent:
+            return .green300Pocket
+        case .moreThanTen:
+            return .blue200Pocket
+        case .twoToNine:
+            return .blue700Pocket
+        case .today:
+            return .redPocket
+        case .closed:
+            return .gray500Pocket
         }
     }
     
     var textColor: UIColor {
         switch self {
-        case .moreThanTen: return .gray800
-        case .twoToTen, .oneDay, .today: return .white
-        case .deadline: return .gray500
+        case .scheduled, .permanent, .moreThanTen:
+            return AppColor.gray800!
+        case .twoToNine, .today:
+            return .white
+        case .closed:
+            return AppColor.gray500!
         }
     }
     
     var displayText: String {
         switch self {
-        case .deadline:
+        case .scheduled:
+            return "예정"
+        case .permanent:
+            return "상시"
+        case .closed:
             return "마감"
         case .today:
-            return "D-0"
-        default:
             return ""
+        case .moreThanTen, .twoToNine:
+            return "" // D-day 숫자는 별도로 설정
         }
     }
     
-    static func determineStyle(from daysLeft: Int) -> DDayStyle {
-        switch daysLeft {
-        case let x where x > 10: return .moreThanTen
-        case 2...10: return .twoToTen
-        case 1: return .oneDay
-        case 0: return .today
-        default: return .deadline
+    /// dday 값으로 스타일 결정
+    static func determineStyle(from dday: Int?) -> (style: DDayStyle, text: String) {
+        guard let dday = dday else {
+            return (.permanent, "상시")
+        }
+        
+        if dday > 999 {
+            return (.permanent, "상시")
+        } else if dday < 0 {
+            return (.scheduled, "예정")
+        } else if dday >= 10 {
+            return (.moreThanTen, "D-\(dday)")
+        } else if dday >= 2 {
+            return (.twoToNine, "D-\(dday)")
+        } else if dday >= 0 {
+            return (.today, "D-\(dday)")
+        }
+        
+        return (.moreThanTen, "D-\(dday)")
+    }
+    
+    /// 배지 텍스트로 스타일 결정 (역방향 호환)
+    static func determineStyle(from badge: String) -> DDayStyle {
+        switch badge {
+        case "예정":
+            return .scheduled
+        case "마감":
+            return .closed
+        case "상시":
+            return .permanent
+        case let value where value.starts(with: "D-"):
+            if let day = Int(value.dropFirst(2)) {
+                if day >= 10 {
+                    return .moreThanTen
+                } else if day >= 2 {
+                    return .twoToNine
+                } else if day >= 0 {
+                    return .today
+                }
+            }
+            return .moreThanTen
+        default:
+            return .moreThanTen
         }
     }
 }

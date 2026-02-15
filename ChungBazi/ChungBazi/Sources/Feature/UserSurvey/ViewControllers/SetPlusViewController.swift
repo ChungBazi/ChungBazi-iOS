@@ -11,7 +11,7 @@ class SetPlusViewController: UIViewController {
     
     private var checkStatus: [Bool] // 체크 상태를 저장
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "추가사항을\n선택해주세요", logo: "thirdPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "추가사항을\n선택해주세요", logo: .thirdPageLogo).then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetIncome), for: .touchUpInside)
     }

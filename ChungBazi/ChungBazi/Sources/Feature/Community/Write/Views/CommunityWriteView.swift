@@ -38,7 +38,7 @@ final class CommunityWriteView: UIView, UITextViewDelegate {
     }
     
     private let cameraButton = UIButton.createWithImage(
-        image: .cameraIcon,
+        image: .sendIcon,
         tintColor: .gray500,
         target: self,
         action: #selector(handleCameraButtonTap)

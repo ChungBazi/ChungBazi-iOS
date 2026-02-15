@@ -91,6 +91,10 @@ class SplashViewController: UIViewController {
     }
     
     private func proceedToNextScreen() {
+        if let userId = AuthManager.shared.hashedUserId {
+            AmplitudeManager.shared.setUserId(userId)
+        }
+        
         let hasNickName = AuthManager.shared.hasNickname
         let isFirst = AuthManager.shared.isFirstLaunch
         
