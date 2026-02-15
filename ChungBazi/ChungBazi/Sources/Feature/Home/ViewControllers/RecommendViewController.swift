@@ -106,7 +106,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         interestDropdown.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(25)
             make.trailing.equalTo(sortDropdown.snp.leading).offset(-8)
-            make.width.equalTo(91)
+            make.width.equalTo(105)
             make.height.equalTo(36)
         }
 
