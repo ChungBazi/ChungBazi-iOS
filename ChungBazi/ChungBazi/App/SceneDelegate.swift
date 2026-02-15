@@ -11,6 +11,9 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    var lastScreenName: String {
+        return UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+    }
     
     var pendingNotificationInfo: [AnyHashable: Any]? // 알림 정보 저장
     var pendingDeepLink: URL? // 딥링크 저장
@@ -37,6 +40,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         setRootViewController()
         NotificationCenter.default.addObserver(self, selector: #selector(handleNotificationFromForeground(_:)), name: NSNotification.Name("NotificationReceived"), object: nil)
+        AmplitudeManager.shared.trackAppOpen()
     }
     
     private func setRootViewController() {
@@ -218,9 +222,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidEnterBackground(_ scene: UIScene) {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
         
-        let currentScreen = UIViewController.getCurrentViewController()?.screenName ?? "unknown"
         AmplitudeManager.shared.trackAppExit(
-            lastScreen: currentScreen
+            lastScreen: lastScreenName
         )
     }
 }

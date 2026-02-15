@@ -57,80 +57,8 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         
         // Amplitude 초기화
         AmplitudeManager.shared.initialize(apiKey: Config.amplitudeKey)
-       
-        AmplitudeManager.shared.trackAppOpen()
 
         return true
-    }
-    
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-            return AuthController.handleOpenUrl(url: url)
-        }
-        
-        if (url.scheme?.hasPrefix("kakao") == true) && (url.host == "kakaolink") {
-            handleKakaoLink(url)   // AppDelegate에도 동일 함수 두거나 공용으로 빼기
-            return true
-        }
-        
-        if url.scheme == "chungbazi" {
-            // SceneDelegate에서 처리
-            if #available(iOS 13.0, *) {
-                return true
-            }
-            
-            // iOS 12 이하에서는 여기서 직접 처리
-            handleDeepLink(url: url)
-            return true
-        }
-        
-        return false
-    }
-    
-    private func handleDeepLink(url: URL) {
-        guard url.scheme == "chungbazi", let host = url.host else { return }
-        
-        let pathComponents = url.pathComponents
-        
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let navigationController = window.rootViewController as? UINavigationController else {
-            return
-        }
-        
-        var destinationVC: UIViewController?
-        
-        switch host {
-        case "policy":
-            if pathComponents.count > 1, let policyId = Int(pathComponents[1]) {
-                let vc = PolicyDetailViewController()
-                vc.configureEntryPoint(.deepLink)
-                vc.policyId = policyId
-                destinationVC = vc
-            }
-        default:
-            break
-        }
-        
-        if let destinationVC = destinationVC {
-            navigationController.pushViewController(destinationVC, animated: true)
-        }
-    }
-    
-    private func handleKakaoLink(_ url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let queryItems = components.queryItems else { return }
-
-        // iosExecutionParams로 넘긴 key가 "url"
-        if let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
-           let decoded = deepLinkString.removingPercentEncoding,
-           let deepLinkURL = URL(string: decoded) {
-
-            // 여기서 기존 로직 재사용
-            if deepLinkURL.scheme == "chungbazi" {
-                handleDeepLink(url: deepLinkURL)
-            }
-        }
     }
 
     // MARK: UISceneSession Lifecycle
@@ -147,15 +75,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
     }
     
-    func applicationDidEnterBackground(_ application: UIApplication) {
-        AmplitudeManager.shared.trackAppExit(
-            lastScreen: lastScreenName
-        )
-    }
+    func applicationDidEnterBackground(_ application: UIApplication) {}
     
-    func applicationWillEnterForeground(_ application: UIApplication) {
-        AmplitudeManager.shared.trackAppOpen()
-    }
+    func applicationWillEnterForeground(_ application: UIApplication) {}
     
     func applicationWillTerminate(_ application: UIApplication) {
         AmplitudeManager.shared.trackAppExit(
