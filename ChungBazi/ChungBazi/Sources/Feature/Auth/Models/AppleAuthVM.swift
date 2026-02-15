@@ -49,10 +49,7 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
             AuthManager.shared.lastAppleLoginEmail = email
         }
         
-        guard let fcmToken = AuthManager.shared.fcmToken else {
-            self.onLoginFailure?("FCM Token 없음")
-            return
-        }
+        let fcmToken = AuthManager.shared.fcmToken ?? ""
 
         let appleDTO = networkService.makeAppleDTO(idToken: idToken, fcmToken: fcmToken)
         networkService.appleLogin(data: appleDTO) { [weak self] result in

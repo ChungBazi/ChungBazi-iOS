@@ -75,7 +75,7 @@ class SelectLoginTypeViewController: UIViewController {
                 }
                 guard let name = user?.kakaoAccount?.profile?.nickname else { return }
                 guard let email = user?.kakaoAccount?.email else { return }
-                guard let fcmToken = AuthManager.shared.fcmToken else { return }
+                let fcmToken = AuthManager.shared.fcmToken ?? ""
                 self.lastLoginEmail = email
                 self.kakaoLoginProceed(name, email: email, fcmToken: fcmToken)
             }

@@ -149,9 +149,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             return
         }
         
-        let fcmToken = AuthManager.shared.fcmToken
-        
-        guard let fcmToken = fcmToken else { return }
+        let fcmToken = AuthManager.shared.fcmToken ?? ""
         
         let dto = LoginRequestDto(email: email, password: password, fcmToken: fcmToken)
         
