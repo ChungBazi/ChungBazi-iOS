@@ -72,6 +72,8 @@ final class PolicyDetailViewController: UIViewController {
         $0.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
     }
     
+    private let emptyView = EmptyBaroWithTitleView(title: "존재하지 않는 정책입니다.")
+    
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         
@@ -125,7 +127,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(scrollView)
+        view.addSubviews(scrollView, emptyView)
         scrollView.addSubview(contentView)
         contentView.addSubviews(posterView, expandButton, policyView)
         
@@ -137,6 +139,12 @@ final class PolicyDetailViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(bottomBackgroundView.snp.top)
         }
+        
+        emptyView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.5)
+        }
+        emptyView.isHidden = true
         
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -225,7 +233,17 @@ final class PolicyDetailViewController: UIViewController {
                     self.trackPolicyDetailViewIfNeeded()
                 }
             case .failure(let error):
-                print("❌ 정책 상세 조회 실패: \(error.localizedDescription)")
+                switch error {
+                case .serverError(let statusCode, let message):
+                    if statusCode == 404 {
+                        self.hideLoading()
+                        emptyView.isHidden = false
+                    } else {
+                        self.showCustomAlert(title: message, buttonText: "확인", buttonAction: nil)
+                    }
+                default:
+                    self.showCustomAlert(title: error.localizedDescription, buttonText: "확인", buttonAction: nil)
+                }
             }
         }
     }

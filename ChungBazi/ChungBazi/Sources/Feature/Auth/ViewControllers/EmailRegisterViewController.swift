@@ -174,8 +174,8 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                     AmplitudeManager.shared.setUserId(response.hashedUserId)
                     self.routeAfterLogin(email: email)
 
-                case .failure(let error):
-                    showCustomAlert(title: "로그인에 실패하였습니다.\n다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
+                case .failure(_):
+                    self.showCustomAlert(title: "로그인에 실패하였습니다.\n다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
                 }
             }
         }
