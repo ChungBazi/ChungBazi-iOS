@@ -10,20 +10,33 @@ import SnapKit
 
 extension UIViewController {
     
-    private static let loadingTag = 999999
+    private enum AssociatedKey {
+        static var spinner: Void?
+    }
+
+    
+    private var spinner: UIActivityIndicatorView? {
+        get {
+            return objc_getAssociatedObject(self, &AssociatedKey.spinner) as? UIActivityIndicatorView
+        }
+        set {
+            objc_setAssociatedObject(self, &AssociatedKey.spinner, newValue, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+        }
+    }
     
     func showLoading() {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            // 이미 있는지 확인
-            if self.view.viewWithTag(Self.loadingTag) != nil {
+            // 이미 spinner가 있으면 재사용
+            if let existingSpinner = self.spinner {
+                existingSpinner.startAnimating()
                 return
             }
             
+            // 새 spinner 생성
             let spinner = UIActivityIndicatorView(style: .large)
             spinner.color = .gray
-            spinner.tag = Self.loadingTag  // Tag 설정
             spinner.translatesAutoresizingMaskIntoConstraints = false
             
             self.view.addSubview(spinner)
@@ -32,6 +45,7 @@ extension UIViewController {
             }
             
             spinner.startAnimating()
+            self.spinner = spinner
         }
     }
     
@@ -39,11 +53,9 @@ extension UIViewController {
         DispatchQueue.main.async { [weak self] in
             guard let self = self else { return }
             
-            // Tag로 찾아서 제거
-            if let spinner = self.view.viewWithTag(Self.loadingTag) as? UIActivityIndicatorView {
-                spinner.stopAnimating()
-                spinner.removeFromSuperview()
-            }
+            self.spinner?.stopAnimating()
+            self.spinner?.removeFromSuperview()
+            self.spinner = nil
         }
     }
     
