@@ -39,9 +39,7 @@ class SplashViewController: UIViewController {
             }
         }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            self.checkAuthenticationStatus()
-        }
+        checkRemoteConfig()
     }
     
     private func addComponents() {
@@ -58,6 +56,44 @@ class SplashViewController: UIViewController {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.splashLabel.text = "청바지"
             self.splashLabel.font = UIFont.afgRegularFont(ofSize: 28)
+        }
+    }
+    
+    private func checkRemoteConfig() {
+        RemoteConfigManager.shared.fetchConfig { [weak self] success in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                let message = RemoteConfigManager.shared.getServerCheckMessage()
+                // 서버 점검 체크
+                if RemoteConfigManager.shared.isServerCheck() {
+                    self.showCustomAlert(title: message, buttonText: "확인") {
+                        exit(0)
+                    }
+                    return
+                }
+                
+                // 버전 체크
+                if RemoteConfigManager.shared.isUpdateRequired() {
+                    self.showCustomAlert(title: "새로운 버전이 출시되었어요!\n더 안정적인 서비스 이용을 위해 청바지를 업데이트해 주세요.", buttonText: "업데이트") {
+                        self.openAppStore()
+                    }
+                    return
+                }
+                
+                // 모든 체크 통과 -> 1초 후 인증 상태 확인
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+                    self.checkAuthenticationStatus()
+                }
+            }
+        }
+    }
+    
+    private func openAppStore() {
+        let appStoreURL = Config.appStoreURL
+        
+        if let url = URL(string: appStoreURL), UIApplication.shared.canOpenURL(url) {
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
     

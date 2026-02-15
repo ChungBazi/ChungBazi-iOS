@@ -27,6 +27,9 @@
 		1FEC1DCE2D4BF70600FC4B1E /* KeychainSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */; };
 		5E819E932D3E1D36005FC310 /* SafeAreaBrush in Frameworks */ = {isa = PBXBuildFile; productRef = 5E819E922D3E1D36005FC310 /* SafeAreaBrush */; };
 		CF15F27F2F3B384700E272F6 /* AmplitudeSwift in Frameworks */ = {isa = PBXBuildFile; productRef = CF15F27E2F3B384700E272F6 /* AmplitudeSwift */; };
+		CFB8C2C42F426BEB00E572EC /* FirebaseCrashlytics in Frameworks */ = {isa = PBXBuildFile; productRef = CFB8C2C32F426BEB00E572EC /* FirebaseCrashlytics */; };
+		CFB8C2C62F426BEB00E572EC /* FirebaseInAppMessaging-Beta in Frameworks */ = {isa = PBXBuildFile; productRef = CFB8C2C52F426BEB00E572EC /* FirebaseInAppMessaging-Beta */; };
+		CFB8C2C82F426BEB00E572EC /* FirebaseRemoteConfig in Frameworks */ = {isa = PBXBuildFile; productRef = CFB8C2C72F426BEB00E572EC /* FirebaseRemoteConfig */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -62,6 +65,7 @@
 				1FEC1DCB2D4BF45400FC4B1E /* FirebaseMessaging in Frameworks */,
 				1F09A25C2D35825A000E8762 /* Kingfisher in Frameworks */,
 				1F09A25F2D358271000E8762 /* FSCalendar in Frameworks */,
+				CFB8C2C42F426BEB00E572EC /* FirebaseCrashlytics in Frameworks */,
 				1FEC1DC92D4BF45400FC4B1E /* FirebaseAuth in Frameworks */,
 				1FEC1DCE2D4BF70600FC4B1E /* KeychainSwift in Frameworks */,
 				1F09A1D22D3580E2000E8762 /* Then in Frameworks */,
@@ -75,6 +79,8 @@
 				1F09A1DE2D35814E000E8762 /* KakaoSDKCertCore in Frameworks */,
 				1FEC1C762D4BE73400FC4B1E /* FirebaseAnalytics in Frameworks */,
 				1F09A1D82D35814E000E8762 /* KakaoSDK in Frameworks */,
+				CFB8C2C62F426BEB00E572EC /* FirebaseInAppMessaging-Beta in Frameworks */,
+				CFB8C2C82F426BEB00E572EC /* FirebaseRemoteConfig in Frameworks */,
 				1F09A1DA2D35814E000E8762 /* KakaoSDKAuth in Frameworks */,
 				5E819E932D3E1D36005FC310 /* SafeAreaBrush in Frameworks */,
 				1F09A2532D35820C000E8762 /* CombineMoya in Frameworks */,
@@ -141,6 +147,9 @@
 				1FEC1DCA2D4BF45400FC4B1E /* FirebaseMessaging */,
 				1FEC1DCD2D4BF70600FC4B1E /* KeychainSwift */,
 				CF15F27E2F3B384700E272F6 /* AmplitudeSwift */,
+				CFB8C2C32F426BEB00E572EC /* FirebaseCrashlytics */,
+				CFB8C2C52F426BEB00E572EC /* FirebaseInAppMessaging-Beta */,
+				CFB8C2C72F426BEB00E572EC /* FirebaseRemoteConfig */,
 			);
 			productName = ChungBazi;
 			productReference = 1F09A0A42D357328000E8762 /* ChungBazi.app */;
@@ -636,6 +645,21 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CF15F27D2F3B384600E272F6 /* XCRemoteSwiftPackageReference "Amplitude-Swift" */;
 			productName = AmplitudeSwift;
+		};
+		CFB8C2C32F426BEB00E572EC /* FirebaseCrashlytics */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseCrashlytics;
+		};
+		CFB8C2C52F426BEB00E572EC /* FirebaseInAppMessaging-Beta */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = "FirebaseInAppMessaging-Beta";
+		};
+		CFB8C2C72F426BEB00E572EC /* FirebaseRemoteConfig */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1FEC1C742D4BE73400FC4B1E /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseRemoteConfig;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

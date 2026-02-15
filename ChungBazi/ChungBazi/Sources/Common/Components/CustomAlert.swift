@@ -49,6 +49,8 @@ class CustomAlertViewController: UIViewController {
     }
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
+        $0.numberOfLines = 0
+        $0.lineBreakMode = .byWordWrapping
     }
     private let leftBtn = CustomButton(backgroundColor: .clear, titleText: "취소", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     private let rightBtn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .buttonAccent, borderWidth: 1, borderColor: .buttonAccent)

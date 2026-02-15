@@ -39,6 +39,8 @@ class CustomAlertViewWithOneBtnController: UIViewController {
     }
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
+        $0.numberOfLines = 0
+        $0.lineBreakMode = .byWordWrapping
     }
     private let Btn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
