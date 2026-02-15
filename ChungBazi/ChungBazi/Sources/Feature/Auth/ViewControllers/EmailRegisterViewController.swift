@@ -184,7 +184,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
     }
 
     private func routeAfterLogin(email: String) {
-        if AuthManager.shared.hasNickname {
+        if !AuthManager.shared.hasNickname {
             let nickNameRegisterVC = NicknameRegisterViewController(email: email, fromLogin: true)
             navigationController?.pushViewController(nickNameRegisterVC, animated: true)
             return
