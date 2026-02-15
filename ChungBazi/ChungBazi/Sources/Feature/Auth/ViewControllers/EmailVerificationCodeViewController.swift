@@ -217,28 +217,28 @@ final class EmailVerificationCodeViewController: UIViewController {
             return
         }
         
-        registerUser(registerInfo: registerInfo, verificationCode: code)
+        verifyEmail(code: code, registerInfo: registerInfo)
     }
     
-    private func registerUser(registerInfo: RegisterRequestDto, verificationCode: String) {
-        authService.register(data: registerInfo) { [weak self] result in
+    private func verifyEmail(code: String, registerInfo: RegisterRequestDto) {
+        emailService.verifyEmailCode(email: registerInfo.email, code: code) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
                 switch result {
                 case .success:
-                    // 2단계: 이메일 인증
-                    self.verifyEmail(email: registerInfo.email, code: verificationCode)
+                    // 2단계: 회원가입
+                    self.registerUser(registerInfo: registerInfo)
                     
                 case .failure(let error):
-                    self.showRegisterFailureAlert(error: error)
+                    self.showVerificationFailureAlert(error: error)
                 }
             }
         }
     }
     
-    private func verifyEmail(email: String, code: String) {
-        emailService.verifyEmailCode(email: email, code: code) { [weak self] result in
+    private func registerUser(registerInfo: RegisterRequestDto) {
+        authService.register(data: registerInfo) { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -248,7 +248,7 @@ final class EmailVerificationCodeViewController: UIViewController {
                     self.navigateToNextStep()
                     
                 case .failure(let error):
-                    self.showVerificationFailureAlert(error: error)
+                    self.showRegisterFailureAlert(error: error)
                 }
             }
         }
