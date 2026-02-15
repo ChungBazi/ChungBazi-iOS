@@ -27,7 +27,7 @@ enum CommunityEndpoints {
     case deleteCommentLike(commentId: Int)
 }
 
-extension CommunityEndpoints: TargetType {
+extension CommunityEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.communityURL) else {
@@ -133,6 +133,10 @@ extension CommunityEndpoints: TargetType {
         case .deleteCommunityPost, .deleteCommunityComment, .postCommentLike, .deleteCommentLike:
             return .requestPlain
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        true
     }
     
     var headers: [String : String]? {

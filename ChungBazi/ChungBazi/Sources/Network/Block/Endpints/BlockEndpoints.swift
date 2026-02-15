@@ -12,7 +12,7 @@ enum BlockEndpoints {
     case postBlock(blockedUserId: Int)
 }
 
-extension BlockEndpoints: TargetType {
+extension BlockEndpoints: AuthenticatedTarget {
     var baseURL: URL {
         guard let url = URL(string: API.baseURL) else {
             fatalError("잘못된 URL")
@@ -35,6 +35,10 @@ extension BlockEndpoints: TargetType {
 
     var task: Task {
         return .requestPlain
+    }
+    
+    var requiresAuthentication: Bool {
+        return true
     }
 
     var headers: [String: String]? {

@@ -14,8 +14,7 @@ enum ChatbotEndpoints {
     case ask(data: ChatbotAskRequestDto)
 }
 
-extension ChatbotEndpoints: TargetType {
-    
+extension ChatbotEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.chatbotURL) else {
             fatalError("잘못된 URL")
@@ -55,6 +54,10 @@ extension ChatbotEndpoints: TargetType {
         case .ask(let data):
             return .requestJSONEncodable(data)
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        true
     }
     
     var headers: [String: String]? {

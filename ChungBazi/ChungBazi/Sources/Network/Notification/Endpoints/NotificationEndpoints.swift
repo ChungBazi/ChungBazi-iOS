@@ -14,7 +14,7 @@ enum NotificationEndpoints {
     case patchAlarmSetting(data: NoticeSettingRequestDto)
 }
 
-extension NotificationEndpoints: TargetType {
+extension NotificationEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.notificationURL) else {
@@ -52,6 +52,10 @@ extension NotificationEndpoints: TargetType {
         case .patchAlarmSetting(let data):
             return .requestJSONEncodable(data)
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        true
     }
     
     var headers: [String : String]? {

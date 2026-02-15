@@ -18,7 +18,7 @@ enum PolicyEndpoints {
     case fetchCalendarPolicyDetail(cartId: Int)
 }
 
-extension PolicyEndpoints: TargetType {
+extension PolicyEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.policyURL) else {
@@ -70,6 +70,10 @@ extension PolicyEndpoints: TargetType {
         case .fetchCalendarPolicyDetail:
             return .requestPlain
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        true
     }
     
     var headers: [String : String]? {

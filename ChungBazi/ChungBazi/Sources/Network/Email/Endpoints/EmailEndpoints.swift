@@ -14,7 +14,7 @@ enum EmailEndpoints {
     case postEmailVerification(email: String, authCode: String)
 }
 
-extension EmailEndpoints: TargetType {
+extension EmailEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.emailURL) else {
             fatalError("잘못된 URL")
@@ -57,6 +57,15 @@ extension EmailEndpoints: TargetType {
                 parameters: ["email": email, "authCode": authCode],
                 encoding: JSONEncoding.default
             )
+        }
+    }
+    
+    var requiresAuthentication: Bool {
+        switch self {
+        case .postEmailRequestNoAuth, .postEmailVerification:
+            return false
+        default:
+            return true
         }
     }
 

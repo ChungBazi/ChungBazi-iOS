@@ -13,7 +13,7 @@ enum ReportsEndpoints {
     case reportComment(commentId: Int, body: ReportRequestDTO)
 }
 
-extension ReportsEndpoints: TargetType {
+extension ReportsEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.baseURL) else {
             fatalError("잘못된 baseURL")
@@ -38,6 +38,10 @@ extension ReportsEndpoints: TargetType {
              .reportComment(_, let body):
             return .requestJSONEncodable(body)
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        true
     }
 
     var headers: [String : String]? {

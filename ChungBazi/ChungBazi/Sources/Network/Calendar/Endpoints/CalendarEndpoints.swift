@@ -15,7 +15,7 @@ enum CalendarEndpoints {
     case updateCalendarDocumentsCheck(cartId: Int, data: [UpdateCheck])
 }
 
-extension CalendarEndpoints: TargetType {
+extension CalendarEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         switch self {
@@ -68,6 +68,10 @@ extension CalendarEndpoints: TargetType {
         case .updateCalendarDocumentsCheck(_, let data):
             return .requestJSONEncodable(data)
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        return true
     }
     
     var headers: [String : String]? {

@@ -21,7 +21,7 @@ enum AuthEndpoints {
     case postLogin(data: LoginRequestDto)
 }
 
-extension AuthEndpoints: TargetType {
+extension AuthEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.authURL) else {
             fatalError("잘못된 URL")
@@ -84,6 +84,15 @@ extension AuthEndpoints: TargetType {
             return .requestJSONEncodable(data)
         case .postLogin(let data):
             return .requestJSONEncodable(data)
+        }
+    }
+    
+    var requiresAuthentication: Bool {
+        switch self {
+        case .postLogin, .postKakaoLogin, .postAppleLogin, .postRegisterNickname, .postRegister, .postReIssueToken, .postResetPasswordNoAuth:
+            return false
+        default:
+            return true
         }
     }
     

@@ -14,7 +14,7 @@ enum CartEndpoints {
     case fetchCartList
 }
 
-extension CartEndpoints: TargetType {
+extension CartEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.cartURL) else {
@@ -54,6 +54,10 @@ extension CartEndpoints: TargetType {
         case .fetchCartList:
             return .requestPlain
         }
+    }
+    
+    var requiresAuthentication: Bool {
+        return true
     }
     
     var headers: [String : String]? {
