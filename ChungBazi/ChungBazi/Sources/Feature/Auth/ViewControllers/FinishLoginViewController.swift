@@ -9,8 +9,6 @@ import UIKit
 
 class FinishLoginViewController: UIViewController {
     
-    var isFirst: Bool?
-    
     private let finishLoginView = LogoWithTitleView(image: "heartBaro", title: "로그인 완료!\n정책을 쉽고 간편하게 확인하세요")
     
     override func viewDidLoad() {
@@ -23,7 +21,7 @@ class FinishLoginViewController: UIViewController {
     private func goToNextView() {
         // 최초 로그인 시, StartSurveyViewController로
         // 그 외에는 BaseTabBarController로
-        if self.isFirst ?? true {
+        if AuthManager.shared.isFirstLaunch {
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
                 let termsOfServiceVC = StartSurveyViewController()
                 let navigationController = UINavigationController(rootViewController: termsOfServiceVC)

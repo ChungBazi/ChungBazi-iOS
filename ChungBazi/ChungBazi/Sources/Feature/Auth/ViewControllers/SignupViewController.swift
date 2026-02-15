@@ -12,7 +12,7 @@ import SwiftyToaster
 
 final class SignupViewController: UIViewController {
 
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     private let registerView = SignupView()
     
     private var isPasswordVisible = false
@@ -129,25 +129,20 @@ final class SignupViewController: UIViewController {
             return
         }
         
+        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        
         guard password == checkPassword else {
             showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
         
         let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
-        authService.register(data: dto) { [weak self] result in
-            DispatchQueue.main.async {
-                switch result {
-                case .success:
-                    Toaster.shared.makeToast("회원가입 성공")
-                    let loginVC = EmailRegisterViewController(initialEmail: email, signupEntry: true)
-                    self?.navigationController?.pushViewController(loginVC, animated: true)
-                    
-                case .failure(_):
-                    Toaster.shared.makeToast("회원가입 실패")
-
-                }
-            }
-        }
+        let EmailVerifyVC = EmailVerificationCodeViewController(registerInfo: dto)
+        self.navigationController?.pushViewController(EmailVerifyVC, animated: true)
+    }
+    
+    private func isValidPassword(_ pwd: String) -> Bool {
+        let pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
+        return pwd.range(of: pattern, options: .regularExpression) != nil
     }
 }

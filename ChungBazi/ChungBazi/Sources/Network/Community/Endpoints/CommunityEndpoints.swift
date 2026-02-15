@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 import Moya
-import KeychainSwift
 
 enum CommunityEndpoints {
     case getCommunityPosts(category: String, cursor: Int)
@@ -28,7 +27,7 @@ enum CommunityEndpoints {
     case deleteCommentLike(commentId: Int)
 }
 
-extension CommunityEndpoints: TargetType {
+extension CommunityEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.communityURL) else {
@@ -136,13 +135,11 @@ extension CommunityEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        true
+    }
+    
     var headers: [String : String]? {
-        guard let accessToken = KeychainSwift().get("serverAccessToken") else {
-            return ["Content-type": "application/json"]
-        }
-        return [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

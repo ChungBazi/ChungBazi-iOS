@@ -8,12 +8,12 @@
 import UIKit
 import SnapKit
 import Then
-import KeychainSwift
 
 final class EmailVerificationCodeViewController: UIViewController {
     
-    private let email: String
+    private let registerInfo: RegisterRequestDto
     private let emailService = EmailService()
+    private let authService = AuthService.shared
     
     private let descriptionLabel = UILabel().then {
         $0.text = "회원님의 이메일로\n코드를 전송했어요!"
@@ -98,8 +98,8 @@ final class EmailVerificationCodeViewController: UIViewController {
     private var remainingSeconds: Int = 180
 
     // MARK: - Init
-    init(email: String) {
-        self.email = email
+    init(registerInfo: RegisterRequestDto) {
+        self.registerInfo = registerInfo
         super.init(nibName: nil, bundle: nil)
     }
     @available(*, unavailable) required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -112,24 +112,9 @@ final class EmailVerificationCodeViewController: UIViewController {
         addCustomNavigationBar(titleText: "이메일 인증", showBackButton: true)
         setupViews()
         setupActions()
-
-        if requireAccessToken() {
-            requestEmailVerification()
-        }
-    }
-
-    @discardableResult
-    private func requireAccessToken() -> Bool {
-        let token = KeychainSwift().get("serverAccessToken") ?? ""
-        if token.isEmpty {
-            showCustomAlert(title: "로그인이 필요합니다.\n로그인 후 이메일 인증을 진행해주세요.", rightButtonText: "확인") { [weak self] in
-                guard let self else { return }
-                let loginVC = SelectLoginTypeViewController()
-                self.navigationController?.pushViewController(loginVC, animated: true)
-            }
-            return false
-        }
-        return true
+        hideKeyboardWhenTappedAround()
+        
+        requestEmailVerification()
     }
 
     private func setupViews() {
@@ -206,12 +191,11 @@ final class EmailVerificationCodeViewController: UIViewController {
 
     
     @objc private func resendTapped() {
-        guard requireAccessToken() else { return }
         requestEmailVerification()
     }
 
     private func requestEmailVerification() {
-        emailService.requestEmailVerification(email: email) { [weak self] result in
+        emailService.requestEmailVerificationNoAuth(email: registerInfo.email) { [weak self] result in
             guard let self else { return }
             switch result {
             case .success:
@@ -232,22 +216,46 @@ final class EmailVerificationCodeViewController: UIViewController {
             showCustomAlert(title: "코드를 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
             return
         }
-        guard requireAccessToken() else { return }
-
-        emailService.verifyEmailCode(email: email, code: code) { [weak self] result in
-            guard let self else { return }
-            switch result {
-            case .success:
-                UIImpactFeedbackGenerator(style: .light).impactOccurred()
-                self.navigateToNextStep()
-            case .failure(let error):
-                self.showCustomAlert(title: "인증 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+        
+        verifyEmail(code: code, registerInfo: registerInfo)
+    }
+    
+    private func verifyEmail(code: String, registerInfo: RegisterRequestDto) {
+        emailService.verifyEmailCode(email: registerInfo.email, code: code) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    // 2단계: 회원가입
+                    self.registerUser(registerInfo: registerInfo)
+                    
+                case .failure(let error):
+                    self.showVerificationFailureAlert(error: error)
+                }
+            }
+        }
+    }
+    
+    private func registerUser(registerInfo: RegisterRequestDto) {
+        authService.register(data: registerInfo) { [weak self] result in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
+                switch result {
+                case .success:
+                    UIImpactFeedbackGenerator(style: .light).impactOccurred()
+                    self.navigateToNextStep()
+                    
+                case .failure(let error):
+                    self.showRegisterFailureAlert(error: error)
+                }
             }
         }
     }
 
     private func navigateToNextStep() {
-        let nicknameVC = NicknameRegisterViewController(email: email, isFirst: true)
+        let nicknameVC = NicknameRegisterViewController(email: registerInfo.email, fromLogin: false)
         navigationController?.pushViewController(nicknameVC, animated: true)
     }
 
@@ -259,10 +267,16 @@ final class EmailVerificationCodeViewController: UIViewController {
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] t in
             guard let self else { return }
             self.remainingSeconds = max(0, self.remainingSeconds - 1)
-            self.updateTimerLabel()
-
-            if self.remainingSeconds == 0 {
+            if self.remainingSeconds <= 0 {
                 t.invalidate()
+                self.remainingSeconds = 0
+                self.updateTimerLabel()
+                self.verifyButton.setEnabled(isEnabled: false)
+                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
+                    self.navigationController?.popViewController(animated: false)
+                })
+            } else {
+                self.updateTimerLabel()
             }
         }
         RunLoop.main.add(countdownTimer!, forMode: .common)
@@ -276,5 +290,47 @@ final class EmailVerificationCodeViewController: UIViewController {
         } else {
             timerLabel.text = "0:00초 남음"
         }
+    }
+    
+    private func showRegisterFailureAlert(error: NetworkError) {
+        let message: String
+        
+        switch error {
+        case .serverError(let statusCode, let serverMessage):
+            if statusCode == 409 {
+                message = "이미 가입된 이메일입니다"
+            } else {
+                message = serverMessage
+            }
+        case .networkError:
+            message = "네트워크 오류가 발생했습니다"
+        case .decodingError:
+            message = "데이터 처리 중 오류가 발생했습니다"
+        default:
+            message = "회원가입에 실패했습니다"
+        }
+        
+        showCustomAlert(
+            title: message,
+            rightButtonText: "확인",
+            rightButtonAction: nil
+        )
+    }
+    
+    private func showVerificationFailureAlert(error: NetworkError) {
+        let message: String
+        
+        switch error {
+        case .serverError(_, let serverMessage):
+            message = serverMessage
+        default:
+            message = "인증 코드가 올바르지 않습니다"
+        }
+        
+        showCustomAlert(
+            title: message,
+            rightButtonText: "확인",
+            rightButtonAction: nil
+        )
     }
 }

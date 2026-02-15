@@ -7,14 +7,14 @@
 
 import Foundation
 import AuthenticationServices
-import KeychainSwift
 
 final class AppleAuthVM: NSObject {
     
-    private let networkService = AuthService()
+    private let networkService: AuthService
     var isFirst: Bool?
+    var hasNickName: Bool?
     
-    var onLoginSuccess: ((Bool, String?) -> Void)?
+    var onLoginSuccess: ((Bool, Bool, String?) -> Void)?
     var onLoginFailure: ((String) -> Void)?
 
     func startLogin() {
@@ -26,6 +26,10 @@ final class AppleAuthVM: NSObject {
         controller.delegate = self
         controller.presentationContextProvider = self
         controller.performRequests()
+    }
+    
+    init(authService: AuthService = .shared) {
+        self.networkService = authService
     }
 }
 
@@ -39,33 +43,41 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
             return
         }
 
-        // 닉네임 설정 화면에서 이메일 받아오기 위함
+        // 닉네임 설정 화면에서 이메일 받아오기 위해 추출
         let emailFromCredential = credential.email
         let emailFromIdToken = Self.extractEmailFromIDToken(idToken)
-        let emailFromKeychain = KeychainSwift().get("lastAppleLoginEmail")
+        let emailFromKeychain = AuthManager.shared.lastAppleLoginEmail
         let resolvedEmail = emailFromCredential ?? emailFromIdToken ?? emailFromKeychain
-        if let e = resolvedEmail, !e.isEmpty {
-            KeychainSwift().set(e, forKey: "lastAppleLoginEmail")
+        
+        if let email = resolvedEmail, !email.isEmpty {
+            AuthManager.shared.lastAppleLoginEmail = email
         }
         
-        guard let fcmToken = KeychainSwift().get("FCMToken") ?? KeychainSwift().get("fcmToken") else {
-            self.onLoginFailure?("FCM Token 없음")
-            return
-        }
+        let fcmToken = AuthManager.shared.fcmToken ?? ""
 
         let appleDTO = networkService.makeAppleDTO(idToken: idToken, fcmToken: fcmToken)
         networkService.appleLogin(data: appleDTO) { [weak self] result in
             switch result {
             case .success(let response):
-                KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
-                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                KeychainSwift().set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                KeychainSwift().set(String(response.isFirst), forKey: "isFirst")
-                self?.isFirst = response.isFirst
-                self?.onLoginSuccess?(response.isFirst, resolvedEmail)
+                guard let response = response else { return }
                 
-                print("🔐 JWT accessToken:", response.accessToken)
+                let loginType = LoginType.from(serverType: response.loginType)
+                
+                AuthManager.shared.saveLoginData(
+                    hashedUserId: response.hashedUserId,
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresIn: response.accessExp,
+                    loginType: loginType,
+                    isFirst: response.isFirst,
+                    userName: response.userName
+                )
+                
+                self?.isFirst = response.isFirst
+                self?.hasNickName = AuthManager.shared.hasNickname
+                guard let hasNickName = self?.hasNickName, let isFirst = self?.isFirst else { return }
+                self?.onLoginSuccess?(hasNickName, isFirst, resolvedEmail)
+                
             case .failure(let error):
                 self?.onLoginFailure?("서버 로그인 실패: \(error.localizedDescription)")
             }
@@ -100,6 +112,9 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
 
 extension AppleAuthVM: ASAuthorizationControllerPresentationContextProviding {
     func presentationAnchor(for controller: ASAuthorizationController) -> ASPresentationAnchor {
-        return UIApplication.shared.windows.first { $0.isKeyWindow } ?? UIWindow()
+        return UIApplication.shared.connectedScenes
+                    .compactMap { $0 as? UIWindowScene }
+                    .first?.windows
+                    .first { $0.isKeyWindow } ?? UIWindow()
     }
 }

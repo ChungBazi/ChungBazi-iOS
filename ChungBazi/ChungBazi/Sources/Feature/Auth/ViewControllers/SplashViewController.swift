@@ -7,12 +7,10 @@
 
 import UIKit
 import Then
-import KeychainSwift
-
 
 class SplashViewController: UIViewController {
     
-    let networkService = AuthService()
+    let networkService = AuthService.shared
     
     private let splashLabel = UILabel().then {
         $0.text = "정책도 쉽고 간편하게"
@@ -57,7 +55,6 @@ class SplashViewController: UIViewController {
     }
     
     private func updateLabelText() {
-        // 1초 후 텍스트 업데이트
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.splashLabel.text = "청바지"
             self.splashLabel.font = UIFont.afgRegularFont(ofSize: 28)
@@ -65,39 +62,44 @@ class SplashViewController: UIViewController {
     }
     
     func checkAuthenticationStatus() {
-        guard let expirationString = KeychainSwift().get("serverAccessTokenExp"),
-              let expirationTimestamp = Int(expirationString) else {
-            DispatchQueue.main.async {
-                self.navigateToLoginScreen()
-            }
+        guard AuthManager.shared.isUserLoggedIn() else {
+            navigateToLoginScreen()
             return
         }
 
-        let expirationDate = Date(timeIntervalSince1970: TimeInterval(expirationTimestamp))
-
-        if Date() < expirationDate {
-            print("토큰이 아직 유효함")
-            checkIsFirst()
+        if AuthManager.shared.isAccessTokenExpired() {
+            refreshTokenAndProceed()
         } else {
-            print("토큰이 만료됨 → 재발급 시도")
-            networkService.reIssueAccesToken { success in
+            proceedToNextScreen()
+        }
+    }
+    
+    private func refreshTokenAndProceed() {
+        networkService.reIssueAccesToken { [weak self] success in
+            guard let self = self else { return }
+            
+            DispatchQueue.main.async {
                 if success {
-                    self.checkIsFirst()
+                    self.proceedToNextScreen()
                 } else {
-                    DispatchQueue.main.async {
-                        self.navigateToLoginScreen()
-                    }
+                    // 재발급 실패 시 로그인 데이터 정리
+                    AuthManager.shared.clearAuthDataForLogout()
+                    self.navigateToLoginScreen()
                 }
             }
         }
     }
     
-    private func checkIsFirst() {
-        guard let isFirstString = KeychainSwift().get("isFirst") else { return }
-        let isFirst = Bool(isFirstString)
-        if isFirst == true || isFirst == nil {
-            navigateToSurveyScreen()
-        } else { navigateToMainScreen() }
+    private func proceedToNextScreen() {
+        let hasNickName = AuthManager.shared.hasNickname
+        let isFirst = AuthManager.shared.isFirstLaunch
+        
+        if !hasNickName || isFirst {
+            navigateToLoginScreen()
+            return
+        }
+        
+        navigateToMainScreen()
     }
     
     private func navigateToMainScreen() {
@@ -117,16 +119,6 @@ class SplashViewController: UIViewController {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = nav
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
-        }
-    }
-    
-    private func navigateToSurveyScreen() {
-        let vc = StartSurveyViewController()
-        let navigationController = UINavigationController(rootViewController: vc)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController = navigationController
             UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
         }
     }

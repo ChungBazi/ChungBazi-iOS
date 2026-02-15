@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum PolicyEndpoints {
     case searchPolicy(name: String, cursor: String, order: String)
@@ -19,7 +18,7 @@ enum PolicyEndpoints {
     case fetchCalendarPolicyDetail(cartId: Int)
 }
 
-extension PolicyEndpoints: TargetType {
+extension PolicyEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.policyURL) else {
@@ -73,11 +72,11 @@ extension PolicyEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        true
+    }
+    
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }
