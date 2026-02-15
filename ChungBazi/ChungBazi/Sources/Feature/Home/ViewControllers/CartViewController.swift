@@ -316,6 +316,7 @@ extension CartViewController: UITableViewDelegate {
         guard let item = cartItems[category]?[indexPath.row] else { return }
 
         let vc = PolicyDetailViewController()
+        vc.configureEntryPoint(.saved)
         vc.policyId = item.policyId
         navigationController?.pushViewController(vc, animated: true)
     }

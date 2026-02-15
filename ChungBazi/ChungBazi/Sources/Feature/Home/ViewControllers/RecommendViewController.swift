@@ -192,7 +192,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                     
                     // 첫 번째 아이템을 드롭다운 title로 설정
                     if !localizedInterests.isEmpty {
-                        self.interestDropdown.didSelectItem(at: 0)
+                        self.interestDropdown.setSelectItemForIndex(at: 0)
                     }
                     
                     self.updateTitleLabel()
@@ -272,6 +272,11 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                     self.tableView.setContentOffset(.zero, animated: true)
                 }
                 
+                AmplitudeManager.shared.trackFilterApply(
+                    filterType: interest,
+                    filterValue: sortOrder
+                )
+                
                 fetchRecommendPolicies(interest: interest, cursor: "", order: sortOrder)
             }
         } else if dropdown == sortDropdown {
@@ -282,6 +287,11 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                 DispatchQueue.main.async {
                     self.tableView.setContentOffset(.zero, animated: true)
                 }
+                
+                AmplitudeManager.shared.trackFilterApply(
+                    filterType: interest,
+                    filterValue: sortOrder
+                )
                 
                 fetchRecommendPolicies(interest: interest, cursor: "", order: order)
             }
@@ -312,6 +322,7 @@ extension RecommendViewController: UITableViewDataSource, UITableViewDelegate {
         let selectedPolicy = policyList[indexPath.row]
         
         let detailVC = PolicyDetailViewController()
+        detailVC.configureEntryPoint(.recommend)
         detailVC.policyId = selectedPolicy.policyId
         
         navigationController?.pushViewController(detailVC, animated: true)

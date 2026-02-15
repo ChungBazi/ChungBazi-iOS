@@ -11,6 +11,9 @@ import KakaoSDKAuth
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    var lastScreenName: String {
+        return UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+    }
     
     var pendingNotificationInfo: [AnyHashable: Any]? // 알림 정보 저장
     var pendingDeepLink: URL? // 딥링크 저장
@@ -37,6 +40,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         setRootViewController()
         NotificationCenter.default.addObserver(self, selector: #selector(handleNotificationFromForeground(_:)), name: NSNotification.Name("NotificationReceived"), object: nil)
+        AmplitudeManager.shared.trackAppOpen()
     }
     
     private func setRootViewController() {
@@ -96,6 +100,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         case "POLICY_ALARM":
             if let policyIdString = userInfo["policyId"] as? String, let policyId = Int(policyIdString) {
                 let vc = PolicyDetailViewController()
+                vc.configureEntryPoint(.alarm)
                 vc.policyId = policyId
                 destinationVC = vc
             }
@@ -137,6 +142,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let policyIdString = pathComponents[1]
                 if let policyId = Int(policyIdString) {
                     let vc = PolicyDetailViewController()
+                    vc.configureEntryPoint(.deepLink)
                     vc.policyId = policyId
                     destinationVC = vc
                 }
@@ -208,8 +214,16 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidDisconnect(_ scene: UIScene) {}
     func sceneDidBecomeActive(_ scene: UIScene) {}
     func sceneWillResignActive(_ scene: UIScene) {}
-    func sceneWillEnterForeground(_ scene: UIScene) {}
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        AmplitudeManager.shared.trackAppOpen()
+    }
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: lastScreenName
+        )
     }
 }

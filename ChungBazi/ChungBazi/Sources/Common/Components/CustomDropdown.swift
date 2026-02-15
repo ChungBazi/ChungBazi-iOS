@@ -218,15 +218,20 @@ class CustomDropdown: UIView {
         return self.superview
     }
     
-    func didSelectItem(at index: Int) {
-        selectedItem = dropdownItems[index]
-        delegate?.dropdown(self, didSelectItem: selectedItem ?? "")
-    }
-    
     // MARK: - Public Methods
+    
     func setItems(_ items: [String]) {
         self.dropdownItems = items
         dropdownTableView.reloadData()
+    }
+    
+    func setSelectItemForIndex(at index: Int) {
+        guard index >= 0, index < dropdownItems.count else { return }
+        let item = dropdownItems[index]
+        self.selectedItem = item
+        dropdownView.titleLabel.text = item
+        dropdownView.titleLabel.textColor = .black
+        delegate?.dropdown(self, didSelectItem: item)
     }
     
     func setSelectedItem(_ item: String?) {

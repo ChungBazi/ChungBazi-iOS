@@ -325,6 +325,7 @@ extension SearchResultViewController: UITableViewDataSource, UITableViewDelegate
         let selectedPolicy = policyList[indexPath.row]
         
         let detailVC = PolicyDetailViewController()
+        detailVC.configureEntryPoint(.search)
         detailVC.policyId = selectedPolicy.policyId
         
         navigationController?.pushViewController(detailVC, animated: true)
@@ -361,6 +362,12 @@ extension SearchResultViewController: CustomDropdownDelegate {
         let newSortOrder = (item == "마감순") ? "deadline" : "latest"
         if sortOrder != newSortOrder {
             sortOrder = newSortOrder
+            
+            AmplitudeManager.shared.trackFilterApply(
+                filterType: nil,
+                filterValue: sortOrder
+            )
+            
             executeSearch()
         }
     }

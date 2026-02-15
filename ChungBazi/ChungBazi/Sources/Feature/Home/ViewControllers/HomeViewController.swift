@@ -42,7 +42,7 @@ final class HomeViewController: UIViewController {
         attributedText.addAttribute(.paragraphStyle, value: paragraphStyle, range: firstPartRange)
 
         attributedText.addAttribute(.font, value: UIFont.afgRegularFont(ofSize: 20), range: secondPartRange)
-        attributedText.addAttribute(.foregroundColor, value: AppColor.blue700, range: secondPartRange)
+        attributedText.addAttribute(.foregroundColor, value: AppColor.blue700!, range: secondPartRange)
         
         $0.numberOfLines = 2
         $0.textAlignment = .right
@@ -64,6 +64,17 @@ final class HomeViewController: UIViewController {
         CategoryItem(title: "복지,문화", iconName: "policy_welfare_culture_icon", policies: []),
         CategoryItem(title: "참여,권리", iconName: "policy_participation_icon", policies: [])
     ]
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        fetchNotificationStatus()
+    }
+    
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        AmplitudeManager.shared.trackHomeView()
+    }
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -82,7 +93,6 @@ final class HomeViewController: UIViewController {
         configureCategoriesWithChatbot()
         configureSearchViewTap()
         fetchNotificationStatus()
-        fetchProfileImg()
     }
 
     private func setupLayout() {
@@ -133,24 +143,6 @@ final class HomeViewController: UIViewController {
         categoriesGridStackView.snp.makeConstraints { make in
             make.top.equalTo(banner.snp.bottom).offset(dynamicSpacing)
             make.leading.trailing.equalToSuperview().inset(16)
-        }
-    }
-    
-    private func fetchProfileImg() {
-        userService.fetchProfileImg { [weak self] result in
-            guard let self = self else { return }
-            
-            switch result {
-            case .success(let response):
-                let characterImgName = response.characterImg
-                
-//                DispatchQueue.main.async {
-//                    self.policyIconImageView.image = UIImage(named: characterImgName) ?? UIImage(named: "homeicon")
-//                }
-                
-            case .failure(let error):
-                print("❌ 캐릭터 이미지 조회 실패: \(error.localizedDescription)")
-            }
         }
     }
     
@@ -249,12 +241,6 @@ final class HomeViewController: UIViewController {
     @objc private func didTapSearchView() {
         let searchResultVC = SearchResultViewController()
         navigationController?.pushViewController(searchResultVC, animated: true)
-    }
-    
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        fetchProfileImg()
-        fetchNotificationStatus()
     }
     
     private let categoryMapping: [String: String] = [
