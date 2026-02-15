@@ -8,13 +8,12 @@
 import UIKit
 import SnapKit
 import Then
-import KeychainSwift
 import SwiftyToaster
 
 final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
 
     
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     private let registerView = EmailRegisterView()
     private var isPasswordVisible = false
 
@@ -41,7 +40,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         addCustomNavigationBar(titleText: "이메일 로그인", showBackButton: true)
         setupActions()
         setupTextFieldDelegates()
-        setupBackgroundTapToDismiss()
+        hideKeyboardWhenTappedAround()
         setupKeyboardFollowing()
 
         if let email = initialEmail {
@@ -67,16 +66,6 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             view.endEditing(true)
         }
         return true
-    }
-    
-    private func setupBackgroundTapToDismiss() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     private func setupKeyboardFollowing() {
@@ -160,7 +149,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             return
         }
         
-        let fcmToken = KeychainSwift().get("fcmToken") ?? ""
+        let fcmToken = AuthManager.shared.fcmToken ?? ""
         
         let dto = LoginRequestDto(email: email, password: password, fcmToken: fcmToken)
         
@@ -169,16 +158,21 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                 guard let self else { return }
                 switch result {
                 case .success(let response):
-                    let kc = KeychainSwift()
-                    kc.set(response.accessToken, forKey: "serverAccessToken")
-                    kc.set(response.refreshToken, forKey: "serverRefreshToken")
-                    let expirationTimestamp = Int(Date().timeIntervalSince1970) + response.accessExp
-                    kc.set(String(expirationTimestamp), forKey: "serverAccessTokenExp")
-                    kc.set(String(response.userId), forKey: "userId")
-                    kc.set(response.userName, forKey: "userName")
-                    kc.set(response.isFirst ? "1" : "0", forKey: "isFirstLogin")
+                    guard let response = response else { return }
+                    
+                    let loginType = LoginType.from(serverType: response.loginType)
+                    
+                    AuthManager.shared.saveLoginData(
+                        hashedUserId: response.hashedUserId,
+                        accessToken: response.accessToken,
+                        refreshToken: response.refreshToken,
+                        expiresIn: response.accessExp,
+                        loginType: loginType,
+                        isFirst: response.isFirst,
+                        userName: response.userName
+                    )
 
-                    self.routeAfterLogin(email: email, isFirst: response.isFirst)
+                    self.routeAfterLogin(email: email)
 
                 case .failure(let error):
                     Toaster.shared.makeToast("로그인 실패: \(error.localizedDescription)")
@@ -187,15 +181,14 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         }
     }
 
-    private func routeAfterLogin(email: String, isFirst: Bool) {
-        if signupEntry {
-            let verifyVC = EmailVerificationCodeViewController(email: email)
-            navigationController?.pushViewController(verifyVC, animated: true)
+    private func routeAfterLogin(email: String) {
+        if !AuthManager.shared.hasNickname {
+            let nickNameRegisterVC = NicknameRegisterViewController(email: email, fromLogin: true)
+            navigationController?.pushViewController(nickNameRegisterVC, animated: true)
             return
         }
 
         let finish = FinishLoginViewController()
-        finish.isFirst = isFirst
         navigationController?.pushViewController(finish, animated: true)
     }
 }

@@ -78,12 +78,12 @@ final class KeyboardHandler: NSObject, UIScrollViewDelegate, UIGestureRecognizer
     }
 
     func setTapGestureToDismissKeyboard() {
-            let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-            tap.cancelsTouchesInView = false
-            tap.delegate = self
-            viewController?.view.addGestureRecognizer(tap)
-            self.dismissTap = tap
-        }
+        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        tap.delegate = self
+        viewController?.view.addGestureRecognizer(tap)
+        self.dismissTap = tap
+    }
 
     @objc private func dismissKeyboard() {
         viewController?.view.endEditing(true)
@@ -115,6 +115,16 @@ extension UIViewController {
         let handler = KeyboardHandler(scrollView: scrollView, inputView: inputView, viewController: self)
         handler.setTapGestureToDismissKeyboard()
         objc_setAssociatedObject(self, &keyboardHandlerKey, handler, .OBJC_ASSOCIATION_RETAIN_NONATOMIC)
+    }
+    
+    func hideKeyboardWhenTappedAround() {
+        let tap = UITapGestureRecognizer(target: self, action: #selector(UIViewController.dismissKeyboard))
+        tap.cancelsTouchesInView = false
+        view.addGestureRecognizer(tap)
+    }
+    
+    @objc func dismissKeyboard() {
+        view.endEditing(true)
     }
 }
 

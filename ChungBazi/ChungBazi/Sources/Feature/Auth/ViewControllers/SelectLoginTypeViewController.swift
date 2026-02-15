@@ -5,29 +5,27 @@
 
 import UIKit
 import KakaoSDKUser
-import KeychainSwift
 import FirebaseAuth
 import Moya
 import SwiftyToaster
-import AuthenticationServices
 
 class SelectLoginTypeViewController: UIViewController {
 
     // MARK: - ViewModels / Services
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
-    let networkService = AuthService()
-    var isFirst: Bool?
+    let networkService = AuthService.shared
     private var lastLoginEmail: String?
     
     lazy var appleAuthVM: AppleAuthVM = {
         let vm = AppleAuthVM()
-        vm.onLoginSuccess = { [weak self] isFirst, email in
-            self?.isFirst = isFirst
+        vm.onLoginSuccess = { [weak self] hasNickName, isFirst, email in
             self?.lastLoginEmail = email
-            self?.goToNextView()
+            DispatchQueue.main.async {
+                self?.goToNextView()
+            }
         }
         vm.onLoginFailure = { errorMessage in
-            DispatchQueue.main.async { Toaster.shared.makeToast("Apple 로그인 실패: \(errorMessage)") }
+            DispatchQueue.main.async { Toaster.shared.makeToast("로그인을 실패하였습니다. 다시 시도해주세요.") }
         }
         return vm
     }()
@@ -73,9 +71,9 @@ class SelectLoginTypeViewController: UIViewController {
                     print("카카오 사용자 조회 실패: \(error.localizedDescription)")
                     return
                 }
-                guard let name = user?.kakaoAccount?.profile?.nickname else { print("userName nil"); return }
-                guard let email = user?.kakaoAccount?.email else { print("userEmail nil"); return }
-                guard let fcmToken = KeychainSwift().get("FCMToken") else { print("FCMToken nil"); return }
+                guard let name = user?.kakaoAccount?.profile?.nickname else { return }
+                guard let email = user?.kakaoAccount?.email else { return }
+                let fcmToken = AuthManager.shared.fcmToken ?? ""
                 self.lastLoginEmail = email
                 self.kakaoLoginProceed(name, email: email, fcmToken: fcmToken)
             }
@@ -88,13 +86,24 @@ class SelectLoginTypeViewController: UIViewController {
             guard let self = self else { return }
             switch result {
             case .success(let response):
-                KeychainSwift().set(response.refreshToken, forKey: "serverRefreshToken")
-                KeychainSwift().set(response.accessToken, forKey: "serverAccessToken")
-                let exp = Int(Date().timeIntervalSince1970) + response.accessExp
-                KeychainSwift().set(String(exp), forKey: "serverAccessTokenExp")
-                KeychainSwift().set(String(response.isFirst), forKey: "isFirst")
-                self.isFirst = response.isFirst
-                self.goToNextView()
+                guard let response = response else { return }
+                
+                let loginType = LoginType.from(serverType: response.loginType)
+                
+                AuthManager.shared.saveLoginData(
+                    hashedUserId: response.hashedUserId,
+                    accessToken: response.accessToken,
+                    refreshToken: response.refreshToken,
+                    expiresIn: response.accessExp,
+                    loginType: loginType,
+                    isFirst: response.isFirst,
+                    userName: response.userName
+                )
+        
+                DispatchQueue.main.async {
+                    self.goToNextView()
+                }
+                
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")
                 DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패했습니다. 다시 시도해 주세요.") }
@@ -115,21 +124,19 @@ class SelectLoginTypeViewController: UIViewController {
     }
 
     func goToNextView() {
-        if isFirst == true {
-            // 최초 로그인 사용자는 닉네임 등록으로
-            let vc = NicknameRegisterViewController(email: lastLoginEmail, isFirst: true)
+        if !AuthManager.shared.hasNickname {
+            let vc = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
             if let nav = navigationController {
                 nav.pushViewController(vc, animated: true)
             } else {
-                let nav = UINavigationController(rootViewController: vc)
-                nav.modalPresentationStyle = .fullScreen
-                present(nav, animated: true, completion: nil)
+                let navController = UINavigationController(rootViewController: vc)
+                navController.modalPresentationStyle = .fullScreen
+                present(navController, animated: true, completion: nil)
             }
             return
         }
-        // 재방문 사용자: 기존 플로우 유지
+        
         let vc = FinishLoginViewController()
-        vc.isFirst = self.isFirst
         let navController = UINavigationController(rootViewController: vc)
         navController.modalPresentationStyle = .fullScreen
         self.present(navController, animated: true, completion: nil)

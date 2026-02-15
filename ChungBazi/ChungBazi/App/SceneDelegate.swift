@@ -7,10 +7,14 @@
 
 import UIKit
 import KakaoSDKAuth
+import SwiftyToaster
 
 class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     var window: UIWindow?
+    var lastScreenName: String {
+        return UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+    }
     
     var pendingNotificationInfo: [AnyHashable: Any]? // 알림 정보 저장
     var pendingDeepLink: URL? // 딥링크 저장
@@ -36,7 +40,67 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         
         setRootViewController()
-        NotificationCenter.default.addObserver(self, selector: #selector(handleNotificationFromForeground(_:)), name: NSNotification.Name("NotificationReceived"), object: nil)
+        setupNotifications()
+        AmplitudeManager.shared.trackAppOpen()
+    }
+    
+    private func setupNotifications() {
+        // 1. 강제 로그아웃
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleForceLogout),
+            name: .forceLogout,
+            object: nil
+        )
+        
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleNotificationFromForeground(_:)),
+            name: NSNotification.Name("NotificationReceived"),
+            object: nil
+        )
+        
+        // 2. 토큰 갱신 완료 (선택사항)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleTokenRefreshed),
+            name: .tokenRefreshed,
+            object: nil
+        )
+    }
+    
+    @objc private func handleForceLogout() {
+        DispatchQueue.main.async { [weak self] in
+            guard let window = self?.window else { return }
+            
+            let loginVC = SelectLoginTypeViewController()
+            let nav = UINavigationController(rootViewController: loginVC)
+            nav.isNavigationBarHidden = true
+            
+            window.rootViewController = nav
+            UIView.transition(
+                with: window,
+                duration: 0.3,
+                options: .transitionCrossDissolve,
+                animations: nil
+            )
+            
+            Toaster.shared.makeToast("세션이 만료되어 로그아웃되었습니다")
+        }
+    }
+    
+    @objc private func handleTokenRefreshed() {
+        
+        // 현재: 아무것도 안 함 (Plugin에서 Toast 이미 표시)
+        
+        // 추후: 특정 ViewController에 알림
+        // 현재 화면이 무엇인지 확인하고 자동 재시도
+        // NotificationCenter.default.post(name: .retryLastRequest, object: nil)
+    }
+    
+    @objc private func handleNotificationFromForeground(_ notification: Notification) {
+        guard let userInfo = notification.userInfo else { return }
+        handleNotification(userInfo: userInfo)
     }
     
     private func setRootViewController() {
@@ -80,11 +144,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
     }
     
-    @objc private func handleNotificationFromForeground(_ notification: Notification) {
-        guard let userInfo = notification.userInfo else { return }
-        handleNotification(userInfo: userInfo)
-    }
-    
     private func handleNotification(userInfo: [AnyHashable: Any]) {
         guard let type = userInfo["notificationType"] as? String else { return }
         guard let topVC = UIApplication.getMostTopViewController(),
@@ -96,17 +155,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         case "POLICY_ALARM":
             if let policyIdString = userInfo["policyId"] as? String, let policyId = Int(policyIdString) {
                 let vc = PolicyDetailViewController()
+                vc.configureEntryPoint(.alarm)
                 vc.policyId = policyId
                 destinationVC = vc
             }
-//        case "COMMUNITY_ALARM":
-//            if let postIdString = userInfo["postId"] as? String, let postId = Int(postIdString) {
-//                let vc = CommunityDetailViewController(postId: postId)
-//                destinationVC = vc
-//            }
-//        case "REWARD_ALARM":
-//            let vc = MyCharacterViewController()
-//            destinationVC = vc
         default:
             break
         }
@@ -137,6 +189,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 let policyIdString = pathComponents[1]
                 if let policyId = Int(policyIdString) {
                     let vc = PolicyDetailViewController()
+                    vc.configureEntryPoint(.deepLink)
                     vc.policyId = policyId
                     destinationVC = vc
                 }
@@ -208,8 +261,20 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidDisconnect(_ scene: UIScene) {}
     func sceneDidBecomeActive(_ scene: UIScene) {}
     func sceneWillResignActive(_ scene: UIScene) {}
-    func sceneWillEnterForeground(_ scene: UIScene) {}
+    
+    func sceneWillEnterForeground(_ scene: UIScene) {
+        AmplitudeManager.shared.trackAppOpen()
+    }
+    
     func sceneDidEnterBackground(_ scene: UIScene) {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
+        
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: lastScreenName
+        )
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
     }
 }

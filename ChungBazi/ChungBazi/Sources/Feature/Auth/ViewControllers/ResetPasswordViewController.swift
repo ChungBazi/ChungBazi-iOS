@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import KeychainSwift
 
 final class ResetPasswordViewController: UIViewController {
 
@@ -21,7 +20,8 @@ final class ResetPasswordViewController: UIViewController {
     private let resetView = ResetPasswordView()
     private var isNewPwdVisible = false
     private var isConfirmPwdVisible = false
-    private let authService = AuthService()
+    private let authService = AuthService.shared
+    private let userAuthService = UserAuthService()
     
     private let tooltipView = TooltipView()
 
@@ -88,30 +88,30 @@ final class ResetPasswordViewController: UIViewController {
     @objc private func textFieldsChanged() {
         let newPwd = resetView.newPwdField.text ?? ""
         let confirm = resetView.confirmPwdField.text ?? ""
-        let valid = isValidPassword(newPwd) && newPwd == confirm && !newPwd.isEmpty
+        let valid = !newPwd.isEmpty && !confirm.isEmpty
         
         resetView.completeButton.isEnabled = valid
         resetView.completeButton.backgroundColor = valid ? .blue700 : .gray200
     }
     
     @objc private func completeTapped() {
-            let newPwd = resetView.newPwdField.text ?? ""
-            let confirm = resetView.confirmPwdField.text ?? ""
-            guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
-            guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
-
-            switch mode {
-            case .loggedIn:
-                let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
-                authService.resetPassword(data: dto, completion: handleResult)
-            case .noAuth(let email, let code):
-                authService.resetPasswordNoAuth(
-                    email: email,
-                    authCode: code,
-                    newPassword: newPwd
+        let newPwd = resetView.newPwdField.text ?? ""
+        let confirm = resetView.confirmPwdField.text ?? ""
+        guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
+        
+        switch mode {
+        case .loggedIn:
+            let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
+            userAuthService.resetPassword(data: dto, completion: handleResult)
+        case .noAuth(let email, let code):
+            authService.resetPasswordNoAuth(
+                email: email,
+                authCode: code,
+                newPassword: newPwd
                 , completion: handleResult)
-            }
         }
+    }
 
 
     
@@ -119,7 +119,6 @@ final class ResetPasswordViewController: UIViewController {
         DispatchQueue.main.async {
             switch result {
             case .success:
-                KeychainSwift().delete("resetPasswordToken")
                 self.showCustomAlert(title: "비밀번호가 재설정되었습니다.", rightButtonText: "확인") {
                     self.navigationController?.popToRootViewController(animated: true)
                 }
@@ -132,7 +131,7 @@ final class ResetPasswordViewController: UIViewController {
     }
     
     private func isValidPassword(_ pwd: String) -> Bool {
-        let pattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
+        let pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
         return pwd.range(of: pattern, options: .regularExpression) != nil
     }
 }

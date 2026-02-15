@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum AuthEndpoints {
     case postKakaoLogin(data: KakaoLoginRequestDto)
@@ -22,7 +21,7 @@ enum AuthEndpoints {
     case postLogin(data: LoginRequestDto)
 }
 
-extension AuthEndpoints: TargetType {
+extension AuthEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.authURL) else {
             fatalError("잘못된 URL")
@@ -88,29 +87,17 @@ extension AuthEndpoints: TargetType {
         }
     }
     
-    var headers: [String : String]? {
-        var base: [String: String] = ["Content-Type": "application/json"]
-        let kc = KeychainSwift()
-
+    var requiresAuthentication: Bool {
         switch self {
-        case .postKakaoLogin, .postAppleLogin, .postReIssueToken,
-             .postRegister, .postRegisterNickname, .postLogin,
-             .postResetPasswordNoAuth:
-            return base
-
-        case .postResetPassword, .postLogout, .deleteUser:
-            if let access = kc.get("serverAccessToken"), !access.isEmpty {
-                base["Authorization"] = "Bearer \(access)"
-                return base
-            }
-            if case .postResetPassword = self,
-               let reset = kc.get("resetPasswordToken"),
-               !reset.isEmpty,
-               isLikelyJWT(reset) {
-                base["Authorization"] = "Bearer \(reset)"
-            }
-            return base
+        case .postLogin, .postKakaoLogin, .postAppleLogin, .postRegisterNickname, .postRegister, .postReIssueToken, .postResetPasswordNoAuth:
+            return false
+        default:
+            return true
         }
+    }
+    
+    var headers: [String : String]? {
+        return ["Content-Type": "application/json"]
     }
     
     private func isLikelyJWT(_ s: String) -> Bool {

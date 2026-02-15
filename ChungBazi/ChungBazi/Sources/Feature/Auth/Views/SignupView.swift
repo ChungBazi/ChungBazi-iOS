@@ -184,7 +184,7 @@ final class SignupView: UIView {
         
         infoLabel.snp.makeConstraints {
             $0.bottom.equalTo(registerButton.snp.top).offset(-25)
-            $0.leading.trailing.equalToSuperview().inset(45)
+            $0.horizontalEdges.equalToSuperview().inset(45)
         }
         
         contentView.snp.makeConstraints {

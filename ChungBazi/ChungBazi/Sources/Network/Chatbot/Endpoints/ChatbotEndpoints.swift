@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum ChatbotEndpoints {
     case getPolicyDetail(policyId: Int)
@@ -15,8 +14,7 @@ enum ChatbotEndpoints {
     case ask(data: ChatbotAskRequestDto)
 }
 
-extension ChatbotEndpoints: TargetType {
-    
+extension ChatbotEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.chatbotURL) else {
             fatalError("잘못된 URL")
@@ -58,14 +56,11 @@ extension ChatbotEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        true
+    }
+    
     var headers: [String: String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        var baseHeaders: [String: String] = [
-            "Content-Type": "application/json"
-        ]
-        if let token = accessToken {
-            baseHeaders["Authorization"] = "Bearer \(token)"
-        }
-        return baseHeaders
+        return ["Content-Type": "application/json"]
     }
 }

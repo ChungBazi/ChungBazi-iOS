@@ -7,7 +7,6 @@
 
 import UIKit
 import SwiftyToaster
-import KeychainSwift
 
 class ProfileViewController: UIViewController {
     private let profileView = ProfileView()
@@ -15,9 +14,9 @@ class ProfileViewController: UIViewController {
     private var rewardData: RewardModel?
     let userInfoData = UserProfileDataManager.shared
     
-    let networkService = AuthService()
+    let userAuthService = UserAuthService()
     let kakaoAuthVM = KakaoAuthVM()
-    private let service = UserService()
+    private let userService = UserService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,7 +28,6 @@ class ProfileViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchProfile()
-        fetchReward()
     }
     
     
@@ -47,7 +45,7 @@ class ProfileViewController: UIViewController {
     private func fetchProfile() {
         showLoading()
         
-        service.fetchProfile { [weak self] result in
+        userService.fetchProfile { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -66,25 +64,6 @@ class ProfileViewController: UIViewController {
                 }
             case .failure(let response):
                 print("❌프로필 불러오기 실패: \(response.localizedDescription)")
-            }
-        }
-    }
-    
-    private func fetchReward() {
-        showLoading()
-        
-        service.fetchReward { [weak self] result in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.hideLoading()
-            }
-            
-            switch result {
-            case .success(let response):
-                self.rewardData = RewardModel(currentReward: response.rewardLevel, myPosts: response.postCount, myComments: response.commentCount)
-            case .failure(let error):
-                print(error)
             }
         }
     }
@@ -131,7 +110,9 @@ extension ProfileViewController: ProfileViewDelegate {
     }
     
     func didTapContact() {
-        print("")
+        if let url = URL(string: Config.contactFormURL) {
+            UIApplication.shared.open(url)
+        }
     }
     
     func didTapAppInfo() {
@@ -155,17 +136,6 @@ extension ProfileViewController: ProfileViewDelegate {
             rightButtonText: "확인",
             rightButtonAction: {
                 self.deleteUser()
-//                self.kakaoAuthVM.unlinkKakaoAccount { success in
-//                    if success {
-//                        Toaster.shared.makeToast("회원탈퇴 성공")
-//                        self.clearForQuit()
-//                        DispatchQueue.main.async {
-//                            self.showSplashScreen()
-//                        }
-//                    } else {
-//                        Toaster.shared.makeToast("회원탈퇴 실패")
-//                    }
-//                }
             }
         )
     }
@@ -176,47 +146,86 @@ extension ProfileViewController: ProfileViewDelegate {
     }
     
     private func logout() {
-        networkService.logout() { [weak self] result in
+        userAuthService.logout() { [weak self] result in
             guard let self = self else { return }
+            
             switch result {
             case .success(_):
-                kakaoAuthVM.kakaoLogout()
-                Toaster.shared.makeToast("로그아웃 성공")
-                self.clearForQuit()
-                DispatchQueue.main.async {
-                    self.showSplashScreen()
+                self.performSocialLogout {
+                    AuthManager.shared.clearAuthDataForLogout()
+                    
+                    DispatchQueue.main.async {
+                        Toaster.shared.makeToast("로그아웃 되었습니다")
+                        self.showSplashScreen()
+                    }
                 }
+                
             case .failure(_):
-                Toaster.shared.makeToast("로그아웃 실패")
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast("로그아웃에 실패하였습니다")
+                }
             }
         }
     }
     
     private func deleteUser() {
-        networkService.deleteUser { [weak self] result in
+        userAuthService.deleteUser { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(_):
-                kakaoAuthVM.unlinkKakaoAccount { success in
-                    if success {
-                        Toaster.shared.makeToast("회원탈퇴 성공")
-                        self.clearForQuit()
-                        DispatchQueue.main.async {
-                            self.showSplashScreen()
-                        }
-                    } else {
-//                        Toaster.shared.makeToast("회원탈퇴 실패")
+                self.performSocialWithdrawal {
+                    AuthManager.shared.clearAuthDataForWithdrawal()
+                    
+                    DispatchQueue.main.async {
+                        Toaster.shared.makeToast("회원탈퇴가 완료되었습니다")
+                        self.showSplashScreen()
                     }
                 }
             case .failure(_):
-                Toaster.shared.makeToast("회원탈퇴 실패")
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다")
+                }
             }
         }
     }
     
-    func clearForQuit() {
-        ["serverAccessToken", "serverAccessTokenExp", "serverRefreshToken"].forEach {
-            KeychainSwift().delete($0)
+    private func performSocialLogout(completion: @escaping () -> Void) {
+        guard let loginType = AuthManager.shared.loginType else {
+            completion()
+            return
+        }
+        
+        switch loginType {
+        case .kakao:
+            kakaoAuthVM.kakaoLogout { success in
+                completion()
+            }
+            
+        case .apple:
+            completion()
+            
+        case .normal:
+            completion()
+        }
+    }
+
+    private func performSocialWithdrawal(completion: @escaping () -> Void) {
+        guard let loginType = AuthManager.shared.loginType else {
+            completion()
+            return
+        }
+        
+        switch loginType {
+        case .kakao:
+            kakaoAuthVM.unlinkKakaoAccount { success in
+                completion()
+            }
+            
+        case .apple:
+            completion()
+            
+        case .normal:
+            completion()
         }
     }
     
@@ -232,7 +241,11 @@ extension ProfileViewController: ProfileViewDelegate {
             return
         }
         
-        UIView.transition(with: window, duration: 0.5, options: .transitionCrossDissolve, animations: {
+        UIView.transition(
+            with: window,
+            duration: 0.5,
+            options: .transitionCrossDissolve,
+            animations: {
             window.rootViewController = splashViewController
         }, completion: nil)
     }

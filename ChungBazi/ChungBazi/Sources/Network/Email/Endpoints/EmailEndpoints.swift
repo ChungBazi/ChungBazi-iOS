@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum EmailEndpoints {
     case postEmailRequest(email: String)
@@ -15,7 +14,7 @@ enum EmailEndpoints {
     case postEmailVerification(email: String, authCode: String)
 }
 
-extension EmailEndpoints: TargetType {
+extension EmailEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.emailURL) else {
             fatalError("잘못된 URL")
@@ -60,6 +59,15 @@ extension EmailEndpoints: TargetType {
             )
         }
     }
+    
+    var requiresAuthentication: Bool {
+        switch self {
+        case .postEmailRequestNoAuth, .postEmailVerification:
+            return false
+        default:
+            return true
+        }
+    }
 
     var headers: [String : String]? {
         switch self {
@@ -68,11 +76,7 @@ extension EmailEndpoints: TargetType {
         case .postEmailVerification:
             return ["Content-Type": "application/json"]
         case .postEmailRequest:
-            var headers = ["Content-Type": "application/json"]
-            if let token = KeychainSwift().get("serverAccessToken"), !token.isEmpty {
-                headers["Authorization"] = "Bearer \(token)"
-            }
-            return headers
+            return ["Content-Type": "application/json"]
         }
     }
 }

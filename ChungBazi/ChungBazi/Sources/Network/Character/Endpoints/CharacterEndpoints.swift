@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 import Moya
-import KeychainSwift
 
 enum CharacterEndpoints {
     case fetchMainCharacter
@@ -16,7 +15,7 @@ enum CharacterEndpoints {
     case updateOpenCharacter(selectedLevel: String)
 }
 
-extension CharacterEndpoints: TargetType {
+extension CharacterEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.characterURL) else {
             fatalError("잘못된 URL")
@@ -53,12 +52,11 @@ extension CharacterEndpoints: TargetType {
         }
     }
     
-    
+    var requiresAuthentication: Bool {
+        return true
+    }
+
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

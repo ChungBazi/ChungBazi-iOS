@@ -18,7 +18,8 @@ final class CalendarService: NetworkManager {
     public init(provider: MoyaProvider<CalendarEndpoints>? = nil) {
         // 플러그인 추가
         let plugins: [PluginType] = [
-            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose))
+            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)),
+            TokenRefreshPlugin()
         ]
         
         // provider 초기화

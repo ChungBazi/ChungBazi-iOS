@@ -151,6 +151,7 @@ extension AlarmViewController: UICollectionViewDataSource, UICollectionViewDeleg
         case .policy:
             guard let policyId = alarm.targetId else { return }
             let vc = PolicyDetailViewController()
+            vc.configureEntryPoint(.alarm)
             vc.policyId = policyId
             destinationVC = vc
             

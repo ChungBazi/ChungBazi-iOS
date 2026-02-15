@@ -15,7 +15,8 @@ final class ReportsService: NetworkManager {
 
     init(provider: MoyaProvider<ReportsEndpoints>? = nil) {
         let plugins: [PluginType] = [
-            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose))
+            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)),
+            TokenRefreshPlugin()
         ]
         self.provider = provider ?? MoyaProvider<ReportsEndpoints>(plugins: plugins)
     }

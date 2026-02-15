@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum NotificationEndpoints {
     case fetchAlarmList(type: String, cursor: Int)
@@ -15,7 +14,7 @@ enum NotificationEndpoints {
     case patchAlarmSetting(data: NoticeSettingRequestDto)
 }
 
-extension NotificationEndpoints: TargetType {
+extension NotificationEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.notificationURL) else {
@@ -31,7 +30,7 @@ extension NotificationEndpoints: TargetType {
         case .fetchAlarmSetting:
             return "/settings"
         case .patchAlarmSetting:
-            return "settings-up"
+            return "/settings-up"
         }
     }
     
@@ -55,11 +54,11 @@ extension NotificationEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        true
+    }
+    
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }
