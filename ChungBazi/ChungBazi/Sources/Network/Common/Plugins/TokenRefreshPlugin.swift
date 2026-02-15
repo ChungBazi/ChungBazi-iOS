@@ -7,22 +7,22 @@
 
 import Moya
 import Foundation
+import SwiftyToaster
 
 class TokenRefreshPlugin: PluginType {
     
     // MARK: - Static Properties (중복 방지)
     private static var isRefreshing = false
-    private static var failedRequests: [(TargetType, (Result<Response, MoyaError>) -> Void)] = []
     
     // MARK: - Prepare Request
     func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
         var request = request
         
-        // 1. 토큰 재발급 API는 제외
-        if isTokenRefreshRequest(target) { return request }
-        
-        // 2. 로그인/회원가입 API는 제외
-        if isAuthRequest(target) { return request }
+        if let authTarget = target as? AuthenticatedTarget {
+            if !authTarget.requiresAuthentication {
+                return request
+            }
+        }
         
         // 3. Access Token 추가
         if let accessToken = AuthManager.shared.accessToken {
@@ -60,8 +60,10 @@ class TokenRefreshPlugin: PluginType {
             Self.isRefreshing = false
         
             if success {
-                // 사용자에게 알림 (선택사항)
-                // 현재는 사용자가 액션을 다시 수행해야 함
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(name: .tokenRefreshed, object: nil)
+                    Toaster.shared.makeToast("세션이 갱신되었습니다. 다시 시도해주세요")
+                }
             } else {
                 self?.forceLogout()
             }
@@ -78,31 +80,10 @@ class TokenRefreshPlugin: PluginType {
             NotificationCenter.default.post(name: .forceLogout, object: nil)
         }
     }
-    
-    // MARK: - Helper Methods
-    private func isTokenRefreshRequest(_ target: TargetType) -> Bool {
-        let path = target.path.lowercased()
-        let isRefresh = path.contains("refresh-token") ||
-                       path.contains("reissue") ||
-                       path.contains("refresh")
-        
-        return isRefresh
-    }
-    
-    private func isAuthRequest(_ target: TargetType) -> Bool {
-        let path = target.path.lowercased()
-        let isAuth = path.contains("login") ||
-                    path.contains("kakao-login") ||
-                    path.contains("apple-login") ||
-                    path.contains("register") ||
-                    path.contains("signup") ||
-                    path.contains("no-auth")
-        
-        return isAuth
-    }
 }
 
 // MARK: - Notification Name
 extension Notification.Name {
     static let forceLogout = Notification.Name("forceLogout")
+    static let tokenRefreshed = Notification.Name("tokenRefreshed")
 }
