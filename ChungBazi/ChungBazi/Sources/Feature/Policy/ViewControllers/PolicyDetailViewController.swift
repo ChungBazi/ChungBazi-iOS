@@ -63,7 +63,7 @@ final class PolicyDetailViewController: UIViewController {
     
     private lazy var cartButton = CustomButton(
         backgroundColor: .white,
-        titleText: "장바구니",
+        titleText: "저장하기",
         titleColor: .gray800,
         borderWidth: 1,
         borderColor: .gray400
@@ -311,7 +311,7 @@ final class PolicyDetailViewController: UIViewController {
         cartService.postCart(policyId: policyId) { result in
             switch result {
             case .success:
-                Toaster.shared.makeToast("해당 정책이 장바구니에 추가되었습니다.")
+                Toaster.shared.makeToast("해당 정책이 저장되었습니다")
                 
             case .failure(let error):
                 Toaster.shared.makeToast(error.localizedDescription)
