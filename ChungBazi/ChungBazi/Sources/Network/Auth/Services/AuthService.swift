@@ -7,6 +7,7 @@
 
 import Foundation
 import Moya
+import SwiftyToaster
 
 final class AuthService: NetworkManager {
     
@@ -118,16 +119,17 @@ extension AuthService {
         
         // Lock으로 보호
         Self.refreshLock.lock()
-        defer { Self.refreshLock.unlock() }
         
         // 중복 재발급 방지
         if Self.isRefreshingToken {
             Self.refreshCallbacks.append(completion)
+            Self.refreshLock.unlock()
             return
         }
         
         // Refresh Token 확인
         guard let refreshToken = AuthManager.shared.refreshToken else {
+            Self.refreshLock.unlock()
             completion(false)
             return
         }
@@ -138,10 +140,8 @@ extension AuthService {
         
         print("토큰 재발급 시작 (대기 중인 요청: \(Self.refreshCallbacks.count)개)")
         
-        let reIssueDto = makeReIssueDTO(refreshToken: refreshToken)
-        
-        // Lock 해체 후 네트워크 요청
         Self.refreshLock.unlock()
+        let reIssueDto = makeReIssueDTO(refreshToken: refreshToken)
         
         reissueToken(data: reIssueDto) { result in
             // 콜백 처리 시 다시 Lock
@@ -150,24 +150,34 @@ extension AuthService {
             
             Self.isRefreshingToken = false
             
+            let callbacks = Self.refreshCallbacks
+            Self.refreshCallbacks.removeAll()
+            
             switch result {
             case .success(let response):
+                print("\(callbacks.count)개의 대기 요청에 성공 알림")
+                
                 AuthManager.shared.updateTokens(
                     accessToken: response.accessToken,
                     refreshToken: response.refreshToken,
                     expiresIn: response.accessExp
                 )
+                
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast("세션이 갱신되었습니다")
+                    NotificationCenter.default.post(name: .tokenRefreshed, object: nil)
+                }
             
-                print("\(Self.refreshCallbacks.count)개의 대기 요청에 성공 알림")
-                Self.refreshCallbacks.forEach { $0(true) }
-                Self.refreshCallbacks.removeAll()
+                // 모든 콜백에 성공 전달
+                callbacks.forEach { $0(true) }
                 
             case .failure(let error):
+                print("\(callbacks.count)개의 대기 요청에 실패 알림")
+                
                 AuthManager.shared.clearAuthDataForLogout()
                 
-                print("\(Self.refreshCallbacks.count)개의 대기 요청에 실패 알림")
-                Self.refreshCallbacks.forEach { $0(false) }
-                Self.refreshCallbacks.removeAll()
+                // 모든 콜백에 실패 전달
+                callbacks.forEach { $0(false) }
             }
         }
         

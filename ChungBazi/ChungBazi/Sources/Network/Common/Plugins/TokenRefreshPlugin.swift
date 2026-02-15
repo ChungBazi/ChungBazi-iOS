@@ -7,12 +7,8 @@
 
 import Moya
 import Foundation
-import SwiftyToaster
 
 class TokenRefreshPlugin: PluginType {
-    
-    // MARK: - Static Properties (중복 방지)
-    private static var isRefreshing = false
     
     // MARK: - Prepare Request
     func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
@@ -54,23 +50,11 @@ class TokenRefreshPlugin: PluginType {
     
     // MARK: - Handle Token Expiration
     private func handleTokenExpiration() {
-        
-        // 이미 재발급 중이면 대기
-        if Self.isRefreshing { return }
-        
-        Self.isRefreshing = true
-        
         let authService = AuthService()
-        authService.reIssueAccesToken { [weak self] success in
-            Self.isRefreshing = false
         
-            if success {
-                DispatchQueue.main.async {
-                    NotificationCenter.default.post(name: .tokenRefreshed, object: nil)
-                    Toaster.shared.makeToast("세션이 갱신되었습니다. 다시 시도해주세요")
-                }
-            } else {
-                self?.forceLogout()
+        authService.reIssueAccesToken { success in
+            if !success {
+                self.forceLogout()
             }
         }
     }
@@ -80,7 +64,6 @@ class TokenRefreshPlugin: PluginType {
         DispatchQueue.main.async {
             // 로그인 데이터 정리
             AuthManager.shared.clearAuthDataForLogout()
-            
             // 로그인 화면으로 이동
             NotificationCenter.default.post(name: .forceLogout, object: nil)
         }
