@@ -9,7 +9,7 @@ class SetIncomeLevelViewController: UIViewController, CustomDropdownDelegate {
     
     let userInfoData = UserInfoDataManager.shared
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "소득분위", logo: "fourthPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "소득분위", logo: .fourthPageLogo).then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetRegion), for: .touchUpInside)
     }

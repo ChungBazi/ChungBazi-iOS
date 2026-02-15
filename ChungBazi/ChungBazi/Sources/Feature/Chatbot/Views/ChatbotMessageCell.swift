@@ -49,7 +49,7 @@ final class ChatbotMessageCell: UITableViewCell {
     }
     
     private let botIconImageView = UIImageView().then {
-        $0.image = UIImage(named: "questionBaro")
+        $0.image = UIImage(resource: .questionBaro)
         $0.contentMode = .scaleAspectFit
     }
     

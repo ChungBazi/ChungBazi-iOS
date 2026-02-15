@@ -6,7 +6,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class PolicyDetailViewController: UIViewController {
     
@@ -42,7 +41,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private let expandButton = UIButton(type: .custom).then {
-        $0.setImage(UIImage(named: "expand_icon"), for: .normal)
+        $0.setImage(UIImage(resource: .expandIcon), for: .normal)
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 19.5
         $0.layer.shadowColor = UIColor.black.cgColor
@@ -63,7 +62,7 @@ final class PolicyDetailViewController: UIViewController {
     
     private lazy var cartButton = CustomButton(
         backgroundColor: .white,
-        titleText: "장바구니",
+        titleText: "저장하기",
         titleColor: .gray800,
         borderWidth: 1,
         borderColor: .gray400
@@ -72,6 +71,8 @@ final class PolicyDetailViewController: UIViewController {
     private let registerButton = CustomActiveButton(title: "담당기관 바로가기", isEnabled: false).then {
         $0.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
     }
+    
+    private let emptyView = EmptyBaroWithTitleView(title: "존재하지 않는 정책입니다.")
     
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
@@ -126,7 +127,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubview(scrollView)
+        view.addSubviews(scrollView, emptyView)
         scrollView.addSubview(contentView)
         contentView.addSubviews(posterView, expandButton, policyView)
         
@@ -138,6 +139,12 @@ final class PolicyDetailViewController: UIViewController {
             make.leading.trailing.equalToSuperview()
             make.bottom.equalTo(bottomBackgroundView.snp.top)
         }
+        
+        emptyView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.5)
+        }
+        emptyView.isHidden = true
         
         contentView.snp.makeConstraints { make in
             make.edges.equalToSuperview()
@@ -226,7 +233,17 @@ final class PolicyDetailViewController: UIViewController {
                     self.trackPolicyDetailViewIfNeeded()
                 }
             case .failure(let error):
-                print("❌ 정책 상세 조회 실패: \(error.localizedDescription)")
+                switch error {
+                case .serverError(let statusCode, let message):
+                    if statusCode == 404 {
+                        self.hideLoading()
+                        emptyView.isHidden = false
+                    } else {
+                        self.showCustomAlert(title: message, buttonText: "확인", buttonAction: nil)
+                    }
+                default:
+                    self.showCustomAlert(title: "정책 상세정보를 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인", buttonAction: nil)
+                }
             }
         }
     }
@@ -311,10 +328,10 @@ final class PolicyDetailViewController: UIViewController {
         cartService.postCart(policyId: policyId) { result in
             switch result {
             case .success:
-                Toaster.shared.makeToast("해당 정책이 장바구니에 추가되었습니다.")
+                self.showCustomAlert(title: "해당 정책이 저장되었습니다.",  buttonText: "확인", buttonAction: nil)
                 
             case .failure(let error):
-                Toaster.shared.makeToast(error.localizedDescription)
+                self.showCustomAlert(title: "정책 저장에 실패하였습니다.\n잠시 후 다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
             }
         }
     }
@@ -337,22 +354,6 @@ final class PolicyDetailViewController: UIViewController {
         }
         
         showMultipleUrlsAlert(urls: urls)
-    }
-    
-    private func presentUrlActionSheet(urls: [String]) {
-        let ac = UIAlertController(title: "담당기관 바로가기", message: "열 링크를 선택하세요", preferredStyle: .actionSheet)
-        
-        for raw in urls {
-            let title = raw.replacingOccurrences(of: "^https?://", with: "", options: .regularExpression)
-            ac.addAction(UIAlertAction(title: title, style: .default) { _ in
-                if let u = URL(string: raw) {
-                    UIApplication.shared.open(u, options: [:], completionHandler: nil)
-                }
-            })
-        }
-        ac.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        
-        present(ac, animated: true, completion: nil)
     }
     
     private func filteredReferenceUrls(_ policy: PolicyModel) -> [String] {

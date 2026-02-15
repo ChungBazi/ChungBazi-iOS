@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class SignupViewController: UIViewController {
 
@@ -17,26 +16,8 @@ final class SignupViewController: UIViewController {
     
     private var isPasswordVisible = false
     private var isCheckPasswordVisible = false
-
-    private let tooltipView = UIView().then {
-        $0.backgroundColor = .white
-        $0.layer.cornerRadius = 10
-        $0.layer.shadowColor = UIColor.black.cgColor
-        $0.layer.shadowOpacity = 0.25
-        $0.layer.shadowOffset = CGSize(width: 0, height: 1)
-        $0.layer.shadowRadius = 4
-        $0.isHidden = true
-        $0.alpha = 1.0
-        $0.clipsToBounds = false
-    }
     
-    private let tooltipLabel = UILabel().then {
-        $0.text = "영문, 숫자, 특수문자 8자 이상 필수"
-        $0.font = UIFont.ptdRegularFont(ofSize: 12)
-        $0.textColor = .black
-        $0.numberOfLines = 1
-        $0.textAlignment = .center
-    }
+    private let tooltipView = TooltipView()
 
     override func loadView() {
         self.view = registerView
@@ -69,19 +50,6 @@ final class SignupViewController: UIViewController {
 
     private func setupTooltipLayout() {
         registerView.addSubview(tooltipView)
-        tooltipView.addSubview(tooltipLabel)
-        
-        tooltipView.snp.makeConstraints {
-            $0.width.equalTo(195)
-            $0.height.equalTo(24)
-            $0.leading.equalTo(registerView.pwdInfoButton.snp.trailing).offset(0)
-            $0.bottom.equalTo(registerView.pwdInfoButton.snp.top).offset(0)
-        }
-        
-        tooltipLabel.snp.makeConstraints {
-            $0.leading.trailing.equalToSuperview().inset(8)
-            $0.centerY.equalToSuperview()
-        }
     }
     
     @objc private func textFieldsChanged() {
@@ -99,7 +67,7 @@ final class SignupViewController: UIViewController {
         registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
         let iconName = isPasswordVisible
         ? UIImage(systemName: "eye")
-        : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.pwdEyeButton.setImage(iconName, for: .normal)
     }
 
@@ -108,31 +76,36 @@ final class SignupViewController: UIViewController {
         registerView.checkPwdTextField.isSecureTextEntry = !isCheckPasswordVisible
         let iconName = isCheckPasswordVisible
         ? UIImage(systemName: "eye")
-        : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.checkPwdEyeButton.setImage(iconName, for: .normal)
     }
 
     @objc private func showPasswordRule() {
-        tooltipView.isHidden.toggle()
+        tooltipView.show(
+            anchorView: registerView.pwdInfoButton,
+            text: "비밀번호는 8자 이상이며, 영문 대·소문자, 숫자, 특수문자를 각각 1자 이상 포함해야 합니다.",
+            width: 190,
+            duration: 3
+        )
     }
 
     @objc private func registerTapped() {
         guard let email = registerView.emailTextField.text, !email.isEmpty,
               let password = registerView.pwdTextField.text, !password.isEmpty,
               let checkPassword = registerView.checkPwdTextField.text, !checkPassword.isEmpty else {
-            showCustomAlert(title: "모든 항목을 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "모든 항목을 입력해주세요.", buttonText: "확인", buttonAction: nil)
             return
         }
         
         guard email.isValidEmail() else {
-            showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "유효한 이메일 형식이 아닙니다.", buttonText: "확인", buttonAction: nil)
             return
         }
         
-        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요.", buttonText: "확인", buttonAction: nil); return }
         
         guard password == checkPassword else {
-            showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "비밀번호가 일치하지 않습니다.", buttonText: "확인", buttonAction: nil)
             return
         }
         

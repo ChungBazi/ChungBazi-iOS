@@ -33,13 +33,13 @@ class BasicSurveyView: UIView {
         $0.distribution = .fillEqually
     }
 
-    init(title: String, logo: String) {
+    init(title: String, logo: ImageResource) {
         super.init(frame: .zero)
         self.backgroundColor = .gray50
         self.title.text = title
         self.title.setLineSpacing()
         self.title.textAlignment = .center
-        self.pageLogo.image = UIImage(named: logo)
+        self.pageLogo.image = UIImage(resource: logo)
         addComponents()
         setConstraints()
     }

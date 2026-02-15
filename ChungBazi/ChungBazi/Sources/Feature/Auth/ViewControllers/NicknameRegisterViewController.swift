@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class NicknameRegisterViewController: UIViewController {
     
@@ -45,7 +44,7 @@ final class NicknameRegisterViewController: UIViewController {
     }
     
     private let profileImg = UIImageView().then {
-        $0.image = UIImage(named: "basicBaro")
+        $0.image = UIImage(resource: .basicBaro)
         $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.clipsToBounds = true
@@ -91,7 +90,7 @@ final class NicknameRegisterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        addCustomNavigationBar(titleText: "회원가입", showBackButton: !fromLogin)
+        addCustomNavigationBar(titleText: "닉네임 설정", showBackButton: false)
         setupLayout()
         bind()
         prefill()
@@ -246,7 +245,7 @@ final class NicknameRegisterViewController: UIViewController {
             case .failure(let error):
                 print("registerNickname 실패: \(error)")
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("닉네임 등록에 실패하였습니다. 잠시 후 다시 시도해 주세요.")
+                    self.showCustomAlert(title: "닉네임 등록에 실패하였습니다.\n잠시 후 다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
                 }
             }
         }

@@ -29,16 +29,16 @@ final class ResetPasswordView: UIView {
         $0.textColor = .gray500
     }
     let questionButton = UIButton().then {
-        $0.setImage(UIImage(named: "questionmark"), for: .normal)
+        $0.setImage(UIImage(resource: .questionmark), for: .normal)
         $0.tintColor = .gray500
     }
     let newPwdField = UITextField().then {
-        $0.placeholder = "영문, 숫자, 특수문자 8자 이상"
+        $0.placeholder = "영문, 대·소문자, 숫자, 특수문자 포함 8자 이상"
         $0.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.isSecureTextEntry = true
     }
     let newPwdEye = UIButton().then {
-        $0.setImage(UIImage(named: "eye_closed"), for: .normal)
+        $0.setImage(UIImage(resource: .eyeClosed), for: .normal)
         $0.tintColor = .gray
     }
     private let newPwdUnderline = UIView().then {
@@ -57,7 +57,7 @@ final class ResetPasswordView: UIView {
         $0.isSecureTextEntry = true
     }
     let confirmPwdEye = UIButton().then {
-        $0.setImage(UIImage(named: "eye_closed"), for: .normal)
+        $0.setImage(UIImage(resource: .eyeClosed), for: .normal)
         $0.tintColor = .gray
     }
     private let confirmPwdUnderline = UIView().then {

@@ -46,7 +46,7 @@ class MyCharacterViewController: UIViewController, UIScrollViewDelegate {
         if myCharacterList.contains { !$0.open } {
             showCustomAlert(
                 title: "레벨업 완료!\n새로운 캐릭터가 열렸습니다.\n카드를 눌러 확인해보세요!",
-                ButtonText: "좋아요",
+                buttonText: "좋아요",
                 image: .confetti
             )
         }

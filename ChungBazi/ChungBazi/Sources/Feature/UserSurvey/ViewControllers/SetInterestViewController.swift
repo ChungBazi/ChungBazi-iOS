@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import SwiftyToaster
 
 class SetInterestViewController: UIViewController {
     
@@ -13,7 +12,7 @@ class SetInterestViewController: UIViewController {
     
     private var checkStatus: [Bool] // 체크 상태를 저장
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "관심 있는 분야를\n선택해주세요", logo: "fifthPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "관심 있는 분야를\n선택해주세요", logo: .fifthPageLogo).then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToFinish), for: .touchUpInside)
     }
@@ -96,9 +95,7 @@ class SetInterestViewController: UIViewController {
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             case .failure(_):
-                DispatchQueue.main.async {
-                    Toaster.shared.makeToast("사용자 정보 등록에 실패했습니다")
-                }
+                self.showCustomAlert(title: "사용자 정보 등록에 실패하였습니다.\n잠시 후 다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
             }
         }
     }

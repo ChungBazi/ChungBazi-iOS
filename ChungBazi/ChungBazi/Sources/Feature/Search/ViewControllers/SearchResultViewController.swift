@@ -30,7 +30,7 @@ final class SearchResultViewController: UIViewController {
     }
     
     private let searchButton = UIButton(type: .system).then {
-        $0.setImage(UIImage(named: "search_icon"), for: .normal)
+        $0.setImage(UIImage(resource: .searchIcon), for: .normal)
         $0.contentMode = .scaleAspectFit
         $0.tintColor = .gray500
     }
@@ -67,13 +67,7 @@ final class SearchResultViewController: UIViewController {
         $0.contentInset.bottom = 20
     }
     
-    private let emptyStateLabel = UILabel().then {
-        $0.text = "검색 결과가 없습니다."
-        $0.textAlignment = .center
-        $0.textColor = .gray600
-        $0.font = .ptdMediumFont(ofSize: 16)
-        $0.isHidden = true
-    }
+    private let emptyView = EmptyBaroWithTitleView(title: "검색 결과가 없어요")
     
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
@@ -118,7 +112,7 @@ final class SearchResultViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyStateLabel)
+        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyView)
 
         searchView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
@@ -164,9 +158,11 @@ final class SearchResultViewController: UIViewController {
             make.bottom.equalToSuperview().inset(tabBarController?.tabBar.frame.height ?? 0)
         }
 
-        emptyStateLabel.snp.makeConstraints { make in
+        emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
+        emptyView.isHidden = true
     }
 
     private func setupActions() {
@@ -235,7 +231,7 @@ final class SearchResultViewController: UIViewController {
                     self.tableView.setContentOffset(.zero, animated: true)
                 }
             case .failure(let error):
-                print("❌ 정책 검색 실패: \(error.localizedDescription)")
+                showCustomAlert(title: "정책 검색에 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }
@@ -258,7 +254,7 @@ final class SearchResultViewController: UIViewController {
 
     private func updateUI() {
         let hasResults = !policyList.isEmpty
-        emptyStateLabel.isHidden = hasResults
+        emptyView.isHidden = hasResults
         tableView.isHidden = !hasResults
         popularSearchLabel.isHidden = true
         popularKeywordsCollectionView.isHidden = true
@@ -270,19 +266,13 @@ final class SearchResultViewController: UIViewController {
     
     private func executeSearch() {
         guard let query = searchTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), query.count >= 2 else {
-            showCharacterLimitAlert()
+            showCustomAlert(title: "검색어를 2자 이상 입력해 주세요.", buttonText: "확인")
             return
         }
         searchTextField.resignFirstResponder()
         policyList.removeAll()
         tableView.reloadData()
         searchPolicy(name: query, cursor: "", order: sortOrder)
-    }
-    
-    private func showCharacterLimitAlert() {
-        let alert = UIAlertController(title: "", message: "검색어를 2자 이상 입력해 주세요.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
     }
     
     private func fetchMorePolicies() {

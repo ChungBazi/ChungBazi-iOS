@@ -40,6 +40,10 @@ final class AmplitudeManager {
         amplitude?.identify(identify: identify)
     }
     
+    func reset() {
+        amplitude?.reset()
+    }
+    
     // MARK: - Event Tracking
     private func track(eventName: String, properties: [String: Any]? = nil) {
         amplitude?.track(eventType: eventName, eventProperties: properties)

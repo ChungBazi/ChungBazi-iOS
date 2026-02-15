@@ -45,7 +45,7 @@ final class EmailRegisterView: UIView {
     }
 
     let pwdEyeButton = UIButton().then {
-        $0.setImage(UIImage(named: "eye_closed"), for: .normal)
+        $0.setImage(UIImage(resource: .eyeClosed), for: .normal)
         $0.tintColor = .gray
     }
 

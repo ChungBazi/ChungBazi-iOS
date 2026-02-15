@@ -10,7 +10,7 @@ class SetEducationViewController: UIViewController, CustomDropdownDelegate {
     
     let userInfoData = UserInfoDataManager.shared
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: "firstPageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "학력", logo: .firstPageLogo).then {
         $0.toggleBackButton()
         $0.nextBtn.addTarget(self, action: #selector(goToSetEmploymentStatus), for: .touchUpInside)
     }

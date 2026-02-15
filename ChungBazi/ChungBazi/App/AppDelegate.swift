@@ -34,7 +34,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // 파이어베이스 설정
         FirebaseApp.configure()
         if FirebaseApp.app() == nil {
-            Toaster.shared.makeToast("FirebaseApp 시작 에러 : 어플을 재실행 해주세요")
+            Toaster.shared.makeToast("일시적인 오류가 발생했습니다. 어플을 재실행 해주세요.")
             FirebaseApp.configure()
         }
         
@@ -152,7 +152,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        Toaster.shared.makeToast("APNs 등록 및 디바이스 토큰 받기 실패 : 어플을 재실행 해주세요")
+        Toaster.shared.makeToast("일시적인 오류가 발생했습니다. 어플을 재실행 해주세요.")
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {

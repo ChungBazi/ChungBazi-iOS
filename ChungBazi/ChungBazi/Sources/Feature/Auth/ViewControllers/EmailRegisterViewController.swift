@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
 
@@ -128,7 +127,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         }
         let icon = isPasswordVisible 
             ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.pwdEyeButton.setImage(icon, for: .normal)
     }
     
@@ -140,12 +139,12 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
     @objc private func loginTapped() {
         guard let email = registerView.emailTextField.text, !email.isEmpty,
               let password = registerView.pwdTextField.text, !password.isEmpty else {
-            showCustomAlert(title: "모든 항목을 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "모든 항목을 입력해주세요.",  buttonText: "확인", buttonAction: nil)
             return
         }
         
         guard email.isValidEmail() else {
-            showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "유효한 이메일 형식이 아닙니다.",  buttonText: "확인", buttonAction: nil)
             return
         }
         
@@ -172,10 +171,11 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                         userName: response.userName
                     )
 
+                    AmplitudeManager.shared.setUserId(response.hashedUserId)
                     self.routeAfterLogin(email: email)
 
-                case .failure(let error):
-                    Toaster.shared.makeToast("로그인 실패: \(error.localizedDescription)")
+                case .failure(_):
+                    self.showCustomAlert(title: "로그인에 실패하였습니다.\n다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
                 }
             }
         }
@@ -184,7 +184,11 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
     private func routeAfterLogin(email: String) {
         if !AuthManager.shared.hasNickname {
             let nickNameRegisterVC = NicknameRegisterViewController(email: email, fromLogin: true)
-            navigationController?.pushViewController(nickNameRegisterVC, animated: true)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = nickNameRegisterVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
             return
         }
 

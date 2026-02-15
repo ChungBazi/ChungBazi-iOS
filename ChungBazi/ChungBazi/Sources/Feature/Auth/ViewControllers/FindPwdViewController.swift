@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class FindPwdViewController: UIViewController {
     
@@ -201,6 +200,7 @@ final class FindPwdViewController: UIViewController {
             textFieldsChanged()
         case .enterCode:
             descriptionLabel.text = "메일로 전달 받은\n인증번호를 입력해주세요."
+            emailField.isEnabled = false
             setCodeUI(hidden: false)
             startTimer()
             textFieldsChanged()
@@ -250,7 +250,7 @@ final class FindPwdViewController: UIViewController {
         case .enterEmail:
             guard let email = emailField.text, !email.isEmpty else { return }
             guard email.isValidEmail() else {
-                showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
+                showCustomAlert(title: "유효한 이메일 형식이 아닙니다.", buttonText: "확인", buttonAction: nil)
                 return
             }
             requestEmailVerification(email: email)
@@ -270,7 +270,7 @@ final class FindPwdViewController: UIViewController {
                    case .success:
                        self.step = .enterCode
                    case .failure(_):
-                       Toaster.shared.makeToast("인증번호 전송 실패")
+                       self.showCustomAlert(title: "인증번호 전송에 실패하였습니다.\n다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
                        self.textFieldsChanged()
                    }
                }
@@ -279,7 +279,7 @@ final class FindPwdViewController: UIViewController {
     
     private func verifyCode(_ code: String) {
         guard let email = verifyEmail, !email.isEmpty else {
-            showCustomAlert(title: "이메일을 먼저 입력하세요", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "이메일을 먼저 입력하세요.", buttonText: "확인", buttonAction: nil)
             return
         }
         let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -312,13 +312,13 @@ final class FindPwdViewController: UIViewController {
         case .serverError(_, let serverMessage):
             message = serverMessage
         default:
-            message = "인증 코드가 올바르지 않습니다"
+            message = "인증 코드가 올바르지 않습니다."
         }
         
         showCustomAlert(
             title: message,
-            rightButtonText: "확인",
-            rightButtonAction: nil
+            buttonText: "확인",
+            buttonAction: nil
         )
     }
     
@@ -337,7 +337,7 @@ final class FindPwdViewController: UIViewController {
                 self.updateTimerLabel()
                 self.completeButton.isEnabled = false
                 self.completeButton.backgroundColor = .gray200
-                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
+                self.showCustomAlert(title: "인증 시간이 만료되었습니다.", buttonText: "확인", buttonAction: {
                     self.navigationController?.popViewController(animated: false)
                 })
             } else {

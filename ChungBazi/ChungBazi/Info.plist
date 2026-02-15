@@ -2,6 +2,12 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>AMPLITUDE_KEY</key>
+	<string>$(AMPLITUDE_KEY)</string>
+	<key>API_BASE_URL</key>
+	<string>$(API_BASE_URL)</string>
+	<key>APPSTORE_URL</key>
+	<string>$(APPSTORE_URL)</string>
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -25,6 +31,8 @@
 			</array>
 		</dict>
 	</array>
+	<key>CONTACT_FORM_URL</key>
+	<string>$(CONTACT_FORM_URL)</string>
 	<key>FirebaseAppDelegateProxyEnabled</key>
 	<false/>
 	<key>KAKAO_NATIVE_APP_KEY</key>
@@ -62,6 +70,8 @@
 		<string>Pretendard-Regular.otf</string>
 		<string>Pretendard-SemiBold.otf</string>
 		<string>Pretendard-Thin.otf</string>
+		<string>AppleSDGothicNeoM.ttf</string>
+		<string>AppleSDGothicNeoSB.ttf</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
@@ -86,13 +96,5 @@
 	</array>
 	<key>UIDesignRequiresCompatibility</key>
 	<true/>
-	<key>API_BASE_URL</key>
-	<string>$(API_BASE_URL)</string>
-	<key>AMPLITUDE_KEY</key>
-	<string>$(AMPLITUDE_KEY)</string>
-	<key>APPSTORE_URL</key>
-	<string>$(APPSTORE_URL)</string>
-	<key>CONTACT_FORM_URL</key>
-	<string>$(CONTACT_FORM_URL)</string>
 </dict>
 </plist>

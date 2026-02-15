@@ -152,17 +152,19 @@ extension ProfileViewController: ProfileViewDelegate {
             switch result {
             case .success(_):
                 self.performSocialLogout {
+                    AmplitudeManager.shared.setUserId(nil)
+                    AmplitudeManager.shared.reset()
                     AuthManager.shared.clearAuthDataForLogout()
                     
                     DispatchQueue.main.async {
-                        Toaster.shared.makeToast("로그아웃 되었습니다")
+                        Toaster.shared.makeToast("로그아웃되었습니다.")
                         self.showSplashScreen()
                     }
                 }
                 
             case .failure(_):
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("로그아웃에 실패하였습니다")
+                    Toaster.shared.makeToast("로그아웃에 실패하였습니다. 다시 시도해주세요.")
                 }
             }
         }
@@ -174,16 +176,18 @@ extension ProfileViewController: ProfileViewDelegate {
             switch result {
             case .success(_):
                 self.performSocialWithdrawal {
+                    AmplitudeManager.shared.setUserId(nil)
+                    AmplitudeManager.shared.reset()
                     AuthManager.shared.clearAuthDataForWithdrawal()
                     
                     DispatchQueue.main.async {
-                        Toaster.shared.makeToast("회원탈퇴가 완료되었습니다")
+                        Toaster.shared.makeToast("회원탈퇴가 완료되었습니다.")
                         self.showSplashScreen()
                     }
                 }
             case .failure(_):
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다")
+                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다. 다시 시도해주세요.")
                 }
             }
         }

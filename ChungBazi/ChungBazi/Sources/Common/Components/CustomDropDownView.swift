@@ -20,7 +20,7 @@ class CustomDropdownView: UIView {
     
     public lazy var dropdownImageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(named: "dropdown_icon")?.withRenderingMode(.alwaysOriginal)
+        imageView.image = UIImage(resource: .dropdownIcon).withRenderingMode(.alwaysOriginal)
         imageView.contentMode = .scaleAspectFit
         return imageView
     }()

@@ -66,6 +66,8 @@ class TokenRefreshPlugin: PluginType {
     // MARK: - Force Logout
     private func forceLogout() {
         DispatchQueue.main.async {
+            AmplitudeManager.shared.setUserId(nil)
+            AmplitudeManager.shared.reset()
             // 로그인 데이터 정리
             AuthManager.shared.clearAuthDataForLogout()
             // 로그인 화면으로 이동

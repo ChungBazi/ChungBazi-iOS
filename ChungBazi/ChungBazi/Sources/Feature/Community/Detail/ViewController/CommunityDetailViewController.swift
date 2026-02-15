@@ -306,7 +306,7 @@ final class CommunityDetailViewController: UIViewController {
                     self.fetchPostData()
                     
                 case .failure(let error):
-                    Toaster.shared.makeToast("댓글 작성에 실패했어요. 다시 시도해 주세요.")
+                    Toaster.shared.makeToast("댓글 작성에 실패했어요. 다시 시도해주세요.")
                     print("❌ 댓글 작성 실패: \(error.localizedDescription)")
                 }
                 self.sendButton.isEnabled = true
