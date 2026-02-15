@@ -1,0 +1,12 @@
+{
+  "images" : [
+    {
+      "filename" : "blue700Pocket.svg",
+      "idiom" : "universal"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

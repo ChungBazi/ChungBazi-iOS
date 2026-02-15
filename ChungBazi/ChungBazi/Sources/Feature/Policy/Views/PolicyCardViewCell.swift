@@ -150,8 +150,16 @@ final class PolicyCardViewCell: UITableViewCell {
 
         let badgeText = {
             guard let dday = item.dday else { return "상시" }
-            return dday >= 0 ? "D-\(dday)" : "마감"
+            
+            if dday > 999 {
+                return "상시"
+            } else if dday < 0 {
+                return "예정"
+            } else {
+                return "D-\(dday)"
+            }
         }()
+        
         badgeTextLabel.text = badgeText
         badgeTextLabel.textColor = badgeTextColor(for: badgeText)
         badgeImageView.image = badgeImage(for: badgeText)
@@ -185,32 +193,36 @@ final class PolicyCardViewCell: UITableViewCell {
     
     private func badgeImage(for badge: String) -> UIImage? {
         switch badge {
+        case "예정":
+            return UIImage(named: "blue50Pocket")
         case "마감":
-            return UIImage(named: "d_day_grayscale200")
+            return UIImage(named: "gray500Pocket")
         case "상시":
-            return UIImage(named: "d_day_red")
+            return UIImage(named: "green300Pocket")
         case let value where value.starts(with: "D-"):
             if let day = Int(value.dropFirst(2)) {
                 if day >= 10 {
-                    return UIImage(named: "d_day_blue200")
+                    return UIImage(named: "blue200Pocket")
                 } else if day >= 2 {
-                    return UIImage(named: "d_day_blue700")
+                    return UIImage(named: "blue700Pocket")
                 } else if day >= 0 {
-                    return UIImage(named: "d_day_blue900")
+                    return UIImage(named: "redPocket")
                 }
             }
-            return UIImage(named: "d_day_blue200")
+            return UIImage(named: "blue200Pocket")
         default:
-            return UIImage(named: "d_day_blue200")
+            return UIImage(named: "blue200Pocket")
         }
     }
 
     private func badgeTextColor(for badge: String) -> UIColor? {
         switch badge {
+        case "예정":
+            return AppColor.gray800
         case "마감":
             return AppColor.gray500
         case "상시":
-            return .white
+            return AppColor.gray800
         case let value where value.starts(with: "D-"):
             if let day = Int(value.dropFirst(2)) {
                 if day >= 10 {
