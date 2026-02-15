@@ -20,10 +20,10 @@ class FinishRegisterViewController: UIViewController {
     
     private func goToSelectLoginView() {
         DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            let termsOfServiceVC = SelectLoginTypeViewController()
+            let vc = SelectLoginTypeViewController()
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
-                window.rootViewController = termsOfServiceVC
+                window.rootViewController = vc
                 UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
             }
         }
