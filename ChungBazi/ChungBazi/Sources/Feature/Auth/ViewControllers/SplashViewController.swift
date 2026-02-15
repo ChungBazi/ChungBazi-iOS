@@ -78,12 +78,14 @@ class SplashViewController: UIViewController {
         networkService.reIssueAccesToken { [weak self] success in
             guard let self = self else { return }
             
-            if success {
-                self.proceedToNextScreen()
-            } else {
-                // 재발급 실패 시 로그인 데이터 정리
-                AuthManager.shared.clearAuthDataForLogout()
-                self.navigateToLoginScreen()
+            DispatchQueue.main.async {
+                if success {
+                    self.proceedToNextScreen()
+                } else {
+                    // 재발급 실패 시 로그인 데이터 정리
+                    AuthManager.shared.clearAuthDataForLogout()
+                    self.navigateToLoginScreen()
+                }
             }
         }
     }
