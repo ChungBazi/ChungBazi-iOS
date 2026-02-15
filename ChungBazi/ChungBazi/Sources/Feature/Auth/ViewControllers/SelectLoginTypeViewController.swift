@@ -13,7 +13,7 @@ class SelectLoginTypeViewController: UIViewController {
 
     // MARK: - ViewModels / Services
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
-    let networkService = AuthService()
+    let networkService = AuthService.shared
     var hasNickName: Bool?
     var isFirst: Bool?
     private var lastLoginEmail: String?
@@ -126,7 +126,7 @@ class SelectLoginTypeViewController: UIViewController {
     }
 
     func goToNextView() {
-        if hasNickName == false {
+        if !AuthManager.shared.hasNickname {
             let vc = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
             if let nav = navigationController {
                 nav.pushViewController(vc, animated: true)

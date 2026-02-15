@@ -30,7 +30,7 @@ extension NotificationEndpoints: AuthenticatedTarget {
         case .fetchAlarmSetting:
             return "/settings"
         case .patchAlarmSetting:
-            return "settings-up"
+            return "/settings-up"
         }
     }
     

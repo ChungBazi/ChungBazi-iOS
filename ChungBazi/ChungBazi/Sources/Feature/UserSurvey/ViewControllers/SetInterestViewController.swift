@@ -90,9 +90,11 @@ class SetInterestViewController: UIViewController {
             
             switch result {
             case .success(_):
-                AuthManager.shared.completeOnboarding()
-                let vc = FinishSurveyViewController()
-                navigationController?.pushViewController(vc, animated: true)
+                DispatchQueue.main.async {
+                    AuthManager.shared.completeOnboarding()
+                    let vc = FinishSurveyViewController()
+                    navigationController?.pushViewController(vc, animated: true)
+                }
             case .failure(_):
                 Toaster.shared.makeToast("사용자 정보 등록에 실패했습니다")
             }

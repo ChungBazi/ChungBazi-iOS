@@ -10,7 +10,7 @@ import AuthenticationServices
 
 final class AppleAuthVM: NSObject {
     
-    private let networkService = AuthService()
+    private let networkService: AuthService
     var isFirst: Bool?
     var hasNickName: Bool?
     
@@ -26,6 +26,10 @@ final class AppleAuthVM: NSObject {
         controller.delegate = self
         controller.presentationContextProvider = self
         controller.performRequests()
+    }
+    
+    init(authService: AuthService = .shared) {
+        self.networkService = authService
     }
 }
 

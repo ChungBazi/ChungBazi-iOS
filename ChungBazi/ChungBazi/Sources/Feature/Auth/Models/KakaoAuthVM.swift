@@ -38,6 +38,8 @@ public class KakaoAuthVM: ObservableObject {
                 } else if oauthToken != nil {
                     print("카카오톡 로그인 성공")
                     completion(true)
+                } else {
+                    completion(false)
                 }
             }
         } else {
@@ -48,6 +50,8 @@ public class KakaoAuthVM: ObservableObject {
                 } else if oauthToken != nil {
                     print("카카오 계정 로그인 성공")
                     completion(true)
+                } else {
+                    completion(false)
                 }
             }
         }
