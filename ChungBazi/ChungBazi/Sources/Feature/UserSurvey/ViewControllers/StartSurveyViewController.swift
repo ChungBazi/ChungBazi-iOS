@@ -11,43 +11,31 @@ class StartSurveyViewController: UIViewController {
 
     private let startSurveyView = LogoWithTitleView(image: .questionBaro, title: "더 정확한 추천을 위해\n몇 가지 정보를 알려주세요!")
     
-    private lazy var startBtn = UIButton().then {
-        $0.setTitle("시작하기", for: .normal)
-        $0.setTitleColor(.white, for: .normal)
-        $0.titleLabel?.font = UIFont.ptdMediumFont(ofSize: 16)
-        $0.layer.cornerRadius = 10
-        $0.layer.borderColor = UIColor.white.cgColor
-        $0.layer.borderWidth = 1
-        $0.backgroundColor = .clear
-        $0.addTarget(self, action: #selector(goToSetEducation), for: .touchUpInside)
-    }
-    
     override func viewDidLoad() {
         super.viewDidLoad()
-        addComponents()
+        view.backgroundColor = .blue700
         setConstraints()
-    }
-    
-    @objc private func goToSetEducation() {
-        let vc = SetEducationViewController()
-        navigationController?.pushViewController(vc, animated: true)
-    }
-    
-    private func addComponents() {
-        view.addSubview(startSurveyView)
-        startSurveyView.addSubview(startBtn)
+        goToNext()
     }
     
     private func setConstraints() {
+        view.addSubview(startSurveyView)
         
-        startSurveyView.snp.makeConstraints {
-            $0.edges.equalToSuperview()
+        startSurveyView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.7)
         }
-        
-        startBtn.snp.makeConstraints {
-            $0.horizontalEdges.equalToSuperview().inset(16)
-            $0.height.equalTo(48)
-            $0.bottom.equalTo(view.safeAreaLayoutGuide).offset(-20)
+    }
+    
+    private func goToNext() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.7) {
+            let termsOfServiceVC = SetEducationViewController()
+            let navigationController = UINavigationController(rootViewController: termsOfServiceVC)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = navigationController
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
         }
     }
 }

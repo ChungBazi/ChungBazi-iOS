@@ -16,7 +16,7 @@ class LogoWithTitleView: UIView {
     }
     
     private lazy var logo = UIImageView().then {
-        $0.contentMode = .scaleAspectFill
+        $0.contentMode = .scaleAspectFit
         $0.backgroundColor = .clear
     }
 
@@ -26,7 +26,7 @@ class LogoWithTitleView: UIView {
         self.title.setLineSpacing()
         self.title.textAlignment = .center
         self.logo.image = UIImage(resource: image)
-        self.backgroundColor = .blue700
+        self.backgroundColor = .clear
         addComponents()
         setConstraints()
     }
@@ -41,16 +41,20 @@ class LogoWithTitleView: UIView {
     }
     
     private func setConstraints() {
+        let stack = UIStackView(arrangedSubviews: [logo, title])
+        stack.axis = .vertical
+        stack.alignment = .center
+        stack.spacing = 21
         
-        logo.snp.makeConstraints {
-            $0.top.equalToSuperview().offset(Constants.superViewHeight * 0.26)
-            $0.centerX.equalToSuperview()
-            $0.height.equalTo(Constants.superViewHeight * 0.35)
+        addSubview(stack)
+        
+        stack.snp.makeConstraints {
+            $0.edges.equalToSuperview()
         }
         
-        title.snp.makeConstraints {
-            $0.top.equalTo(logo.snp.bottom).offset(21)
-            $0.centerX.equalToSuperview()
+        logo.snp.makeConstraints {
+            $0.width.equalToSuperview()
+            $0.height.equalTo(logo.snp.width)
         }
     }
 }

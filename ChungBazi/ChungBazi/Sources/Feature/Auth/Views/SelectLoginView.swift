@@ -33,16 +33,10 @@ class SelectLoginView: UIView {
         $0.numberOfLines = 2
     }
     
-    private lazy var labelStackView = UIStackView(arrangedSubviews: [title]).then {
-        $0.axis = .vertical
-        $0.spacing = 21
-        $0.alignment = .leading
-    }
-    // MARK: - 로고 이미지
-    private lazy var logo = UIImageView().then {
-        $0.image = UIImage(resource: .basicBaro)
+    // MARK: - Background
+    private lazy var loginBG = UIImageView().then {
+        $0.image = UIImage(resource: .loginBG)
         $0.contentMode = .scaleAspectFill
-        $0.backgroundColor = .clear
     }
     
     // MARK: - 소셜 로그인
@@ -57,17 +51,23 @@ class SelectLoginView: UIView {
 
         // 타이틀 속성 설정
         let attributes: AttributeContainer = AttributeContainer([
-            .font: UIFont.ptdSemiBoldFont(ofSize: 15), .foregroundColor: UIColor.black.withAlphaComponent(0.85)])
-        configuration.attributedTitle = AttributedString("카카오 로그인", attributes: attributes)
+            .font: UIFont.ptdMediumFont(ofSize: 13), .foregroundColor: UIColor.black.withAlphaComponent(0.85)])
+        configuration.attributedTitle = AttributedString("카카오로 로그인", attributes: attributes)
         configuration.titleAlignment = .center
         
         configuration.contentInsets = NSDirectionalEdgeInsets(top: 0, leading: 0, bottom: 0, trailing: 14) // 여백 설정
 
         // 버튼 설정
         $0.configuration = configuration
-        $0.layer.cornerRadius = 12
+        $0.layer.cornerRadius = 5
         $0.layer.masksToBounds = true
         $0.backgroundColor = UIColor(hex: "#FEE500")
+    }
+    
+    private lazy var loginButtonStackView = UIStackView(arrangedSubviews: [appleBtn, kakaoBtn]).then {
+        $0.axis = .vertical
+        $0.spacing = 12
+        $0.distribution = .fillEqually
     }
     
     // 하단 링크: 회원가입 | 이메일 로그인
@@ -98,23 +98,24 @@ class SelectLoginView: UIView {
     }
     
     func addComponents() {
-        [labelStackView, logo, appleBtn, kakaoBtn, linkRow].forEach(addSubview)
+        addSubview(loginBG)
+        [title, loginButtonStackView, linkRow].forEach {
+            loginBG.addSubviews($0)
+        }
         [signUpButton, divider, emailLoginButton].forEach { linkRow.addSubview($0) }
     }
     
     private func setConstraints() {
         
+        loginBG.snp.makeConstraints {
+            $0.edges.equalToSuperview()
+        }
+        
         labelStackView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(101)
             $0.leading.trailing.equalToSuperview().inset(40)
         }
-        
-        logo.snp.makeConstraints {
-            $0.top.equalTo(labelStackView.snp.bottom).offset(82)
-            $0.leading.trailing.equalToSuperview().inset(74.5)
-            $0.height.equalTo(226)
-        }
-        
+
         appleBtn.snp.makeConstraints {
             $0.top.equalTo(logo.snp.bottom).offset(85)
             $0.leading.trailing.equalToSuperview().inset(16)

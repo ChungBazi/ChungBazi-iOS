@@ -14,12 +14,22 @@ class FinishRegisterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.isHidden = true
-        self.view = finishRegisterView
+        view.backgroundColor = .blue700
+        setupLayout()
         goToSelectLoginView()
     }
     
+    private func setupLayout() {
+        view.addSubview(finishRegisterView)
+        
+        finishRegisterView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.7)
+        }
+    }
+    
     private func goToSelectLoginView() {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.7) {
             let vc = SelectLoginTypeViewController()
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
