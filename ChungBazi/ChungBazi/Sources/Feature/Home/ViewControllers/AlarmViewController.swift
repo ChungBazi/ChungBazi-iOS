@@ -28,13 +28,7 @@ class AlarmViewController: UIViewController {
         $0.dataSource = self
     }
     
-    private let emptyStateLabel = UILabel().then {
-        $0.text = "알림이 비었습니다."
-        $0.textAlignment = .center
-        $0.textColor = .gray600
-        $0.font = .ptdMediumFont(ofSize: 16)
-        $0.isHidden = true
-    }
+    private let emptyView = EmptyBaroWithTitleView(title: "알림이 비었어요")
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -56,7 +50,7 @@ class AlarmViewController: UIViewController {
     }
     
     private func addComoponents() {
-        [alarmListCollectionView, emptyStateLabel].forEach { view.addSubview($0) }
+        [alarmListCollectionView, emptyView].forEach { view.addSubview($0) }
     }
     
     private func setConstraints() {
@@ -66,8 +60,9 @@ class AlarmViewController: UIViewController {
             $0.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
-        emptyStateLabel.snp.makeConstraints { make in
+        emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
     }
     
@@ -117,7 +112,7 @@ class AlarmViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.alarmListCollectionView.reloadData()
                     let hasResults = self.alarmList.isEmpty
-                    self.emptyStateLabel.isHidden = !hasResults
+                    self.emptyView.isHidden = !hasResults
                 }
             case .failure(let error):
                 print(error)
