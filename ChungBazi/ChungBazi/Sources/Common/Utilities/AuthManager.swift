@@ -228,5 +228,6 @@ final class AuthManager {
         loginType = nil
         isFirstLaunch = true
         userName = nil
+        lastAppleLoginEmail = nil
     }
 }
