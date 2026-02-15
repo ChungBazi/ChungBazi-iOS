@@ -273,7 +273,7 @@ final class EmailVerificationCodeViewController: UIViewController {
                 self.updateTimerLabel()
                 self.verifyButton.setEnabled(isEnabled: false)
                 self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
-                    self.navigationController?.popToRootViewController(animated: false)
+                    self.navigationController?.popViewController(animated: false)
                 })
             } else {
                 self.updateTimerLabel()

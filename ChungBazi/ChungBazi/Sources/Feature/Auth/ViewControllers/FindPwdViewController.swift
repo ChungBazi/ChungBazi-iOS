@@ -338,7 +338,7 @@ final class FindPwdViewController: UIViewController {
                 self.completeButton.isEnabled = false
                 self.completeButton.backgroundColor = .gray200
                 self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
-                    self.navigationController?.popToRootViewController(animated: false)
+                    self.navigationController?.popViewController(animated: false)
                 })
             } else {
                 self.updateTimerLabel()
