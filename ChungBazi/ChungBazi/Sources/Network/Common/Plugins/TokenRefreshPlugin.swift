@@ -10,6 +10,12 @@ import Foundation
 
 class TokenRefreshPlugin: PluginType {
     
+    private let authService: AuthService
+    
+    init(authService: AuthService = .shared) {
+        self.authService = authService
+    }
+    
     // MARK: - Prepare Request
     func prepare(_ request: URLRequest, target: TargetType) -> URLRequest {
         var request = request
@@ -50,8 +56,6 @@ class TokenRefreshPlugin: PluginType {
     
     // MARK: - Handle Token Expiration
     private func handleTokenExpiration() {
-        let authService = AuthService()
-        
         authService.reIssueAccesToken { success in
             if !success {
                 self.forceLogout()

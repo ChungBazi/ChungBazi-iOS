@@ -11,6 +11,7 @@ import SwiftyToaster
 
 final class AuthService: NetworkManager {
     
+    static let shared = AuthService()
     typealias Endpoint = AuthEndpoints
     
     // MARK: - 토큰 재발급 상태 관리
@@ -22,7 +23,7 @@ final class AuthService: NetworkManager {
     // MARK: - Provider 설정
     let provider: MoyaProvider<AuthEndpoints>
     
-    public init(provider: MoyaProvider<AuthEndpoints>? = nil) {
+    private init() {
         // 플러그인 추가
         let plugins: [PluginType] = [
             NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)), // 로그 플러그인
@@ -30,7 +31,11 @@ final class AuthService: NetworkManager {
         ]
         
         // provider 초기화
-        self.provider = provider ?? MoyaProvider<AuthEndpoints>(plugins: plugins)
+        self.provider = MoyaProvider<AuthEndpoints>(plugins: plugins)
+    }
+    
+    public init(provider: MoyaProvider<AuthEndpoints>) {
+        self.provider = provider
     }
     
     // MARK: - DTO funcs
