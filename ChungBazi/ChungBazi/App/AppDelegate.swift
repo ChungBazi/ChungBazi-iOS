@@ -152,7 +152,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
     }
     
     func application(_ application: UIApplication, didFailToRegisterForRemoteNotificationsWithError error: Error) {
-        Toaster.shared.makeToast("일시적인 오류가 발생했습니다. 어플을 재실행 해주세요")
+        Toaster.shared.makeToast("일시적인 오류가 발생했습니다. 어플을 재실행 해주세요.")
     }
     
     func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse, withCompletionHandler completionHandler: @escaping () -> Void) {
