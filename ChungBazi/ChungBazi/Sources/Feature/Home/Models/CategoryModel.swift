@@ -7,6 +7,6 @@
 
 struct CategoryItem {
     let title: String
-    let iconName: String
+    let iconName: ImageResource
     let policies: [PolicyItem]
 }

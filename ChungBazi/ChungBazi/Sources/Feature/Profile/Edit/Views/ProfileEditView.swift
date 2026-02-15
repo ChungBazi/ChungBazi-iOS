@@ -27,8 +27,6 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     private let profileImageView = UIImageView()
     
-    public let settingCharacterBtn = CustomButton(backgroundColor: .white, titleText: "캐릭터 설정", titleColor: .black, borderWidth: 1, borderColor: .gray400)
-    
     private let nickNameTitle = B14_M(text: "닉네임", textColor: .gray500)
     public let nickNameTextField = UITextField().then {
         $0.font = UIFont.ptdMediumFont(ofSize: 16)
@@ -72,7 +70,7 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
     }
     
     private func setupUI() {
-        addSubviews(profileView, settingCharacterBtn, nickNameTitle, nickNameTextField, nickNameUnderLine, emailTitle, emailLabel, emailUnderLine, resetPwdButton, completeBtn)
+        addSubviews(profileView, nickNameTitle, nickNameTextField, nickNameUnderLine, emailTitle, emailLabel, emailUnderLine, resetPwdButton, completeBtn)
         
         profileView.snp.makeConstraints {
             $0.top.equalToSuperview().offset(26)
@@ -85,13 +83,8 @@ final class ProfileEditView: UIView, UITextFieldDelegate {
             $0.leading.trailing.equalToSuperview().inset(1)
             $0.bottom.equalToSuperview().inset(5)
         }
-        settingCharacterBtn.snp.makeConstraints {
-            $0.top.equalTo(profileImageView.snp.bottom).offset(33)
-            $0.centerX.equalToSuperview()
-            $0.width.equalTo(118)
-        }
         nickNameTitle.snp.makeConstraints {
-            $0.top.equalTo(settingCharacterBtn.snp.bottom).offset(51)
+            $0.top.equalTo(profileImageView.snp.bottom).offset(36)
             $0.leading.trailing.equalToSuperview().inset(45)
         }
         nickNameTextField.snp.makeConstraints {

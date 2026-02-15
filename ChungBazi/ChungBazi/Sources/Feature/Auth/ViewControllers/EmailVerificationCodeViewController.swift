@@ -60,7 +60,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
 
     private let resendActionButton = UIButton(type: .system).then {
-        let image = UIImage(named: "resendbutton")
+        let image = UIImage(resource: .resendbutton)
         $0.setImage(image, for: .normal)
         $0.contentHorizontalAlignment = .leading
 

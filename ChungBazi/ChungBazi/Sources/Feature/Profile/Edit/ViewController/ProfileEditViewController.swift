@@ -53,8 +53,6 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
         addCustomNavigationBar(titleText: "프로필 설정", showBackButton: true, showCartButton: false, showAlarmButton: false, backgroundColor: .white)
         scrollView.showsVerticalScrollIndicator = false
         
-        profileEditView.settingCharacterBtn.addTarget(self, action: #selector(settingCharacterBtnTapped), for: .touchUpInside)
-        
         view.addSubview(scrollView)
         scrollView.addSubview(profileEditView)
         
@@ -67,12 +65,6 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
             $0.edges.width.equalToSuperview()
             $0.height.greaterThanOrEqualTo(scrollView.snp.height)
         }
-    }
-    
-    @objc private func settingCharacterBtnTapped() {
-        let vc = CharacterEditViewController()
-        vc.delegate = self
-        navigationController?.pushViewController(vc, animated: true)
     }
     
     @objc private func didTapResetPassword() {

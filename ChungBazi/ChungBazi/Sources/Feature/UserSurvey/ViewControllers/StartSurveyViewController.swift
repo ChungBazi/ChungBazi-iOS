@@ -9,7 +9,7 @@ import Then
 
 class StartSurveyViewController: UIViewController {
 
-    private let startSurveyView = LogoWithTitleView(image: "questionBaro", title: "더 정확한 추천을 위해\n몇 가지 정보를 알려주세요!")
+    private let startSurveyView = LogoWithTitleView(image: .questionBaro, title: "더 정확한 추천을 위해\n몇 가지 정보를 알려주세요!")
     
     private lazy var startBtn = UIButton().then {
         $0.setTitle("시작하기", for: .normal)

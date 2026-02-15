@@ -61,7 +61,7 @@ extension UIViewController {
         }
         if showCartButton {
             let cartButton = UIButton().then {
-                let cartIcon = UIImage(resource: .cartIcon).withRenderingMode(.alwaysTemplate)
+                let cartIcon = UIImage(resource: .savedIcon).withRenderingMode(.alwaysTemplate)
                 $0.setImage(cartIcon, for: .normal)
                 $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
@@ -74,7 +74,7 @@ extension UIViewController {
         }
         if showAlarmButton {
             let alarmButton = UIButton().then {
-                $0.setImage(UIImage(named: "alarm_icon"), for: .normal)
+                $0.setImage(UIImage(resource: .alarmIcon), for: .normal)
                 $0.tintColor = tintColor
                 $0.accessibilityIdentifier = "alarmButton"
                 $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
@@ -87,7 +87,7 @@ extension UIViewController {
         }
         if showRightCartButton {
             let alarmButton = UIButton().then {
-                let cartIcon = UIImage(resource: .cartIcon).withRenderingMode(.alwaysTemplate)
+                let cartIcon = UIImage(resource: .savedIcon).withRenderingMode(.alwaysTemplate)
                 $0.setImage(cartIcon, for: .normal)
                 $0.tintColor = tintColor
                 $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
@@ -295,8 +295,8 @@ extension UIViewController {
 
         DispatchQueue.main.async {
             if let alarmButton = navBarView.subviews.first(where: { $0 is UIButton && $0.accessibilityIdentifier == "alarmButton" }) as? UIButton {
-                let alarmIcon = isUnread ? "alarm_unread_icon" : "alarm_icon"
-                alarmButton.setImage(UIImage(named: alarmIcon), for: .normal)
+                let alarmIcon: ImageResource = isUnread ? .alarmUnreadIcon : .alarmIcon
+                alarmButton.setImage(UIImage(resource: alarmIcon), for: .normal)
             }
         }
     }

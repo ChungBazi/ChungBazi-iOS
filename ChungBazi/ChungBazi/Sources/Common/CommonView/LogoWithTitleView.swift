@@ -20,12 +20,12 @@ class LogoWithTitleView: UIView {
         $0.backgroundColor = .clear
     }
 
-    init(image: String, title: String) {
+    init(image: ImageResource, title: String) {
         super.init(frame: .zero)
         self.title.text = title
         self.title.setLineSpacing()
         self.title.textAlignment = .center
-        self.logo.image = UIImage(named: image)
+        self.logo.image = UIImage(resource: image)
         self.backgroundColor = .blue700
         addComponents()
         setConstraints()

@@ -30,8 +30,8 @@ final class PolicyCardViewCell: UITableViewCell {
 
     private let checkBoxButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
-        button.setImage(UIImage(named: "checkbox_checked"), for: .selected)
+        button.setImage(UIImage(resource: .checkboxUnchecked), for: .normal)
+        button.setImage(UIImage(resource: .checkboxChecked), for: .selected)
         button.isHidden = true
         return button
     }()
@@ -194,24 +194,24 @@ final class PolicyCardViewCell: UITableViewCell {
     private func badgeImage(for badge: String) -> UIImage? {
         switch badge {
         case "예정":
-            return UIImage(named: "blue50Pocket")
+            return UIImage(resource: .blue50Pocket)
         case "마감":
-            return UIImage(named: "gray500Pocket")
+            return UIImage(resource: .gray500Pocket)
         case "상시":
-            return UIImage(named: "green300Pocket")
+            return UIImage(resource: .green300Pocket)
         case let value where value.starts(with: "D-"):
             if let day = Int(value.dropFirst(2)) {
                 if day >= 10 {
-                    return UIImage(named: "blue200Pocket")
+                    return UIImage(resource: .blue200Pocket)
                 } else if day >= 2 {
-                    return UIImage(named: "blue700Pocket")
+                    return UIImage(resource: .blue700Pocket)
                 } else if day >= 0 {
-                    return UIImage(named: "redPocket")
+                    return UIImage(resource: .redPocket)
                 }
             }
-            return UIImage(named: "blue200Pocket")
+            return UIImage(resource: .blue200Pocket)
         default:
-            return UIImage(named: "blue200Pocket")
+            return UIImage(resource: .blue200Pocket)
         }
     }
 

@@ -45,7 +45,7 @@ final class NicknameRegisterViewController: UIViewController {
     }
     
     private let profileImg = UIImageView().then {
-        $0.image = UIImage(named: "basicBaro")
+        $0.image = UIImage(resource: .basicBaro)
         $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
         $0.clipsToBounds = true

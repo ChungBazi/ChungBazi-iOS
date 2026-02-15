@@ -19,11 +19,11 @@ final class HomeViewController: UIViewController {
         $0.layer.cornerRadius = 10
     }
 
-    private let searchIcon = UIImageView(image: UIImage(named: "search_icon")).then {
+    private let searchIcon = UIImageView(image: UIImage(resource: .searchIcon)).then {
         $0.contentMode = .scaleAspectFit
     }
 
-    private let policyIconImageView = UIImageView(image: UIImage(named: "homeicon")).then {
+    private let policyIconImageView = UIImageView(image: UIImage(resource: .homeicon)).then {
         $0.contentMode = .scaleAspectFit
     }
 
@@ -58,11 +58,11 @@ final class HomeViewController: UIViewController {
     }
 
     private let categories: [CategoryItem] = [
-        CategoryItem(title: "일자리", iconName: "policy_job_icon", policies: []),
-        CategoryItem(title: "주거", iconName: "policy_housing_icon", policies: []),
-        CategoryItem(title: "교육", iconName: "policy_education_icon", policies: []),
-        CategoryItem(title: "복지,문화", iconName: "policy_welfare_culture_icon", policies: []),
-        CategoryItem(title: "참여,권리", iconName: "policy_participation_icon", policies: [])
+        CategoryItem(title: "일자리", iconName: .policyJobIcon, policies: []),
+        CategoryItem(title: "주거", iconName: .policyHousingIcon, policies: []),
+        CategoryItem(title: "교육", iconName: .policyEducationIcon, policies: []),
+        CategoryItem(title: "복지,문화", iconName: .policyWelfareCultureIcon, policies: []),
+        CategoryItem(title: "참여,권리", iconName: .policyParticipationIcon, policies: [])
     ]
     
     override func viewWillAppear(_ animated: Bool) {
@@ -168,7 +168,7 @@ final class HomeViewController: UIViewController {
 
         for (index, category) in categories.enumerated() {
             let button = CategoryButton().then {
-                $0.iconImageView.image = UIImage(named: category.iconName)
+                $0.iconImageView.image = UIImage(resource: category.iconName)
                 $0.customTitleLabel.text = category.title
                 $0.tag = index
                 $0.addTarget(self, action: #selector(categoryButtonTapped(_:)), for: .touchUpInside)
@@ -208,7 +208,7 @@ final class HomeViewController: UIViewController {
             make.trailing.equalToSuperview().offset(-3)
             make.width.height.equalTo(chatbotSize)
         }
-        let chatbotIcon = UIImageView(image: UIImage(named: "chatbot")).then {
+        let chatbotIcon = UIImageView(image: UIImage(resource: .chatbot)).then {
             $0.contentMode = .scaleAspectFit
         }
         chatbotButton.addSubview(chatbotIcon)

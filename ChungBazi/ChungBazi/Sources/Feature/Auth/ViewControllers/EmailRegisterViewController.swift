@@ -128,7 +128,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         }
         let icon = isPasswordVisible 
             ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.pwdEyeButton.setImage(icon, for: .normal)
     }
     

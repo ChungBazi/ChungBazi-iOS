@@ -164,7 +164,7 @@ extension EditingView: UITableViewDataSource, UITableViewDelegate {
             self.delegate?.didDeleteDocument(at: indexPath.row)
         }
         
-        deleteAction.image = UIImage(named: "trash_icon")?.withRenderingMode(.alwaysTemplate)
+        deleteAction.image = UIImage(resource: .trashIcon).withRenderingMode(.alwaysTemplate)
         deleteAction.backgroundColor = .gray500
         
         return UISwipeActionsConfiguration(actions: [deleteAction])

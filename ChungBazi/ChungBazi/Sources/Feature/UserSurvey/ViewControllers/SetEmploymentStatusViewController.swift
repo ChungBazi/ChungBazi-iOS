@@ -9,7 +9,7 @@ class SetEmploymentStatusViewController: UIViewController, CustomDropdownDelegat
     
     let userInfoData = UserInfoDataManager.shared
     
-    private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: "twicePageLogo").then {
+    private lazy var baseSurveyView = BasicSurveyView(title: "취업상태", logo: .twicePageLogo).then {
         $0.backBtn.addTarget(self, action: #selector(goToback), for: .touchUpInside)
         $0.nextBtn.addTarget(self, action: #selector(goToSetPlus), for: .touchUpInside)
     }

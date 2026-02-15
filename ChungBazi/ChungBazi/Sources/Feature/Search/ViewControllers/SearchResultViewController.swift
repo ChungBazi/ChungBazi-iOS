@@ -30,7 +30,7 @@ final class SearchResultViewController: UIViewController {
     }
     
     private let searchButton = UIButton(type: .system).then {
-        $0.setImage(UIImage(named: "search_icon"), for: .normal)
+        $0.setImage(UIImage(resource: .searchIcon), for: .normal)
         $0.contentMode = .scaleAspectFit
         $0.tintColor = .gray500
     }

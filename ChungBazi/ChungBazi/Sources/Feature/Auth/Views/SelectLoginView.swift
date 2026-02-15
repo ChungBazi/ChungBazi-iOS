@@ -40,7 +40,7 @@ class SelectLoginView: UIView {
     }
     // MARK: - 로고 이미지
     private lazy var logo = UIImageView().then {
-        $0.image = UIImage(named: "basicBaro")
+        $0.image = UIImage(resource: .basicBaro)
         $0.contentMode = .scaleAspectFill
         $0.backgroundColor = .clear
     }
@@ -51,7 +51,7 @@ class SelectLoginView: UIView {
     public let kakaoBtn = UIButton().then {
         var configuration = UIButton.Configuration.plain()
         // 이미지 설정
-        configuration.image = UIImage(named: "kakao")?.withRenderingMode(.alwaysOriginal).withTintColor(.black)
+        configuration.image = UIImage(resource: .kakao).withRenderingMode(.alwaysOriginal).withTintColor(.black)
         configuration.imagePlacement = .leading
         configuration.imagePadding = 14
 

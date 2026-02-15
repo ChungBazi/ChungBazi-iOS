@@ -143,16 +143,15 @@ final class CalendarDetailView: UIView {
     }
     
     func updateDDay(daysLeft: Int) {
-        let dDayStyle = DDayStyle.determineStyle(from: daysLeft)
-        let imageName = dDayStyle.assetName
-        dDayPocketImage.image = UIImage(named: imageName) ?? UIImage(named: "default_d_day_image")
+        let (dDayStyle, dDayText) = DDayStyle.determineStyle(from: daysLeft)
         
-        if dDayPocketImage.image == nil {
-            print("Error: Image \(imageName) not found. Using default image.")
-        }
+        dDayPocketImage.image = UIImage(resource: dDayStyle.assetName)
+        
+        if dDayPocketImage.image == nil { return }
         
         dDayPocketText.textColor = dDayStyle.textColor
-        dDayPocketText.text = dDayStyle.displayText.isEmpty ? "D-\(daysLeft)" : dDayStyle.displayText
+        
+        dDayPocketText.text = dDayText
         
         setNeedsLayout()
         layoutIfNeeded()

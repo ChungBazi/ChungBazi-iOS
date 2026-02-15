@@ -42,7 +42,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private let expandButton = UIButton(type: .custom).then {
-        $0.setImage(UIImage(named: "expand_icon"), for: .normal)
+        $0.setImage(UIImage(resource: .expandIcon), for: .normal)
         $0.backgroundColor = .white
         $0.layer.cornerRadius = 19.5
         $0.layer.shadowColor = UIColor.black.cgColor

@@ -9,7 +9,7 @@ import UIKit
 
 class FinishRegisterViewController: UIViewController {
     
-    private let finishRegisterView = LogoWithTitleView(image: "lightBaro", title: "회원가입이 완료되었습니다!\n이제 청바지에 로그인해보세요!")
+    private let finishRegisterView = LogoWithTitleView(image: .lightBaro, title: "회원가입이 완료되었습니다!\n이제 청바지에 로그인해보세요!")
     
     override func viewDidLoad() {
         super.viewDidLoad()

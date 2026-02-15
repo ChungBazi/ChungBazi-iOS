@@ -18,7 +18,7 @@ final class CalendarDetailDocumentListView: UIView {
         $0.rowHeight = UITableView.automaticDimension
         $0.estimatedRowHeight = 64
     }
-    private let plusCircleButton = UIButton.createWithImage(image: UIImage(named: "plusCircle")?.withRenderingMode(.alwaysOriginal)).then {
+    private let plusCircleButton = UIButton.createWithImage(image: UIImage(resource: .plusCircle).withRenderingMode(.alwaysOriginal)).then {
         $0.isHidden = true
     }
     

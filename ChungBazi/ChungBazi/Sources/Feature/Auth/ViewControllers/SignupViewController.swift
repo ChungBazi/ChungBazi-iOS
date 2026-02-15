@@ -99,7 +99,7 @@ final class SignupViewController: UIViewController {
         registerView.pwdTextField.isSecureTextEntry = !isPasswordVisible
         let iconName = isPasswordVisible
         ? UIImage(systemName: "eye")
-        : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.pwdEyeButton.setImage(iconName, for: .normal)
     }
 
@@ -108,7 +108,7 @@ final class SignupViewController: UIViewController {
         registerView.checkPwdTextField.isSecureTextEntry = !isCheckPasswordVisible
         let iconName = isCheckPasswordVisible
         ? UIImage(systemName: "eye")
-        : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         registerView.checkPwdEyeButton.setImage(iconName, for: .normal)
     }
 

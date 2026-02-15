@@ -42,7 +42,7 @@ final class SignupView: UIView {
     }
     
     let pwdInfoButton = UIButton().then {
-        $0.setImage(UIImage(named: "questionmark"), for: .normal)
+        $0.setImage(UIImage(resource: .questionmark), for: .normal)
     }
     
     let pwdTextField = UITextField().then {
@@ -52,7 +52,7 @@ final class SignupView: UIView {
     }
     
     let pwdEyeButton = UIButton().then {
-        $0.setImage(UIImage(named: "eye_closed"), for: .normal)
+        $0.setImage(UIImage(resource: .eyeClosed), for: .normal)
         $0.tintColor = .gray
     }
     
@@ -69,7 +69,7 @@ final class SignupView: UIView {
     }
     
     let checkPwdEyeButton = UIButton().then {
-        $0.setImage(UIImage(named: "eye_closed"), for: .normal)
+        $0.setImage(UIImage(resource: .eyeClosed), for: .normal)
         $0.tintColor = .gray
     }
     

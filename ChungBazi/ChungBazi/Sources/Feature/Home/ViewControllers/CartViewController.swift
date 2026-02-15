@@ -23,8 +23,8 @@ final class CartViewController: UIViewController {
 
     private let allSelectButton: UIButton = {
         let button = UIButton(type: .custom)
-        button.setImage(UIImage(named: "checkbox_unchecked"), for: .normal)
-        button.setImage(UIImage(named: "checkbox_checked"), for: .selected)
+        button.setImage(UIImage(resource: .checkboxUnchecked), for: .normal)
+        button.setImage(UIImage(resource: .checkboxChecked), for: .selected)
         button.setTitle(" 전체선택", for: .normal)
         button.setTitleColor(.black, for: .normal)
         button.titleLabel?.font = UIFont(name: AppFontName.pMedium, size: 16)

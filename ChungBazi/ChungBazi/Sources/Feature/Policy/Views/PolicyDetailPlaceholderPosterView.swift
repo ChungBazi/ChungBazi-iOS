@@ -12,7 +12,7 @@ import Then
 /// posterUrl == nil 일 때 보여줄 대체 포스터 뷰
 final class PolicyDetailPlaceholderPosterView: UIView {
 
-    private let backgroundImageView = UIImageView(image: UIImage(named: "policyDetail")).then {
+    private let backgroundImageView = UIImageView(image: UIImage(resource: .policyDetail)).then {
         $0.contentMode = .scaleAspectFit
         $0.clipsToBounds = true
     }

@@ -27,7 +27,7 @@ class AddingView: UIView {
         $0.estimatedRowHeight = 64
         $0.isScrollEnabled = false
     }
-    private let plusCircleButton = UIButton.createWithImage(image: UIImage(named: "plusCircle")?.withRenderingMode(.alwaysOriginal))
+    private let plusCircleButton = UIButton.createWithImage(image: UIImage(resource: .plusCircle).withRenderingMode(.alwaysOriginal))
     
     override init(frame: CGRect) {
         super.init(frame: frame)

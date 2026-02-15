@@ -96,7 +96,7 @@ final class ResetPasswordViewController: UIViewController {
         resetView.newPwdField.isSecureTextEntry = !isNewPwdVisible
         let iconName = isNewPwdVisible
             ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+        : UIImage(resource: .eyeClosed)
         resetView.newPwdEye.setImage(iconName, for: .normal)
     }
     
@@ -105,7 +105,7 @@ final class ResetPasswordViewController: UIViewController {
         resetView.confirmPwdField.isSecureTextEntry = !isConfirmPwdVisible
         let iconName = isConfirmPwdVisible
             ? UIImage(systemName: "eye")
-            : UIImage(named: "eye_closed")
+            : UIImage(resource: .eyeClosed)
         resetView.confirmPwdEye.setImage(iconName, for: .normal)
     }
     
