@@ -13,8 +13,10 @@ final class AuthService: NetworkManager {
     typealias Endpoint = AuthEndpoints
     
     // MARK: - 토큰 재발급 상태 관리
+    
     private static var isRefreshingToken = false
     private static var refreshCallbacks: [(Bool) -> Void] = []
+    private static let refreshLock = NSLock()
     
     // MARK: - Provider 설정
     let provider: MoyaProvider<AuthEndpoints>
@@ -113,6 +115,11 @@ final class AuthService: NetworkManager {
 extension AuthService {
     /// 토큰 재발급 API 함수
     public func reIssueAccesToken(completion: @escaping (Bool) -> Void) {
+        
+        // Lock으로 보호
+        Self.refreshLock.lock()
+        defer { Self.refreshLock.unlock() }
+        
         // 중복 재발급 방지
         if Self.isRefreshingToken {
             Self.refreshCallbacks.append(completion)
@@ -133,7 +140,14 @@ extension AuthService {
         
         let reIssueDto = makeReIssueDTO(refreshToken: refreshToken)
         
+        // Lock 해체 후 네트워크 요청
+        Self.refreshLock.unlock()
+        
         reissueToken(data: reIssueDto) { result in
+            // 콜백 처리 시 다시 Lock
+            Self.refreshLock.lock()
+            defer { Self.refreshLock.unlock() }
+            
             Self.isRefreshingToken = false
             
             switch result {
@@ -156,5 +170,8 @@ extension AuthService {
                 Self.refreshCallbacks.removeAll()
             }
         }
+        
+        // defer에서 unlock 위해 lock 다시 획득
+        Self.refreshLock.lock()
     }
 }
