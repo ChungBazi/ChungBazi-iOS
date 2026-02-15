@@ -222,7 +222,7 @@ extension UIViewController {
         let policyTitle = policy.name
         let policyId = policy.policyId
         let policyDetailLink = "chungbazi://policy/\(policyId)"
-        let webLink = "https://apps.apple.com/kr/app/청바지/id6753987371"
+        let webLink = Config.appStoreURL
         
         // posterUrl이 있으면 이미지와 함께, 없으면 텍스트만
         if let posterUrlString = policy.posterUrl,
