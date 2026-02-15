@@ -24,7 +24,9 @@ class SelectLoginTypeViewController: UIViewController {
             self?.hasNickName = hasNickName
             self?.isFirst = isFirst
             self?.lastLoginEmail = email
-            self?.goToNextView()
+            DispatchQueue.main.async {
+                self?.goToNextView()
+            }
         }
         vm.onLoginFailure = { errorMessage in
             DispatchQueue.main.async { Toaster.shared.makeToast("로그인을 실패하였습니다. 다시 시도해주세요.") }
@@ -104,7 +106,10 @@ class SelectLoginTypeViewController: UIViewController {
                 
                 self.hasNickName = AuthManager.shared.hasNickname
                 self.isFirst = response.isFirst
-                self.goToNextView()
+        
+                DispatchQueue.main.async {
+                    self.goToNextView()
+                }
                 
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")

@@ -12,7 +12,7 @@ import SwiftyToaster
 
 final class SignupViewController: UIViewController {
 
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     private let registerView = SignupView()
     
     private var isPasswordVisible = false

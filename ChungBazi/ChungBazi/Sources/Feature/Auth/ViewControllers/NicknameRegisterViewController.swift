@@ -12,7 +12,7 @@ import SwiftyToaster
 
 final class NicknameRegisterViewController: UIViewController {
     
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     
     private let scrollView = UIScrollView()
     private let contentView = UIView()

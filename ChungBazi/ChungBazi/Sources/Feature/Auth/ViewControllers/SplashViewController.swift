@@ -10,7 +10,7 @@ import Then
 
 class SplashViewController: UIViewController {
     
-    let networkService = AuthService()
+    let networkService = AuthService.shared
     
     private let splashLabel = UILabel().then {
         $0.text = "정책도 쉽고 간편하게"

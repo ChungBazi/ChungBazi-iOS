@@ -13,7 +13,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     
     private let registerInfo: RegisterRequestDto
     private let emailService = EmailService()
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     
     private let descriptionLabel = UILabel().then {
         $0.text = "회원님의 이메일로\n코드를 전송했어요!"

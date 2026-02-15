@@ -20,7 +20,8 @@ final class ResetPasswordViewController: UIViewController {
     private let resetView = ResetPasswordView()
     private var isNewPwdVisible = false
     private var isConfirmPwdVisible = false
-    private let authService = AuthService()
+    private let authService = AuthService.shared
+    private let userAuthService = UserAuthService()
     
     private let tooltipView = UIView().then {
         $0.backgroundColor = .white
@@ -126,7 +127,7 @@ final class ResetPasswordViewController: UIViewController {
         switch mode {
         case .loggedIn:
             let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
-            authService.resetPassword(data: dto, completion: handleResult)
+            userAuthService.resetPassword(data: dto, completion: handleResult)
         case .noAuth(let email, let code):
             authService.resetPasswordNoAuth(
                 email: email,

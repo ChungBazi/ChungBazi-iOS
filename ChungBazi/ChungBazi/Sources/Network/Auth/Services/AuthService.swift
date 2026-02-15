@@ -9,6 +9,7 @@ import Foundation
 import Moya
 import SwiftyToaster
 
+// 인증이 필요 없는 사용자 관련 API
 final class AuthService: NetworkManager {
     
     static let shared = AuthService()
@@ -26,8 +27,7 @@ final class AuthService: NetworkManager {
     private init() {
         // 플러그인 추가
         let plugins: [PluginType] = [
-            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)), // 로그 플러그인
-            TokenRefreshPlugin() // 토큰 재발급 플러그인
+            NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)) // 로그 플러그인
         ]
         
         // provider 초기화
@@ -71,24 +71,9 @@ final class AuthService: NetworkManager {
         requestOptional(target: .postAppleLogin(data: data), decodingType: LoginResponseDto.self, completion: completion)
     }
     
-    /// 로그아웃 API
-    public func logout(completion: @escaping (Result<String, NetworkError>) -> Void) {
-        request(target: .postLogout, decodingType: String.self, completion: completion)
-    }
-    
     /// 토큰 재발급 API
     public func reissueToken(data: ReIssueRequestDto, completion: @escaping (Result<ReIssueResponseDto, NetworkError>) -> Void) {
         request(target: .postReIssueToken(data: data), decodingType: ReIssueResponseDto.self, completion: completion)
-    }
-    
-    /// 회원 탈퇴 API
-    public func deleteUser(completion: @escaping (Result<String, NetworkError>) -> Void) {
-        request(target: .deleteUser, decodingType: String.self, completion: completion)
-    }
-    
-    /// 비밀번호 재설정 API
-    public func resetPassword(data: ResetPasswordRequestDto, completion: @escaping (Result<String, NetworkError>) -> Void) {
-        request(target: .postResetPassword(data: data), decodingType: String.self, completion: completion)
     }
     
     /// 로그인 없이 비밀번호 재설정 API
@@ -151,12 +136,13 @@ extension AuthService {
         reissueToken(data: reIssueDto) { result in
             // 콜백 처리 시 다시 Lock
             Self.refreshLock.lock()
-            defer { Self.refreshLock.unlock() }
             
             Self.isRefreshingToken = false
             
             let callbacks = Self.refreshCallbacks
             Self.refreshCallbacks.removeAll()
+            
+            Self.refreshLock.unlock()
             
             switch result {
             case .success(let response):
@@ -176,7 +162,7 @@ extension AuthService {
                 // 모든 콜백에 성공 전달
                 callbacks.forEach { $0(true) }
                 
-            case .failure(let error):
+            case .failure(_):
                 print("\(callbacks.count)개의 대기 요청에 실패 알림")
                 
                 AuthManager.shared.clearAuthDataForLogout()
@@ -185,8 +171,5 @@ extension AuthService {
                 callbacks.forEach { $0(false) }
             }
         }
-        
-        // defer에서 unlock 위해 lock 다시 획득
-        Self.refreshLock.lock()
     }
 }

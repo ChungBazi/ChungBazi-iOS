@@ -14,9 +14,9 @@ class ProfileViewController: UIViewController {
     private var rewardData: RewardModel?
     let userInfoData = UserProfileDataManager.shared
     
-    let networkService = AuthService()
+    let userAuthService = UserAuthService()
     let kakaoAuthVM = KakaoAuthVM()
-    private let service = UserService()
+    private let userService = UserService()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -46,7 +46,7 @@ class ProfileViewController: UIViewController {
     private func fetchProfile() {
         showLoading()
         
-        service.fetchProfile { [weak self] result in
+        userService.fetchProfile { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -72,7 +72,7 @@ class ProfileViewController: UIViewController {
     private func fetchReward() {
         showLoading()
         
-        service.fetchReward { [weak self] result in
+        userService.fetchReward { [weak self] result in
             guard let self = self else { return }
             
             DispatchQueue.main.async {
@@ -166,7 +166,7 @@ extension ProfileViewController: ProfileViewDelegate {
     }
     
     private func logout() {
-        networkService.logout() { [weak self] result in
+        userAuthService.logout() { [weak self] result in
             guard let self = self else { return }
             
             switch result {
@@ -181,13 +181,15 @@ extension ProfileViewController: ProfileViewDelegate {
                 }
                 
             case .failure(_):
-                Toaster.shared.makeToast("로그아웃에 실패하였습니다")
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast("로그아웃에 실패하였습니다")
+                }
             }
         }
     }
     
     private func deleteUser() {
-        networkService.deleteUser { [weak self] result in
+        userAuthService.deleteUser { [weak self] result in
             guard let self = self else { return }
             switch result {
             case .success(_):
@@ -200,7 +202,9 @@ extension ProfileViewController: ProfileViewDelegate {
                     }
                 }
             case .failure(_):
-                Toaster.shared.makeToast("회원탈퇴에 실패하였습니다")
+                DispatchQueue.main.async {
+                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다")
+                }
             }
         }
     }

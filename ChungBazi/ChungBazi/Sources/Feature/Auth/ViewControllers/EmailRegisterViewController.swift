@@ -13,7 +13,7 @@ import SwiftyToaster
 final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
 
     
-    private let authService = AuthService()
+    private let authService = AuthService.shared
     private let registerView = EmailRegisterView()
     private var isPasswordVisible = false
 
