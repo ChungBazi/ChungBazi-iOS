@@ -34,6 +34,11 @@ class TokenRefreshPlugin: PluginType {
     
     // MARK: - Did Receive Response
     func didReceive(_ result: Result<Response, MoyaError>, target: TargetType) {
+        // 인증이 필요하지 않은 endpoint의 401은 무시
+        if let authTarget = target as? AuthenticatedTarget, !authTarget.requiresAuthentication {
+            return
+        }
+        
         switch result {
         case .success(let response):
             
