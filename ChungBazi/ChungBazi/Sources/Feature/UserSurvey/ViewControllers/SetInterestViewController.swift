@@ -4,6 +4,7 @@
 //
 
 import UIKit
+import SwiftyToaster
 
 class SetInterestViewController: UIViewController {
     
@@ -79,8 +80,6 @@ class SetInterestViewController: UIViewController {
         UserInfoDataManager.shared.setInterests(selectedInterests)
         
         registerUserInfo()
-        let vc = FinishSurveyViewController()
-        navigationController?.pushViewController(vc, animated: true)
     }
     
     private func registerUserInfo() {
@@ -92,8 +91,10 @@ class SetInterestViewController: UIViewController {
             switch result {
             case .success(_):
                 AuthManager.shared.completeOnboarding()
-            case .failure(let response):
-                print(response)
+                let vc = FinishSurveyViewController()
+                navigationController?.pushViewController(vc, animated: true)
+            case .failure(_):
+                Toaster.shared.makeToast("사용자 정보 등록에 실패했습니다")
             }
         }
     }

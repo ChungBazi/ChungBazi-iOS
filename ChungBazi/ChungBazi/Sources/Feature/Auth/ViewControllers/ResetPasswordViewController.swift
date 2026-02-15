@@ -118,23 +118,23 @@ final class ResetPasswordViewController: UIViewController {
     }
     
     @objc private func completeTapped() {
-            let newPwd = resetView.newPwdField.text ?? ""
-            let confirm = resetView.confirmPwdField.text ?? ""
-            guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
-            guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
-
-            switch mode {
-            case .loggedIn:
-                let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
-                authService.resetPassword(data: dto, completion: handleResult)
-            case .noAuth(let email, let code):
-                authService.resetPasswordNoAuth(
-                    email: email,
-                    authCode: code,
-                    newPassword: newPwd
+        let newPwd = resetView.newPwdField.text ?? ""
+        let confirm = resetView.confirmPwdField.text ?? ""
+        guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
+        
+        switch mode {
+        case .loggedIn:
+            let dto = ResetPasswordRequestDto(newPassword: newPwd, checkNewPassword: confirm)
+            authService.resetPassword(data: dto, completion: handleResult)
+        case .noAuth(let email, let code):
+            authService.resetPasswordNoAuth(
+                email: email,
+                authCode: code,
+                newPassword: newPwd
                 , completion: handleResult)
-            }
         }
+    }
 
 
     
