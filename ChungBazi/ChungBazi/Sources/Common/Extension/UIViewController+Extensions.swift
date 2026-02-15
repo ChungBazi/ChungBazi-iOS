@@ -76,9 +76,11 @@ extension UIViewController {
     // 실제로 보이는 ViewController 찾기
     private static func getVisibleViewController(from vc: UIViewController) -> UIViewController {
         if let navigationController = vc as? UINavigationController {
-            return getVisibleViewController(from: navigationController.visibleViewController ?? vc)
+            guard let visible = navigationController.visibleViewController else { return vc }
+            return getVisibleViewController(from: visible)
         } else if let tabBarController = vc as? UITabBarController {
-            return getVisibleViewController(from: tabBarController.selectedViewController ?? vc)
+            guard let selected = tabBarController.selectedViewController else { return vc }
+            return getVisibleViewController(from: selected)
         } else if let presentedViewController = vc.presentedViewController {
             return getVisibleViewController(from: presentedViewController)
         }
