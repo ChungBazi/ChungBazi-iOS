@@ -37,6 +37,8 @@ class SelectLoginView: UIView {
     private lazy var loginBG = UIImageView().then {
         $0.image = UIImage(resource: .loginBG)
         $0.contentMode = .scaleAspectFill
+        $0.isUserInteractionEnabled = true
+        $0.clipsToBounds = true
     }
     
     // MARK: - 소셜 로그인
