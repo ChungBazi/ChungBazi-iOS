@@ -168,14 +168,8 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
             case .success(let response):
                 guard let response = response else { return  }
                 
-                let previousState = self.readAllNotifications
                 self.readAllNotifications = response.readAllNotifications
-                
-                if previousState != self.readAllNotifications {
-                    DispatchQueue.main.async {
-                        self.updateAlarmButtonIcon(isUnread: !self.readAllNotifications)
-                    }
-                }
+                self.updateAlarmButtonIcon(isUnread: !response.readAllNotifications)
                 
                 self.userName = response.username ?? "사용자"
                 

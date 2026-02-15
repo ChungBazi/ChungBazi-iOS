@@ -11,7 +11,7 @@ final class HomeViewController: UIViewController {
 
     private let networkService = PolicyService()
     private let userService = UserService()
-    private var readAllNotifications: Bool = false
+    private var readAllNotifications: Bool = true
     private var sortOrder: String = "latest"
 
     private let searchView = UIView().then {
@@ -92,7 +92,6 @@ final class HomeViewController: UIViewController {
         setupLayout()
         configureCategoriesWithChatbot()
         configureSearchViewTap()
-        fetchNotificationStatus()
     }
 
     private func setupLayout() {
@@ -266,14 +265,8 @@ final class HomeViewController: UIViewController {
             switch result {
             case .success(let response):
                 guard let response = response else { return }
-                let previousState = self.readAllNotifications
                 self.readAllNotifications = response.readAllNotifications
-                
-                if previousState != self.readAllNotifications {
-                    DispatchQueue.main.async {
-                        self.updateAlarmButtonIcon(isUnread: !self.readAllNotifications)
-                    }
-                }
+                self.updateAlarmButtonIcon(isUnread: !response.readAllNotifications)
             case .failure(let error):
                 print("❌ 알림 상태 조회 실패: \(error.localizedDescription)")
             }

@@ -295,8 +295,8 @@ extension UIViewController {
 
         DispatchQueue.main.async {
             if let alarmButton = navBarView.subviews.first(where: { $0 is UIButton && $0.accessibilityIdentifier == "alarmButton" }) as? UIButton {
-                let alarmIcon = isUnread ? UIImage(named: "alarm_unread_icon") : UIImage(named: "alarm_icon")
-                alarmButton.setImage(alarmIcon, for: .normal)
+                let alarmIcon = isUnread ? "alarm_unread_icon" : "alarm_icon"
+                alarmButton.setImage(UIImage(named: alarmIcon), for: .normal)
             }
         }
     }

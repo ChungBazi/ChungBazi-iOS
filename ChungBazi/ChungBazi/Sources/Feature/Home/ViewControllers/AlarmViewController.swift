@@ -94,7 +94,8 @@ class AlarmViewController: UIViewController {
                     guard let notificationId = data.notificationId,
                           let message = data.message,
                           let typeString = data.type,
-                          let sentTime = data.formattedCreatedAt else {
+                          let sentTime = data.formattedCreatedAt?.replacingOccurrences(of: "T", with: " ")
+                    else {
                         print("알림이 없습니다.")
                         return nil
                     }
