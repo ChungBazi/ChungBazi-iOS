@@ -8,9 +8,9 @@
 import Foundation
 
 enum LoginType: String {
-    case kakao = "LOCAL"
+    case kakao = "KAKAO"
     case apple = "APPLE"
-    case normal = "KAKAO"
+    case normal = "LOCAL"
     
     static func from(serverType: String) -> LoginType {
         switch serverType.uppercased() {
@@ -18,8 +18,6 @@ enum LoginType: String {
             return .kakao
         case "APPLE":
             return .apple
-        case "LOCAL", "NORMAL":
-            return .normal
         default:
             return .normal
         }
