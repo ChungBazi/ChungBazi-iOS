@@ -174,8 +174,8 @@ extension ProfileViewController: ProfileViewDelegate {
                 self.performSocialLogout {
                     AuthManager.shared.clearAuthDataForLogout()
                     
-                    Toaster.shared.makeToast("로그아웃 되었습니다")
                     DispatchQueue.main.async {
+                        Toaster.shared.makeToast("로그아웃 되었습니다")
                         self.showSplashScreen()
                     }
                 }
@@ -194,8 +194,8 @@ extension ProfileViewController: ProfileViewDelegate {
                 self.performSocialWithdrawal {
                     AuthManager.shared.clearAuthDataForWithdrawal()
                     
-                    Toaster.shared.makeToast("회원탈퇴가 완료되었습니다")
                     DispatchQueue.main.async {
+                        Toaster.shared.makeToast("회원탈퇴가 완료되었습니다")
                         self.showSplashScreen()
                     }
                 }
