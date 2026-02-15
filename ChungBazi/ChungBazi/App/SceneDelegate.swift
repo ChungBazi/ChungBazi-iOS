@@ -212,21 +212,15 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillResignActive(_ scene: UIScene) {}
     
     func sceneWillEnterForeground(_ scene: UIScene) {
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            AmplitudeManager.shared.trackAppOpen()
-        }
+        AmplitudeManager.shared.trackAppOpen()
     }
     
     func sceneDidEnterBackground(_ scene: UIScene) {
         (UIApplication.shared.delegate as? AppDelegate)?.saveContext()
         
-        if let appDelegate = UIApplication.shared.delegate as? AppDelegate {
-            // 현재 화면 자동 추적
-            let currentScreen = UIViewController.getCurrentViewController()?.screenName ?? "unknown"
-            
-            AmplitudeManager.shared.trackAppExit(
-                lastScreen: currentScreen
-            )
-        }
+        let currentScreen = UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: currentScreen
+        )
     }
 }
