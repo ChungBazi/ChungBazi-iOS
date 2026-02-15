@@ -41,6 +41,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         
         setRootViewController()
         setupNotifications()
+        AmplitudeManager.shared.trackAppOpen()
     }
     
     private func setupNotifications() {
@@ -100,8 +101,6 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     @objc private func handleNotificationFromForeground(_ notification: Notification) {
         guard let userInfo = notification.userInfo else { return }
         handleNotification(userInfo: userInfo)
-
-        AmplitudeManager.shared.trackAppOpen()
     }
     
     private func setRootViewController() {
