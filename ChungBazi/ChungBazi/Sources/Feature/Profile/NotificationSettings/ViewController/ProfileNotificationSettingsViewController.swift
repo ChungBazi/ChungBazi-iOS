@@ -29,12 +29,6 @@ final class ProfileNotificationSettingsViewController: UIViewController {
                 self.alarmSettings.policy = isOn
                 self.alarmSettings.community = isOn
                 self.alarmSettings.reward = isOn
-            case "장바구니 알림":
-                self.alarmSettings.policy = isOn
-            case "커뮤니티 알림":
-                self.alarmSettings.community = isOn
-            case "리워드 알림":
-                self.alarmSettings.reward = isOn
             default:
                 break
             }
