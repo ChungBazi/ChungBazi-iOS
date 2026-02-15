@@ -231,7 +231,7 @@ final class SearchResultViewController: UIViewController {
                     self.tableView.setContentOffset(.zero, animated: true)
                 }
             case .failure(let error):
-                print("❌ 정책 검색 실패: \(error.localizedDescription)")
+                showCustomAlert(title: "정책 검색에 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }

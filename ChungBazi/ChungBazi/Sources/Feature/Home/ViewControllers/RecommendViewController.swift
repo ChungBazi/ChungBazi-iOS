@@ -191,7 +191,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                 self.fetchRecommendPolicies(interest: self.interest, cursor: "", order: self.sortOrder)
                 
             case .failure(let error):
-                print("정책 추천 초기 세팅 API 실패: \(error.localizedDescription)")
+                showCustomAlert(title: "정책을 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }
@@ -239,7 +239,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                 }
                 
             case .failure(let error):
-                print("❌ 정책 추천 API 실패: \(error.localizedDescription)")
+                showCustomAlert(title: "정책을 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }

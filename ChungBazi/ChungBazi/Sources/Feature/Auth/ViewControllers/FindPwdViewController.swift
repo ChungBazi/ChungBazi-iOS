@@ -270,7 +270,7 @@ final class FindPwdViewController: UIViewController {
                    case .success:
                        self.step = .enterCode
                    case .failure(_):
-                       self.showCustomAlert(title: "인증번호 전송에 실패하였습니다.\n다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
+                       self.showCustomAlert(title: "인증번호 전송에 실패하였습니다.\n다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
                        self.textFieldsChanged()
                    }
                }

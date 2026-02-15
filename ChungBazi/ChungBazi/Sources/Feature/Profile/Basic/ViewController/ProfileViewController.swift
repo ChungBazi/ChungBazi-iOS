@@ -164,7 +164,7 @@ extension ProfileViewController: ProfileViewDelegate {
                 
             case .failure(_):
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("로그아웃에 실패하였습니다. 다시 시도해 주세요.")
+                    Toaster.shared.makeToast("로그아웃에 실패하였습니다. 다시 시도해주세요.")
                 }
             }
         }
@@ -187,7 +187,7 @@ extension ProfileViewController: ProfileViewDelegate {
                 }
             case .failure(_):
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다. 다시 시도해 주세요.")
+                    Toaster.shared.makeToast("회원탈퇴에 실패하였습니다. 다시 시도해주세요.")
                 }
             }
         }

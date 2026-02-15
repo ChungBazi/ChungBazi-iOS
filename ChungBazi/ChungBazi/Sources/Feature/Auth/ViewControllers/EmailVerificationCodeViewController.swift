@@ -203,7 +203,7 @@ final class EmailVerificationCodeViewController: UIViewController {
                 self.startCountdown(from: 180)
                 self.codeTextField.becomeFirstResponder()
             case .failure(let error):
-                self.showCustomAlert(title: "이메일 인증 요청에 실패하였습니다. \n다시 시도해 주세요.", buttonText: "확인", buttonAction: nil)
+                self.showCustomAlert(title: "이메일 인증 요청에 실패하였습니다. \n다시 시도해주세요.", buttonText: "확인", buttonAction: nil)
             }
         }
     }

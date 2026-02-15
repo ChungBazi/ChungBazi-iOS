@@ -242,7 +242,7 @@ final class PolicyDetailViewController: UIViewController {
                         self.showCustomAlert(title: message, buttonText: "확인", buttonAction: nil)
                     }
                 default:
-                    self.showCustomAlert(title: error.localizedDescription, buttonText: "확인", buttonAction: nil)
+                    self.showCustomAlert(title: "정책 상세정보를 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인", buttonAction: nil)
                 }
             }
         }
@@ -331,7 +331,7 @@ final class PolicyDetailViewController: UIViewController {
                 self.showCustomAlert(title: "해당 정책이 저장되었습니다.",  buttonText: "확인", buttonAction: nil)
                 
             case .failure(let error):
-                self.showCustomAlert(title: "정책 저장에 실패하였습니다.\n잠시 후 다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
+                self.showCustomAlert(title: "정책 저장에 실패하였습니다.\n잠시 후 다시 시도해주세요.",  buttonText: "확인", buttonAction: nil)
             }
         }
     }

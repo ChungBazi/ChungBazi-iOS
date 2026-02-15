@@ -166,7 +166,7 @@ final class CategoryPolicyViewController: UIViewController {
                 }
                 
             case .failure(let error):
-                print("❌ 카테고리별 정책 조회 실패: \(error.localizedDescription)")
+                showCustomAlert(title: "정책을 불러오는 데 실패하였습니다.\n다시 시도해주세요.", buttonText: "확인")
             }
         }
     }

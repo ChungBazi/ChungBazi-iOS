@@ -71,7 +71,7 @@ class SelectLoginTypeViewController: UIViewController {
                         if (error as NSError).code == -2 { // 사용자가 취소
                             return
                         }
-                        Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해 주세요.")
+                        Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해주세요.")
                     }
                     return
                 }
@@ -111,7 +111,7 @@ class SelectLoginTypeViewController: UIViewController {
                 
             case .failure(let error):
                 print("카카오 서버 로그인 실패: \(error.localizedDescription)")
-                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해 주세요.") }
+                DispatchQueue.main.async { Toaster.shared.makeToast("로그인에 실패하였습니다. 다시 시도해주세요.") }
             }
         }
     }
