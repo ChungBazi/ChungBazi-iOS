@@ -111,7 +111,7 @@ final class ResetPasswordViewController: UIViewController {
     @objc private func textFieldsChanged() {
         let newPwd = resetView.newPwdField.text ?? ""
         let confirm = resetView.confirmPwdField.text ?? ""
-        let valid = isValidPassword(newPwd) && newPwd == confirm && !newPwd.isEmpty
+        let valid = !newPwd.isEmpty && !confirm.isEmpty
         
         resetView.completeButton.isEnabled = valid
         resetView.completeButton.backgroundColor = valid ? .blue700 : .gray200
@@ -154,7 +154,7 @@ final class ResetPasswordViewController: UIViewController {
     }
     
     private func isValidPassword(_ pwd: String) -> Bool {
-        let pattern = "^(?=.*[A-Za-z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
+        let pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
         return pwd.range(of: pattern, options: .regularExpression) != nil
     }
 }

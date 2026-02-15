@@ -129,6 +129,8 @@ final class SignupViewController: UIViewController {
             return
         }
         
+        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        
         guard password == checkPassword else {
             showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
             return
@@ -137,5 +139,10 @@ final class SignupViewController: UIViewController {
         let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
         let EmailVerifyVC = EmailVerificationCodeViewController(registerInfo: dto)
         self.navigationController?.pushViewController(EmailVerifyVC, animated: true)
+    }
+    
+    private func isValidPassword(_ pwd: String) -> Bool {
+        let pattern = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+=\\-{}\\[\\]|:;\"'<>,.?/`~]).{8,}$"
+        return pwd.range(of: pattern, options: .regularExpression) != nil
     }
 }
