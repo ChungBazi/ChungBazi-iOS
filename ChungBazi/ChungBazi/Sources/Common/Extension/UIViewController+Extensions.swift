@@ -9,33 +9,41 @@ import UIKit
 import SnapKit
 
 extension UIViewController {
-    private struct LoadingIndicator {
-        static var spinner: UIActivityIndicatorView?
-    }
+    
+    private static let loadingTag = 999999
     
     func showLoading() {
-        DispatchQueue.main.async {
-            if LoadingIndicator.spinner == nil {
-                let spinner = UIActivityIndicatorView(style: .large)
-                spinner.color = .gray
-                spinner.translatesAutoresizingMaskIntoConstraints = false
-                
-                self.view.addSubview(spinner)
-                spinner.snp.makeConstraints {
-                    $0.center.equalToSuperview()
-                }
-                
-                spinner.startAnimating()
-                LoadingIndicator.spinner = spinner
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // 이미 있는지 확인
+            if self.view.viewWithTag(Self.loadingTag) != nil {
+                return
             }
+            
+            let spinner = UIActivityIndicatorView(style: .large)
+            spinner.color = .gray
+            spinner.tag = Self.loadingTag  // Tag 설정
+            spinner.translatesAutoresizingMaskIntoConstraints = false
+            
+            self.view.addSubview(spinner)
+            spinner.snp.makeConstraints {
+                $0.center.equalToSuperview()
+            }
+            
+            spinner.startAnimating()
         }
     }
     
     func hideLoading() {
-        DispatchQueue.main.async {
-            LoadingIndicator.spinner?.stopAnimating()
-            LoadingIndicator.spinner?.removeFromSuperview()
-            LoadingIndicator.spinner = nil
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else { return }
+            
+            // Tag로 찾아서 제거
+            if let spinner = self.view.viewWithTag(Self.loadingTag) as? UIActivityIndicatorView {
+                spinner.stopAnimating()
+                spinner.removeFromSuperview()
+            }
         }
     }
     
