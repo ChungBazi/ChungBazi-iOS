@@ -201,6 +201,7 @@ final class FindPwdViewController: UIViewController {
             textFieldsChanged()
         case .enterCode:
             descriptionLabel.text = "메일로 전달 받은\n인증번호를 입력해주세요."
+            emailField.isEnabled = false
             setCodeUI(hidden: false)
             startTimer()
             textFieldsChanged()
