@@ -92,13 +92,8 @@ class SplashViewController: UIViewController {
         let hasNickName = AuthManager.shared.hasNickname
         let isFirst = AuthManager.shared.isFirstLaunch
         
-        if !hasNickName {
+        if !hasNickName || isFirst {
             navigateToLoginScreen()
-            return
-        }
-        
-        if isFirst {
-            navigateToSurveyScreen()
             return
         }
         
@@ -122,16 +117,6 @@ class SplashViewController: UIViewController {
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = nav
-            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
-        }
-    }
-    
-    private func navigateToSurveyScreen() {
-        let vc = StartSurveyViewController()
-        let navigationController = UINavigationController(rootViewController: vc)
-        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-           let window = windowScene.windows.first {
-            window.rootViewController = navigationController
             UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
         }
     }
