@@ -49,7 +49,11 @@ final class HomeViewController: UIViewController {
         $0.attributedText = attributedText
     }
 
-    private let banner = BannerView()
+    private lazy var banner = UIImageView().then {
+        $0.contentMode = .scaleAspectFill
+        $0.backgroundColor = .clear
+        $0.image = UIImage.banner
+    }
 
     private let categoriesGridStackView = UIStackView().then {
         $0.axis = .vertical
