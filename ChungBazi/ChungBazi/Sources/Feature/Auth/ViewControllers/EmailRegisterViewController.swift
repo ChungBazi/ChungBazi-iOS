@@ -40,7 +40,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
         addCustomNavigationBar(titleText: "이메일 로그인", showBackButton: true)
         setupActions()
         setupTextFieldDelegates()
-        setupBackgroundTapToDismiss()
+        hideKeyboardWhenTappedAround()
         setupKeyboardFollowing()
 
         if let email = initialEmail {
@@ -66,16 +66,6 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
             view.endEditing(true)
         }
         return true
-    }
-    
-    private func setupBackgroundTapToDismiss() {
-        let tap = UITapGestureRecognizer(target: self, action: #selector(dismissKeyboard))
-        tap.cancelsTouchesInView = false
-        view.addGestureRecognizer(tap)
-    }
-    
-    @objc private func dismissKeyboard() {
-        view.endEditing(true)
     }
     
     private func setupKeyboardFollowing() {

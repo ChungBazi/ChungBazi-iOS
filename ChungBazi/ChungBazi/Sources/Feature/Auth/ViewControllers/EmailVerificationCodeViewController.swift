@@ -112,6 +112,7 @@ final class EmailVerificationCodeViewController: UIViewController {
         addCustomNavigationBar(titleText: "이메일 인증", showBackButton: true)
         setupViews()
         setupActions()
+        hideKeyboardWhenTappedAround()
         
         requestEmailVerification()
     }
