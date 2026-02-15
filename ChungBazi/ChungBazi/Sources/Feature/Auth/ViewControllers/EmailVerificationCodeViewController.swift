@@ -267,10 +267,16 @@ final class EmailVerificationCodeViewController: UIViewController {
         countdownTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] t in
             guard let self else { return }
             self.remainingSeconds = max(0, self.remainingSeconds - 1)
-            self.updateTimerLabel()
-
-            if self.remainingSeconds == 0 {
+            if self.remainingSeconds <= 0 {
                 t.invalidate()
+                self.remainingSeconds = 0
+                self.updateTimerLabel()
+                self.verifyButton.setEnabled(isEnabled: false)
+                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
+                    self.navigationController?.popToRootViewController(animated: false)
+                })
+            } else {
+                self.updateTimerLabel()
             }
         }
         RunLoop.main.add(countdownTimer!, forMode: .common)

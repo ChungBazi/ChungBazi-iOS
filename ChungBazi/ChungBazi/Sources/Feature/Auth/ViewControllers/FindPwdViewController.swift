@@ -283,7 +283,6 @@ final class FindPwdViewController: UIViewController {
             return
         }
         let trimmedCode = code.trimmingCharacters(in: .whitespacesAndNewlines)
-        invalidateTimer()
         verifyEmailCode(email: email, code: trimmedCode)
     }
     
@@ -294,6 +293,7 @@ final class FindPwdViewController: UIViewController {
             DispatchQueue.main.async {
                 switch result {
                 case .success:
+                    self.invalidateTimer()
                     UIImpactFeedbackGenerator(style: .light).impactOccurred()
                     let resetVC = ResetPasswordViewController(mode: .noAuth(email: email, code: code))
                     self.navigationController?.pushViewController(resetVC, animated: true)
@@ -330,14 +330,16 @@ final class FindPwdViewController: UIViewController {
         
         timer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] t in
             guard let self = self else { return }
-            self.remainingSeconds -= 1
+            self.remainingSeconds = max(0, self.remainingSeconds - 1)
             if self.remainingSeconds <= 0 {
                 t.invalidate()
                 self.remainingSeconds = 0
                 self.updateTimerLabel()
                 self.completeButton.isEnabled = false
                 self.completeButton.backgroundColor = .gray200
-                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: nil)
+                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
+                    self.navigationController?.popToRootViewController(animated: false)
+                })
             } else {
                 self.updateTimerLabel()
             }
