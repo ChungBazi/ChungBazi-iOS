@@ -338,22 +338,6 @@ final class PolicyDetailViewController: UIViewController {
         showMultipleUrlsAlert(urls: urls)
     }
     
-    private func presentUrlActionSheet(urls: [String]) {
-        let ac = UIAlertController(title: "담당기관 바로가기", message: "열 링크를 선택하세요", preferredStyle: .actionSheet)
-        
-        for raw in urls {
-            let title = raw.replacingOccurrences(of: "^https?://", with: "", options: .regularExpression)
-            ac.addAction(UIAlertAction(title: title, style: .default) { _ in
-                if let u = URL(string: raw) {
-                    UIApplication.shared.open(u, options: [:], completionHandler: nil)
-                }
-            })
-        }
-        ac.addAction(UIAlertAction(title: "취소", style: .cancel, handler: nil))
-        
-        present(ac, animated: true, completion: nil)
-    }
-    
     private func filteredReferenceUrls(_ policy: PolicyModel) -> [String] {
         let raw = [policy.referenceUrl1, policy.referenceUrl2]
         return raw.compactMap { $0?.trimmingCharacters(in: .whitespacesAndNewlines) }

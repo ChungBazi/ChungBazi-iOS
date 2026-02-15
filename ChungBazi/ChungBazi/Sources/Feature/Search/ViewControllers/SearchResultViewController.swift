@@ -266,19 +266,13 @@ final class SearchResultViewController: UIViewController {
     
     private func executeSearch() {
         guard let query = searchTextField.text?.trimmingCharacters(in: .whitespacesAndNewlines), query.count >= 2 else {
-            showCharacterLimitAlert()
+            showCustomAlert(title: "검색어를 2자 이상 입력해 주세요.", buttonText: "확인")
             return
         }
         searchTextField.resignFirstResponder()
         policyList.removeAll()
         tableView.reloadData()
         searchPolicy(name: query, cursor: "", order: sortOrder)
-    }
-    
-    private func showCharacterLimitAlert() {
-        let alert = UIAlertController(title: "", message: "검색어를 2자 이상 입력해 주세요.", preferredStyle: .alert)
-        alert.addAction(UIAlertAction(title: "확인", style: .default, handler: nil))
-        present(alert, animated: true, completion: nil)
     }
     
     private func fetchMorePolicies() {
