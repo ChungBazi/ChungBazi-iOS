@@ -192,7 +192,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
                     
                     // 첫 번째 아이템을 드롭다운 title로 설정
                     if !localizedInterests.isEmpty {
-                        self.interestDropdown.setSelectItemforIndex(at: 0)
+                        self.interestDropdown.setSelectItemForIndex(at: 0)
                     }
                     
                     self.updateTitleLabel()
