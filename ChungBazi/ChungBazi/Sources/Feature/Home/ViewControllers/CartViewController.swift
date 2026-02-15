@@ -65,7 +65,7 @@ final class CartViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .gray50
         addCustomNavigationBar(
-            titleText: "장바구니",
+            titleText: "저장한 정책",
             showBackButton: true,
             showCartButton: false,
             showAlarmButton: false,

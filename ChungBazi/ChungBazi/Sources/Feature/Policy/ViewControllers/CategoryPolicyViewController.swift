@@ -63,7 +63,7 @@ final class CategoryPolicyViewController: UIViewController {
             titleText: categoryTitle,
             showBackButton: true,
             showCartButton: false,
-            showAlarmButton: true,
+            showAlarmButton: false,
             showHomeRecommendTabs: false,
             backgroundColor: .white
         )
