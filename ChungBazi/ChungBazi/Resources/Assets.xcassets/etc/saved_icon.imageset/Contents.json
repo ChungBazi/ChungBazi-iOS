@@ -1,15 +1,12 @@
 {
   "images" : [
     {
-      "filename" : "reward_icon.svg",
+      "filename" : "saved_icon.svg",
       "idiom" : "universal"
     }
   ],
   "info" : {
     "author" : "xcode",
     "version" : 1
-  },
-  "properties" : {
-    "preserves-vector-representation" : true
   }
 }
