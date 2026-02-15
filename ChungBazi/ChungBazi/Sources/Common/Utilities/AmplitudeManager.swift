@@ -145,7 +145,7 @@ extension AmplitudeManager {
         track(eventName: "chatbot_message_send", properties: [
             "message_length": messageLength,
             "session_id": sessionId,
-            "message_order": messageOrder
+            "user_message_order": messageOrder
         ])
     }
     
@@ -156,7 +156,7 @@ extension AmplitudeManager {
     ) {
         track(eventName: "chatbot_session_end", properties: [
             "session_id": sessionId,
-            "message_count": messageCount,
+            "user_message_count": messageCount,
             "last_action": lastAction
         ])
     }

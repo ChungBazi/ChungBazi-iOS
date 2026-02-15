@@ -50,6 +50,7 @@ final class ChatbotViewController: UIViewController {
     private var sessionId: String = UUID().uuidString
     private var hasTrackedOpen = false
     private var lastAction: ChatbotLastAction = .userExit
+    private var userMessageCount: Int = 0
     
     // MARK: - Lifecycle
     override func viewDidLoad() {
@@ -91,7 +92,7 @@ final class ChatbotViewController: UIViewController {
         if isMovingFromParent {
             AmplitudeManager.shared.trackChatbotSessionEnd(
                 sessionId: sessionId,
-                messageCount: messages.count,
+                messageCount: userMessageCount,
                 lastAction: lastAction.rawValue
             )
         }
@@ -178,12 +179,13 @@ final class ChatbotViewController: UIViewController {
         // 사용자 메시지 추가
         let userMessage = ChatbotMessage(type: .text(messageText), isUser: true, timestamp: Date())
         messages.append(userMessage)
+        userMessageCount += 1
         
         // chatbot_message_send event
         AmplitudeManager.shared.trackChatbotMessageSend(
             messageLength: messageText.count,
             sessionId: sessionId,
-            messageOrder: messages.count
+            messageOrder: userMessageCount
         )
         
         // 로딩 메시지 추가
@@ -266,12 +268,13 @@ final class ChatbotViewController: UIViewController {
             timestamp: Date()
         )
         messages.append(userMessage)
+        userMessageCount += 1
         
         // chatbot_message_send event
         AmplitudeManager.shared.trackChatbotMessageSend(
             messageLength: trimmedText.count,
             sessionId: sessionId,
-            messageOrder: messages.count
+            messageOrder: userMessageCount
         )
         
         // 로딩 메시지 추가
