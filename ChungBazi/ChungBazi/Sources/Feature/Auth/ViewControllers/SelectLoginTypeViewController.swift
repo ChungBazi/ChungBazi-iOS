@@ -14,15 +14,11 @@ class SelectLoginTypeViewController: UIViewController {
     // MARK: - ViewModels / Services
     lazy var kakaoAuthVM: KakaoAuthVM = KakaoAuthVM()
     let networkService = AuthService.shared
-    var hasNickName: Bool?
-    var isFirst: Bool?
     private var lastLoginEmail: String?
     
     lazy var appleAuthVM: AppleAuthVM = {
         let vm = AppleAuthVM()
         vm.onLoginSuccess = { [weak self] hasNickName, isFirst, email in
-            self?.hasNickName = hasNickName
-            self?.isFirst = isFirst
             self?.lastLoginEmail = email
             DispatchQueue.main.async {
                 self?.goToNextView()
@@ -103,9 +99,6 @@ class SelectLoginTypeViewController: UIViewController {
                     isFirst: response.isFirst,
                     userName: response.userName
                 )
-                
-                self.hasNickName = AuthManager.shared.hasNickname
-                self.isFirst = response.isFirst
         
                 DispatchQueue.main.async {
                     self.goToNextView()

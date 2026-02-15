@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import SwiftyToaster
 
 // 인증이 필요 없는 사용자 관련 API
 final class AuthService: NetworkManager {
@@ -155,7 +154,6 @@ extension AuthService {
                 )
                 
                 DispatchQueue.main.async {
-                    Toaster.shared.makeToast("세션이 갱신되었습니다")
                     NotificationCenter.default.post(name: .tokenRefreshed, object: nil)
                 }
             
