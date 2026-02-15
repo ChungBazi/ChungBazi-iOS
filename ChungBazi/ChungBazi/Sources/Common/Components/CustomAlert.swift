@@ -45,10 +45,12 @@ class CustomAlertViewController: UIViewController {
         $0.layer.cornerRadius = 10
     }
     private let headerLabel = B16_SB(text: "", textColor: .buttonAccent).then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
     }
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
+        $0.setLineSpacing()
         $0.numberOfLines = 0
         $0.lineBreakMode = .byWordWrapping
     }
@@ -80,6 +82,7 @@ class CustomAlertViewController: UIViewController {
                 make.top.equalToSuperview().offset(38)
             }
             make.centerX.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(14)
         }
     }
     

@@ -70,6 +70,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
                 make.top.equalToSuperview().offset(38)
             }
             make.centerX.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(14)
         }
     }
     
