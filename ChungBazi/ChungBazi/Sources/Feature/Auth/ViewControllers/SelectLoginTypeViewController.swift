@@ -136,7 +136,6 @@ class SelectLoginTypeViewController: UIViewController {
             return
         }
         
-        
         let vc = FinishLoginViewController()
         let navController = UINavigationController(rootViewController: vc)
         navController.modalPresentationStyle = .fullScreen

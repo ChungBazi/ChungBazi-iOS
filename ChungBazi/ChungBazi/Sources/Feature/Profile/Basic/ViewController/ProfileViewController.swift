@@ -28,7 +28,6 @@ class ProfileViewController: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         fetchProfile()
-        fetchReward()
     }
     
     
@@ -65,25 +64,6 @@ class ProfileViewController: UIViewController {
                 }
             case .failure(let response):
                 print("❌프로필 불러오기 실패: \(response.localizedDescription)")
-            }
-        }
-    }
-    
-    private func fetchReward() {
-        showLoading()
-        
-        userService.fetchReward { [weak self] result in
-            guard let self = self else { return }
-            
-            DispatchQueue.main.async {
-                self.hideLoading()
-            }
-            
-            switch result {
-            case .success(let response):
-                self.rewardData = RewardModel(currentReward: response.rewardLevel, myPosts: response.postCount, myComments: response.commentCount)
-            case .failure(let error):
-                print(error)
             }
         }
     }
