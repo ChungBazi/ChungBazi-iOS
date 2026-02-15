@@ -23,7 +23,7 @@ final class HomeViewController: UIViewController {
         $0.contentMode = .scaleAspectFit
     }
 
-    private let policyIconImageView = UIImageView(image: UIImage(resource: .homeicon)).then {
+    private let policyIconImageView = UIImageView(image: UIImage(resource: .basicBaro)).then {
         $0.contentMode = .scaleAspectFit
     }
 

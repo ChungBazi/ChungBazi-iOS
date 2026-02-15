@@ -35,13 +35,7 @@ final class CategoryPolicyViewController: UIViewController {
         return tableView
     }()
     
-    private let emptyStateLabel = UILabel().then {
-        $0.text = "정책이 존재하지 않습니다."
-        $0.textAlignment = .center
-        $0.textColor = .gray600
-        $0.font = .ptdMediumFont(ofSize: 16)
-        $0.isHidden = true
-    }
+    private let emptyView = EmptyBaroWithTitleView(title: "정책이 비어 있어요")
 
     private let safeAreaBackgroundView: UIView = {
         let view = UIView()
@@ -87,7 +81,7 @@ final class CategoryPolicyViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubviews(sortDropdown, tableView, emptyStateLabel)
+        view.addSubviews(sortDropdown, tableView, emptyView)
         
         sortDropdown.snp.makeConstraints {
             $0.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(90)
@@ -101,8 +95,9 @@ final class CategoryPolicyViewController: UIViewController {
             $0.leading.trailing.bottom.equalToSuperview()
         }
         
-        emptyStateLabel.snp.makeConstraints { make in
+        emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.4)
         }
     }
     
@@ -167,7 +162,7 @@ final class CategoryPolicyViewController: UIViewController {
                 DispatchQueue.main.async {
                     self.tableView.reloadData()
                     let hasResults = self.policyList.isEmpty
-                    self.emptyStateLabel.isHidden = !hasResults
+                    self.emptyView.isHidden = !hasResults
                 }
                 
             case .failure(let error):

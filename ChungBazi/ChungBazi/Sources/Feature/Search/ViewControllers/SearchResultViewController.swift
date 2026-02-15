@@ -67,13 +67,7 @@ final class SearchResultViewController: UIViewController {
         $0.contentInset.bottom = 20
     }
     
-    private let emptyStateLabel = UILabel().then {
-        $0.text = "검색 결과가 없습니다."
-        $0.textAlignment = .center
-        $0.textColor = .gray600
-        $0.font = .ptdMediumFont(ofSize: 16)
-        $0.isHidden = true
-    }
+    private let emptyView = EmptyBaroWithTitleView(title: "검색 결과가 없어요")
     
     private lazy var sortDropdown = CustomDropdown(
         height: 36,
@@ -118,7 +112,7 @@ final class SearchResultViewController: UIViewController {
     }
     
     private func setupLayout() {
-        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyStateLabel)
+        view.addSubviews(searchView, popularSearchLabel, popularKeywordsCollectionView, sortDropdown, tableView, emptyView)
 
         searchView.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide.snp.top).offset(80)
@@ -164,8 +158,9 @@ final class SearchResultViewController: UIViewController {
             make.bottom.equalToSuperview().inset(tabBarController?.tabBar.frame.height ?? 0)
         }
 
-        emptyStateLabel.snp.makeConstraints { make in
+        emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
+            make.width.equalToSuperview().multipliedBy(0.4)
         }
     }
 
@@ -258,7 +253,7 @@ final class SearchResultViewController: UIViewController {
 
     private func updateUI() {
         let hasResults = !policyList.isEmpty
-        emptyStateLabel.isHidden = hasResults
+        emptyView.isHidden = hasResults
         tableView.isHidden = !hasResults
         popularSearchLabel.isHidden = true
         popularKeywordsCollectionView.isHidden = true
