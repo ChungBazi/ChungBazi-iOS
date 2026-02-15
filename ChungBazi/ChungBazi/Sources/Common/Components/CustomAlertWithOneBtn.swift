@@ -10,12 +10,12 @@ import SnapKit
 import Then
 
 extension UIViewController {
-    func showCustomAlert(headerTitle: String? = nil, title: String, ButtonText: String, image: UIImage? = nil) {
+    func showCustomAlert(headerTitle: String? = nil, title: String,  buttonText: String, image: UIImage? = nil, buttonAction: (() -> Void)? = nil) {
         let alertVC = CustomAlertViewWithOneBtnController()
         alertVC.modalPresentationStyle = .overFullScreen
         alertVC.modalTransitionStyle = .crossDissolve
         
-        alertVC.configureAlert(headerTitle: headerTitle, title: title, ButtonText: ButtonText, image: image)
+        alertVC.configureAlert(headerTitle: headerTitle, title: title, ButtonText:  buttonText, image: image, buttonAction: buttonAction)
         
         self.present(alertVC, animated: true, completion: nil)
     }
@@ -40,9 +40,11 @@ class CustomAlertViewWithOneBtnController: UIViewController {
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
     }
-    private let Btn = CustomButton(backgroundColor: .blue700, titleText: "", titleColor: .white)
+    private let Btn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
     private var titleLabelTopConstraint: Constraint?
+    
+    private var buttonAction: (() -> Void)?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -110,7 +112,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
         Btn.addTarget(self, action: #selector(ButtonTapped), for: .touchUpInside)
     }
     
-    func configureAlert(headerTitle: String?, title: String, ButtonText: String, image: UIImage?) {
+    func configureAlert(headerTitle: String?, title: String, ButtonText: String, image: UIImage?, buttonAction: (() -> Void)?) {
         self.headerLabel.text = headerTitle
         self.titleLabel.text = title
         self.Btn.setTitle(ButtonText, for: .normal)
@@ -118,10 +120,13 @@ class CustomAlertViewWithOneBtnController: UIViewController {
             self.imageView.image = image
             self.imageView.isHidden = false // 이미지가 있으면 표시
         }
+        self.buttonAction = buttonAction
     }
     
     @objc private func ButtonTapped() {
-        dismiss(animated: true, completion: nil)
+        dismiss(animated: true) {
+            self.buttonAction?()
+        }
     }
     
     @objc private func dismissAlert() {

@@ -6,7 +6,6 @@
 //
 
 import UIKit
-import SwiftyToaster
 
 final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate, CharacterEditDelegate {
     
@@ -97,9 +96,7 @@ final class ProfileEditViewController: UIViewController, ProfileEditViewDelegate
                 default:
                     errorMessage = error.localizedDescription
                 }
-                DispatchQueue.main.async {
-                    Toaster.shared.makeToast(errorMessage)
-                }
+                self.showCustomAlert(title: errorMessage,  buttonText: "확인", buttonAction: nil)
             }
         }
     }

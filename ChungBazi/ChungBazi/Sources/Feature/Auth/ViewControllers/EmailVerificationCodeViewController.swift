@@ -203,7 +203,7 @@ final class EmailVerificationCodeViewController: UIViewController {
                 self.startCountdown(from: 180)
                 self.codeTextField.becomeFirstResponder()
             case .failure(let error):
-                self.showCustomAlert(title: "인증 요청 실패: \(error.localizedDescription)", rightButtonText: "확인", rightButtonAction: nil)
+                self.showCustomAlert(title: "이메일 인증 요청에 실패하였습니다. \n다시 시도해 주세요.", buttonText: "확인", buttonAction: nil)
             }
         }
     }
@@ -213,7 +213,7 @@ final class EmailVerificationCodeViewController: UIViewController {
             .replacingOccurrences(of: "\\s", with: "", options: .regularExpression)
 
         guard !code.isEmpty else {
-            showCustomAlert(title: "코드를 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "코드를 입력해주세요.", buttonText: "확인", buttonAction: nil)
             return
         }
         
@@ -276,7 +276,7 @@ final class EmailVerificationCodeViewController: UIViewController {
                 self.remainingSeconds = 0
                 self.updateTimerLabel()
                 self.verifyButton.setEnabled(isEnabled: false)
-                self.showCustomAlert(title: "인증 시간이 만료되었습니다", rightButtonText: "확인", rightButtonAction: {
+                self.showCustomAlert(title: "인증 시간이 만료되었습니다.", buttonText: "확인", buttonAction: {
                     self.navigationController?.popViewController(animated: false)
                 })
             } else {
@@ -302,22 +302,22 @@ final class EmailVerificationCodeViewController: UIViewController {
         switch error {
         case .serverError(let statusCode, let serverMessage):
             if statusCode == 409 {
-                message = "이미 가입된 이메일입니다"
+                message = "이미 가입된 이메일입니다."
             } else {
                 message = serverMessage
             }
         case .networkError:
-            message = "네트워크 오류가 발생했습니다"
+            message = "네트워크 오류가 발생했습니다."
         case .decodingError:
-            message = "데이터 처리 중 오류가 발생했습니다"
+            message = "데이터 처리 중 오류가 발생했습니다."
         default:
-            message = "회원가입에 실패했습니다"
+            message = "회원가입에 실패했습니다."
         }
         
         showCustomAlert(
             title: message,
-            rightButtonText: "확인",
-            rightButtonAction: nil
+            buttonText: "확인",
+            buttonAction: nil
         )
     }
     
@@ -328,13 +328,13 @@ final class EmailVerificationCodeViewController: UIViewController {
         case .serverError(_, let serverMessage):
             message = serverMessage
         default:
-            message = "인증 코드가 올바르지 않습니다"
+            message = "인증 코드가 올바르지 않습니다."
         }
         
         showCustomAlert(
             title: message,
-            rightButtonText: "확인",
-            rightButtonAction: nil
+            buttonText: "확인",
+            buttonAction: nil
         )
     }
 }

@@ -6,7 +6,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class PolicyDetailViewController: UIViewController {
     
@@ -311,10 +310,10 @@ final class PolicyDetailViewController: UIViewController {
         cartService.postCart(policyId: policyId) { result in
             switch result {
             case .success:
-                Toaster.shared.makeToast("해당 정책이 저장되었습니다")
+                self.showCustomAlert(title: "해당 정책이 저장되었습니다.",  buttonText: "확인", buttonAction: nil)
                 
             case .failure(let error):
-                Toaster.shared.makeToast(error.localizedDescription)
+                self.showCustomAlert(title: "정책 저장에 실패하였습니다.\n잠시 후 다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
             }
         }
     }

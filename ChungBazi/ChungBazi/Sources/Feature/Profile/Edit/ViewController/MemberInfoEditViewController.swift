@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 class MemberInfoEditViewController: UIViewController {
     
@@ -144,12 +143,12 @@ class MemberInfoEditViewController: UIViewController {
             case .serverError(_, let msg):
                 errorMessage = msg
             default:
-                errorMessage = error.localizedDescription
+                errorMessage = message
             }
         } else {
-            errorMessage = error.localizedDescription
+            errorMessage = message
         }
-         Toaster.shared.makeToast(errorMessage)
+        self.showCustomAlert(title: errorMessage,  buttonText: "확인", buttonAction: nil)
     }
     
     private func validateForm() {

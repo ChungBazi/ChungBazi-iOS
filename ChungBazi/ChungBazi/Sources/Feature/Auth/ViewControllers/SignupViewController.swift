@@ -8,7 +8,6 @@
 import UIKit
 import SnapKit
 import Then
-import SwiftyToaster
 
 final class SignupViewController: UIViewController {
 
@@ -94,19 +93,19 @@ final class SignupViewController: UIViewController {
         guard let email = registerView.emailTextField.text, !email.isEmpty,
               let password = registerView.pwdTextField.text, !password.isEmpty,
               let checkPassword = registerView.checkPwdTextField.text, !checkPassword.isEmpty else {
-            showCustomAlert(title: "모든 항목을 입력해주세요", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "모든 항목을 입력해주세요.", buttonText: "확인", buttonAction: nil)
             return
         }
         
         guard email.isValidEmail() else {
-            showCustomAlert(title: "유효한 이메일 형식이 아닙니다", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "유효한 이메일 형식이 아닙니다.", buttonText: "확인", buttonAction: nil)
             return
         }
         
-        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
+        guard isValidPassword(password) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요.", buttonText: "확인", buttonAction: nil); return }
         
         guard password == checkPassword else {
-            showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil)
+            showCustomAlert(title: "비밀번호가 일치하지 않습니다.", buttonText: "확인", buttonAction: nil)
             return
         }
         

@@ -97,8 +97,8 @@ final class ResetPasswordViewController: UIViewController {
     @objc private func completeTapped() {
         let newPwd = resetView.newPwdField.text ?? ""
         let confirm = resetView.confirmPwdField.text ?? ""
-        guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요", rightButtonText: "확인", rightButtonAction: nil); return }
-        guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다", rightButtonText: "확인", rightButtonAction: nil); return }
+        guard isValidPassword(newPwd) else { showCustomAlert(title: "비밀번호 규칙을 확인해 주세요.", buttonText: "확인", buttonAction: nil); return }
+        guard newPwd == confirm else { showCustomAlert(title: "비밀번호가 일치하지 않습니다.", buttonText: "확인", buttonAction: nil); return }
         
         switch mode {
         case .loggedIn:
@@ -119,13 +119,13 @@ final class ResetPasswordViewController: UIViewController {
         DispatchQueue.main.async {
             switch result {
             case .success:
-                self.showCustomAlert(title: "비밀번호가 재설정되었습니다.", rightButtonText: "확인") {
+                self.showCustomAlert(title: "비밀번호가 재설정되었습니다.", buttonText: "확인") {
                     self.navigationController?.popToRootViewController(animated: true)
                 }
             case .failure(let error):
                 let msg: String
                 switch error { case .serverError(_, let m): msg = m; default: msg = error.localizedDescription }
-                self.showCustomAlert(title: msg, rightButtonText: "확인", rightButtonAction: nil)
+                self.showCustomAlert(title: msg, buttonText: "확인", buttonAction: nil)
             }
         }
     }

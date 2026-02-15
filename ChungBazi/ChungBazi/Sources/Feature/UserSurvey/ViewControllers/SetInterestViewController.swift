@@ -4,7 +4,6 @@
 //
 
 import UIKit
-import SwiftyToaster
 
 class SetInterestViewController: UIViewController {
     
@@ -96,9 +95,7 @@ class SetInterestViewController: UIViewController {
                     self.navigationController?.pushViewController(vc, animated: true)
                 }
             case .failure(_):
-                DispatchQueue.main.async {
-                    Toaster.shared.makeToast("사용자 정보 등록에 실패했습니다")
-                }
+                self.showCustomAlert(title: "사용자 정보 등록에 실패하였습니다.\n잠시 후 다시 시도해 주세요.",  buttonText: "확인", buttonAction: nil)
             }
         }
     }
