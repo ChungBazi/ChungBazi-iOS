@@ -160,8 +160,9 @@ final class SearchResultViewController: UIViewController {
 
         emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalToSuperview().multipliedBy(0.4)
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
+        emptyView.isHidden = true
     }
 
     private func setupActions() {

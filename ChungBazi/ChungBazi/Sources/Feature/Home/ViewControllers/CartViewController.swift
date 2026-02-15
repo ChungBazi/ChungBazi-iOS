@@ -71,8 +71,8 @@ final class CartViewController: UIViewController {
     }
     
     private func setupScrollView() {
-        view.addSubview(scrollView)
-        scrollView.addSubviews(contentView, emptyView)
+        view.addSubviews(scrollView, emptyView)
+        scrollView.addSubviews(contentView)
         contentView.addSubviews(headerView, tableView)
         
         guard let navigationBarView = self.view.subviews.first(where: { $0 is UIView }) else { return }
@@ -84,7 +84,7 @@ final class CartViewController: UIViewController {
         
         emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalToSuperview().multipliedBy(0.4)
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
         
         contentView.snp.makeConstraints { make in

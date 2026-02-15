@@ -118,7 +118,7 @@ final class RecommendViewController: UIViewController, CustomDropdownDelegate {
         
         emptyView.snp.makeConstraints { make in
             make.center.equalToSuperview()
-            make.width.equalToSuperview().multipliedBy(0.4)
+            make.width.equalToSuperview().multipliedBy(0.5)
         }
     }
     
