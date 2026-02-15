@@ -100,6 +100,7 @@ class SelectLoginTypeViewController: UIViewController {
                     userName: response.userName
                 )
         
+                AmplitudeManager.shared.setUserId(response.hashedUserId)
                 DispatchQueue.main.async {
                     self.goToNextView()
                 }
@@ -125,13 +126,11 @@ class SelectLoginTypeViewController: UIViewController {
 
     func goToNextView() {
         if !AuthManager.shared.hasNickname {
-            let vc = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
-            if let nav = navigationController {
-                nav.pushViewController(vc, animated: true)
-            } else {
-                let navController = UINavigationController(rootViewController: vc)
-                navController.modalPresentationStyle = .fullScreen
-                present(navController, animated: true, completion: nil)
+            let nickNameRegisterVC = NicknameRegisterViewController(email: lastLoginEmail, fromLogin: true)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = nickNameRegisterVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
             }
             return
         }

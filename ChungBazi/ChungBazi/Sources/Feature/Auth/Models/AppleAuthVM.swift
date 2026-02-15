@@ -73,6 +73,7 @@ extension AppleAuthVM: ASAuthorizationControllerDelegate {
                     userName: response.userName
                 )
                 
+                AmplitudeManager.shared.setUserId(response.hashedUserId)
                 self?.isFirst = response.isFirst
                 self?.hasNickName = AuthManager.shared.hasNickname
                 guard let hasNickName = self?.hasNickName, let isFirst = self?.isFirst else { return }

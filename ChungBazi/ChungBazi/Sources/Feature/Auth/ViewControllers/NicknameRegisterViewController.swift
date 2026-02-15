@@ -91,7 +91,7 @@ final class NicknameRegisterViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        addCustomNavigationBar(titleText: "닉네임 설정", showBackButton: !fromLogin)
+        addCustomNavigationBar(titleText: "닉네임 설정", showBackButton: false)
         setupLayout()
         bind()
         prefill()

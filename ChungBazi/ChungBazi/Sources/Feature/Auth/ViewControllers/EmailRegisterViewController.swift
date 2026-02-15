@@ -172,6 +172,7 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
                         userName: response.userName
                     )
 
+                    AmplitudeManager.shared.setUserId(response.hashedUserId)
                     self.routeAfterLogin(email: email)
 
                 case .failure(let error):
@@ -184,7 +185,11 @@ final class EmailRegisterViewController: UIViewController, UITextFieldDelegate {
     private func routeAfterLogin(email: String) {
         if !AuthManager.shared.hasNickname {
             let nickNameRegisterVC = NicknameRegisterViewController(email: email, fromLogin: true)
-            navigationController?.pushViewController(nickNameRegisterVC, animated: true)
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+               let window = windowScene.windows.first {
+                window.rootViewController = nickNameRegisterVC
+                UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+            }
             return
         }
 

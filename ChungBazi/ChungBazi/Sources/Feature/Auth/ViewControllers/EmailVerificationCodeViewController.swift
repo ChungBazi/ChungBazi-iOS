@@ -255,8 +255,12 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
 
     private func navigateToNextStep() {
-        let nicknameVC = NicknameRegisterViewController(email: registerInfo.email, fromLogin: false)
-        navigationController?.pushViewController(nicknameVC, animated: true)
+        let nickNameRegisterVC = NicknameRegisterViewController(email: registerInfo.email, fromLogin: true)
+        if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
+           let window = windowScene.windows.first {
+            window.rootViewController = nickNameRegisterVC
+            UIView.transition(with: window, duration: 0.3, options: .transitionCrossDissolve, animations: nil)
+        }
     }
 
     private func startCountdown(from seconds: Int) {

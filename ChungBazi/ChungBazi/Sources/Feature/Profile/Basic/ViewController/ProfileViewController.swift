@@ -152,6 +152,8 @@ extension ProfileViewController: ProfileViewDelegate {
             switch result {
             case .success(_):
                 self.performSocialLogout {
+                    AmplitudeManager.shared.setUserId(nil)
+                    AmplitudeManager.shared.reset()
                     AuthManager.shared.clearAuthDataForLogout()
                     
                     DispatchQueue.main.async {
@@ -174,6 +176,8 @@ extension ProfileViewController: ProfileViewDelegate {
             switch result {
             case .success(_):
                 self.performSocialWithdrawal {
+                    AmplitudeManager.shared.setUserId(nil)
+                    AmplitudeManager.shared.reset()
                     AuthManager.shared.clearAuthDataForWithdrawal()
                     
                     DispatchQueue.main.async {
