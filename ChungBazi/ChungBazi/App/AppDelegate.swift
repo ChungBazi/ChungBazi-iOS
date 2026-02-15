@@ -14,16 +14,19 @@ import KakaoSDKAuth
 
 import FirebaseCore
 import FirebaseMessaging
-import KeychainSwift
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
     
     var window: UIWindow?
+    var lastScreenName: String {
+        return UIViewController.getCurrentViewController()?.screenName ?? "unknown"
+    }
 
     func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?) -> Bool {
         // Override point for customization after application launch.
         
+        // 카카오 sdk 초기화
         if let kakaoAPIkey = Bundle.main.object(forInfoDictionaryKey: "KAKAO_NATIVE_APP_KEY") as? String {
             KakaoSDK.initSDK(appKey: "\(kakaoAPIkey)")
         }
@@ -32,9 +35,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         FirebaseApp.configure()
         if FirebaseApp.app() == nil {
             Toaster.shared.makeToast("FirebaseApp 시작 에러 : 어플을 재실행 해주세요")
-//            print("FirebaseApp is not initialized. Configuring now...")
             FirebaseApp.configure()
         }
+        
         // 앱 실행 시 사용자에게 알림 허용 권한을 받음
         UNUserNotificationCenter.current().delegate = self
         let authOptions: UNAuthorizationOptions = [.alert, .badge, .sound] // 필요한 알림 권한을 설정
@@ -46,80 +49,15 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
                 }
             }
         }
+        
         // 파이어베이스 Meesaging 설정
         Messaging.messaging().delegate = self
         UNUserNotificationCenter.current().delegate = self
+        
+        // Amplitude 초기화
+        AmplitudeManager.shared.initialize(apiKey: Config.amplitudeKey)
 
         return true
-    }
-    
-    func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
-        if (AuthApi.isKakaoTalkLoginUrl(url)) {
-            return AuthController.handleOpenUrl(url: url)
-        }
-        
-        if (url.scheme?.hasPrefix("kakao") == true) && (url.host == "kakaolink") {
-            handleKakaoLink(url)   // AppDelegate에도 동일 함수 두거나 공용으로 빼기
-            return true
-        }
-        
-        if url.scheme == "chungbazi" {
-            // SceneDelegate에서 처리
-            if #available(iOS 13.0, *) {
-                return true
-            }
-            
-            // iOS 12 이하에서는 여기서 직접 처리
-            handleDeepLink(url: url)
-            return true
-        }
-        
-        return false
-    }
-    
-    private func handleDeepLink(url: URL) {
-        guard url.scheme == "chungbazi", let host = url.host else { return }
-        
-        let pathComponents = url.pathComponents
-        
-        guard let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
-              let window = windowScene.windows.first,
-              let navigationController = window.rootViewController as? UINavigationController else {
-            return
-        }
-        
-        var destinationVC: UIViewController?
-        
-        switch host {
-        case "policy":
-            if pathComponents.count > 1, let policyId = Int(pathComponents[1]) {
-                let vc = PolicyDetailViewController()
-                vc.policyId = policyId
-                destinationVC = vc
-            }
-        default:
-            break
-        }
-        
-        if let destinationVC = destinationVC {
-            navigationController.pushViewController(destinationVC, animated: true)
-        }
-    }
-    
-    private func handleKakaoLink(_ url: URL) {
-        guard let components = URLComponents(url: url, resolvingAgainstBaseURL: false),
-              let queryItems = components.queryItems else { return }
-
-        // 너가 iosExecutionParams로 넘긴 key가 "url" 이었지
-        if let deepLinkString = queryItems.first(where: { $0.name == "url" })?.value,
-           let decoded = deepLinkString.removingPercentEncoding,
-           let deepLinkURL = URL(string: decoded) {
-
-            // 여기서 기존 로직 재사용
-            if deepLinkURL.scheme == "chungbazi" {
-                handleDeepLink(url: deepLinkURL)
-            }
-        }
     }
 
     // MARK: UISceneSession Lifecycle
@@ -134,6 +72,16 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         // Called when the user discards a scene session.
         // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
         // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+    }
+    
+    func applicationDidEnterBackground(_ application: UIApplication) {}
+    
+    func applicationWillEnterForeground(_ application: UIApplication) {}
+    
+    func applicationWillTerminate(_ application: UIApplication) {
+        AmplitudeManager.shared.trackAppExit(
+            lastScreen: lastScreenName
+        )
     }
 
     // MARK: - Core Data stack
@@ -194,7 +142,7 @@ extension AppDelegate: UNUserNotificationCenterDelegate {
                 print("Error fetching FCM registration token: \(error)")
             } else if let token = token {
                 print("----FCM registration token: \(token)")
-                KeychainSwift().set(token, forKey: "FCMToken")
+                AuthManager.shared.fcmToken = token
             }
         }
     }
@@ -219,9 +167,9 @@ extension AppDelegate: MessagingDelegate {
     func messaging(_ messaging: Messaging, didReceiveRegistrationToken fcmToken: String?) {
         guard let fcmToken = fcmToken else { return }
         
-        let storedToken = KeychainSwift().get("FCMToken")
+        let storedToken = AuthManager.shared.fcmToken
         if storedToken != fcmToken { // 기존 토큰과 다를 때만 업데이트
-            KeychainSwift().set(fcmToken, forKey: "FCMToken")
+            AuthManager.shared.fcmToken = fcmToken
             print("🔄 FCM Token 업데이트됨: \(fcmToken)")
         } else {
             print("✅ 기존 FCM Token 유지됨")

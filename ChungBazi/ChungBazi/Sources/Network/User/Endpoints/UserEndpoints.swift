@@ -8,7 +8,6 @@
 import Foundation
 import UIKit
 import Moya
-import KeychainSwift
 
 enum UserEndpoints {
     case fetchProfile
@@ -20,7 +19,7 @@ enum UserEndpoints {
     case fetchProfileImg
 }
 
-extension UserEndpoints: TargetType {
+extension UserEndpoints: AuthenticatedTarget {
     public var baseURL: URL {
         guard let url = URL(string: API.userURL) else {
             fatalError("잘못된 URL")
@@ -71,12 +70,11 @@ extension UserEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        true
+    }
     
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

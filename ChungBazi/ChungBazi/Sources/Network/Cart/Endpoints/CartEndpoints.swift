@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum CartEndpoints {
     case postCart(policyId: Int)
@@ -15,7 +14,7 @@ enum CartEndpoints {
     case fetchCartList
 }
 
-extension CartEndpoints: TargetType {
+extension CartEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         guard let url = URL(string: API.cartURL) else {
@@ -57,11 +56,11 @@ extension CartEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        return true
+    }
+    
     var headers: [String : String]? {
-        let accessToken = KeychainSwift().get("serverAccessToken")
-        return [
-            "Authorization": "Bearer \(accessToken!)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

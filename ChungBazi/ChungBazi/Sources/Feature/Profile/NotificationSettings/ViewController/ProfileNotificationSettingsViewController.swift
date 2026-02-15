@@ -87,7 +87,7 @@ final class ProfileNotificationSettingsViewController: UIViewController {
             guard let self = self else { return }
             
             switch result {
-            case .success(let response): break
+            case .success(_): break
             case .failure(let error):
                 print(error)
             }

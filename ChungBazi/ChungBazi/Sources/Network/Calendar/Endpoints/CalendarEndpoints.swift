@@ -7,7 +7,6 @@
 
 import Foundation
 import Moya
-import KeychainSwift
 
 enum CalendarEndpoints {
     case getCalendarPolicies(yearMonth: String)
@@ -16,7 +15,7 @@ enum CalendarEndpoints {
     case updateCalendarDocumentsCheck(cartId: Int, data: [UpdateCheck])
 }
 
-extension CalendarEndpoints: TargetType {
+extension CalendarEndpoints: AuthenticatedTarget {
     
     public var baseURL: URL {
         switch self {
@@ -71,13 +70,11 @@ extension CalendarEndpoints: TargetType {
         }
     }
     
+    var requiresAuthentication: Bool {
+        return true
+    }
+    
     var headers: [String : String]? {
-        guard let accessToken = KeychainSwift().get("serverAccessToken") else {
-            return ["Content-type": "application/json"]
-        }
-        return [
-            "Authorization": "Bearer \(accessToken)",
-            "Content-type": "application/json"
-        ]
+        return ["Content-Type": "application/json"]
     }
 }

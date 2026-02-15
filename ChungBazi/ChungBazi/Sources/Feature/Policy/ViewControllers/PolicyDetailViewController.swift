@@ -12,13 +12,19 @@ final class PolicyDetailViewController: UIViewController {
     
     private var posterViewHeightConstraint: Constraint?
     
+    private var entryPoint: PolicyDetailEntryPoint?
+    private var hasTrackedView = false
+    
     var policyId: Int?
     var policy: PolicyModel?
     private var policyTarget: PolicyTarget?
     let networkService = PolicyService()
-    private weak var currentUrlAlert: CustomAlertView?
+    private weak var currentUrlAlert: MultiURLCustomAlertView?
     
     private var linkUrls: [String] = []   // 유효 링크만 저장
+    
+    private var trackedDepths: Set<Int> = []
+    private var currentScrollDepth: Int = 0
     
     private let scrollView = UIScrollView().then {
         $0.showsVerticalScrollIndicator = false
@@ -67,6 +73,12 @@ final class PolicyDetailViewController: UIViewController {
         $0.addTarget(self, action: #selector(handleRegisterButtonTap), for: .touchUpInside)
     }
     
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        
+        trackPolicyDetailViewIfNeeded()
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
@@ -84,6 +96,7 @@ final class PolicyDetailViewController: UIViewController {
         setExpandButtonVisible(false)
         showLoading()
         
+        setupDelegate()
         setupLayout()
         fetchPolicyDetail()
         setupActions()
@@ -97,6 +110,19 @@ final class PolicyDetailViewController: UIViewController {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         tabBarController?.tabBar.isHidden = false
+        
+        if isMovingFromParent {
+            guard let policyId = policy?.policyId else { return }
+            
+            AmplitudeManager.shared.trackBackClick(
+                policyId: policyId,
+                scrollDepth: currentScrollDepth
+            )
+        }
+    }
+    
+    private func setupDelegate() {
+        scrollView.delegate = self
     }
     
     private func setupLayout() {
@@ -197,6 +223,7 @@ final class PolicyDetailViewController: UIViewController {
                 
                 DispatchQueue.main.async {
                     self.updateUI()
+                    self.trackPolicyDetailViewIfNeeded()
                 }
             case .failure(let error):
                 print("❌ 정책 상세 조회 실패: \(error.localizedDescription)")
@@ -270,18 +297,23 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     @objc private func handleCartButtonTap() {
-        guard let policyId = policy?.policyId else {
-            print("❌ 정책 ID가 없습니다.")
+        guard let policyId = policy?.policyId,
+              let policyName = policy?.name else {
             return
         }
+        
+        AmplitudeManager.shared.trackSavedClick(
+            policyId: policyId,
+            policyName: policyName
+        )
         
         let cartService = CartService()
         cartService.postCart(policyId: policyId) { result in
             switch result {
             case .success:
                 Toaster.shared.makeToast("해당 정책이 장바구니에 추가되었습니다.")
+                
             case .failure(let error):
-                print("❌ 장바구니 추가 실패: \(error.localizedDescription)")
                 Toaster.shared.makeToast(error.localizedDescription)
             }
         }
@@ -291,9 +323,15 @@ final class PolicyDetailViewController: UIViewController {
         if currentUrlAlert != nil { return }
         
         let urls = self.linkUrls
-        guard !urls.isEmpty else { return }
+        guard let policyId = policy?.policyId,
+              !urls.isEmpty else { return }
         
         if urls.count == 1, let url = URL(string: urls[0]) {
+            AmplitudeManager.shared.trackExternalApplyLinkOpen(
+                policyId: policyId,
+                externalUrl: url.absoluteString
+            )
+            
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
             return
         }
@@ -324,7 +362,7 @@ final class PolicyDetailViewController: UIViewController {
     }
     
     private func showMultipleUrlsAlert(urls: [String]) {
-        let alert = CustomAlertView()
+        let alert = MultiURLCustomAlertView()
         alert.onDismiss = { [weak self] in
             self?.currentUrlAlert = nil
         }
@@ -335,7 +373,9 @@ final class PolicyDetailViewController: UIViewController {
         }
         
         let msg = "해당 정책은 담당기관 바로가기 \n링크가 \(urls.count)개입니다."
-        alert.configure(message: msg, urls: urls)
+        
+        guard let policyId = policyId else { return }
+        alert.configure(message: msg, urls: urls, policyId: policyId)
         alert.show(in: self)
         
         self.currentUrlAlert = alert
@@ -352,6 +392,64 @@ final class PolicyDetailViewController: UIViewController {
         UIView.animate(withDuration: 0.18, delay: 0, options: [.curveEaseOut]) {
             self.scrollView.alpha = 1
             self.bottomBackgroundView.alpha = 1
+        }
+    }
+    
+    private func trackPolicyDetailViewIfNeeded() {
+        // 이미 트래킹했거나 필수 데이터가 없으면 스킵
+        guard !hasTrackedView,
+              let policyId = policyId,
+              let policyName = policy?.name,
+              let policyCategory = policy?.categoryName,
+              let entryPoint = entryPoint else {
+            return
+        }
+        
+        hasTrackedView = true
+        
+        AmplitudeManager.shared.trackPolicyDetailView(
+            policyId: policyId,
+            policyName: policyName,
+            policyCategory: policyCategory,
+            entryPoint: entryPoint.rawValue
+        )
+    }
+    
+    // MARK: - Public Method
+    public func configureEntryPoint(_ entryPoint: PolicyDetailEntryPoint) {
+        self.entryPoint = entryPoint
+    }
+}
+
+extension PolicyDetailViewController: UIScrollViewDelegate {
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        guard let policyId = policy?.policyId else { return }
+
+        let contentHeight = scrollView.contentSize.height
+        let visibleHeight = scrollView.frame.height
+        let offsetY = scrollView.contentOffset.y
+
+        let totalScrollableHeight = contentHeight - visibleHeight
+        guard totalScrollableHeight > 0 else { return }
+
+        let percentage = (offsetY / totalScrollableHeight) * 100
+        currentScrollDepth = min(100, max(0, Int(percentage)))
+
+        trackDepthIfNeeded(policyId: policyId)
+    }
+    
+    private func trackDepthIfNeeded(policyId: Int) {
+        let checkpoints = [25, 50, 75, 100]
+
+        for point in checkpoints {
+            if currentScrollDepth >= point && !trackedDepths.contains(point) {
+                trackedDepths.insert(point)
+
+                AmplitudeManager.shared.trackScrollDepth(
+                    policyId: policyId,
+                    depth: point
+                )
+            }
         }
     }
 }

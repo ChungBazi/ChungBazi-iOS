@@ -10,6 +10,7 @@ struct ProfileResponseDto: Decodable {
     let name: String
     let email: String
     let characterImg: String
+    let oauthProvider: String
 }
 
 struct RewardResponseDto: Decodable {

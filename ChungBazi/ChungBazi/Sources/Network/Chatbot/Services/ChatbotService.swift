@@ -15,11 +15,21 @@ final class ChatbotService: NetworkManager {
     // MARK: - Provider
     let provider: MoyaProvider<ChatbotEndpoints>
     
+    let plugins: [PluginType] = [
+        NetworkLoggerPlugin(configuration: .init(logOptions: .verbose)),
+        TokenRefreshPlugin()
+    ]
+    
     init(stub: Bool = false) {
         if stub {
-            self.provider = MoyaProvider<ChatbotEndpoints>(stubClosure: MoyaProvider.immediatelyStub)
+            self.provider = MoyaProvider<ChatbotEndpoints>(
+                stubClosure: MoyaProvider.immediatelyStub,
+                plugins: plugins
+            )
         } else {
-            self.provider = MoyaProvider<ChatbotEndpoints>()
+            self.provider = MoyaProvider<ChatbotEndpoints>(
+                plugins: plugins
+            )
         }
     }
     
