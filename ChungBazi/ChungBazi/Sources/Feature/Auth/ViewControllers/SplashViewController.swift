@@ -101,9 +101,9 @@ class SplashViewController: UIViewController {
         RemoteConfigManager.shared.fetchConfig { [weak self] success in
             guard let self = self else { return }
             
-            self.isCheckingConfig = false
-            
             DispatchQueue.main.async {
+                self.isCheckingConfig = false
+                
                 // fetch 실패 시, 기본 플로우로 진행
                 guard success else {
                     self.proceedWithDefaultFlow()
