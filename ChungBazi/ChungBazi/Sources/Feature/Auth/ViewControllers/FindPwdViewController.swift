@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class FindPwdViewController: UIViewController {
+final class FindPwdViewController: UIViewController, UITextFieldDelegate {
     
     // MARK: - State
     private enum Step {
@@ -101,6 +101,7 @@ final class FindPwdViewController: UIViewController {
         setupUI()
         addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupActions()
+        setupTextFieldDelegates()
         enableKeyboardHandling(for: scrollView)
         scrollView.keyboardDismissMode = .onDrag
     }
@@ -227,6 +228,16 @@ final class FindPwdViewController: UIViewController {
         } else {
             textField.textColor = .black
         }
+    }
+    
+    private func setupTextFieldDelegates() {
+        emailField.delegate = self
+        codeField.delegate = self
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 해제
+        return true
     }
     
     @objc private func textFieldsChanged() {
