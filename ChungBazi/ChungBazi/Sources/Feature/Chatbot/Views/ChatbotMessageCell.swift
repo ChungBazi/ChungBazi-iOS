@@ -49,7 +49,7 @@ final class ChatbotMessageCell: UITableViewCell {
     }
     
     private let botIconImageView = UIImageView().then {
-        $0.image = UIImage(resource: .questionBaro)
+        $0.image = UIImage(resource: .chatbot)
         $0.contentMode = .scaleAspectFit
     }
     
@@ -161,10 +161,9 @@ final class ChatbotMessageCell: UITableViewCell {
             }
             
             botIconImageView.snp.remakeConstraints {
-                $0.top.equalTo(botIconBackgroundView).offset(4)
-                $0.left.equalTo(botIconBackgroundView).offset(6)
-                $0.right.equalTo(botIconBackgroundView).inset(5.25)
-                $0.bottom.equalTo(botIconBackgroundView).inset(7.25)
+                $0.bottom.equalToSuperview().offset(-4)
+                $0.trailing.equalToSuperview().offset(-1)
+                $0.width.height.equalToSuperview().multipliedBy(0.93)
             }
             
             loadingContainerView.snp.remakeConstraints {
@@ -207,10 +206,9 @@ final class ChatbotMessageCell: UITableViewCell {
                 }
                 
                 botIconImageView.snp.remakeConstraints {
-                    $0.top.equalTo(botIconBackgroundView).offset(4)
-                    $0.left.equalTo(botIconBackgroundView).offset(6)
-                    $0.right.equalTo(botIconBackgroundView).inset(5.25)
-                    $0.bottom.equalTo(botIconBackgroundView).inset(7.25)
+                    $0.bottom.equalToSuperview().offset(-4)
+                    $0.trailing.equalToSuperview().offset(-1)
+                    $0.width.height.equalToSuperview().multipliedBy(0.93)
                 }
                 
                 messageLabel.snp.remakeConstraints {
@@ -242,10 +240,9 @@ final class ChatbotMessageCell: UITableViewCell {
             }
 
             botIconImageView.snp.remakeConstraints {
-                $0.top.equalTo(botIconBackgroundView).offset(4)
-                $0.left.equalTo(botIconBackgroundView).offset(6)
-                $0.right.equalTo(botIconBackgroundView).inset(5.25)
-                $0.bottom.equalTo(botIconBackgroundView).inset(7.25)
+                $0.bottom.equalToSuperview().offset(-4)
+                $0.trailing.equalToSuperview().offset(-1)
+                $0.width.height.equalToSuperview().multipliedBy(0.93)
             }
 
             timestampLabel.snp.remakeConstraints {
