@@ -149,12 +149,23 @@ final class PolicyCardViewCell: UITableViewCell {
         periodLabel.text = formattedPeriod
 
         let badgeText = {
+            if !item.startDate.isEmpty && item.startDate != "상시" {
+                if let startDate = DateFormatter.yearMonthDay.date(from: item.startDate) {
+                    let today = Calendar.current.startOfDay(for: Date())
+                    let start = Calendar.current.startOfDay(for: startDate)
+                    
+                    if start > today {
+                        return "예정"
+                    }
+                }
+            }
+            
             guard let dday = item.dday else { return "상시" }
             
             if dday > 999 {
                 return "상시"
             } else if dday < 0 {
-                return "예정"
+                return "마감"
             } else {
                 return "D-\(dday)"
             }

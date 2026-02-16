@@ -136,14 +136,14 @@ final class CalendarDetailView: UIView {
         if let end = DateFormatter.convertToDate(policy.endDate) {
             let today = Date()
             let daysLeft = Calendar.current.dateComponents([.day], from: today, to: end).day ?? 0
-            updateDDay(daysLeft: daysLeft)
+            updateDDay(daysLeft: daysLeft, startDate: startDate.text ?? "")
         } else {
             print("❌ 날짜 변환 실패: updateDDay 호출 안됨")
         }
     }
     
-    func updateDDay(daysLeft: Int) {
-        let (dDayStyle, dDayText) = DDayStyle.determineStyle(from: daysLeft)
+    func updateDDay(daysLeft: Int, startDate: String) {
+        let (dDayStyle, dDayText) = DDayStyle.determineStyle(from: startDate, dday: daysLeft)
         
         dDayPocketImage.image = UIImage(resource: dDayStyle.assetName)
         
