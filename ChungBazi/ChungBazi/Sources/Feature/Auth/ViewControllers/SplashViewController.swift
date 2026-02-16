@@ -81,7 +81,6 @@ class SplashViewController: UIViewController {
                     return
                 }
                 
-                // 모든 체크 통과 -> 1초 후 인증 상태 확인
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     self.checkAuthenticationStatus()
                 }
