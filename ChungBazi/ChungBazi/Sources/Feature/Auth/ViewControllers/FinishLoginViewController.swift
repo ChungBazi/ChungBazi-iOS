@@ -9,7 +9,7 @@ import UIKit
 
 class FinishLoginViewController: UIViewController {
     
-    private let finishLoginView = LogoWithTitleView(image: .heartBaro, title: "로그인 완료!\n정책을 쉽고 간편하게 확인하세요")
+    private let finishLoginView = LogoWithTitleView(image: .heartBaro, title: "로그인이 완료되었습니다!\n정책을 한눈에 살펴보세요!")
     
     override func viewDidLoad() {
         super.viewDidLoad()
