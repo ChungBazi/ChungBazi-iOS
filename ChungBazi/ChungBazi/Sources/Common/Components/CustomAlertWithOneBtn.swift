@@ -38,7 +38,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
         $0.setLineSpacing()
         $0.textAlignment = .center
     }
-    private let titleLabel = B16_M(text: "").then {
+    private let titleLabel = B14_M(text: "").then {
         $0.setLineSpacing()
         $0.textAlignment = .center
         $0.numberOfLines = 0
@@ -66,7 +66,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
         
         titleLabel.snp.remakeConstraints { make in
             if let headerText = headerLabel.text, !headerText.isEmpty {
-                make.top.equalTo(headerLabel.snp.bottom).offset(21)
+                make.top.equalTo(headerLabel.snp.bottom).offset(10)
             } else {
                 make.top.equalToSuperview().offset(38)
             }
