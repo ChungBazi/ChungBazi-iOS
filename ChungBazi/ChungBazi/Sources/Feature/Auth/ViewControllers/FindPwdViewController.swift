@@ -101,7 +101,7 @@ final class FindPwdViewController: UIViewController {
         setupUI()
         addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupActions()
-        enableKeyboardHandling(for: scrollView, inputView: completeButton)
+        enableKeyboardHandling(for: scrollView)
         scrollView.keyboardDismissMode = .onDrag
     }
     
