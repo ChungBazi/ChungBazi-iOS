@@ -1,0 +1,29 @@
+//
+//  NotificationResponseDTOs.swift
+//  ChungBazi
+//
+//  Created by 이현주 on 1/27/25.
+//
+
+struct NoticeListResponseDto: Decodable {
+    let items: [NotificationInfo]?
+    let nextCursor: Int?
+    let hasNext: Bool
+}
+
+struct NotificationInfo: Decodable {
+    let notificationId: Int?
+    let message: String?
+    let type: String?
+    let targetId: Int?
+    let formattedCreatedAt: String?
+    let read: Bool?
+}
+
+struct NoticeSettingResponseDto: Decodable {
+    let policyAlarm: Bool
+    let communityAlarm: Bool
+    let rewardAlarm: Bool
+    let noticeAlarm: Bool
+}
+

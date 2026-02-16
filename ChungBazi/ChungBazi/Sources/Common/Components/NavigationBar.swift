@@ -1,0 +1,314 @@
+//
+//  NavigationBar.swift
+//  ChungBazi
+//
+//  Created by 신호연 on 1/16/25.
+//
+
+import UIKit
+import Then
+import KakaoSDKShare
+import KakaoSDKTemplate
+import KakaoSDKCommon
+import KakaoSDKTalk
+
+extension UIViewController {
+    // MARK: - Custom NavigationBar
+
+    private var navigationBarView: UIView? {
+        return self.view.subviews.first(where: { $0 is UIView }) 
+    }
+    
+    private var titleLabel: UILabel? {
+        return navigationBarView?.subviews.first(where: { $0 is UILabel }) as? UILabel
+    }
+    
+    private var alarmButton: UIButton? {
+        return navigationBarView?.subviews.first(where: { $0 is UIButton }) as? UIButton
+    }
+    
+    func addCustomNavigationBar(titleText: String?, tintColor: UIColor = .black, showBackButton: Bool, showCartButton: Bool = false, showAlarmButton: Bool = false, showHomeRecommendTabs: Bool = false, activeTab: Int = 0, showRightCartButton: Bool = false, showLeftSearchButton: Bool = false, showShareButton: Bool = false, backgroundColor: UIColor = .clear) {
+  
+        let navigationBarView = UIView()
+        navigationBarView.backgroundColor = backgroundColor
+        self.navigationController?.setNavigationBarHidden(true, animated: true)
+        self.view.addSubview(navigationBarView)
+        
+        navigationBarView.snp.makeConstraints { make in
+            make.top.equalTo(self.view.safeAreaLayoutGuide.snp.top)
+            make.leading.trailing.equalToSuperview()
+            make.height.equalTo(Constants.navigationHeight)
+        }
+        
+        let titleLabel = T20_SB(text: titleText ?? "")
+        titleLabel.textAlignment = .center
+        titleLabel.textColor = tintColor
+        
+        navigationBarView.addSubview(titleLabel)
+        
+        if showBackButton {
+            let backButton = UIButton().then {
+                let backIcon = UIImage(resource: .backIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(backIcon, for: .normal)
+                $0.tintColor = tintColor
+                $0.addTarget(self, action: #selector(handleBackButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(backButton)
+            backButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.leading.equalToSuperview().offset(28)
+            }
+        }
+        if showCartButton {
+            let cartButton = UIButton().then {
+                let cartIcon = UIImage(resource: .savedIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(cartIcon, for: .normal)
+                $0.tintColor = tintColor
+                $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(cartButton)
+            cartButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(78)
+            }
+        }
+        if showAlarmButton {
+            let alarmButton = UIButton().then {
+                $0.setImage(UIImage(resource: .alarmIcon), for: .normal)
+                $0.tintColor = tintColor
+                $0.accessibilityIdentifier = "alarmButton"
+                $0.addTarget(self, action: #selector(handleAlarmButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(alarmButton)
+            alarmButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        if showRightCartButton {
+            let alarmButton = UIButton().then {
+                let cartIcon = UIImage(resource: .savedIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(cartIcon, for: .normal)
+                $0.tintColor = tintColor
+                $0.addTarget(self, action: #selector(handleCartButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(alarmButton)
+            alarmButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        if showLeftSearchButton {
+            let searchButton = UIButton().then {
+                let searchIcon = UIImage(resource: .searchIcon).withRenderingMode(.alwaysTemplate) 
+                $0.setImage(searchIcon, for: .normal)
+                $0.tintColor = .gray800
+                $0.addTarget(self, action: #selector(handleSearchButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(searchButton)
+            searchButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        
+        if showShareButton {
+            let shareButton = UIButton().then {
+                let shareIcon = UIImage(resource: .shareIcon).withRenderingMode(.alwaysTemplate)
+                $0.setImage(shareIcon, for: .normal)
+                $0.tintColor = .gray800
+                $0.addTarget(self, action: #selector(handleShareButtonTapped), for: .touchUpInside)
+            }
+            navigationBarView.addSubview(shareButton)
+            shareButton.snp.makeConstraints { make in
+                make.centerY.equalTo(titleLabel)
+                make.trailing.equalToSuperview().inset(28)
+            }
+        }
+        
+        titleLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.height.equalTo(28)
+        }
+        
+        if let navigationController = self.navigationController {
+            navigationController.interactivePopGestureRecognizer?.delegate = nil
+            navigationController.interactivePopGestureRecognizer?.isEnabled = true
+        }
+        
+        if showHomeRecommendTabs {
+            addHomeRecommendTabs(to: navigationBarView, activeTab: activeTab)
+        }
+    }
+    // MARK: - Home-Recommend Tabs
+    private func addHomeRecommendTabs(to navigationBarView: UIView, activeTab: Int) {
+        let homeButton = UIButton(type: .system)
+        homeButton.setTitle("홈", for: .normal)
+        homeButton.titleLabel?.font = UIFont(name: AppFontName.pSemiBold, size: 28)
+        homeButton.setTitleColor(activeTab == 0 ? .black : AppColor.gray300, for: .normal)
+        homeButton.tag = 0
+        homeButton.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
+        
+        let recommendButton = UIButton(type: .system)
+        recommendButton.setTitle("추천", for: .normal)
+        recommendButton.titleLabel?.font = UIFont(name: AppFontName.pSemiBold, size: 28)
+        recommendButton.setTitleColor(activeTab == 1 ? .black : AppColor.gray300, for: .normal)
+        recommendButton.tag = 1
+        recommendButton.addTarget(self, action: #selector(tabButtonTapped(_:)), for: .touchUpInside)
+        
+        let buttonStackView = UIStackView(arrangedSubviews: [homeButton, recommendButton])
+        buttonStackView.axis = .horizontal
+        buttonStackView.spacing = 20
+        buttonStackView.alignment = .center
+        navigationBarView.addSubview(buttonStackView)
+
+        buttonStackView.snp.makeConstraints { make in
+            make.bottom.equalToSuperview().inset(10)
+            make.leading.equalToSuperview().offset(30)
+        }
+    }
+    
+    @objc private func tabButtonTapped(_ sender: UIButton) {
+        switch sender.tag {
+        case 0:
+            if !(self is HomeViewController) {
+                self.navigationController?.popToRootViewController(animated: false)
+            }
+        case 1:
+            if !(self is RecommendViewController) {
+                let recommendVC = RecommendViewController()
+                self.navigationController?.pushViewController(recommendVC, animated: false)
+            }
+        default:
+            break
+        }
+    }
+    
+    // MARK: - Button Handlers with Effects
+    @objc private func handleBackButtonTapped() {
+//        triggerCustomTransition(type: .push, direction: .fromLeft)
+        popViewController()
+    }
+    
+    @objc private func handleCartButtonTapped() {
+        let cartViewController = CartViewController()
+        self.navigationController?.pushViewController(cartViewController, animated: true)
+    }
+    
+    @objc private func handleSearchButtonTapped() {
+        let searchViewController = CommunitySearchViewController()
+        self.navigationController?.pushViewController(searchViewController, animated: true)
+    }
+    
+    @objc private func handleAlarmButtonTapped() {
+        let alarmViewController = AlarmViewController()
+        self.navigationController?.pushViewController(alarmViewController, animated: true)
+    }
+    
+    @objc private func popViewController() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    @objc private func handleShareButtonTapped() {
+        
+        guard let viewController = self as? PolicyDetailViewController else {
+            return
+        }
+        
+        guard let policy = viewController.policy else {
+            return
+        }
+        
+        let policyTitle = policy.name
+        let policyId = policy.policyId
+        let policyDetailLink = "chungbazi://policy/\(policyId)"
+        let webLink = Config.appStoreURL
+        
+        // posterUrl이 있으면 이미지와 함께, 없으면 텍스트만
+        if let posterUrlString = policy.posterUrl,
+           !posterUrlString.isEmpty,
+           let encodedPosterUrl = posterUrlString.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
+           let imageUrl = URL(string: encodedPosterUrl) {
+            shareToKakaoWithImage(policyTitle: policyTitle, policyURL: policyDetailLink, appStoreLink: webLink, imageUrl: imageUrl)
+        } else {
+            shareToKakaoTextOnly(policyTitle: policyTitle, policyURL: policyDetailLink, appStoreLink: webLink)
+        }
+    }
+    
+    private func shareToKakaoWithImage(policyTitle: String, policyURL: String, appStoreLink: String, imageUrl: URL) {
+        let link = Link(
+            webUrl: URL(string: appStoreLink),
+            mobileWebUrl: URL(string: appStoreLink),
+            androidExecutionParams: nil,
+            iosExecutionParams: ["url": policyURL]
+        )
+
+        let content = Content(
+            title: policyTitle,
+            imageUrl: imageUrl,
+            description: "이 정책을 확인해보세요!",
+            link: link
+        )
+
+        let template = FeedTemplate(content: content)
+        
+        shareKakaoTemplate(template: template)
+    }
+    
+    private func shareToKakaoTextOnly(policyTitle: String, policyURL: String, appStoreLink: String) {
+        let link = Link(
+            webUrl: URL(string: appStoreLink),
+            mobileWebUrl: URL(string: appStoreLink),
+            androidExecutionParams: nil,
+            iosExecutionParams: ["url": policyURL]
+        )
+
+        let content = Content(
+            title: policyTitle,
+            imageUrl: nil,
+            description: "이 정책을 확인해보세요!",
+            link: link
+        )
+
+        let template = FeedTemplate(content: content)
+        
+        shareKakaoTemplate(template: template)
+    }
+    
+    private func shareKakaoTemplate(template: FeedTemplate) {
+        if ShareApi.isKakaoTalkSharingAvailable() {
+            ShareApi.shared.shareDefault(templatable: template) { linkResult, error in
+                if let error = error {
+                    print("Kakao share error: \(error.localizedDescription)")
+                } else if let linkResult = linkResult {
+                    UIApplication.shared.open(linkResult.url, options: [:], completionHandler: nil)
+                }
+            }
+        } else {
+            guard let url = ShareApi.shared.makeDefaultUrl(templatable: template) else { return }
+            UIApplication.shared.open(url, options: [:], completionHandler: nil)
+        }
+    }
+    
+    func updateAlarmButtonIcon(isUnread: Bool) {
+        guard let navBarView = navigationBarView else { return }
+
+        DispatchQueue.main.async {
+            if let alarmButton = navBarView.subviews.first(where: { $0 is UIButton && $0.accessibilityIdentifier == "alarmButton" }) as? UIButton {
+                let alarmIcon: ImageResource = isUnread ? .alarmUnreadIcon : .alarmIcon
+                alarmButton.setImage(UIImage(resource: alarmIcon), for: .normal)
+            }
+        }
+    }
+    
+    // MARK: - Custom TransitionEffects
+    private func triggerCustomTransition(type: CATransitionType, direction: CATransitionSubtype?) {
+        let transition = CATransition()
+        transition.duration = 0.3
+        transition.type = type
+        transition.subtype = direction
+        transition.timingFunction = CAMediaTimingFunction(name: .easeInEaseOut)
+        
+        self.navigationController?.view.layer.add(transition, forKey: kCATransition)
+    }
+}
