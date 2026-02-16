@@ -35,10 +35,13 @@ class CustomAlertViewWithOneBtnController: UIViewController {
         $0.isHidden = true // 처음에는 숨김 처리
     }
     private let headerLabel = B16_SB(text: "", textColor: .buttonAccent).then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
     }
     private let titleLabel = B16_M(text: "").then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
+        $0.numberOfLines = 0
     }
     private let Btn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
@@ -68,6 +71,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
                 make.top.equalToSuperview().offset(38)
             }
             make.centerX.equalToSuperview()
+            make.leading.trailing.equalToSuperview().inset(14)
         }
     }
     

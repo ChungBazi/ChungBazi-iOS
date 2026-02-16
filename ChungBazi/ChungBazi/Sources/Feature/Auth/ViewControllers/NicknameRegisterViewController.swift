@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class NicknameRegisterViewController: UIViewController {
+final class NicknameRegisterViewController: UIViewController, UITextFieldDelegate {
     
     private let authService = AuthService.shared
     
@@ -94,6 +94,7 @@ final class NicknameRegisterViewController: UIViewController {
         setupLayout()
         bind()
         prefill()
+        setupTextFieldDelegates()
         enableKeyboardHandling(for: scrollView)
         scrollView.keyboardDismissMode = .onDrag
     }
@@ -182,7 +183,6 @@ final class NicknameRegisterViewController: UIViewController {
     
     private func bind() {
         nicknameTextField.addTarget(self, action: #selector(nicknameEditingChanged), for: .editingChanged)
-        emailTextField.addTarget(self, action: #selector(emailEditingChanged), for: .editingChanged)
         completeButton.addTarget(self, action: #selector(didTapComplete), for: .touchUpInside)
     }
     
@@ -204,7 +204,13 @@ final class NicknameRegisterViewController: UIViewController {
         completeButton.setEnabled(isEnabled: hasNickname)
     }
     
-    @objc private func emailEditingChanged() {
+    private func setupTextFieldDelegates() {
+        nicknameTextField.delegate = self
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        textField.resignFirstResponder() // 키보드 해제
+        return true
     }
     
     @objc private func didTapComplete() {

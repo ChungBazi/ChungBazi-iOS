@@ -14,6 +14,7 @@ import KakaoSDKAuth
 
 import FirebaseCore
 import FirebaseMessaging
+import FirebaseCrashlytics
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {

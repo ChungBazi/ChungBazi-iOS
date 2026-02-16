@@ -255,7 +255,7 @@ final class EmailVerificationCodeViewController: UIViewController {
     }
 
     private func navigateToNextStep() {
-        let nickNameRegisterVC = NicknameRegisterViewController(email: registerInfo.email, fromLogin: true)
+        let nickNameRegisterVC = NicknameRegisterViewController(email: registerInfo.email, fromLogin: false)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let window = windowScene.windows.first {
             window.rootViewController = nickNameRegisterVC

@@ -93,6 +93,7 @@ final class SearchResultViewController: UIViewController {
         setupLayout()
         setupActions()
         configureTableView()
+        hideKeyboardWhenTappedAround()
         fetchPopularSearchText()
         popularKeywordsCollectionView.delegate = self
         popularKeywordsCollectionView.dataSource = self

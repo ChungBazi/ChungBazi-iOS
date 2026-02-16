@@ -9,7 +9,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.project.ChungBazi</string>
+	<string>com.yeonho.chungbazi</string>
 	<key>PROJECT_ID</key>
 	<string>chungbazi-d382c</string>
 	<key>STORAGE_BUCKET</key>
@@ -25,6 +25,6 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:635600144863:ios:99ec5b367dda85ccae5c6a</string>
+	<string>1:635600144863:ios:f8a959668990a07eae5c6a</string>
 </dict>
 </plist>

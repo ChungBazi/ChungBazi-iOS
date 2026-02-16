@@ -8,26 +8,19 @@
 import UIKit
 import Then
 
-protocol CheckCollectionViewCellDelegate: AnyObject {
-    func cell(_ cell: CheckCollectionViewCell, didToggleCheckAt indexPath: IndexPath)
-}
-
 class CheckCollectionViewCell: UICollectionViewCell {
     static let identifier = "CheckCollectionViewCell"
     
-    public lazy var checkButton = UIButton().then {
+    public lazy var checkImageView = UIImageView().then {
         $0.backgroundColor = .clear
-        $0.setImage(.checkboxUnchecked, for: .normal)
-        $0.addTarget(self, action: #selector(checkButtonTapped), for: .touchUpInside)
+        $0.image = .checkboxUnchecked
+        $0.contentMode = .scaleAspectFit
     }
     
     public lazy var contents = UILabel().then {
         $0.font = UIFont.ptdMediumFont(ofSize: 16)
         $0.textColor = UIColor.gray800
     }
-    
-    private var indexPath: IndexPath? // 셀의 위치를 저장
-    weak var delegate: CheckCollectionViewCellDelegate? // 클릭 이벤트 전달
     
     override init(frame: CGRect) {
         super.init(frame: frame)
@@ -38,6 +31,7 @@ class CheckCollectionViewCell: UICollectionViewCell {
     override func prepareForReuse() {
         super.prepareForReuse()
         self.contents.text = nil
+        self.checkImageView.image = .checkboxUnchecked
     }
         
     required init?(coder: NSCoder) {
@@ -45,30 +39,23 @@ class CheckCollectionViewCell: UICollectionViewCell {
     }
     
     private func addComponents() {
-        [checkButton, contents].forEach { self.addSubview($0)}
+        [checkImageView, contents].forEach { contentView.addSubview($0)}
     }
     
     private func setConstraints() {
-        checkButton.snp.makeConstraints {
+        checkImageView.snp.makeConstraints {
             $0.leading.equalToSuperview()
             $0.verticalEdges.equalToSuperview()
         }
         
         contents.snp.makeConstraints {
-            $0.centerY.equalTo(checkButton)
-            $0.leading.equalTo(checkButton.snp.trailing).offset(12)
+            $0.centerY.equalTo(checkImageView)
+            $0.leading.equalTo(checkImageView.snp.trailing).offset(12)
         }
     }
     
-    public func configure(contents: String, isChecked: Bool, indexPath: IndexPath, delegate: CheckCollectionViewCellDelegate) {
+    public func configure(contents: String, isChecked: Bool) {
         self.contents.text = contents
-        self.indexPath = indexPath
-        self.delegate = delegate
-        checkButton.setImage(isChecked ? .checkboxChecked : .checkboxUnchecked, for: .normal)
-    }
-    
-    @objc private func checkButtonTapped() {
-        guard let indexPath = indexPath else { return }
-        delegate?.cell(self, didToggleCheckAt: indexPath)
+        checkImageView.image = isChecked ? .checkboxChecked : .checkboxUnchecked
     }
 }

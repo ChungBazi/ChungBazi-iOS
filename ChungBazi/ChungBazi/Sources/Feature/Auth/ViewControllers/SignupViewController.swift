@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class SignupViewController: UIViewController {
+final class SignupViewController: UIViewController, UITextFieldDelegate {
 
     private let authService = AuthService.shared
     private let registerView = SignupView()
@@ -28,6 +28,7 @@ final class SignupViewController: UIViewController {
         addCustomNavigationBar(titleText: "회원가입", showBackButton: true)
         setupActions()
         setupTooltipLayout()
+        setupTextFieldDelegates()
         enableKeyboardHandling(for: registerView.scrollView)
         registerView.scrollView.keyboardDismissMode = .onDrag
         
@@ -112,6 +113,27 @@ final class SignupViewController: UIViewController {
         let dto = RegisterRequestDto(email: email, password: password, checkPassword: checkPassword)
         let EmailVerifyVC = EmailVerificationCodeViewController(registerInfo: dto)
         self.navigationController?.pushViewController(EmailVerifyVC, animated: true)
+    }
+    
+    private func setupTextFieldDelegates() {
+        registerView.emailTextField.delegate = self
+        registerView.pwdTextField.delegate = self
+        registerView.checkPwdTextField.delegate = self
+        
+        registerView.emailTextField.returnKeyType = .next
+        registerView.pwdTextField.returnKeyType = .next
+        registerView.checkPwdTextField.returnKeyType = .done
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == registerView.emailTextField {
+            registerView.pwdTextField.becomeFirstResponder()
+        } else if textField == registerView.pwdTextField {
+            registerView.checkPwdTextField.becomeFirstResponder()
+        } else {
+            view.endEditing(true)
+        }
+        return true
     }
     
     private func isValidPassword(_ pwd: String) -> Bool {

@@ -9,7 +9,7 @@ import UIKit
 import SnapKit
 import Then
 
-final class ResetPasswordViewController: UIViewController {
+final class ResetPasswordViewController: UIViewController, UITextFieldDelegate {
 
     enum Mode {
         case loggedIn
@@ -37,7 +37,8 @@ final class ResetPasswordViewController: UIViewController {
         addCustomNavigationBar(titleText: "비밀번호 재설정", showBackButton: true, backgroundColor: .white)
         setupTooltip()
         setupActions()
-        enableKeyboardHandling(for: resetView.scrollView, inputView: resetView.completeButton)
+        setupTextFieldDelegates()
+        enableKeyboardHandling(for: resetView.scrollView)
         resetView.scrollView.keyboardDismissMode = .onDrag
         
         resetView.scrollView.canCancelContentTouches = true
@@ -56,6 +57,23 @@ final class ResetPasswordViewController: UIViewController {
         resetView.confirmPwdEye.addTarget(self, action: #selector(toggleConfirmPwdVisibility), for: .touchUpInside)
         resetView.questionButton.addTarget(self, action: #selector(toggleTooltip), for: .touchUpInside)
         resetView.completeButton.addTarget(self, action: #selector(completeTapped), for: .touchUpInside)
+    }
+    
+    private func setupTextFieldDelegates() {
+        resetView.newPwdField.delegate = self
+        resetView.confirmPwdField.delegate = self
+        
+        resetView.newPwdField.returnKeyType = .next
+        resetView.confirmPwdField.returnKeyType = .done
+    }
+    
+    func textFieldShouldReturn(_ textField: UITextField) -> Bool {
+        if textField == resetView.newPwdField {
+            resetView.confirmPwdField.becomeFirstResponder()
+        } else {
+            view.endEditing(true)
+        }
+        return true
     }
     
     @objc private func toggleTooltip() {

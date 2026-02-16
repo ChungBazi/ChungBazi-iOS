@@ -75,6 +75,7 @@ final class CalendarDetailViewController: UIViewController {
         notEmptyView.delegate = self
         
         fetchCalendarPolicyDetail()
+        hideKeyboardWhenTappedAround()
         
         setupUI()
         setupActions()

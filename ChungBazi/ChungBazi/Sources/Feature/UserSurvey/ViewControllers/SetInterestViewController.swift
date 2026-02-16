@@ -110,19 +110,15 @@ extension SetInterestViewController: UICollectionViewDataSource, UICollectionVie
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: CheckCollectionViewCell.identifier, for: indexPath) as! CheckCollectionViewCell
         
         let isChecked = checkStatus[indexPath.row]
-        cell.configure(contents: Constants.interestCheckMenu[indexPath.row], isChecked: isChecked, indexPath: indexPath, delegate: self)
+        cell.configure(contents: Constants.interestCheckMenu[indexPath.row], isChecked: isChecked)
         
         return cell
     }
-}
-
-extension SetInterestViewController: CheckCollectionViewCellDelegate {
-    func cell(_ cell: CheckCollectionViewCell, didToggleCheckAt indexPath: IndexPath) {
-        // 체크 상태 토글
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         checkStatus[indexPath.row].toggle()
-        checkCollectionView.reloadItems(at: [indexPath]) // UI 업데이트
-        
-        updateNextButtonState() // 버튼 활성화 상태 업데이트
+        checkCollectionView.reloadItems(at: [indexPath])
+        updateNextButtonState()
     }
 }
 
