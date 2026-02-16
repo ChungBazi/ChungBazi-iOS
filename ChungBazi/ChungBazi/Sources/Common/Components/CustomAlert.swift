@@ -45,9 +45,11 @@ class CustomAlertViewController: UIViewController {
         $0.layer.cornerRadius = 10
     }
     private let headerLabel = B16_SB(text: "", textColor: .buttonAccent).then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
     }
     private let titleLabel = B16_M(text: "").then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
         $0.numberOfLines = 0
     }
@@ -125,9 +127,7 @@ class CustomAlertViewController: UIViewController {
     
     func configureAlert(headerTitle: String?, title: String, rightButtonText: String, rightButtonAction: (() -> Void)?) {
         self.headerLabel.text = headerTitle
-        self.headerLabel.setLineSpacing()
         self.titleLabel.text = title
-        self.titleLabel.setLineSpacing()
         self.rightBtn.setTitle(rightButtonText, for: .normal)
         self.rightButtonAction = rightButtonAction
     }

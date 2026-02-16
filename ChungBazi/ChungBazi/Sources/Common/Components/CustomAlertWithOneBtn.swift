@@ -35,9 +35,11 @@ class CustomAlertViewWithOneBtnController: UIViewController {
         $0.isHidden = true // 처음에는 숨김 처리
     }
     private let headerLabel = B16_SB(text: "", textColor: .buttonAccent).then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
     }
     private let titleLabel = B16_M(text: "").then {
+        $0.setLineSpacing()
         $0.textAlignment = .center
         $0.numberOfLines = 0
     }
@@ -116,9 +118,7 @@ class CustomAlertViewWithOneBtnController: UIViewController {
     
     func configureAlert(headerTitle: String?, title: String, ButtonText: String, image: UIImage?, buttonAction: (() -> Void)?) {
         self.headerLabel.text = headerTitle
-        self.headerLabel.setLineSpacing()
         self.titleLabel.text = title
-        self.titleLabel.setLineSpacing()
         self.Btn.setTitle(ButtonText, for: .normal)
         if let image = image {
             self.imageView.image = image
