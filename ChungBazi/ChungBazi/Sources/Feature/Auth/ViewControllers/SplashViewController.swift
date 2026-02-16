@@ -12,10 +12,26 @@ class SplashViewController: UIViewController {
     
     let networkService = AuthService.shared
     
+    private var isCheckingConfig = false
+    private var shouldShowUpdateAlert = false
+    private var shouldShowServerCheckAlert = false
+    private var serverCheckMessage: String = ""
+    
     private let splashLabel = UILabel().then {
         $0.text = "정책도 쉽고 간편하게"
         $0.textColor = .white
         $0.font = UIFont.ptdSemiBoldFont(ofSize: 28)
+    }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        // 앱스토어에서 돌아왔을 때 alert 재표시
+        if shouldShowServerCheckAlert {
+            showServerCheckAlert()
+        } else if shouldShowUpdateAlert {
+            showUpdateRequiredAlert()
+        }
     }
     
     override func viewDidLoad() {
@@ -27,11 +43,9 @@ class SplashViewController: UIViewController {
         
         // 현재 뷰 컨트롤러가 내비게이션 컨트롤러 안에 있는지 확인
         if self.navigationController == nil {
-            // 네비게이션 컨트롤러가 없으면 새로 설정
             let navController = UINavigationController(rootViewController: self)
             navController.modalPresentationStyle = .fullScreen
             
-            // 현재 창의 rootViewController 교체
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
                let window = windowScene.windows.first {
                 window.rootViewController = navController
@@ -39,6 +53,23 @@ class SplashViewController: UIViewController {
             }
         }
         
+        // 앱 재진입 감지
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(appWillEnterForeground),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
+        )
+        
+        checkRemoteConfig()
+    }
+    
+    deinit {
+        NotificationCenter.default.removeObserver(self)
+    }
+    
+    // 앱 재진입 시 RemoteConfig 재체크
+    @objc private func appWillEnterForeground() {
         checkRemoteConfig()
     }
     
@@ -59,32 +90,90 @@ class SplashViewController: UIViewController {
         }
     }
     
+    // MARK: - RemoteConfig Check
+    
     private func checkRemoteConfig() {
+        // 중복 체크 방지
+        guard !isCheckingConfig else { return }
+        
+        isCheckingConfig = true
+        
         RemoteConfigManager.shared.fetchConfig { [weak self] success in
             guard let self = self else { return }
             
+            self.isCheckingConfig = false
+            
             DispatchQueue.main.async {
-                let message = RemoteConfigManager.shared.getServerCheckMessage()
+                // fetch 실패 시, 기본 플로우로 진행
+                guard success else {
+                    self.proceedWithDefaultFlow()
+                    return
+                }
+            
+                self.serverCheckMessage = RemoteConfigManager.shared.getServerCheckMessage()
+                
                 // 서버 점검 체크
                 if RemoteConfigManager.shared.isServerCheck() {
-                    self.showCustomAlert(title: message, buttonText: "확인") {
-                        exit(0)
-                    }
+                    self.shouldShowServerCheckAlert = true
+                    self.shouldShowUpdateAlert = false
+                    self.showServerCheckAlert()
                     return
                 }
                 
                 // 버전 체크
                 if RemoteConfigManager.shared.isUpdateRequired() {
-                    self.showCustomAlert(title: "새로운 버전이 출시되었어요!\n더 안정적인 서비스 이용을 위해 청바지를 업데이트해 주세요.", buttonText: "업데이트") {
-                        self.openAppStore()
-                    }
+                    self.shouldShowUpdateAlert = true
+                    self.shouldShowServerCheckAlert = false
+                    self.showUpdateRequiredAlert()
                     return
                 }
+                
+                // 모든 체크 통과
+                self.shouldShowServerCheckAlert = false
+                self.shouldShowUpdateAlert = false
                 
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                     self.checkAuthenticationStatus()
                 }
             }
+        }
+    }
+    
+    /// RemoteConfig fetch 실패 시 기본 플로우로 진행
+    private func proceedWithDefaultFlow() {
+        shouldShowServerCheckAlert = false
+        shouldShowUpdateAlert = false
+        
+        // fetch 실패 시에도 앱은 정상 동작하도록 진행
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
+            self.checkAuthenticationStatus()
+        }
+    }
+    
+    // MARK: - Alert
+    
+    private func showServerCheckAlert() {
+        // 중복 alert 방지
+        if presentedViewController != nil {
+            return
+        }
+        
+        showCustomAlert(title: serverCheckMessage, buttonText: "확인") {
+            exit(0)
+        }
+    }
+    
+    private func showUpdateRequiredAlert() {
+        // 중복 alert 방지
+        if presentedViewController != nil {
+            return
+        }
+        
+        showCustomAlert(
+            title: "새로운 버전이 출시되었어요!\n더 안정적인 서비스 이용을 위해 청바지를 업데이트해 주세요.",
+            buttonText: "업데이트"
+        ) {
+            self.openAppStore()
         }
     }
     
@@ -95,6 +184,8 @@ class SplashViewController: UIViewController {
             UIApplication.shared.open(url, options: [:], completionHandler: nil)
         }
     }
+    
+    // MARK: - Authentication Check
     
     func checkAuthenticationStatus() {
         guard AuthManager.shared.isUserLoggedIn() else {
@@ -141,6 +232,8 @@ class SplashViewController: UIViewController {
         navigateToMainScreen()
     }
     
+    // MARK: - Navigation
+    
     private func navigateToMainScreen() {
         let mainTabBarController = MainTabBarController()
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
@@ -162,3 +255,26 @@ class SplashViewController: UIViewController {
         }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
