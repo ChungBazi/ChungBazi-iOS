@@ -8,12 +8,12 @@
 import UIKit
 
 enum DDayStyle {
-    case scheduled      // 예정 (dday < 0)
+    case scheduled      // 예정
     case permanent      // 상시 (dday > 999 또는 nil)
     case moreThanTen    // D-10 이상
     case twoToNine      // D-2 ~ D-9
     case today          // D-0 ~ D-1
-    case closed         // 마감
+    case closed         // 마감 (dday < 0)
     
     var assetName: ImageResource {
         switch self {
@@ -59,7 +59,14 @@ enum DDayStyle {
     }
     
     /// dday 값으로 스타일 결정
-    static func determineStyle(from dday: Int?) -> (style: DDayStyle, text: String) {
+    static func determineStyle(from startDate: String, dday: Int?) -> (style: DDayStyle, text: String) {
+        if !startDate.isEmpty && startDate != "N/A" {
+            if let date = DateFormatter.yearMonthDayDot.date(from: startDate),
+               Calendar.current.startOfDay(for: date) > Calendar.current.startOfDay(for: Date()) {
+                return (.scheduled, "예정")
+            }
+        }
+        
         guard let dday = dday else {
             return (.permanent, "상시")
         }
@@ -67,7 +74,7 @@ enum DDayStyle {
         if dday > 999 {
             return (.permanent, "상시")
         } else if dday < 0 {
-            return (.scheduled, "예정")
+            return (.closed, "마감")
         } else if dday >= 10 {
             return (.moreThanTen, "D-\(dday)")
         } else if dday >= 2 {
