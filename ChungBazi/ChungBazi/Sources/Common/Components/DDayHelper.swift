@@ -8,12 +8,12 @@
 import UIKit
 
 enum DDayStyle {
-    case scheduled      // 예정 (dday < 0)
+    case scheduled      // 예정
     case permanent      // 상시 (dday > 999 또는 nil)
     case moreThanTen    // D-10 이상
     case twoToNine      // D-2 ~ D-9
     case today          // D-0 ~ D-1
-    case closed         // 마감
+    case closed         // 마감 (dday < 0)
     
     var assetName: ImageResource {
         switch self {

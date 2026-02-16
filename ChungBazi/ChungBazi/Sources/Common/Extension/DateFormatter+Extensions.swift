@@ -55,7 +55,7 @@ extension DateFormatter {
             return formatter
         }()
     
-        /// MMMM 형식 (January, February 등)
+        /// MMMM 형식 (1월, 2월 등)
         static let monthFullName: DateFormatter = {
             let formatter = DateFormatter()
             formatter.locale = Locale(identifier: "ko_KR")  // 또는 en_US
