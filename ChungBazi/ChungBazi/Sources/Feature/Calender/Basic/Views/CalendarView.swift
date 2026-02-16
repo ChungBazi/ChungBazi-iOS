@@ -153,12 +153,8 @@ final class CalendarView: UIView {
     
     // MARK: - UI Update
     private func updateHeader(for date: Date) {
-        let dateFormatter = DateFormatter.shared
-        dateFormatter.dateFormat = "MMMM"
-        customMonth.text = dateFormatter.string(from: date)
-        
-        dateFormatter.dateFormat = "yyyy"
-        customYear.text = dateFormatter.string(from: date)
+        customMonth.text = DateFormatter.monthFullName.string(from: date)
+        customYear.text = DateFormatter.year.string(from: date)
     }
     
     // MARK: - Actions

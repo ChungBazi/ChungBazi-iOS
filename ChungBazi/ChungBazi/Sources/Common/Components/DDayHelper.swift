@@ -59,7 +59,14 @@ enum DDayStyle {
     }
     
     /// dday 값으로 스타일 결정
-    static func determineStyle(from dday: Int?) -> (style: DDayStyle, text: String) {
+    static func determineStyle(from startDate: String, dday: Int?) -> (style: DDayStyle, text: String) {
+        if !startDate.isEmpty && startDate != "N/A" {
+            if let date = DateFormatter.yearMonthDayDot.date(from: startDate),
+               Calendar.current.startOfDay(for: date) > Calendar.current.startOfDay(for: Date()) {
+                return (.scheduled, "예정")
+            }
+        }
+        
         guard let dday = dday else {
             return (.permanent, "상시")
         }
@@ -67,7 +74,7 @@ enum DDayStyle {
         if dday > 999 {
             return (.permanent, "상시")
         } else if dday < 0 {
-            return (.scheduled, "예정")
+            return (.closed, "마감")
         } else if dday >= 10 {
             return (.moreThanTen, "D-\(dday)")
         } else if dday >= 2 {
