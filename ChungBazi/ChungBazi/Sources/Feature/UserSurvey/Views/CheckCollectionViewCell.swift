@@ -39,7 +39,7 @@ class CheckCollectionViewCell: UICollectionViewCell {
     }
     
     private func addComponents() {
-        [checkImageView, contents].forEach { self.addSubview($0)}
+        [checkImageView, contents].forEach { contentView.addSubview($0)}
     }
     
     private func setConstraints() {
