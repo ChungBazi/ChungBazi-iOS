@@ -40,7 +40,6 @@ class CustomAlertViewWithOneBtnController: UIViewController {
     private let titleLabel = B16_M(text: "").then {
         $0.textAlignment = .center
         $0.numberOfLines = 0
-        $0.lineBreakMode = .byWordWrapping
     }
     private let Btn = CustomButton(backgroundColor: .clear, titleText: "", titleColor: .black, borderWidth: 1, borderColor: .gray400)
     
@@ -117,7 +116,9 @@ class CustomAlertViewWithOneBtnController: UIViewController {
     
     func configureAlert(headerTitle: String?, title: String, ButtonText: String, image: UIImage?, buttonAction: (() -> Void)?) {
         self.headerLabel.text = headerTitle
+        self.headerLabel.setLineSpacing()
         self.titleLabel.text = title
+        self.titleLabel.setLineSpacing()
         self.Btn.setTitle(ButtonText, for: .normal)
         if let image = image {
             self.imageView.image = image
